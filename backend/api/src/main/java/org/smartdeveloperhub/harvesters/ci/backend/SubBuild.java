@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
 
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects.ToStringHelper;
 
 public final class SubBuild extends Build {
 

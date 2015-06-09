@@ -35,7 +35,7 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.Status;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
 final class InMemoryJenkinsResource implements JenkinsResource {
@@ -131,7 +131,7 @@ final class InMemoryJenkinsResource implements JenkinsResource {
 	@Override
 	public String toString() {
 		return
-			Objects.
+			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
 					add("location",this.location).

@@ -33,8 +33,9 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.collect.Lists;
 
 public abstract class Build {
@@ -135,7 +136,7 @@ public abstract class Build {
 	@Override
 	public String toString() {
 		ToStringHelper helper =
-			Objects.
+			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
 						add("serviceId",this.serviceId).

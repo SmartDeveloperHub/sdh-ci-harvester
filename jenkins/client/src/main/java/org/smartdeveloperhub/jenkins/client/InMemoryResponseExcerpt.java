@@ -31,7 +31,7 @@ import java.util.Date;
 import org.smartdeveloperhub.jenkins.ResponseBody;
 import org.smartdeveloperhub.jenkins.ResponseExcerpt;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
 final class InMemoryResponseExcerpt implements ResponseExcerpt {
@@ -87,7 +87,7 @@ final class InMemoryResponseExcerpt implements ResponseExcerpt {
 	@Override
 	public String toString() {
 		return
-			Objects.
+			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
 					add("statusCode",this.statusCode).

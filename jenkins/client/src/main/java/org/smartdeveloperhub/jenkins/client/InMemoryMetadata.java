@@ -30,7 +30,7 @@ import java.util.Date;
 
 import org.smartdeveloperhub.jenkins.JenkinsResource.Metadata;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 final class InMemoryMetadata implements Metadata {
 
@@ -66,7 +66,7 @@ final class InMemoryMetadata implements Metadata {
 	@Override
 	public String toString() {
 		return
-			Objects.
+			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
 					add("retrievedOn",this.retrievedOn).

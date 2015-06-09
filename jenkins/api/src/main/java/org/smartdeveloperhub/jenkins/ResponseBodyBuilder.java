@@ -28,6 +28,7 @@ package org.smartdeveloperhub.jenkins;
 
 import static com.google.common.base.Preconditions.*;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 public final class ResponseBodyBuilder {
@@ -77,7 +78,7 @@ public final class ResponseBodyBuilder {
 		@Override
 		public String toString() {
 			return
-				Objects.
+				MoreObjects.
 					toStringHelper(getClass()).
 						add("digest",this.digest).
 						add("contentType",this.contentType).

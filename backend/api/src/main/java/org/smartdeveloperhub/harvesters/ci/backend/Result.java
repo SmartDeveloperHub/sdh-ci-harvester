@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Date;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 public final class Result {
@@ -92,7 +93,7 @@ public final class Result {
 	@Override
 	public String toString() {
 		return
-			Objects.
+			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
 					add("status",this.status).

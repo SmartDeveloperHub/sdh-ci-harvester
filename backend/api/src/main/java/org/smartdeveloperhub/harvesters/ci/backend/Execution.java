@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.net.URI;
 import java.util.Date;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 public final class Execution {
 
@@ -110,7 +110,7 @@ public final class Execution {
 	@Override
 	public String toString() {
 		return
-			Objects.
+			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
 					add("buildId",this.buildId).

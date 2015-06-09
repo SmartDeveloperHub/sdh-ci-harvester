@@ -31,6 +31,7 @@ import java.util.Arrays;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 public final class DigestService {
@@ -77,7 +78,7 @@ public final class DigestService {
 		@Override
 		public String toString() {
 			return
-				Objects.
+				MoreObjects.
 					toStringHelper(Digest.class).
 						add("algorithm",this.algorithm).
 						add("value",DigestUtil.bytesToHex(this.value)).

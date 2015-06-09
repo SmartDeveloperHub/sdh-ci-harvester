@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.net.URI;
 
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 public final class JenkinsURI {
 
@@ -102,7 +102,7 @@ public final class JenkinsURI {
 	@Override
 	public String toString() {
 		return
-			Objects.
+			MoreObjects.
 				toStringHelper(JenkinsURI.class).
 					omitNullValues().
 					add("location",this.location).

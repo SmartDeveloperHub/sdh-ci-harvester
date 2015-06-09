@@ -54,7 +54,7 @@ import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResponseDescriptor;
 import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
 final class StorageUtils {
@@ -157,7 +157,7 @@ final class StorageUtils {
 						@Override
 						public String toString() {
 							return
-								Objects.
+								MoreObjects.
 									toStringHelper(getClass()).
 										omitNullValues().
 										add("statusCode",statusCode()).
@@ -172,7 +172,7 @@ final class StorageUtils {
 				@Override
 				public String toString() {
 					return
-						Objects.
+						MoreObjects.
 							toStringHelper(getClass()).
 								omitNullValues().
 								add("retrievedOn",retrievedOn()).
@@ -186,7 +186,7 @@ final class StorageUtils {
 		@Override
 		public String toString() {
 			return
-				Objects.
+				MoreObjects.
 					toStringHelper(getClass()).
 						omitNullValues().
 						add("location",location()).

@@ -50,7 +50,7 @@ import org.smartdeveloperhub.jenkins.Status;
 import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
 import org.w3c.dom.Document;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 public final class JenkinsResourceProxy {
 
@@ -130,7 +130,7 @@ public final class JenkinsResourceProxy {
 	@Override
 	public String toString() {
 		return
-			Objects.
+			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
 					add("location",this.location).
