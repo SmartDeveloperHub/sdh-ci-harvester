@@ -43,7 +43,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 	<artifactId>ci-jenkins-client</artifactId>
 
 	<!-- =================================================================== -->
@@ -74,6 +73,27 @@
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 			<artifactId>ci-jenkins-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
+			<artifactId>ci-jenkins-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.4.1</version>
+		</dependency>
+
+		<!-- Default unit testing frameworks-->
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-integration</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

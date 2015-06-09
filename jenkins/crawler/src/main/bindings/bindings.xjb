@@ -1,0 +1,122 @@
+<!--
+
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      This file is part of the Smart Developer Hub Project:
+        http://www.smartdeveloperhub.org/
+
+      Center for Open Middleware
+        http://www.centeropenmiddleware.com/
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Copyright (C) 2015 Center for Open Middleware.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+
+                http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+      Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+
+-->
+<jaxb:bindings
+	version="2.1"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	xmlns:namespace="http://jaxb2-commons.dev.java.net/namespace-prefix"
+	xmlns:rest="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_1.xsd
+		http://jaxb2-commons.dev.java.net/namespace-prefix http://java.net/projects/jaxb2-commons/sources/svn/content/namespace-prefix/trunk/src/main/resources/prefix-namespace-schema.xsd"
+	jaxb:extensionBindingPrefixes="xjc namespace">
+
+	<jaxb:globalBindings generateIsSetMethod="true">
+		<jaxb:javaType
+			name="java.net.URI"
+			xmlType="xs:anyURI"
+			parseMethod="org.smartdeveloperhub.jenkins.util.xml.URIConverter.unmarshal"
+			printMethod="org.smartdeveloperhub.jenkins.util.xml.URIConverter.marshal" />
+		<jaxb:javaType
+			name="org.joda.time.DateTime"
+			xmlType="xs:dateTime"
+			parseMethod="org.smartdeveloperhub.jenkins.util.xml.DateTimeConverter.unmarshal"
+			printMethod="org.smartdeveloperhub.jenkins.util.xml.DateTimeConverter.marshal" />
+		<jaxb:javaType
+			name="org.smartdeveloperhub.jenkins.Status"
+			xmlType="rest:ResourceStatus"
+			parseMethod="org.smartdeveloperhub.jenkins.crawler.xml.ci.ResourceStatusConverter.unmarshal"
+			printMethod="org.smartdeveloperhub.jenkins.crawler.xml.ci.ResourceStatusConverter.marshal" />
+		<jaxb:javaType
+			name="org.smartdeveloperhub.jenkins.JenkinsEntityType"
+			xmlType="rest:EntityType"
+			parseMethod="org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityTypeConverter.unmarshal"
+			printMethod="org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityTypeConverter.marshal" />
+		<jaxb:javaType
+			name="org.smartdeveloperhub.jenkins.JenkinsArtifactType"
+			xmlType="rest:ArtifactType"
+			parseMethod="org.smartdeveloperhub.jenkins.crawler.xml.ci.ArtifactTypeConverter.unmarshal"
+			printMethod="org.smartdeveloperhub.jenkins.crawler.xml.ci.ArtifactTypeConverter.marshal" />
+		<xjc:simple />
+	</jaxb:globalBindings>
+
+	<jaxb:bindings schemaLocation="../resources/schemas/ci.xsd" node="/xs:schema">
+		<jaxb:schemaBindings>
+			<jaxb:package name="org.smartdeveloperhub.jenkins.crawler.xml.ci"/>
+		</jaxb:schemaBindings>
+		<jaxb:bindings node="xs:element[@name='service']">
+			<jaxb:class name="ServiceDocument"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:element[@name='simpleBuild']">
+			<jaxb:class name="SimpleBuildDocument"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:element[@name='compositeBuild']">
+			<jaxb:class name="CompositeBuildDocument"/>
+		</jaxb:bindings>
+		<jaxb:bindings>
+			<namespace:prefix name="ci" />
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<jaxb:bindings schemaLocation="../resources/schemas/rest.xsd" node="/xs:schema">
+		<jaxb:schemaBindings>
+			<jaxb:package name="org.smartdeveloperhub.jenkins.crawler.xml.jenkins"/>
+		</jaxb:schemaBindings>
+		<jaxb:bindings node="xs:complexType[@name='ResourceType']">
+			<jaxb:class name="ResourceDescriptor"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='RepresentationType']">
+			<jaxb:class name="RepresentationDescriptor"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='ResponseType']">
+			<jaxb:class name="ResponseDescriptor"/>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:element[@name='resource']">
+			<jaxb:class name="ResourceDescriptorDocument"/>
+		</jaxb:bindings>
+		<jaxb:bindings>
+			<namespace:prefix name="rest" />
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+	<jaxb:bindings schemaLocation="../resources/schemas/storage.xsd" node="/xs:schema">
+		<jaxb:schemaBindings>
+			<jaxb:package name="org.smartdeveloperhub.jenkins.crawler.xml.persistence"/>
+		</jaxb:schemaBindings>
+		<jaxb:bindings node="xs:element[@name='storage']">
+			<jaxb:class name="StorageDescriptor"/>
+		</jaxb:bindings>
+		<jaxb:bindings>
+			<namespace:prefix name="storage" />
+		</jaxb:bindings>
+	</jaxb:bindings>
+
+</jaxb:bindings>

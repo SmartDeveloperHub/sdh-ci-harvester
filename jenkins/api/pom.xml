@@ -43,7 +43,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 	<artifactId>ci-jenkins-api</artifactId>
 
 	<!-- =================================================================== -->
@@ -57,5 +56,33 @@
 	<!-- =================================================================== -->
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+
+		<!-- Default unit testing frameworks-->
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-integration</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
 
 </project>

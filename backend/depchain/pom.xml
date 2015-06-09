@@ -43,7 +43,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 	<artifactId>ci-backend-depchain</artifactId>
 	<packaging>pom</packaging>
 

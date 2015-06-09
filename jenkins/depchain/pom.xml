@@ -43,7 +43,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 	<artifactId>ci-jenkins-depchain</artifactId>
 	<packaging>pom</packaging>
 
@@ -75,6 +74,10 @@
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 			<artifactId>ci-jenkins-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
+			<artifactId>ci-jenkins-util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>

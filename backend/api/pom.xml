@@ -43,7 +43,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 	<artifactId>ci-backend-api</artifactId>
 
 	<!-- =================================================================== -->
@@ -57,5 +56,12 @@
 	<!-- =================================================================== -->
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+	</dependencies>
 
 </project>

@@ -43,7 +43,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 	<artifactId>ci-backend-core</artifactId>
 
 	<!-- =================================================================== -->
@@ -82,10 +81,52 @@
 			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 			<artifactId>ci-jenkins-depchain</artifactId>
 			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 			<artifactId>ci-backend-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<artifactId>xml-apis</artifactId>
+			<groupId>xml-apis</groupId>
+			<version>1.4.01</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>4.3.8.Final</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.3.2</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Default unit testing frameworks-->
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-integration</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      This file is part of the Smart Developer Hub Project:
+        http://www.smartdeveloperhub.org/
+
+      Center for Open Middleware
+        http://www.centeropenmiddleware.com/
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Copyright (C) 2015 Center for Open Middleware.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+
+                http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
+      Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+
+-->
+<orm:entity-mappings
+	xmlns:orm="http://xmlns.jcp.org/xml/ns/persistence/orm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://xmlns.jcp.org/xml/ns/persistence/orm
+		http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+	version="2.1">
+	<orm:description>CI Persistency</orm:description>
+	<orm:package>org.smartdeveloperhub.harvesters.ci.backend</orm:package>
+	<orm:access>FIELD</orm:access>
+
+	<orm:entity class="Build">
+		<orm:inheritance strategy="TABLE_PER_CLASS"/>
+		<orm:attributes>
+			<orm:id name="buildId"/>
+			<orm:basic name="serviceId"/>
+			<orm:basic name="location"/>
+			<orm:basic name="codebase"/>
+			<orm:element-collection name="executions" target-class="java.net.URI">
+				<orm:column name="executionId"/>
+				<orm:collection-table name="BuildExecutions">
+					<orm:foreign-key name="buildId"/>
+					<orm:unique-constraint name="Executions_are_owned_by_a_single_build">
+						<orm:column-name>executionId</orm:column-name>
+					</orm:unique-constraint>
+				</orm:collection-table>
+			</orm:element-collection>
+		</orm:attributes>
+	</orm:entity>
+	<orm:entity class="SimpleBuild">
+	</orm:entity>
+	<orm:entity class="Execution">
+		<orm:attributes>
+			<orm:id name="executionId"/>
+			<orm:basic name="createdOn">
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db.DateUtils"/>
+			</orm:basic>
+			<orm:basic name="buildId"/>
+			<orm:embedded name="result"/>
+		</orm:attributes>
+	</orm:entity>
+	<orm:embeddable class="Result">
+		<orm:attributes>
+			<orm:basic name="status">
+				<orm:enumerated>STRING</orm:enumerated>
+			</orm:basic>
+			<orm:basic name="finishedOn">
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db.DateUtils"/>
+			</orm:basic>
+		</orm:attributes>
+	</orm:embeddable>
+</orm:entity-mappings>

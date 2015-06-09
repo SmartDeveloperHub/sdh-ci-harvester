@@ -1,0 +1,114 @@
+<!--
+
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      This file is part of the Smart Developer Hub Project:
+        http://www.smartdeveloperhub.org/
+
+      Center for Open Middleware
+        http://www.centeropenmiddleware.com/
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Copyright (C) 2015 Center for Open Middleware.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+
+                http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+      Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+
+-->
+<xsd:schema
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:rest="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1"
+	targetNamespace="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1">
+	<xsd:element name="resource" type="rest:ResourceType"/>
+	<xsd:complexType name="ResourceType">
+		<xsd:sequence>
+			<xsd:element name="url" type="xsd:anyURI"/>
+			<xsd:element name="entity" type="rest:EntityType" minOccurs="0"/>
+			<xsd:element name="artifact" type="rest:ArtifactType" minOccurs="0"/>
+			<xsd:element name="representation" type="rest:RepresentationType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="RepresentationType">
+		<xsd:sequence>
+			<xsd:element name="status" type="rest:ResourceStatus"/>
+			<xsd:element name="retrievedOn" type="xsd:dateTime"/>
+			<xsd:element name="failure" type="xsd:base64Binary" minOccurs="0"/>
+			<xsd:element name="response" type="rest:ResponseType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ResponseType">
+		<xsd:sequence>
+			<xsd:element name="statusCode" type="xsd:int"/>
+			<xsd:element name="serverVersion" type="xsd:string" minOccurs="0"/>
+			<xsd:element name="etag" type="xsd:string" minOccurs="0"/>
+			<xsd:element name="lastModified" type="xsd:dateTime" minOccurs="0"/>
+			<xsd:element name="body" type="rest:BodyType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="ResourceStatus">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="UNKOWN"/>
+			<xsd:enumeration value="AVAILABLE"/>
+			<xsd:enumeration value="UNAVAILABLE"/>
+			<xsd:enumeration value="ERROR"/>
+			<xsd:enumeration value="COMMUNICATION_FAILURE"/>
+			<xsd:enumeration value="UNSUPPORTED_RESOURCE"/>
+			<xsd:enumeration value="INCOMPATIBLE_RESOURCE"/>
+			<xsd:enumeration value="UNPROCESSABLE_RESOURCE"/>
+			<xsd:enumeration value="INVALID_RESOURCE"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="EntityType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="SERVICE"/>
+			<xsd:enumeration value="JOB"/>
+			<xsd:enumeration value="MULTI_JOB"/>
+			<xsd:enumeration value="RUN"/>
+			<xsd:enumeration value="FREE_STYLE_BUILD"/>
+			<xsd:enumeration value="MAVEN_BUILD"/>
+			<xsd:enumeration value="MAVEN_MULTIMODULE_BUILD"/>
+			<xsd:enumeration value="MAVEN_MODULE_BUILD"/>
+			<xsd:enumeration value="MATRIX_BUILD"/>
+			<xsd:enumeration value="CONFIGURATION_BUILD"/>
+			<xsd:enumeration value="FREE_STYLE_RUN"/>
+			<xsd:enumeration value="MAVEN_RUN"/>
+			<xsd:enumeration value="MAVEN_MULTIMODULE_RUN"/>
+			<xsd:enumeration value="MAVEN_MODULE_RUN"/>
+			<xsd:enumeration value="MATRIX_RUN"/>
+			<xsd:enumeration value="CONFIGURATION_RUN"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="ArtifactType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="RESOURCE"/>
+			<xsd:enumeration value="SCM"/>
+			<xsd:enumeration value="CONFIGURATION"/>
+			<xsd:enumeration value="ARTIFACTS"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="BodyType">
+		<xsd:sequence>
+			<xsd:element name="digest" type="rest:DigestType"/>
+			<xsd:element name="contentType" type="xsd:string"/>
+			<xsd:element name="external" type="xsd:anyURI"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DigestType">
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:base64Binary">
+				<xsd:attribute name="algorithm" type="xsd:string" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+</xsd:schema>
