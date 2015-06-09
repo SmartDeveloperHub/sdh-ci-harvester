@@ -22,7 +22,7 @@
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
       Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-dist:1.0.0-SNAPSHOT
-      Bundle      : ci-frontend-dist-1.0.0-SNAPSHOT.jar
+      Bundle      : ci-frontend-dist-1.0.0-SNAPSHOT.war
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -37,13 +37,15 @@
 	<!-- =================================================================== -->
 
 	<parent>
-		<groupId>org.smartdeveloperhub</groupId>
-		<artifactId>sdh-build</artifactId>
+		<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
+		<artifactId>ci-frontend-aggregator</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
 	<artifactId>ci-frontend-dist</artifactId>
+	<packaging>war</packaging>
 
 	<!-- =================================================================== -->
 	<!--   MODULE INFORMATION                                                -->

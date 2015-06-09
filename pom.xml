@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.vocabulary:sdh-vocabulary:1.0.0-SNAPSHOT
-      Bundle      : sdh-vocabulary-1.0.0-SNAPSHOT.jar
+      Artifact    : org.smartdeveloperhub.harvesters.ci:ci-harvester-aggregator:1.0.0-SNAPSHOT
+      Bundle      : ci-harvester-aggregator-1.0.0-SNAPSHOT.pom
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -38,7 +38,7 @@
 
 	<parent>
 		<groupId>org.smartdeveloperhub</groupId>
-		<artifactId>sdh-parent</artifactId>
+		<artifactId>sdh-build</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -64,4 +64,62 @@
 		<module>frontend</module>
 	</modules>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											ru.concerteza.buildnumber
+										</groupId>
+										<artifactId>
+											maven-jgit-buildnumber-plugin
+										</artifactId>
+										<versionRange>
+											[1.2.8,)
+										</versionRange>
+										<goals>
+											<goal>
+												extract-buildnumber
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.groovy.maven
+										</groupId>
+										<artifactId>
+											gmaven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0,)
+										</versionRange>
+										<goals>
+											<goal>execute</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>

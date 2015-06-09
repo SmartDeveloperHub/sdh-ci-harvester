@@ -37,9 +37,10 @@
 	<!-- =================================================================== -->
 
 	<parent>
-		<groupId>org.smartdeveloperhub</groupId>
-		<artifactId>sdh-build</artifactId>
+		<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
+		<artifactId>ci-backend-aggregator</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
