@@ -102,14 +102,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.centeropenmiddleware.sdh</groupId>
-				<artifactId>commons-xml-depchain</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-core</artifactId>
 				<version>${metrics.version}</version>
