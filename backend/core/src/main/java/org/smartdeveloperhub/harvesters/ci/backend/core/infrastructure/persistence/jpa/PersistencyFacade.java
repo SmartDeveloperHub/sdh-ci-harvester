@@ -24,7 +24,7 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db;
+package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -60,7 +60,7 @@ public final class PersistencyFacade {
 
 	public ExecutionRepository getExecutionRepository() {
 		return
-			new DatabaseExecutionRepository(
+			new JPAExecutionRepository(
 				new EntityManagerProvider(){
 					@Override
 					public EntityManager entityManager() {
@@ -72,7 +72,7 @@ public final class PersistencyFacade {
 
 	public BuildRepository getBuildRepository() {
 		return
-			new DatabaseBuildRepository(
+			new JPABuildRepository(
 				new EntityManagerProvider(){
 					@Override
 					public EntityManager entityManager() {

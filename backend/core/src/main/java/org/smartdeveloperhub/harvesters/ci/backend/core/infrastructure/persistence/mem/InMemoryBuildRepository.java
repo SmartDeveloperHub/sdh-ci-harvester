@@ -24,7 +24,7 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.impl;
+package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -32,37 +32,41 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.net.URI;
 import java.util.concurrent.ConcurrentMap;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
 
 import com.google.common.collect.Maps;
 
-public class InMemoryExecutionRepository implements ExecutionRepository {
+public class InMemoryBuildRepository implements BuildRepository {
 
-	private final ConcurrentMap<URI,Execution> executions;
+	private final ConcurrentMap<URI,Build> builds;
 
-	public InMemoryExecutionRepository() {
-		this.executions=Maps.newConcurrentMap();
-	}
-
-
-	@Override
-	public void add(Execution entity) {
-		checkNotNull(entity,"Execution cannot be null");
-		Execution previous = this.executions.putIfAbsent(entity.executionId(),entity);
-		checkArgument(previous==null,"An execution identified by '%s' already exists",entity.executionId());
+	public InMemoryBuildRepository() {
+		this.builds=Maps.newConcurrentMap();
 	}
 
 	@Override
-	public void remove(Execution entity) {
-		checkNotNull(entity,"Execution cannot be null");
-		this.executions.remove(entity.executionId(),entity);
+	public void add(Build build) {
+		checkNotNull(build,"Build cannot be null");
+		Build previous = this.builds.putIfAbsent(build.buildId(),build);
+		checkArgument(previous==null,"A build identified by '%s' already exists",build.buildId());
 	}
 
 	@Override
-	public Execution executionOfId(URI executionId) {
-		checkNotNull(executionId,"Execution identifier cannot be null");
-		return this.executions.get(executionId);
+	public void remove(Build build) {
+		checkNotNull(build,"Build cannot be null");
+		this.builds.remove(build.buildId(),build);
+	}
+
+	@Override
+	public Build buildOfId(URI buildId) {
+		checkNotNull(buildId,"Build identifier cannot be null");
+		return this.builds.get(buildId);
+	}
+
+	@Override
+	public <T extends Build> T buildOfId(URI buildId, Class<? extends T> clazz) {
+		return clazz.cast(buildOfId(buildId));
 	}
 
 }

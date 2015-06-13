@@ -24,30 +24,46 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db;
+package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
 
-import java.util.Date;
+import java.net.URI;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import javax.persistence.EntityManager;
 
-@Converter
-public class DateUtils implements AttributeConverter<Date,String> {
+import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.PersistencyFacade.EntityManagerProvider;
 
-	@Override
-	public String convertToDatabaseColumn(Date attribute) {
-		if(attribute==null) {
-			return null;
-		}
-		return Long.toString(attribute.getTime());
+public class JPABuildRepository implements BuildRepository {
+
+	private EntityManagerProvider provider;
+
+	public JPABuildRepository(EntityManagerProvider provider) {
+		this.provider = provider;
+	}
+
+	private EntityManager entityManager() {
+		return this.provider.entityManager();
 	}
 
 	@Override
-	public Date convertToEntityAttribute(String dbData) {
-		if(dbData==null) {
-			return null;
-		}
-		return new Date(Long.parseLong(dbData));
+	public void add(Build build) {
+		entityManager().persist(build);
+	}
+
+	@Override
+	public void remove(Build build) {
+		entityManager().remove(build);
+	}
+
+	@Override
+	public Build buildOfId(URI id) {
+		return buildOfId(id,Build.class);
+	}
+
+	@Override
+	public <T extends Build> T buildOfId(URI id, Class<? extends T> clazz) {
+		return entityManager().find(clazz,id);
 	}
 
 }

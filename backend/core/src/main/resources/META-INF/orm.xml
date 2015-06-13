@@ -39,7 +39,8 @@
 	<orm:access>FIELD</orm:access>
 
 	<orm:entity class="Build">
-		<orm:inheritance strategy="TABLE_PER_CLASS"/>
+		<orm:inheritance strategy="SINGLE_TABLE"/>
+		<orm:discriminator-column name="type"/>
 		<orm:attributes>
 			<orm:id name="buildId"/>
 			<orm:basic name="serviceId"/>
@@ -57,12 +58,33 @@
 		</orm:attributes>
 	</orm:entity>
 	<orm:entity class="SimpleBuild">
+		<orm:discriminator-value>simple</orm:discriminator-value>
+	</orm:entity>
+	<orm:entity class="CompositeBuild">
+		<orm:discriminator-value>composite</orm:discriminator-value>
+		<orm:attributes>
+			<orm:element-collection name="subBuilds" target-class="java.net.URI">
+				<orm:column name="subBuildId"/>
+				<orm:collection-table name="CompositeBuildSubBuilds">
+					<orm:foreign-key name="compositeBuildId"/>
+					<orm:unique-constraint name="Sub_builds_are_owned_by_a_single_composite_build">
+						<orm:column-name>subBuildId</orm:column-name>
+					</orm:unique-constraint>
+				</orm:collection-table>
+			</orm:element-collection>
+		</orm:attributes>
+	</orm:entity>
+	<orm:entity class="SubBuild">
+		<orm:discriminator-value>sub</orm:discriminator-value>
+		<orm:attributes>
+			<orm:basic name="parentId"/>
+		</orm:attributes>
 	</orm:entity>
 	<orm:entity class="Execution">
 		<orm:attributes>
 			<orm:id name="executionId"/>
 			<orm:basic name="createdOn">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db.DateUtils"/>
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
 			</orm:basic>
 			<orm:basic name="buildId"/>
 			<orm:embedded name="result"/>
@@ -74,7 +96,7 @@
 				<orm:enumerated>STRING</orm:enumerated>
 			</orm:basic>
 			<orm:basic name="finishedOn">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db.DateUtils"/>
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
 			</orm:basic>
 		</orm:attributes>
 	</orm:embeddable>

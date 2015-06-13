@@ -24,41 +24,28 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db;
+package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
 
-import java.net.URI;
+import java.util.Date;
 
-import javax.persistence.EntityManager;
+import javax.persistence.AttributeConverter;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db.PersistencyFacade.EntityManagerProvider;
+public class DateUtils implements AttributeConverter<Date,String> {
 
-public class DatabaseExecutionRepository implements ExecutionRepository {
-
-	private EntityManagerProvider provider;
-
-	public DatabaseExecutionRepository(EntityManagerProvider provider) {
-		this.provider = provider;
-	}
-
-	private EntityManager entityManager() {
-		return this.provider.entityManager();
+	@Override
+	public String convertToDatabaseColumn(Date attribute) {
+		if(attribute==null) {
+			return null;
+		}
+		return Long.toString(attribute.getTime());
 	}
 
 	@Override
-	public void add(Execution execution) {
-		entityManager().persist(execution);
-	}
-
-	@Override
-	public void remove(Execution execution) {
-		entityManager().remove(execution);
-	}
-
-	@Override
-	public Execution executionOfId(URI executionId) {
-		return entityManager().find(Execution.class, executionId);
+	public Date convertToEntityAttribute(String dbData) {
+		if(dbData==null) {
+			return null;
+		}
+		return new Date(Long.parseLong(dbData));
 	}
 
 }

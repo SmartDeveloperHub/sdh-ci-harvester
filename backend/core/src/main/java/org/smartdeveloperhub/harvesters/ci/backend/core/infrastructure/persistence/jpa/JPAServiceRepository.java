@@ -24,51 +24,57 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.impl;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
 
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.PersistencyFacade.EntityManagerProvider;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+public class JPAServiceRepository implements ServiceRepository {
 
-public class InMemoryServiceRepository implements ServiceRepository {
+	private EntityManagerProvider provider;
 
-	private final ConcurrentMap<URI,Service> services;
-
-	public InMemoryServiceRepository() {
-		this.services=Maps.newConcurrentMap();
+	public JPAServiceRepository(EntityManagerProvider provider) {
+		this.provider = provider;
 	}
 
-	@Override
-	public List<URI> serviceIds() {
-		return ImmutableList.copyOf(this.services.keySet());
+	private EntityManager entityManager() {
+		return this.provider.entityManager();
 	}
 
 	@Override
 	public void add(Service service) {
-		checkNotNull(service,"Service cannot be null");
-		Service previous = this.services.putIfAbsent(service.serviceId(),service);
-		checkArgument(previous==null,"A service identified by '%s' already exists",service.serviceId());
+		entityManager().persist(service);
 	}
 
 	@Override
 	public void remove(Service service) {
-		checkNotNull(service,"Service cannot be null");
-		this.services.remove(service.serviceId(),service);
+		entityManager().remove(service);
 	}
 
 	@Override
 	public Service serviceOfId(URI serviceId) {
-		checkNotNull(serviceId,"Service identifier cannot be null");
-		return this.services.get(serviceId);
+		return entityManager().find(Service.class, serviceId);
+	}
+
+	@Override
+	public List<URI> serviceIds() {
+		CriteriaQuery<URI> query =
+			entityManager().
+				getCriteriaBuilder().
+					createQuery(URI.class);
+		Root<Service> service = query.from(Service.class);
+		query.
+			select(service.<URI>get("serviceId")).
+			distinct(true);
+		return entityManager().createQuery(query).getResultList();
 	}
 
 }

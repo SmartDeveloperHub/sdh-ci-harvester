@@ -24,46 +24,45 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db;
+package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
+import java.util.concurrent.ConcurrentMap;
 
-import javax.persistence.EntityManager;
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.db.PersistencyFacade.EntityManagerProvider;
+import com.google.common.collect.Maps;
 
-public class DatabaseBuildRepository implements BuildRepository {
+public class InMemoryExecutionRepository implements ExecutionRepository {
 
-	private EntityManagerProvider provider;
+	private final ConcurrentMap<URI,Execution> executions;
 
-	public DatabaseBuildRepository(EntityManagerProvider provider) {
-		this.provider = provider;
+	public InMemoryExecutionRepository() {
+		this.executions=Maps.newConcurrentMap();
 	}
 
-	private EntityManager entityManager() {
-		return this.provider.entityManager();
+
+	@Override
+	public void add(Execution entity) {
+		checkNotNull(entity,"Execution cannot be null");
+		Execution previous = this.executions.putIfAbsent(entity.executionId(),entity);
+		checkArgument(previous==null,"An execution identified by '%s' already exists",entity.executionId());
 	}
 
 	@Override
-	public void add(Build build) {
-		entityManager().persist(build);
+	public void remove(Execution entity) {
+		checkNotNull(entity,"Execution cannot be null");
+		this.executions.remove(entity.executionId(),entity);
 	}
 
 	@Override
-	public void remove(Build build) {
-		entityManager().remove(build);
-	}
-
-	@Override
-	public Build buildOfId(URI id) {
-		return buildOfId(id,Build.class);
-	}
-
-	@Override
-	public <T extends Build> T buildOfId(URI id, Class<? extends T> clazz) {
-		return entityManager().find(clazz,id);
+	public Execution executionOfId(URI executionId) {
+		checkNotNull(executionId,"Execution identifier cannot be null");
+		return this.executions.get(executionId);
 	}
 
 }
