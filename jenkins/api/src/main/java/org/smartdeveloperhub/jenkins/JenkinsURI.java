@@ -32,9 +32,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.net.URI;
 
 
+
 import com.google.common.base.MoreObjects;
 
 public final class JenkinsURI {
+
+	private static final String JENKINS_ENTITY_URI_MARKER = "/job/";
 
 	private final URI location;
 
@@ -112,8 +115,6 @@ public final class JenkinsURI {
 					add("run",this.location).
 					toString();
 	}
-
-	private static final String JENKINS_ENTITY_URI_MARKER = "/job/";
 
 	public static JenkinsURI create(URI location) {
 		checkNotNull(location,"Location cannot be null");

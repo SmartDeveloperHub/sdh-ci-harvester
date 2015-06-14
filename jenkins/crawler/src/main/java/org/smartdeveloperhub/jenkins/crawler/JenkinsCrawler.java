@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
 import java.util.Date;
@@ -91,7 +92,7 @@ public final class JenkinsCrawler {
 
 	}
 
-	private static abstract class AbstractCrawlingTask implements Task {
+	private abstract static class AbstractCrawlingTask implements Task {
 
 		private static final int RETRY_THRESHOLD = 5;
 
@@ -204,7 +205,7 @@ public final class JenkinsCrawler {
 
 	}
 
-	private static abstract class AbstractCrawlingSubTask<T extends Entity> extends AbstractCrawlingTask {
+	private abstract static class AbstractCrawlingSubTask<T extends Entity> extends AbstractCrawlingTask {
 
 		private T parent;
 
@@ -402,6 +403,38 @@ public final class JenkinsCrawler {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsCrawler.class);
 
+	private static final PeriodFormatter PERIOD_FORMATTER =
+	new PeriodFormatterBuilder().
+			appendYears().
+			appendSuffix(" year", " years").
+			appendSeparator(" and ").
+			printZeroRarelyLast().
+			appendMonths().
+			appendSuffix(" month", " months").
+			appendSeparator(" and ").
+			printZeroRarelyLast().
+			appendDays().
+			appendSuffix(" day", " days").
+			appendSeparator(" and ").
+			printZeroRarelyLast().
+			appendHours().
+			appendSuffix(" hour", " hours").
+			appendSeparator(" and ").
+			printZeroRarelyLast().
+			appendMinutes().
+			appendSuffix(" minute", " minutes").
+			appendSeparator(" and ").
+			printZeroRarelyLast().
+			appendSeconds().
+			appendSuffix(" second", " seconds").
+			appendSeparator(" and ").
+			printZeroRarelyLast().
+			appendMillis().
+			appendSuffix(" millisecond", " milliseconds").
+			appendSeparator(" and ").
+			printZeroRarelyLast().
+			toFormatter();
+
 	private final ScheduledExecutorService adminPool;
 
 	private final MultiThreadedTaskScheduler taskScheduler;
@@ -480,42 +513,18 @@ public final class JenkinsCrawler {
 	}
 
 	private static String durationToString(long started, long finished) {
-		Duration duration=new Duration(started,finished);
-		PeriodFormatter formatter =
-			new PeriodFormatterBuilder().
-				appendYears().
-				appendSuffix(" year", " years").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendMonths().
-				appendSuffix(" month", " months").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendDays().
-				appendSuffix(" day", " days").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendHours().
-				appendSuffix(" hour", " hours").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendMinutes().
-				appendSuffix(" minute", " minutes").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendSeconds().
-				appendSuffix(" second", " seconds").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendMillis().
-				appendSuffix(" millisecond", " milliseconds").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				toFormatter();
-		StringBuffer buffer = new StringBuffer();
-		formatter.getPrinter().printTo(buffer, duration.toPeriod(), Locale.ENGLISH);
-		String durationStr=buffer.toString();
-		return durationStr;
+		StringWriter writer = new StringWriter();
+		try {
+			PERIOD_FORMATTER.
+				getPrinter().
+					printTo(
+						writer,
+						new Duration(started,finished).toPeriod(),
+						Locale.ENGLISH);
+			return writer.toString();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public static JenkinsCrawlerBuilder builder() {

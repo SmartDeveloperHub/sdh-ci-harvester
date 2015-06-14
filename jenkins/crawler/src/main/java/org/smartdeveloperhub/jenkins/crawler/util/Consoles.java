@@ -37,13 +37,13 @@ import java.io.PrintWriter;
  */
 public final class Consoles {
 
-	private Consoles() {
-	}
-
-	private static Console DEFAULT =
+	private static final Console DEFAULT =
 		(System.console() == null) ?
 			streamConsole(System.in, System.out) : // NOSONAR
 			new NativeConsole(System.console());
+
+	private Consoles() {
+	}
 
 	/**
 	 * The default system console.

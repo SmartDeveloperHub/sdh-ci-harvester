@@ -39,19 +39,29 @@ final class CharacterConsole implements Console {
 	private final BufferedReader in;
 	private final PrintWriter out;
 
-	public CharacterConsole(BufferedReader reader, PrintWriter writer) {
+	CharacterConsole(BufferedReader reader, PrintWriter writer) {
 		this.in = reader;
 		this.out = writer;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public CharacterConsole printf(String fmt, Object... params) throws ConsoleException {
-		this.out.printf(fmt, params);
-		return this;
+	public CharacterConsole printf(String fmt, Object... params) {
+		try {
+			this.out.printf(fmt, params);
+			return this;
+		} catch (Exception e) {
+			throw new ConsoleException(e);
+		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public String readLine() throws ConsoleException {
+	public String readLine() {
 		try {
 			return this.in.readLine();
 		} catch (IOException e) {
@@ -59,18 +69,27 @@ final class CharacterConsole implements Console {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public char[] readPassword() throws ConsoleException {
+	public char[] readPassword() {
 		return readLine().toCharArray();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public Reader reader() throws ConsoleException {
+	public Reader reader() {
 		return this.in;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public PrintWriter writer() throws ConsoleException {
+	public PrintWriter writer() {
 		return this.out;
 	}
 

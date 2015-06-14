@@ -300,14 +300,12 @@ final class StorageUtils {
 				withFailure(SerializationUtils.serialize(resource.failure().get()));
 		}
 
-		ResourceDescriptorDocument resourceDescriptor=
+		return
 			new ResourceDescriptorDocument().
 				withUrl(resource.location()).
 				withEntity(resource.entity()).
 				withArtifact(resource.artifact()).
 				withRepresentation(representationDescriptor);
-
-		return resourceDescriptor;
 	}
 
 	static JenkinsResource toJenkinsResource(ResourceDescriptorDocument descriptor) {

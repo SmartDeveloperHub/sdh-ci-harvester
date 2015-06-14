@@ -28,6 +28,7 @@ package org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence;
 
 import java.net.URI;
 import java.util.EnumSet;
+import java.util.Set;
 
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
@@ -39,7 +40,7 @@ final class StorageEntry {
 
 	private final URI location;
 	private final JenkinsEntityType type;
-	private final EnumSet<JenkinsArtifactType> persistedArtifacts;
+	private final Set<JenkinsArtifactType> persistedArtifacts;
 	private boolean persistEntity;
 
 	StorageEntry(URI location, JenkinsEntityType type) {

@@ -69,14 +69,13 @@ public final class ModelMappingService {
 				getFirstChild().
 					getNodeName();
 		Source data = new DOMSource(content);
-		Service service=
+		return
 			this.transformationService.transform(
 				localName,
 				data,
 				createParameters(resource),
 				Service.class
 			);
-		return service;
 	}
 
 	public Build loadBuild(JenkinsResource resource) throws TransformationException {
@@ -86,14 +85,13 @@ public final class ModelMappingService {
 				getFirstChild().
 					getNodeName();
 		Source data = new DOMSource(content);
-		Build build=
+		return
 			this.transformationService.transform(
 				localName,
 				data,
 				createParameters(resource),
 				Build.class
 			);
-		return build;
 	}
 
 	public Run loadRun(JenkinsResource resource) throws TransformationException {
@@ -103,14 +101,13 @@ public final class ModelMappingService {
 				getFirstChild().
 					getNodeName();
 		Source data = new DOMSource(content);
-		Run run=
+		return
 			this.transformationService.transform(
 				localName,
 				data,
 				createParameters(resource),
 				Run.class
 			);
-		return run;
 	}
 
 	public static ModelMappingService newInstance(TransformationService transformationManager) {

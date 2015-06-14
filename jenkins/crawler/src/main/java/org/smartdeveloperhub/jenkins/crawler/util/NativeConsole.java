@@ -26,8 +26,10 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.util;
 
+import java.io.IOError;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.IllegalFormatException;
 
 /**
  * {@link Console} implementation that wraps a {@link java.io.Console}.
@@ -39,27 +41,54 @@ final class NativeConsole implements Console {
 		this.console = console;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public Console printf(String fmt, Object... params) throws ConsoleException {
-		console.format(fmt, params);
-		return this;
+	public Console printf(String fmt, Object... params) {
+		try {
+			this.console.format(fmt, params);
+			return this;
+		} catch (IllegalFormatException e) {
+			throw new ConsoleException(e);
+		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public Reader reader() throws ConsoleException {
+	public Reader reader() {
 		return console.reader();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public String readLine() throws ConsoleException {
-		return console.readLine();
+	public String readLine() {
+		try {
+			return console.readLine();
+		} catch (IOError e) {
+			throw new ConsoleException(e);
+		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public char[] readPassword() throws ConsoleException {
-		return console.readPassword();
+	public char[] readPassword() {
+		try {
+			return console.readPassword();
+		} catch (IOError e) {
+			throw new ConsoleException(e);
+		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public PrintWriter writer() throws ConsoleException {
 		return console.writer();

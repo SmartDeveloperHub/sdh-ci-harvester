@@ -85,6 +85,7 @@ public final class Transformation {
 
 	}
 
+	private static final TransformerFactory transformerFactory=TransformerFactory.newInstance();
 	private final MemoizingTemplates styleSheet;
 	private final ImmutableMap<String, Object> parameters;
 	private TransformerFactory factory;
@@ -124,8 +125,6 @@ public final class Transformation {
 		newTransformer.transform(toSource(source), adapter);
 		return adapter.value();
 	}
-
-	private static final TransformerFactory transformerFactory=TransformerFactory.newInstance();
 
 	public static <T> Transformation newTransformation(T styleSheet) throws TransformerConfigurationException {
 		return createNew(styleSheet, transformerFactory, ImmutableMap.<String,Object>of());

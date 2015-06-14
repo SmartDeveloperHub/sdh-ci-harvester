@@ -418,7 +418,7 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 				addEntity(entity).
 				build();
 		this.locker.write(location,new StoreOperation(location,actions));
-		entry(location,entityType).persistEntity();;
+		entry(location,entityType).persistEntity();
 	}
 
 	@Override

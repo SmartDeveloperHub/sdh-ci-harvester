@@ -46,12 +46,10 @@ public final class DateTimeConverter {
 	}
 
 	public static DateTime unmarshal(String dateStr) {
-		DateTime result = DATE_PATTERN.parseDateTime(dateStr);
-		return result;
+		return DATE_PATTERN.parseDateTime(dateStr);
 	}
 
 	public static String marshal(DateTime dateTime) {
-		String result = DATE_PATTERN.print(dateTime);
-		return result;
+		return DATE_PATTERN.print(dateTime);
 	}
 }

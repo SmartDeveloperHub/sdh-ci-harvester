@@ -70,7 +70,7 @@ final class HttpResponseUtil {
 		String rawLastModified = headers[0].getValue();
 		try {
 			lastModified = HttpDateUtils.parse(rawLastModified);
-		} catch (UnknownHttpDateFormatException e) {
+		} catch (UnknownHttpDateFormatException e) { // NOSONAR
 			LOGGER.warn(
 				"Ignoring invalid response last modified date '{}' ({})",
 				rawLastModified,
