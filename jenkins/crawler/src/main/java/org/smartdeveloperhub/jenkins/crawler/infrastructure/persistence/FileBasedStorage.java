@@ -349,7 +349,9 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 		File workingDirectory=new File(descriptor.getWorkingDirectory());
 		StorageUtils.prepareWorkingDirectory(workingDirectory);
 
-		StorageAllocationStrategy strategy = StorageUtils.instantiateStrategy(descriptor.getStrategy());
+		StorageAllocationStrategy strategy=
+			StorageUtils.
+				instantiateStrategy(descriptor.getStrategy());
 		strategy.setWorkingDirectory(workingDirectory);
 
 		setConfigFile(configFile).
