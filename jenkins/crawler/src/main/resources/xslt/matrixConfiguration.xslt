@@ -32,7 +32,7 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:fn="http://www.w3.org/2005/xpath-functions"
-	xmlns:ci="http://www.sdh.org/harvester/ci/v1"
+	xmlns:ci="http://www.smartdeveloperhub.org/harvester/ci/model/v1"
 	exclude-result-prefixes="fn xsl xs">
 	<xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
 	<xsl:template match="matrixConfiguration">
@@ -41,10 +41,10 @@
 		<xsl:variable name="segments" select="tokenize($url,'/')"/>
 		<xsl:variable name="segNumber" select="count($segments)-3" as="xs:integer"/>
 		<xsl:variable name="service" select="concat(string-join(subsequence($segments,0,$segNumber),'/'),'/')"/>
-		<ci:subBuild 
-			service="{$service}" 
-			parent="{substring($url,0,string-length($url)-string-length($name))}" 
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		<ci:subBuild
+			service="{$service}"
+			parent="{substring($url,0,string-length($url)-string-length($name))}"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://www.sdh.org/harvester/ci/v1 http://www.sdh.org/harvester/ci/v1/schema.xsd" >
 			<url><xsl:value-of select="$url"/></url>
 			<id><xsl:value-of select="$name"/></id>

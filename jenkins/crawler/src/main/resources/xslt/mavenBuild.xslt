@@ -27,12 +27,12 @@
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
-<xsl:stylesheet 
+<xsl:stylesheet
 	version="2.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:fn="http://www.w3.org/2005/xpath-functions"
-	xmlns:ci="http://www.sdh.org/harvester/ci/v1"
+	xmlns:ci="http://www.smartdeveloperhub.org/harvester/ci/model/v1"
 	exclude-result-prefixes="fn xsl xs">
 	<xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
 	<xsl:template match="mavenBuild">
@@ -60,4 +60,3 @@
 		</ci:run>
 	</xsl:template>
 </xsl:stylesheet>
- 
