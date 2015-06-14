@@ -26,7 +26,9 @@
  */
 package org.smartdeveloperhub.jenkins;
 
-interface Range {
+import java.io.Serializable;
+
+interface Range extends Serializable{
 
 	boolean contains(int candidate);
 

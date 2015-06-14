@@ -33,17 +33,17 @@ final class RangeFactory {
 
 	static Range equalTo(final int value) {
 		return new Range() {
-
+			private static final long serialVersionUID = -966084429887367866L;
 			@Override
 			public boolean contains(int candidate) {
 				return value==candidate;
 			}
-
 		};
 	}
 
 	static Range greaterThan(final int value) {
 		return new Range() {
+			private static final long serialVersionUID = 7322706219195976509L;
 			@Override
 			public boolean contains(int candidate) {
 				return candidate>value;
@@ -53,6 +53,7 @@ final class RangeFactory {
 
 	static Range greaterOrEqualThan(final int value) {
 		return new Range() {
+			private static final long serialVersionUID = 6766720239232784840L;
 			@Override
 			public boolean contains(int candidate) {
 				return candidate>=value;
@@ -62,6 +63,7 @@ final class RangeFactory {
 
 	static Range lowerThan(final int value) {
 		return new Range() {
+			private static final long serialVersionUID = 2179357896204605497L;
 			@Override
 			public boolean contains(int candidate) {
 				return candidate<value;
@@ -71,6 +73,7 @@ final class RangeFactory {
 
 	static Range lowerOrEqualThan(final int value) {
 		return new Range() {
+			private static final long serialVersionUID = 8094478819732773588L;
 			@Override
 			public boolean contains(int candidate) {
 				return candidate<=value;
@@ -80,6 +83,7 @@ final class RangeFactory {
 
 	static Range not(final Range range) {
 		return new Range() {
+			private static final long serialVersionUID = -2499220525374469940L;
 			@Override
 			public boolean contains(int candidate) {
 				return !range.contains(candidate);
@@ -89,31 +93,31 @@ final class RangeFactory {
 
 	static Range and(final Range r1, final Range r2) {
 		return new Range() {
+			private static final long serialVersionUID = 2000177500725768440L;
 			@Override
 			public boolean contains(int candidate) {
-				return r1.contains(candidate) && r1.contains(candidate);
+				return r1.contains(candidate) && r2.contains(candidate);
 			}
-
 		};
 	}
 
 	static Range or(final Range r1, final Range r2) {
 		return new Range() {
+			private static final long serialVersionUID = -7518747584459506831L;
 			@Override
 			public boolean contains(int candidate) {
-				return r1.contains(candidate) || r1.contains(candidate);
+				return r1.contains(candidate) || r2.contains(candidate);
 			}
-
 		};
 	}
 
 	static Range empty() {
 		return new Range() {
+			private static final long serialVersionUID = -4665007847244997659L;
 			@Override
 			public boolean contains(int candidate) {
 				return false;
 			}
-
 		};
 	}
 

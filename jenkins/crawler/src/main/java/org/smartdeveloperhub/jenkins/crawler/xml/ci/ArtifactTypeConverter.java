@@ -28,7 +28,10 @@ package org.smartdeveloperhub.jenkins.crawler.xml.ci;
 
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 
-public class ArtifactTypeConverter {
+public final class ArtifactTypeConverter {
+
+	private ArtifactTypeConverter() {
+	}
 
 	public static JenkinsArtifactType unmarshal(String value) {
 		return JenkinsArtifactType.valueOf(value);

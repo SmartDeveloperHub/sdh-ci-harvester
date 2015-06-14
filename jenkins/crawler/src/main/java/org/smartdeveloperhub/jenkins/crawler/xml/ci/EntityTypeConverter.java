@@ -28,7 +28,10 @@ package org.smartdeveloperhub.jenkins.crawler.xml.ci;
 
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 
-public class EntityTypeConverter {
+public final class EntityTypeConverter {
+
+	private EntityTypeConverter() {
+	}
 
 	public static JenkinsEntityType unmarshal(String value) {
 		return JenkinsEntityType.valueOf(value);

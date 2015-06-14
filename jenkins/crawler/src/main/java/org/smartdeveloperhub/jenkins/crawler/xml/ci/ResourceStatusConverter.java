@@ -30,6 +30,9 @@ import org.smartdeveloperhub.jenkins.Status;
 
 public final class ResourceStatusConverter {
 
+	private ResourceStatusConverter() {
+	}
+
 	public static Status unmarshal(String statusStr) {
 		return Status.valueOf(statusStr);
 	}

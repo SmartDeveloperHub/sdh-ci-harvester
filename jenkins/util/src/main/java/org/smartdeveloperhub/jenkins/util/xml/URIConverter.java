@@ -30,6 +30,9 @@ import java.net.URI;
 
 public final class URIConverter {
 
+	private URIConverter() {
+	}
+
 	public static URI unmarshal(String rawURI) {
 		return URI.create(rawURI);
 	}

@@ -189,18 +189,18 @@ public final class JenkinsResourceProxy {
 			Document content = XmlUtils.toDocument(resource.metadata().response().body().get().content());
 			String localName=content.getFirstChild().getNodeName();
 			if(JenkinsArtifactType.RESOURCE.equals(resource.artifact())) {
-				JenkinsEntityType entity=JenkinsEntityType.fromNode(localName);
-				if(entity==null) {
+				JenkinsEntityType receivedEntity=JenkinsEntityType.fromNode(localName);
+				if(receivedEntity==null) {
 					resource.withStatus(
 						Status.UNSUPPORTED_RESOURCE,
 						"Unsupported Jenkins resource type '%s'",localName);
-				} else if(!this.entity.isCompatible(entity)) {
+				} else if(!this.entity.isCompatible(receivedEntity)) {
 					resource.withStatus(
 						Status.INVALID_RESOURCE,
-						"Invalid Jenkins entity type. Expected '%s' but got '%s'",this.entity,entity);
+						"Invalid Jenkins entity type. Expected '%s' but got '%s'",this.entity,receivedEntity);
 				} else {
 					resource.
-						withEntity(entity).
+						withEntity(receivedEntity).
 						withStatus(Status.AVAILABLE);
 				}
 			} else {

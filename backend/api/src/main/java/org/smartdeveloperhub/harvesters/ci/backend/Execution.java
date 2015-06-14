@@ -99,12 +99,12 @@ public final class Execution {
 
 	@Override
 	public boolean equals(Object obj) {
-		boolean result=false;
+		boolean equals=false;
 		if(obj instanceof Execution) {
 			Execution that=(Execution)obj;
-			result=this.executionId.equals(that.executionId);
+			equals=this.executionId.equals(that.executionId);
 		}
-		return result;
+		return equals;
 	}
 
 	@Override

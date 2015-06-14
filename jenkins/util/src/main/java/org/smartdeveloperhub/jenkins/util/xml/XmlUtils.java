@@ -84,6 +84,9 @@ public final class XmlUtils {
 		}
 	}
 
+	private XmlUtils() {
+	}
+
 	private static List<Class<?>> getXmlRegistries() {
 		ServiceLoader<XmlRegistryProvider> providers=ServiceLoader.load(XmlRegistryProvider.class);
 		List<Class<?>> result=Lists.newArrayList();

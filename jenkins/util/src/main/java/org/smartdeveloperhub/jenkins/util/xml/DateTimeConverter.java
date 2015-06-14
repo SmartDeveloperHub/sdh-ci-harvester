@@ -42,6 +42,9 @@ public final class DateTimeConverter {
 
 	private static final DateTimeFormatter DATE_PATTERN = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
+	private DateTimeConverter() {
+	}
+
 	public static DateTime unmarshal(String dateStr) {
 		DateTime result = DATE_PATTERN.parseDateTime(dateStr);
 		return result;

@@ -31,8 +31,12 @@ import java.util.Date;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class HttpResponseUtil {
+
+	private static Logger LOGGER=LoggerFactory.getLogger(HttpResponseUtil.class);
 
 	private HttpResponseUtil() {
 	}
@@ -67,8 +71,10 @@ final class HttpResponseUtil {
 		try {
 			lastModified = HttpDateUtils.parse(rawLastModified);
 		} catch (UnknownHttpDateFormatException e) {
-			// TODO: Log error message
-			e.printStackTrace();
+			LOGGER.warn(
+				"Ignoring invalid response last modified date '{}' ({})",
+				rawLastModified,
+				e.getMessage());
 		}
 		return lastModified;
 	}

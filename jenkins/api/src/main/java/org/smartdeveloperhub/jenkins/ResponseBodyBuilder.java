@@ -89,7 +89,7 @@ public final class ResponseBodyBuilder {
 
 	private String content;
 	private String contentType;
-	private Digest digest;
+	private Digest tmpDigest;
 
 	public ResponseBodyBuilder withContent(String content) {
 		this.content=content;
@@ -102,14 +102,14 @@ public final class ResponseBodyBuilder {
 	}
 
 	public ResponseBodyBuilder withDigest(Digest digest) {
-		this.digest = digest;
+		this.tmpDigest = digest;
 		return this;
 	}
 
 	public ResponseBody build() {
 		checkNotNull(this.content,"Response body content cannot be null");
 		checkNotNull(this.contentType,"Response body content type cannot be null");
-		Digest digest=this.digest;
+		Digest digest=this.tmpDigest;
 		if(digest==null) {
 			digest=DigestService.digestContents(this.content);
 		}

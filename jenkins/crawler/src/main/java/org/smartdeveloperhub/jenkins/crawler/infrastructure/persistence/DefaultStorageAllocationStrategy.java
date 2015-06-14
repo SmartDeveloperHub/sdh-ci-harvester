@@ -48,9 +48,9 @@ final class DefaultStorageAllocationStrategy implements StorageAllocationStrateg
 
 	private void getServiceBase(JenkinsURI id, PathBuilder builder) {
 		try {
-			builder.addSegment(URLEncoder.encode(id.service(), "UTF-8"));
+			builder.addSegment(URLEncoder.encode(id.service(),"UTF-8"));
 		} catch (UnsupportedEncodingException e) {
-			throw new AssertionError("UTF-8 encoding should be supported");
+			throw new AssertionError("UTF-8 encoding should be supported",e);
 		}
 	}
 

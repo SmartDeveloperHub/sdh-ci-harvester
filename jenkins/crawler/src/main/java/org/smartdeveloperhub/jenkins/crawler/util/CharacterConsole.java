@@ -55,7 +55,7 @@ final class CharacterConsole implements Console {
 		try {
 			return this.in.readLine();
 		} catch (IOException e) {
-			throw new IllegalStateException();
+			throw new ConsoleException(e);
 		}
 	}
 

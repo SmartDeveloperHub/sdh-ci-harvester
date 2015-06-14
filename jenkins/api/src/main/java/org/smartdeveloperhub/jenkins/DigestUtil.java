@@ -30,6 +30,9 @@ final class DigestUtil {
 
 	private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
+	private DigestUtil() {
+	}
+
 	static String bytesToHex(byte[] bytes) {
 		char[] hexChars = new char[bytes.length * 2];
 		for (int i = 0; i < bytes.length; i++) {

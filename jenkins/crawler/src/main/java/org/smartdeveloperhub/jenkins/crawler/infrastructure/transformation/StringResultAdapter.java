@@ -34,12 +34,12 @@ import javax.xml.transform.stream.StreamResult;
 final class StringResultAdapter {
 
 	private StringWriter writer;
-	private String result;
+	private String cachedResult;
 
 	Result getResult() {
 		synchronized(this) {
 			writer=new StringWriter();
-			result=null;
+			cachedResult=null;
 			return new StreamResult(writer);
 		}
 	}
@@ -47,12 +47,12 @@ final class StringResultAdapter {
 	String getValue() {
 		String result=null;
 		synchronized(this) {
-			result=this.result;
+			result=this.cachedResult;
 			if(result==null) {
 				if(writer==null) {
 					throw new IllegalStateException("No value is available yet");
 				}
-				this.result = result = writer.toString();
+				this.cachedResult = result = writer.toString();
 				this.writer=null;
 			}
 		}

@@ -33,7 +33,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public class SerializationUtils {
+public final class SerializationUtils {
+
+	private SerializationUtils() {
+	}
 
 	static <T extends Serializable> T deserialize(byte[] binaryFailure, Class<? extends T> clazz) {
 		try {

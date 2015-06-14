@@ -240,8 +240,7 @@ public final class JenkinsCrawler {
 			Service service = modelMapper().loadService(resource);
 			persistEntity(service,resource.entity());
 			for(Reference ref:service.getBuilds().getBuilds()) {
-				URI location=ref.getValue();
-				scheduleTask(new LoadProjectTask(location));
+				scheduleTask(new LoadProjectTask(ref.getValue()));
 			}
 		}
 
