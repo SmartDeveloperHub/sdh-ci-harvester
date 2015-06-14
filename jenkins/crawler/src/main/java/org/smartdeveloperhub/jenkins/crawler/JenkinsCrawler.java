@@ -261,8 +261,8 @@ public final class JenkinsCrawler {
 		protected void processResource(JenkinsResource resource) throws IOException {
 			Build build = modelMapper().loadBuild(resource);
 			persistEntity(build,resource.entity());
-			scheduleTask(new LoadProjectConfigurationTask(location(),build,resource.entity()));
-			scheduleTask(new LoadProjectSCMTask(location(),build));
+			scheduleTask(new LoadProjectConfigurationTask(super.location(),build,resource.entity()));
+			scheduleTask(new LoadProjectSCMTask(super.location(),build));
 			if(build instanceof CompositeBuild) {
 				CompositeBuild cBuild=(CompositeBuild)build;
 				for(Reference ref:cBuild.getSubBuilds().getBuilds()) {
@@ -337,7 +337,7 @@ public final class JenkinsCrawler {
 			Run run = modelMapper().loadRun(resource);
 			persistEntity(run,resource.entity());
 			if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && run.getResult().equals(RunResult.SUCCESS)) {
-				scheduleTask(new LoadRunArtifactsTask(location(),run));
+				scheduleTask(new LoadRunArtifactsTask(super.location(),run));
 			}
 		}
 
@@ -525,11 +525,7 @@ public final class JenkinsCrawler {
 	public static void main(String[] args) {
 		final File tmpDirectory = new File("target","jenkins"+new Date().getTime());
 		tmpDirectory.deleteOnExit();
-		String location = "http://localhost:8080/";
-		if(true) {
-			location="http://ci.jenkins-ci.org/";
-		}
-
+		String location="http://ci.jenkins-ci.org/";
 		try {
 			final JenkinsCrawler crawler=
 				JenkinsCrawler.

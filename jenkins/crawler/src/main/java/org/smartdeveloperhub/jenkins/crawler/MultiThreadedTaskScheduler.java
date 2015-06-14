@@ -171,10 +171,10 @@ final class MultiThreadedTaskScheduler implements TaskScheduler {
 		}
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("Task scheduler stopped.");
-			if(pendingRunnables.size()>0) {
-				LOGGER.debug("- Aborted {} pending tasks.",pendingRunnables.size());
-			} else {
+			if(pendingRunnables.isEmpty()) {
 				LOGGER.debug("- No pending tasks aborted.");
+			} else {
+				LOGGER.debug("- Aborted {} pending tasks.",pendingRunnables.size());
 			}
 			LOGGER.debug(
 				"- Processed {} tasks. {} completed succesfully, {} failed.",

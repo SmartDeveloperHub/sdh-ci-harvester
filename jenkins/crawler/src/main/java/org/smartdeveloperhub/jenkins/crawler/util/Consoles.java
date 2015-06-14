@@ -42,7 +42,7 @@ public final class Consoles {
 
 	private static Console DEFAULT =
 		(System.console() == null) ?
-			streamConsole(System.in, System.out) :
+			streamConsole(System.in, System.out) : // NOSONAR
 			new NativeConsole(System.console());
 
 	/**

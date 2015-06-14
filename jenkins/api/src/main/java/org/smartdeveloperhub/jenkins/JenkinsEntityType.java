@@ -142,7 +142,6 @@ public enum JenkinsEntityType {
 				tmp=tmp.parent;
 			}
 		}
-//		System.err.println(""+this+".isCompatible("+entity+")="+compatible);
 		return compatible;
 	}
 

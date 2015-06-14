@@ -29,15 +29,15 @@ package org.smartdeveloperhub.harvesters.ci.backend;
 public class BuildVisitor {
 
 	public void visitSimpleBuild(SimpleBuild aBuild) {
-
+		// To be extended by subclasses
 	}
 
 	public void visitCompositeBuild(CompositeBuild aBuild) {
-
+		// To be extended by subclasses
 	}
 
 	public void visitSubBuild(SubBuild aBuild) {
-
+		// To be extended by subclasses
 	}
 
 }

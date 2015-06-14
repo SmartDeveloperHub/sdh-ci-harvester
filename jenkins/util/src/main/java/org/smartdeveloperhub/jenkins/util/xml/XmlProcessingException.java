@@ -42,7 +42,6 @@ public class XmlProcessingException extends IOException {
 
 	public XmlProcessingException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
 }

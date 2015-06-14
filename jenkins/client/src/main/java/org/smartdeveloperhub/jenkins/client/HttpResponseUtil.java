@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 final class HttpResponseUtil {
 
-	private static Logger LOGGER=LoggerFactory.getLogger(HttpResponseUtil.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(HttpResponseUtil.class);
 
 	private HttpResponseUtil() {
 	}

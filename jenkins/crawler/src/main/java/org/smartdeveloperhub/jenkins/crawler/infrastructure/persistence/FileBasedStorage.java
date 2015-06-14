@@ -177,7 +177,7 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 			if(body.isPresent()) {
 				ResponseBody responseBody = body.get();
 				String content = responseBody.content();
-				if(responseBody.contentType().equals("application/xml")) {
+				if("application/xml".equals(responseBody.contentType())) {
 					new ContentSelectorBuilder("raw data",rawDataFile).withXmlData(content);
 				} else {
 					new ContentSelectorBuilder("raw data",rawDataFile).withPlainTextData(content);

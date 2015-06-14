@@ -241,7 +241,7 @@ final class StorageUtils {
 					withContentType(body.getContentType()).
 					build()
 			);
-			if(body.getContentType().equals("application/xml")) {
+			if("application/xml".equals(body.getContentType())) {
 				result.withContent(XmlUtils.toDocument(rawBody));
 			}
 		} catch (Exception e) {

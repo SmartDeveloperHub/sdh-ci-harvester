@@ -119,7 +119,7 @@ public final class JenkinsURI {
 		checkNotNull(location,"Location cannot be null");
 		checkArgument(location.isAbsolute(),"Location must be absolute (%s)",location);
 		checkArgument(!location.isOpaque(),"Location must be hierarchical (%s)",location);
-		checkArgument(location.getScheme().equals("http") || location.getScheme().equals("https"),"Location must be an HTTP(S) url (%s)",location);
+		checkArgument("http".equals(location.getScheme()) || "https".equals(location.getScheme()),"Location must be an HTTP(S) url (%s)",location);
 
 		JenkinsURI result=new JenkinsURI(location);
 		String strLocation = location.toString();

@@ -30,6 +30,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
 
@@ -62,7 +63,7 @@ public enum JenkinsArtifactType {
 	),
 	;
 
-	private final EnumSet<JenkinsEntityType> resources;
+	private final Set<JenkinsEntityType> resources;
 	private final String artifactPath;
 
 	private JenkinsArtifactType(String artifactPath, JenkinsEntityType... types) {
@@ -81,7 +82,7 @@ public enum JenkinsArtifactType {
 		return resourceBase.resolve(this.artifactPath);
 	}
 
-	public static EnumSet<JenkinsArtifactType> findArtifacts(JenkinsEntityType type) {
+	public static Set<JenkinsArtifactType> findArtifacts(JenkinsEntityType type) {
 		if(type==null) {
 			return EnumSet.noneOf(JenkinsArtifactType.class);
 		}
