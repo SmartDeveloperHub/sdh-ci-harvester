@@ -26,7 +26,6 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-
 interface Task {
 
 	String id();

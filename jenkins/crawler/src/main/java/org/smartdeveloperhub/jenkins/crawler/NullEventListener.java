@@ -61,7 +61,7 @@ final class NullEventListener implements JenkinsEventListener {
 		// Nothing to do
 	}
 
-	static JenkinsEventListener create() {
+	static JenkinsEventListener getInstance() {
 		return DEFAULT;
 	}
 }

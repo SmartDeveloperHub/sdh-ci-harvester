@@ -26,8 +26,7 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
@@ -42,6 +41,35 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 final class MultiThreadedTaskScheduler implements TaskScheduler {
+
+	static final class Builder {
+
+		private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
+
+		private Context context;
+		private int threads=MAX_THREADS;
+
+		private Builder() {
+		}
+
+		Builder withNumberOfThreads(int threads) {
+			checkArgument(0>threads,"Thread number must be greater than 0 (%s)",threads);
+			checkArgument(threads<=MAX_THREADS,"Thread number cannot be greater than %s (%s)",MAX_THREADS,threads);
+			this.threads = threads;
+			return this;
+		}
+
+		Builder withContext(Context context) {
+			checkNotNull(context,"Context cannot be null");
+			this.context = context;
+			return this;
+		}
+
+		MultiThreadedTaskScheduler build() {
+			return new MultiThreadedTaskScheduler(this.context, this.threads);
+		}
+
+	}
 
 	private final class RunnableTask implements Runnable {
 
@@ -81,7 +109,7 @@ final class MultiThreadedTaskScheduler implements TaskScheduler {
 
 	private ExecutorService pool;
 
-	MultiThreadedTaskScheduler(Context context, int threads) {
+	private MultiThreadedTaskScheduler(Context context, int threads) {
 		this.threads = threads;
 		this.context = context;
 		this.pendingTasks=new AtomicLong();
@@ -90,18 +118,7 @@ final class MultiThreadedTaskScheduler implements TaskScheduler {
 	}
 
 	@Override
-	public void schedule(final Task task) {
-		checkState(this.pool!=null,"Scheduler not started");
-		if(this.pool.isShutdown()) {
-			LOGGER.debug("Task [{}] rejected. Scheduler is shutting down",task.id());
-			return;
-		}
-		this.pendingTasks.incrementAndGet();
-		LOGGER.debug("Scheduled task [{}]",task.id());
-		this.pool.execute(new RunnableTask(task));
-	}
-
-	void start() {
+	public void start() {
 		checkState(this.pool==null,"Scheduler already started");
 		LOGGER.info("Starting task scheduler...");
 		this.pool =
@@ -122,7 +139,9 @@ final class MultiThreadedTaskScheduler implements TaskScheduler {
 		LOGGER.info("Task scheduler started.");
 	}
 
-	void stop() {
+	@Override
+	public void stop() {
+		checkState(this.pool!=null,"Scheduler not started");
 		LOGGER.info("Stopping task scheduler...");
 		List<Runnable> pendingRunnables=this.pool.shutdownNow();
 		this.pendingTasks.set(0);
@@ -148,16 +167,25 @@ final class MultiThreadedTaskScheduler implements TaskScheduler {
 		}
 	}
 
-	void awaitTaskCompletion(long timeOut, TimeUnit unit) {
-		checkNotNull(timeOut,"Time out cannot be null");
-		checkNotNull(unit,"Time unit cannot be null");
-		while(this.pendingTasks.get()!=0) {
-			try {
-				unit.sleep(timeOut);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
+	@Override
+	public void schedule(final Task task) {
+		checkState(this.pool!=null,"Scheduler not started");
+		if(this.pool.isShutdown()) {
+			LOGGER.debug("Task [{}] rejected. Scheduler is shutting down",task.id());
+			return;
 		}
+		this.pendingTasks.incrementAndGet();
+		LOGGER.debug("Scheduled task [{}]",task.id());
+		this.pool.execute(new RunnableTask(task));
+	}
+
+	@Override
+	public boolean hasPendingTasks() {
+		return this.pendingTasks.get()!=0;
+	}
+
+	static Builder builder() {
+		return new Builder();
 	}
 
 }

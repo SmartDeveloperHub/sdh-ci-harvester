@@ -70,7 +70,7 @@ public interface Console {
 	 *         any line-termination characters, or <tt>null</tt> if an end of
 	 *         stream has been reached.
 	 */
-	String readLine() throws ConsoleException;
+	String readLine();
 
 	/**
 	 * Reads a password or passphrase from the console.
@@ -82,7 +82,7 @@ public interface Console {
 	 *         the console, not including any line-termination characters, or
 	 *         <tt>null</tt> if an end of stream has been reached.
 	 */
-	char[] readPassword() throws ConsoleException;
+	char[] readPassword();
 
 	/**
 	 * Retrieves the {@link java.io.Reader Reader} associated with this console.
@@ -117,7 +117,7 @@ public interface Console {
 	 *
 	 * @return The reader associated with this console
 	 */
-	Reader reader() throws ConsoleException;
+	Reader reader();
 
 	/**
 	 * Retrieves the unique {@link java.io.PrintWriter PrintWriter} object
@@ -125,6 +125,6 @@ public interface Console {
 	 *
 	 * @return The printwriter associated with this console
 	 */
-	PrintWriter writer() throws ConsoleException;
+	PrintWriter writer();
 
 }

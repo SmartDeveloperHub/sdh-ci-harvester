@@ -26,8 +26,15 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
+
 interface TaskScheduler {
 
+	void start();
+
+	void stop();
+
 	void schedule(Task task);
+
+	boolean hasPendingTasks();
 
 }

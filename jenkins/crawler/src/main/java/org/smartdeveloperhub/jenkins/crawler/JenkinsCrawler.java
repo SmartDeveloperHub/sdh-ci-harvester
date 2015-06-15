@@ -30,18 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
 import java.util.Date;
-import java.util.Locale;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import org.joda.time.Duration;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
@@ -56,32 +47,7 @@ import org.smartdeveloperhub.jenkins.crawler.infrastructure.transformation.Trans
 import org.smartdeveloperhub.jenkins.crawler.util.Consoles;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 public final class JenkinsCrawler {
-
-	private final class JenkinsCrawlerBootstrap implements Runnable {
-
-		@Override
-		public void run() {
-			LOGGER.info("Starting crawling...");
-			long started=System.currentTimeMillis();
-			taskScheduler().schedule(new LoadServiceTask(URI.create(location)));
-			taskScheduler().awaitTaskCompletion(1,TimeUnit.SECONDS);
-			long finished=System.currentTimeMillis();
-			LOGGER.info("Crawling completed. Execution took {}",durationToString(started, finished));
-			try {
-				JenkinsCrawler.this.storageManager.save();
-			} catch (IOException e) {
-				LOGGER.warn("Could not persist crawler state",e);
-			}
-		}
-
-		private MultiThreadedTaskScheduler taskScheduler() {
-			return JenkinsCrawler.this.taskScheduler;
-		}
-
-	}
 
 	public static final class JenkinsCrawlerBuilder {
 
@@ -108,12 +74,13 @@ public final class JenkinsCrawler {
 		}
 
 		public JenkinsCrawler build() throws JenkinsCrawlerException {
+			checkNotNull(this.location,"Service instance cannot be null");
 			try {
 				return
 					new JenkinsCrawler(
-						this.location,
+						URI.create(this.location),
 						this.listener==null?
-							NullEventListener.create():
+							NullEventListener.getInstance():
 							this.listener,
 						createFileBasedStorage(),
 						ModelMappingService.
@@ -156,12 +123,12 @@ public final class JenkinsCrawler {
 
 		@Override
 		public EntityRepository entityRepository() {
-			return JenkinsCrawler.this.storageManager;
+			return JenkinsCrawler.this.storage;
 		}
 
 		@Override
 		public ResourceRepository resourceRepository() {
-			return JenkinsCrawler.this.storageManager;
+			return JenkinsCrawler.this.storage;
 		}
 
 		@Override
@@ -177,144 +144,46 @@ public final class JenkinsCrawler {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsCrawler.class);
 
-	private static final PeriodFormatter PERIOD_FORMATTER =
-		new PeriodFormatterBuilder().
-				appendYears().
-				appendSuffix(" year", " years").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendMonths().
-				appendSuffix(" month", " months").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendDays().
-				appendSuffix(" day", " days").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendHours().
-				appendSuffix(" hour", " hours").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendMinutes().
-				appendSuffix(" minute", " minutes").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendSeconds().
-				appendSuffix(" second", " seconds").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				appendMillis().
-				appendSuffix(" millisecond", " milliseconds").
-				appendSeparator(" and ").
-				printZeroRarelyLast().
-				toFormatter();
-
-	private final ScheduledExecutorService adminPool;
-	private final MultiThreadedTaskScheduler taskScheduler;
-
-	private String location;
-	private FileBasedStorage storageManager;
-
-	private ModelMappingService mappingService;
 
 	private URI instance;
-
+	private TaskScheduler taskScheduler;
+	private CrawlingController crawlingStrategy;
+	private FileBasedStorage storage;
+	private ModelMappingService mappingService;
 	private JenkinsEventListener listener;
 
-
-	private JenkinsCrawler(String location, JenkinsEventListener listener, FileBasedStorage storage, ModelMappingService mappingService) {
-		setListener(listener);
-		setLocation(location);
-		setInstance(URI.create(location));
-		setFileBasedStorage(storage);
-		setMappingService(mappingService);
-		this.adminPool=createAdminPool();
-		this.taskScheduler=
-			new MultiThreadedTaskScheduler(
-				new LocalContext(),
-				Runtime.getRuntime().availableProcessors());
-	}
-
-	private void setListener(JenkinsEventListener listener) {
-		this.listener = listener;
-	}
-
-	private void setMappingService(ModelMappingService mappingService) {
-		this.mappingService=mappingService;
-	}
-
-	private void setInstance(URI instance) {
-		checkNotNull(instance,"Service instance cannot be null");
+	private JenkinsCrawler(URI instance, JenkinsEventListener listener, FileBasedStorage storage, ModelMappingService mappingService) {
+		this.listener=listener;
 		this.instance=instance;
-	}
-
-	private void setLocation(String location) {
-		checkNotNull(location,"Service location cannot be null");
-		this.location = location;
-	}
-
-	private void setFileBasedStorage(FileBasedStorage storage) {
-		checkNotNull(storage,"Storage cannot be null");
-		this.storageManager = storage;
+		this.storage=storage;
+		this.mappingService=mappingService;
+		this.taskScheduler=
+			MultiThreadedTaskScheduler.
+				builder().
+					withContext(new LocalContext()).
+					build();
+		this.crawlingStrategy=
+			CrawlingController.
+				builder().
+					withStorage(this.storage).
+					withJenkinsInstance(this.instance).
+					withTaskScheduler(this.taskScheduler).
+					build();
 	}
 
 	public void start() {
-		LOGGER.info("Starting crawler...");
+		LOGGER.info("Starting Jenkins Crawler ({})...",this.instance);
 		this.taskScheduler.start();
-		this.adminPool.
-			scheduleWithFixedDelay(
-				new JenkinsCrawlerBootstrap(),
-				1,
-				60,
-				TimeUnit.SECONDS);
-		LOGGER.info("Crawler started.");
+		this.crawlingStrategy.start();
+		LOGGER.info("Jenkins Crawler ({}) started.",this.instance);
 	}
 
 	public void stop() throws IOException {
-		LOGGER.info("Stopping crawler...");
+		LOGGER.info("Stopping Jenkins Crawler ({})...",this.instance);
+		this.crawlingStrategy.stop();
 		this.taskScheduler.stop();
-		this.adminPool.shutdown();
-		while(!this.adminPool.isTerminated()) {
-			try {
-				this.adminPool.awaitTermination(1, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
-		}
-		LOGGER.info("Crawler stopped.");
-	}
-
-	private static ScheduledExecutorService createAdminPool() {
-		return
-			Executors.
-				newScheduledThreadPool(
-					1,
-					new ThreadFactoryBuilder().
-						setNameFormat("JenkinsCrawler-admin-%d").
-						setUncaughtExceptionHandler(
-							new UncaughtExceptionHandler() {
-								@Override
-								public void uncaughtException(Thread t, Throwable e) {
-									LOGGER.error(String.format("Thread %s died",t.getName()),e);
-								}
-							}).
-							build()
-					);
-	}
-
-	private static String durationToString(long started, long finished) {
-		StringWriter writer = new StringWriter();
-		try {
-			PERIOD_FORMATTER.
-				getPrinter().
-					printTo(
-						writer,
-						new Duration(started,finished).toPeriod(),
-						Locale.ENGLISH);
-			return writer.toString();
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
+		this.storage.save();
+		LOGGER.info("Jenkins Crawler ({}) stopped.",this.instance);
 	}
 
 	public static JenkinsCrawlerBuilder builder() {
