@@ -26,7 +26,7 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,25 +45,16 @@ import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
-import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
-import org.smartdeveloperhub.jenkins.Status;
-import org.smartdeveloperhub.jenkins.client.JenkinsClientException;
-import org.smartdeveloperhub.jenkins.client.JenkinsResourceProxy;
+import org.smartdeveloperhub.jenkins.ResourceRepository;
 import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventDispatcher;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.transformation.TransformationManager;
 import org.smartdeveloperhub.jenkins.crawler.util.Consoles;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeBuild;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
-import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
-
-import static com.google.common.base.Preconditions.*;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -92,277 +83,18 @@ public final class JenkinsCrawler {
 
 	}
 
-	private abstract static class AbstractCrawlingTask implements Task {
-
-		private static final int RETRY_THRESHOLD = 5;
-
-		private URI location;
-		private JenkinsEntityType entity;
-		private JenkinsArtifactType artifact;
-		private Context context;
-		private int retries;
-
-		private AbstractCrawlingTask(URI location, JenkinsEntityType entity, JenkinsArtifactType artifact) {
-			this.location=location;
-			this.entity=entity;
-			this.artifact=artifact;
-			this.retries=0;
-		}
-
-		private void setContext(Context context) {
-			this.context=context;
-		}
-
-		private JenkinsResourceProxy createProxy() {
-			return
-				JenkinsResourceProxy.
-					create(this.location).
-						withUseHttps(true).
-						withEntity(this.entity);
-		}
-
-		private void retryTask(Throwable failure) {
-			this.retries++;
-			if(this.retries<RETRY_THRESHOLD) {
-				if(LOGGER.isInfoEnabled()) {
-					LOGGER.info("Retrying {} ({})",this.location,this.retries+1);
-				}
-				scheduleTask(this);
-			} else {
-				failSilently(failure,"Could not retrieve '%s' aftet %d intents",this.location,this.retries);
-			}
-		}
-
-		private void failSilently(Throwable failure, String errorMessage, Object... args) {
-			String log=String.format(errorMessage,args);
-			LOGGER.error(log,failure);
-			throw new JenkinsClientException(log,failure);
-		}
-
-		private void persistResource(JenkinsResource resource) {
-			try {
-				this.context.resourceRepository().saveResource(resource);
-			} catch (IOException e) {
-				failSilently(e,"Could not persist resource %s",resource);
-			}
-		}
-
-		private void dispatchResource(JenkinsResource resource) {
-			if(Status.AVAILABLE.equals(resource.status())) {
-				try {
-					processResource(resource);
-				} catch (IOException e) {
-					failSilently(e,"Could not process resource %s",resource);
-				}
-			}
-		}
-
-		@Override
-		public final String id() {
-			return String.format("%s:%s:%s:%s",taskPrefix(),entity,artifact,location);
-		}
-
-		@Override
-		public final void execute(Context context) {
-			setContext(context);
-			try {
-				JenkinsResource resource=
-						createProxy().
-							get(this.artifact);
-				persistResource(resource);
-				dispatchResource(resource);
-			} catch (IOException e) {
-				retryTask(e);
-			}
-		}
-
-		protected final URI location() {
-			return this.location;
-		}
-
-		protected final JenkinsEntityType entityType() {
-			return this.entity;
-		}
-
-		protected final void scheduleTask(Task task) {
-			checkState(context!=null);
-			this.context.scheduler().schedule(task);
-		}
-
-		protected final void persistEntity(Entity entity, JenkinsEntityType type) throws IOException {
-			checkState(context!=null);
-			this.context.entityRepository().saveEntity(entity,type);
-		}
-
-		protected final ModelMappingService modelMapper() {
-			checkState(context!=null);
-			return this.context.modelMapper();
-		}
-
-		protected abstract String taskPrefix();
-
-		protected abstract void processResource(JenkinsResource resource) throws IOException;
-
-	}
-
-	private abstract static class AbstractCrawlingSubTask<T extends Entity> extends AbstractCrawlingTask {
-
-		private T parent;
-
-		private AbstractCrawlingSubTask(URI location, JenkinsEntityType entity, JenkinsArtifactType artifact, T parent) {
-			super(location,entity, artifact);
-			this.parent = parent;
-		}
-
-		@Override
-		protected final void processResource(JenkinsResource resource) throws IOException {
-			processSubresource(this.parent,resource);
-		}
-
-		protected void processSubresource(T parent, JenkinsResource resource) throws IOException {
-			// To be extended by subclasses if necessary
-		}
-
-	}
-
-	private static class LoadServiceTask extends AbstractCrawlingTask {
-
-		private LoadServiceTask(URI location) {
-			super(location,JenkinsEntityType.SERVICE,JenkinsArtifactType.RESOURCE);
-		}
-
-		@Override
-		protected String taskPrefix() {
-			return "lst";
-		}
-
-		@Override
-		protected void processResource(JenkinsResource resource) throws IOException {
-			Service service = modelMapper().loadService(resource);
-			persistEntity(service,resource.entity());
-			for(Reference ref:service.getBuilds().getBuilds()) {
-				scheduleTask(new LoadProjectTask(ref.getValue()));
-			}
-		}
-
-	}
-
-	private static class LoadProjectTask extends AbstractCrawlingTask {
-
-		private LoadProjectTask(URI location) {
-			super(location,JenkinsEntityType.JOB,JenkinsArtifactType.RESOURCE);
-		}
-
-		@Override
-		protected String taskPrefix() {
-			return "lpt";
-		}
-
-		@Override
-		protected void processResource(JenkinsResource resource) throws IOException {
-			Build build = modelMapper().loadBuild(resource);
-			persistEntity(build,resource.entity());
-			scheduleTask(new LoadProjectConfigurationTask(super.location(),build,resource.entity()));
-			scheduleTask(new LoadProjectSCMTask(super.location(),build));
-			if(build instanceof CompositeBuild) {
-				CompositeBuild cBuild=(CompositeBuild)build;
-				for(Reference ref:cBuild.getSubBuilds().getBuilds()) {
-					scheduleTask(new LoadProjectTask(ref.getValue()));
-				}
-			}
-			boolean first=true;
-			for(Reference ref:build.getRuns().getRuns()) {
-				if(first) {
-					first=false;
-					scheduleTask(new LoadRunTask(ref.getValue()));
-				}
-			}
-		}
-
-	}
-
-	private static class LoadProjectSCMTask extends AbstractCrawlingSubTask<Build> {
-
-		private LoadProjectSCMTask(URI location, Build build) {
-			super(location,JenkinsEntityType.JOB,JenkinsArtifactType.SCM,build);
-		}
-
-		@Override
-		protected String taskPrefix() {
-			return "lpst";
-		}
-
-	}
-
-	private static class LoadProjectConfigurationTask extends AbstractCrawlingSubTask<Build> {
-
-		private LoadProjectConfigurationTask(URI location, Build build, JenkinsEntityType type) {
-			super(location,type,JenkinsArtifactType.CONFIGURATION,build);
-		}
-
-		@Override
-		protected String taskPrefix() {
-			return "lpct";
-		}
-
-		@Override
-		protected void processSubresource(Build parent, JenkinsResource resource) throws IOException {
-			try {
-				String rawURI=
-					XmlUtils.
-						evaluateXPath(
-							"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
-							resource.content().get());
-				parent.withCodebase(URI.create(rawURI));
-				persistEntity(parent, entityType());
-			} catch (Exception e) {
-				LOGGER.error("Could not recover SCM information",e);
-			}
-		}
-
-	}
-
-	private static class LoadRunTask extends AbstractCrawlingTask {
-
-		private LoadRunTask(URI location) {
-			super(location,JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
-		}
-
-		@Override
-		protected String taskPrefix() {
-			return "lrt";
-		}
-
-		@Override
-		protected void processResource(JenkinsResource resource) throws IOException {
-			Run run = modelMapper().loadRun(resource);
-			persistEntity(run,resource.entity());
-			if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && run.getResult().equals(RunResult.SUCCESS)) {
-				scheduleTask(new LoadRunArtifactsTask(super.location(),run));
-			}
-		}
-
-	}
-
-	private static class LoadRunArtifactsTask extends AbstractCrawlingSubTask<Run> {
-
-		private LoadRunArtifactsTask(URI location, Run run) {
-			super(location,JenkinsEntityType.RUN,JenkinsArtifactType.ARTIFACTS,run);
-		}
-
-		@Override
-		protected String taskPrefix() {
-			return "lrat";
-		}
-
-	}
-
-	public static class JenkinsCrawlerBuilder {
+	public static final class JenkinsCrawlerBuilder {
 
 		private String location;
 		private File directory;
+		private JenkinsEventListener listener;
 
 		private JenkinsCrawlerBuilder() {
+		}
+
+		public JenkinsCrawlerBuilder withListener(JenkinsEventListener listener) {
+			this.listener = listener;
+			return this;
 		}
 
 		public JenkinsCrawlerBuilder withLocation(String location) {
@@ -380,6 +112,9 @@ public final class JenkinsCrawler {
 				return
 					new JenkinsCrawler(
 						this.location,
+						this.listener==null?
+							NullEventListener.create():
+							this.listener,
 						createFileBasedStorage(),
 						ModelMappingService.
 							newInstance(TransformationManager.newInstance()));
@@ -401,52 +136,116 @@ public final class JenkinsCrawler {
 
 	}
 
+	private final class LocalContext implements Context {
+
+		private final JenkinsEventDispatcher dispatcher;
+
+		private LocalContext() {
+			this.dispatcher=JenkinsEventDispatcher.create(JenkinsCrawler.this.listener);
+		}
+
+		@Override
+		public URI jenkinsInstance() {
+			return JenkinsCrawler.this.instance;
+		}
+
+		@Override
+		public ModelMappingService modelMapper() {
+			return JenkinsCrawler.this.mappingService;
+		}
+
+		@Override
+		public EntityRepository entityRepository() {
+			return JenkinsCrawler.this.storageManager;
+		}
+
+		@Override
+		public ResourceRepository resourceRepository() {
+			return JenkinsCrawler.this.storageManager;
+		}
+
+		@Override
+		public void fireEvent(JenkinsEvent event) {
+			this.dispatcher.fireEvent(event);
+		}
+
+		@Override
+		public void schedule(Task task) {
+			JenkinsCrawler.this.taskScheduler.schedule(task);
+		}
+	}
+
 	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsCrawler.class);
 
 	private static final PeriodFormatter PERIOD_FORMATTER =
-	new PeriodFormatterBuilder().
-			appendYears().
-			appendSuffix(" year", " years").
-			appendSeparator(" and ").
-			printZeroRarelyLast().
-			appendMonths().
-			appendSuffix(" month", " months").
-			appendSeparator(" and ").
-			printZeroRarelyLast().
-			appendDays().
-			appendSuffix(" day", " days").
-			appendSeparator(" and ").
-			printZeroRarelyLast().
-			appendHours().
-			appendSuffix(" hour", " hours").
-			appendSeparator(" and ").
-			printZeroRarelyLast().
-			appendMinutes().
-			appendSuffix(" minute", " minutes").
-			appendSeparator(" and ").
-			printZeroRarelyLast().
-			appendSeconds().
-			appendSuffix(" second", " seconds").
-			appendSeparator(" and ").
-			printZeroRarelyLast().
-			appendMillis().
-			appendSuffix(" millisecond", " milliseconds").
-			appendSeparator(" and ").
-			printZeroRarelyLast().
-			toFormatter();
+		new PeriodFormatterBuilder().
+				appendYears().
+				appendSuffix(" year", " years").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendMonths().
+				appendSuffix(" month", " months").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendDays().
+				appendSuffix(" day", " days").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendHours().
+				appendSuffix(" hour", " hours").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendMinutes().
+				appendSuffix(" minute", " minutes").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendSeconds().
+				appendSuffix(" second", " seconds").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendMillis().
+				appendSuffix(" millisecond", " milliseconds").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				toFormatter();
 
 	private final ScheduledExecutorService adminPool;
-
 	private final MultiThreadedTaskScheduler taskScheduler;
 
 	private String location;
 	private FileBasedStorage storageManager;
 
-	private JenkinsCrawler(String location, FileBasedStorage storage, ModelMappingService mappingService) {
+	private ModelMappingService mappingService;
+
+	private URI instance;
+
+	private JenkinsEventListener listener;
+
+
+	private JenkinsCrawler(String location, JenkinsEventListener listener, FileBasedStorage storage, ModelMappingService mappingService) {
+		setListener(listener);
 		setLocation(location);
+		setInstance(URI.create(location));
 		setFileBasedStorage(storage);
-		this.adminPool =createAdminPool();
-		this.taskScheduler=createTaskScheduler(storage, mappingService);
+		setMappingService(mappingService);
+		this.adminPool=createAdminPool();
+		this.taskScheduler=
+			new MultiThreadedTaskScheduler(
+				new LocalContext(),
+				Runtime.getRuntime().availableProcessors());
+	}
+
+	private void setListener(JenkinsEventListener listener) {
+		this.listener = listener;
+	}
+
+	private void setMappingService(ModelMappingService mappingService) {
+		this.mappingService=mappingService;
+	}
+
+	private void setInstance(URI instance) {
+		checkNotNull(instance,"Service instance cannot be null");
+		this.instance=instance;
 	}
 
 	private void setLocation(String location) {
@@ -501,15 +300,6 @@ public final class JenkinsCrawler {
 							}).
 							build()
 					);
-	}
-
-	private static MultiThreadedTaskScheduler createTaskScheduler(FileBasedStorage storage, ModelMappingService mappingService) {
-		return
-			new MultiThreadedTaskScheduler(
-				storage,
-				storage,
-				mappingService,
-				Runtime.getRuntime().availableProcessors());
 	}
 
 	private static String durationToString(long started, long finished) {

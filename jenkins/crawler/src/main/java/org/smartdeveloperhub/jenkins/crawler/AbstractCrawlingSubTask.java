@@ -26,25 +26,30 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
+import java.io.IOException;
 import java.net.URI;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
 
-interface Context {
+abstract class AbstractCrawlingSubTask<T extends Entity> extends AbstractCrawlingTask {
 
-	URI jenkinsInstance();
+	private T parent;
 
-	void fireEvent(JenkinsEvent event);
+	AbstractCrawlingSubTask(URI location, JenkinsEntityType entity, JenkinsArtifactType artifact, T parent) {
+		super(location,entity, artifact);
+		this.parent = parent;
+	}
 
-	void schedule(Task task);
+	@Override
+	protected final void processResource(JenkinsResource resource) throws IOException {
+		processSubresource(this.parent,resource);
+	}
 
-	ModelMappingService modelMapper();
-
-	EntityRepository entityRepository();
-
-	ResourceRepository resourceRepository();
+	protected void processSubresource(T parent, JenkinsResource resource) throws IOException {
+		// To be implemented by subclasses if necessary
+	}
 
 }

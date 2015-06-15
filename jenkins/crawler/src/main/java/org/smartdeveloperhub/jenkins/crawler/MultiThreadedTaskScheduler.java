@@ -38,9 +38,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -74,52 +71,19 @@ final class MultiThreadedTaskScheduler implements TaskScheduler {
 		}
 	}
 
-	private final class LocalContext implements Context {
-		@Override
-		public ModelMappingService modelMapper() {
-			return modelMapper;
-		}
-
-		@Override
-		public EntityRepository entityRepository() {
-			return entityRepository;
-		}
-
-		@Override
-		public TaskScheduler scheduler() {
-			return MultiThreadedTaskScheduler.this;
-		}
-
-		@Override
-		public ResourceRepository resourceRepository() {
-			return resourceRepository;
-		}
-	}
-
 	private static final Logger LOGGER=LoggerFactory.getLogger(MultiThreadedTaskScheduler.class);
 
-	private final EntityRepository entityRepository;
-	private final ResourceRepository resourceRepository;
-
-	private final ModelMappingService modelMapper;
-	private final LocalContext context;
+	private final Context    context;
+	private final int        threads;
+	private final AtomicLong pendingTasks;
+	private final AtomicLong executedTasks;
+	private final AtomicLong failedTasks;
 
 	private ExecutorService pool;
 
-	private int threads;
-
-	private final AtomicLong pendingTasks;
-
-	private final AtomicLong executedTasks;
-
-	private AtomicLong failedTasks;
-
-	MultiThreadedTaskScheduler(EntityRepository entityRepository, ResourceRepository resourceRepository, ModelMappingService modelMapper, int threads) {
-		this.entityRepository = entityRepository;
-		this.resourceRepository = resourceRepository;
-		this.modelMapper = modelMapper;
+	MultiThreadedTaskScheduler(Context context, int threads) {
 		this.threads = threads;
-		this.context = new LocalContext();
+		this.context = context;
 		this.pendingTasks=new AtomicLong();
 		this.executedTasks=new AtomicLong();
 		this.failedTasks=new AtomicLong();
@@ -184,14 +148,10 @@ final class MultiThreadedTaskScheduler implements TaskScheduler {
 		}
 	}
 
-	private boolean hasPendingTasks() {
-		return this.pendingTasks.get()!=0;
-	}
-
 	void awaitTaskCompletion(long timeOut, TimeUnit unit) {
 		checkNotNull(timeOut,"Time out cannot be null");
 		checkNotNull(unit,"Time unit cannot be null");
-		while(!hasPendingTasks()) {
+		while(this.pendingTasks.get()!=0) {
 			try {
 				unit.sleep(timeOut);
 			} catch (InterruptedException e) {

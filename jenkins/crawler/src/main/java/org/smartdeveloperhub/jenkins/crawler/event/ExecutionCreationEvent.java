@@ -24,27 +24,39 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.event;
 
 import java.net.URI;
+import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
-interface Context {
+public final class ExecutionCreationEvent extends JenkinsEvent {
 
-	URI jenkinsInstance();
+	private Run run;
 
-	void fireEvent(JenkinsEvent event);
+	private ExecutionCreationEvent(URI service, Date date) {
+		super(service,date);
+	}
 
-	void schedule(Task task);
+	ExecutionCreationEvent withRun(Run run) {
+		this.run = run;
+		return this;
+	}
 
-	ModelMappingService modelMapper();
+	Run run() {
+		return this.run;
+	}
 
-	EntityRepository entityRepository();
+	static ExecutionCreationEvent create(URI location) {
+		return new ExecutionCreationEvent(location, new Date());
+	}
 
-	ResourceRepository resourceRepository();
+	@Override
+	void accept(JenkinsEventVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitExecutionCreationEvent(this);
+		}
+	}
 
 }

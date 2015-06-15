@@ -26,25 +26,42 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import java.net.URI;
+import org.smartdeveloperhub.jenkins.crawler.event.BuildCreationEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletionEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreationEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletionEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdateEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+final class NullEventListener implements JenkinsEventListener {
 
-interface Context {
+	private static final NullEventListener DEFAULT=new NullEventListener();
 
-	URI jenkinsInstance();
+	private NullEventListener() {
+	}
 
-	void fireEvent(JenkinsEvent event);
+	@Override
+	public void onExecutionUpdate(ExecutionUpdateEvent event) {
+		// Nothing to do
+	}
+	@Override
+	public void onExecutionDeletion(ExecutionDeletionEvent event) {
+		// Nothing to do
+	}
+	@Override
+	public void onExecutionCreation(ExecutionCreationEvent event) {
+		// Nothing to do
+	}
+	@Override
+	public void onBuildDeletion(BuildDeletionEvent event) {
+		// Nothing to do
+	}
+	@Override
+	public void onBuildCreation(BuildCreationEvent event) {
+		// Nothing to do
+	}
 
-	void schedule(Task task);
-
-	ModelMappingService modelMapper();
-
-	EntityRepository entityRepository();
-
-	ResourceRepository resourceRepository();
-
+	static JenkinsEventListener create() {
+		return DEFAULT;
+	}
 }

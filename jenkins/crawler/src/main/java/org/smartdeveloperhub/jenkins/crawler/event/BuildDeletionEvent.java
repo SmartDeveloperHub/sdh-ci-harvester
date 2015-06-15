@@ -24,27 +24,22 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.event;
 
 import java.net.URI;
+import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+public final class BuildDeletionEvent extends JenkinsEvent {
 
-interface Context {
+	BuildDeletionEvent(URI service, Date date) {
+		super(service,date);
+	}
 
-	URI jenkinsInstance();
-
-	void fireEvent(JenkinsEvent event);
-
-	void schedule(Task task);
-
-	ModelMappingService modelMapper();
-
-	EntityRepository entityRepository();
-
-	ResourceRepository resourceRepository();
+	@Override
+	void accept(JenkinsEventVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitBuildDeletionEvent(this);
+		}
+	}
 
 }

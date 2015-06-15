@@ -26,25 +26,43 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
+import java.io.IOException;
 import java.net.URI;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
 
-interface Context {
+final class LoadProjectConfigurationTask extends AbstractCrawlingSubTask<Build> {
 
-	URI jenkinsInstance();
+	private static final Logger LOGGER=LoggerFactory.getLogger(LoadProjectConfigurationTask.class);
 
-	void fireEvent(JenkinsEvent event);
+	LoadProjectConfigurationTask(URI location, Build build, JenkinsEntityType type) {
+		super(location,type,JenkinsArtifactType.CONFIGURATION,build);
+	}
 
-	void schedule(Task task);
+	@Override
+	protected String taskPrefix() {
+		return "lpct";
+	}
 
-	ModelMappingService modelMapper();
-
-	EntityRepository entityRepository();
-
-	ResourceRepository resourceRepository();
+	@Override
+	protected void processSubresource(Build parent, JenkinsResource resource) throws IOException {
+		try {
+			String rawURI=
+				XmlUtils.
+					evaluateXPath(
+						"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
+						resource.content().get());
+			parent.withCodebase(URI.create(rawURI));
+			persistEntity(parent, entityType());
+		} catch (Exception e) {
+			LOGGER.error("Could not recover SCM information",e);
+		}
+	}
 
 }

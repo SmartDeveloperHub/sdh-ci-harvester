@@ -28,23 +28,19 @@ package org.smartdeveloperhub.jenkins.crawler;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
 
-interface Context {
+final class LoadProjectSCMTask extends AbstractCrawlingSubTask<Build> {
 
-	URI jenkinsInstance();
+	LoadProjectSCMTask(URI location, Build build) {
+		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.SCM,build);
+	}
 
-	void fireEvent(JenkinsEvent event);
-
-	void schedule(Task task);
-
-	ModelMappingService modelMapper();
-
-	EntityRepository entityRepository();
-
-	ResourceRepository resourceRepository();
+	@Override
+	protected String taskPrefix() {
+		return "lpst";
+	}
 
 }

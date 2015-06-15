@@ -26,25 +26,33 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
+import java.io.IOException;
 import java.net.URI;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
 
-interface Context {
+final class LoadServiceTask extends AbstractCrawlingTask {
 
-	URI jenkinsInstance();
+	LoadServiceTask(URI location) {
+		super(location,JenkinsEntityType.SERVICE,JenkinsArtifactType.RESOURCE);
+	}
 
-	void fireEvent(JenkinsEvent event);
+	@Override
+	protected String taskPrefix() {
+		return "lst";
+	}
 
-	void schedule(Task task);
-
-	ModelMappingService modelMapper();
-
-	EntityRepository entityRepository();
-
-	ResourceRepository resourceRepository();
+	@Override
+	protected void processResource(JenkinsResource resource) throws IOException {
+		Service service = super.loadService(resource);
+		persistEntity(service,resource.entity());
+		for(Reference ref:service.getBuilds().getBuilds()) {
+			scheduleTask(new LoadProjectTask(ref.getValue()));
+		}
+	}
 
 }

@@ -24,27 +24,29 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.event;
 
 import java.net.URI;
+import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+public abstract class JenkinsEvent {
 
-interface Context {
+	private final URI service;
+	private final Date date;
 
-	URI jenkinsInstance();
+	JenkinsEvent(URI service, Date date) {
+		this.service = service;
+		this.date=date;
+	}
 
-	void fireEvent(JenkinsEvent event);
+	abstract void accept(JenkinsEventVisitor visitor);
 
-	void schedule(Task task);
+	public URI service() {
+		return this.service;
+	}
 
-	ModelMappingService modelMapper();
-
-	EntityRepository entityRepository();
-
-	ResourceRepository resourceRepository();
+	public Date date() {
+		return this.date;
+	}
 
 }

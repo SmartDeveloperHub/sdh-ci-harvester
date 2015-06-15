@@ -26,25 +26,41 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
+import java.io.IOException;
 import java.net.URI;
 
-import org.smartdeveloperhub.jenkins.ResourceRepository;
-import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 
-interface Context {
+final class LoadRunTask extends AbstractCrawlingTask {
 
-	URI jenkinsInstance();
+	LoadRunTask(URI location) {
+		super(location,JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
+	}
 
-	void fireEvent(JenkinsEvent event);
+	@Override
+	protected String taskPrefix() {
+		return "lrt";
+	}
 
-	void schedule(Task task);
+	@Override
+	protected void processResource(JenkinsResource resource) throws IOException {
+		Run run = super.loadRun(resource);
 
-	ModelMappingService modelMapper();
+		persistEntity(run,resource.entity());
+		if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && run.getResult().equals(RunResult.SUCCESS)) {
+			scheduleTask(new LoadRunArtifactsTask(super.location(),run));
+		}
 
-	EntityRepository entityRepository();
-
-	ResourceRepository resourceRepository();
+		super.fireEvent(
+			JenkinsEventFactory.
+				newExecutionCreationEvent(
+					super.jenkinsInstance(),
+					run));
+	}
 
 }
