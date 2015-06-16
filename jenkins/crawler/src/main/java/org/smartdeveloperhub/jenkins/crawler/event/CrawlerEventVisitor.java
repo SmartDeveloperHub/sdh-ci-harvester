@@ -28,23 +28,23 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 
 abstract class CrawlerEventVisitor implements EventVisitor {
 
-	public void visitCrawlerStartedEvent(CrawlerStartedEvent event) {
+	void visitCrawlerStartedEvent(CrawlerStartedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	public void visitCrawlerStoppedEvent(CrawlerStoppedEvent crawlerStoppedEvent) {
+	void visitCrawlerStoppedEvent(CrawlerStoppedEvent crawlerStoppedEvent) {
 		// To be implemented by subclasses
 	}
 
-	public void visitCrawlingStartedEvent(CrawlingStartedEvent event) {
+	void visitCrawlingStartedEvent(CrawlingStartedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	public void visitCrawlingAbortedEvent(CrawlingAbortedEvent event) {
+	void visitCrawlingAbortedEvent(CrawlingAbortedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	public void visitCrawlingCompletedEvent(CrawlingCompletedEvent event) {
+	void visitCrawlingCompletedEvent(CrawlingCompletedEvent event) {
 		// To be implemented by subclasses
 	}
 

@@ -35,18 +35,17 @@ import com.google.common.collect.Maps;
 
 final class LockManager {
 
-	interface Operation<E extends Throwable> {
-
+	interface Operation {
 
 	}
 
-	interface RunnableOperation<E extends Throwable> extends LockManager.Operation<E> {
+	interface RunnableOperation<E extends Throwable> extends Operation {
 
 		void execute() throws E;
 
 	}
 
-	interface CallableOperation<T,E extends Throwable> extends LockManager.Operation<E> {
+	interface CallableOperation<T,E extends Throwable> extends Operation {
 
 		T execute() throws E;
 
@@ -67,7 +66,7 @@ final class LockManager {
 		return result;
 	}
 
-	<E extends Throwable> void read(URI uri, LockManager.RunnableOperation<E> operation) throws E{
+	<E extends Throwable> void read(URI uri, RunnableOperation<E> operation) throws E{
 		ReadWriteLock lock = register(uri);
 		lock.readLock().lock();
 		try {
@@ -77,7 +76,7 @@ final class LockManager {
 		}
 	}
 
-	<T, E extends Throwable> T read(URI uri, LockManager.CallableOperation<T,E> operation) throws E {
+	<T, E extends Throwable> T read(URI uri, CallableOperation<T,E> operation) throws E {
 		ReadWriteLock lock = register(uri);
 		lock.readLock().lock();
 		try {
@@ -87,7 +86,7 @@ final class LockManager {
 		}
 	}
 
-	<E extends Throwable> void write(URI uri, LockManager.RunnableOperation<E> operation) throws E{
+	<E extends Throwable> void write(URI uri, RunnableOperation<E> operation) throws E{
 		ReadWriteLock lock = register(uri);
 		lock.writeLock().lock();
 		try {
@@ -97,7 +96,7 @@ final class LockManager {
 		}
 	}
 
-	<T, E extends Throwable> T write(URI uri, LockManager.CallableOperation<T,E> operation) throws E {
+	<T, E extends Throwable> T write(URI uri, CallableOperation<T,E> operation) throws E {
 		ReadWriteLock lock = register(uri);
 		lock.readLock().lock();
 		try {

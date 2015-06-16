@@ -37,8 +37,6 @@ import java.util.TimeZone;
 final class HttpDateUtils {
 
 	private static final Locale DEFAULT_LOCALE = Locale.US;
-	@SuppressWarnings("unused")
-	private static final String DEFAULT_LOCALE_STR = "US";
 	private static final String DEFAULT_TIME_ZONE = "GMT";
 
 	private static final String RFC_822_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";

@@ -54,7 +54,51 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.commands.RegisterService
 
 public class ContinuousIntegrationService {
 
-	private static final String COMMAND_CANNOT_BE_NULL = "Command cannot be null";
+	private final class BuildDeleter extends BuildVisitor {
+
+		private void deleteBuild(Build aBuild) {
+			buildRepository().remove(aBuild);
+			for(URI executionId:aBuild.executions()) {
+				Execution execution = executionRepository().executionOfId(executionId);
+				if(execution!=null) {
+					executionRepository().remove(execution);
+				}
+			}
+			aBuild.executions().clear();
+		}
+
+		@Override
+		public void visitSimpleBuild(SimpleBuild aBuild) {
+			deleteBuild(aBuild);
+		}
+
+		@Override
+		public void visitCompositeBuild(CompositeBuild aBuild) {
+			deleteBuild(aBuild);
+			for(URI childId:aBuild.subBuilds()) {
+				Build subBuild = buildRepository().buildOfId(childId);
+				if(subBuild!=null) {
+					deleteBuild(subBuild);
+				}
+			}
+			aBuild.subBuilds().clear();
+		}
+
+		@Override
+		public void visitSubBuild(SubBuild aBuild) {
+			deleteBuild(aBuild);
+			CompositeBuild parent=
+				buildRepository().
+					buildOfId(aBuild.parentId(),CompositeBuild.class);
+			if(parent!=null) {
+				parent.removeSubBuild(aBuild);
+			}
+		}
+	}
+
+	private static final String EXECUTION_IS_NOT_REGISTERED = "Execution '%s' is not registered";
+	private static final String BUILD_IS_NOT_REGISTERED     = "Build '%s' is not registered";
+	private static final String COMMAND_CANNOT_BE_NULL      = "Command cannot be null";
 
 	private ServiceRepository serviceRepository;
 	private BuildRepository buildRepository;
@@ -143,45 +187,8 @@ public class ContinuousIntegrationService {
 		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI buildId=aCommand.buildId();
 		Build build = buildRepository().buildOfId(buildId);
-		checkArgument(build!=null,"Build '%s' is not registered",buildId);
-		build.accept(
-			new BuildVisitor() {
-				private void deleteBuild(Build aBuild) {
-					buildRepository().remove(aBuild);
-					for(URI executionId:aBuild.executions()) {
-						Execution execution = executionRepository().executionOfId(executionId);
-						if(execution!=null) {
-							executionRepository().remove(execution);
-						}
-					}
-					aBuild.executions().clear();
-				}
-
-				@Override
-				public void visitSimpleBuild(SimpleBuild aBuild) {
-					deleteBuild(aBuild);
-				}
-				@Override
-				public void visitCompositeBuild(CompositeBuild aBuild) {
-					deleteBuild(aBuild);
-					for(URI childId:aBuild.subBuilds()) {
-						Build subBuild = buildRepository().buildOfId(childId);
-						if(subBuild!=null) {
-							deleteBuild(subBuild);
-						}
-					}
-					aBuild.subBuilds().clear();
-				}
-				@Override
-				public void visitSubBuild(SubBuild aBuild) {
-					deleteBuild(aBuild);
-					CompositeBuild parent = buildRepository().buildOfId(aBuild.parentId(),CompositeBuild.class);
-					if(parent!=null) {
-						parent.removeSubBuild(aBuild);
-					}
-				}
-			}
-		);
+		checkArgument(build!=null,BUILD_IS_NOT_REGISTERED,buildId);
+		build.accept(new BuildDeleter());
 	}
 
 	public void createExecution(CreateExecutionCommand aCommand) {
@@ -190,8 +197,8 @@ public class ContinuousIntegrationService {
 		URI executionId=aCommand.executionId();
 		Date createdOn=aCommand.createdOn();
 		Build build = buildRepository().buildOfId(buildId);
-		checkArgument(build!=null,"Build '%s' is not registered",buildId);
-		checkState(!build.executions().contains(executionId),"An execution '%s' is already registered in build '%s'",buildId,executionId);
+		checkArgument(build!=null,BUILD_IS_NOT_REGISTERED,buildId);
+		checkState(!build.executions().contains(executionId),"Execution '%s' is already registered in build '%s'",buildId,executionId);
 		Execution execution = build.addExecution(executionId, createdOn);
 		executionRepository().add(execution);
 	}
@@ -200,7 +207,7 @@ public class ContinuousIntegrationService {
 		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI executionId=aCommand.executionId();
 		Execution execution = executionRepository().executionOfId(executionId);
-		checkArgument(execution!=null,"Execution '%s' is not registered",executionId);
+		checkArgument(execution!=null,EXECUTION_IS_NOT_REGISTERED,executionId);
 		checkState(!execution.isFinished(),"Execution '%s' is already finished",executionId);
 		Result result=new Result(aCommand.status(),aCommand.finishedOn());
 		execution.finish(result);
@@ -210,9 +217,9 @@ public class ContinuousIntegrationService {
 		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI executionId=aCommand.executionId();
 		Execution execution = executionRepository().executionOfId(executionId);
-		checkArgument(execution!=null,"Execution '%s' is not registered",executionId);
+		checkArgument(execution!=null,EXECUTION_IS_NOT_REGISTERED,executionId);
 		Build build = buildRepository().buildOfId(execution.buildId());
-		checkArgument(build!=null,"Build '%s' is not registered",build.buildId());
+		checkArgument(build!=null,BUILD_IS_NOT_REGISTERED,build.buildId());
 		build.removeExecution(execution);
 		executionRepository().remove(execution);
 	}

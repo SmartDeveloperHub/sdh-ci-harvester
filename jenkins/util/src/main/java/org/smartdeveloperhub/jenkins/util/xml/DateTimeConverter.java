@@ -29,16 +29,9 @@ package org.smartdeveloperhub.jenkins.util.xml;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 
 
 public final class DateTimeConverter {
-
-	@SuppressWarnings("unused")
-	private static final DateTimeFormatter XML_DATE_FORMAT = ISODateTimeFormat.dateTimeNoMillis();
-
-	@SuppressWarnings("unused")
-	private static final DateTimeFormatter XML_DATE_TIME_FORMAT = ISODateTimeFormat.localDateOptionalTimeParser();
 
 	private static final DateTimeFormatter DATE_PATTERN = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 

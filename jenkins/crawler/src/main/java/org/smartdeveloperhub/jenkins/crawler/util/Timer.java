@@ -51,10 +51,6 @@ public final class Timer {
 	private static final String YEAR        = " year";
 	private static final String AND         = " and ";
 
-	private static String plural(String string) {
-		return string+"s";
-	}
-
 	private static final PeriodFormatter PERIOD_FORMATTER =
 		new PeriodFormatterBuilder().
 				appendYears().
@@ -139,6 +135,10 @@ public final class Timer {
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	private static String plural(String string) {
+		return string+"s";
 	}
 
 }
