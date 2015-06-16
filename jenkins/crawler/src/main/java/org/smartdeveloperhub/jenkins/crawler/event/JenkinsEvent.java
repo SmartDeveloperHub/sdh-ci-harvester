@@ -29,6 +29,9 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
+
 public abstract class JenkinsEvent {
 
 	private final URI service;
@@ -48,5 +51,17 @@ public abstract class JenkinsEvent {
 	public Date date() {
 		return this.date;
 	}
+
+	@Override
+	public final String toString() {
+		ToStringHelper helper = MoreObjects.
+			toStringHelper(getClass()).
+				add("date", this.date).
+				add("service", this.service);
+		toString(helper);
+		return helper.toString();
+	}
+
+	protected abstract void toString(ToStringHelper helper);
 
 }

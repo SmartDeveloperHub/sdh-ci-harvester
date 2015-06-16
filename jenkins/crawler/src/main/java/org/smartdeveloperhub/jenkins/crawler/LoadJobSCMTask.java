@@ -24,22 +24,23 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler;
 
 import java.net.URI;
-import java.util.Date;
 
-public final class ExecutionUpdateEvent extends JenkinsEvent {
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
 
-	ExecutionUpdateEvent(URI service, Date date) {
-		super(service,date);
+final class LoadJobSCMTask extends AbstractCrawlingSubTask<Build> {
+
+	LoadJobSCMTask(URI location, Build build) {
+		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.SCM,build);
 	}
 
 	@Override
-	void accept(JenkinsEventVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitExecutionUpdateEvent(this);
-		}
+	protected String taskPrefix() {
+		return "ljst";
 	}
 
 }

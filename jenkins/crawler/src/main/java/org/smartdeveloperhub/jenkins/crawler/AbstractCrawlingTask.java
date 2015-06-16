@@ -172,10 +172,16 @@ abstract class AbstractCrawlingTask implements Task {
 
 	protected final void fireEvent(JenkinsEvent event) {
 		checkState(this.context!=null);
+		System.err.println(event);
 		this.context.fireEvent(event);
 	}
 
 	protected abstract String taskPrefix();
 
 	protected abstract void processResource(JenkinsResource resource) throws IOException;
+
+	public <T extends Entity> T entityOfId(URI id, JenkinsEntityType entityType, Class<? extends T> entityClass) throws IOException {
+		checkState(this.context!=null);
+		return this.context.entityRepository().entityOfId(id,entityType,entityClass);
+	}
 }

@@ -39,27 +39,27 @@ public final class JenkinsEventDispatcher {
 		}
 
 		@Override
-		void visitBuildCreationEvent(BuildCreationEvent event) {
+		void visitBuildCreationEvent(BuildCreatedEvent event) {
 			this.listener.onBuildCreation(event);
 		}
 
 		@Override
-		void visitBuildDeletionEvent(BuildDeletionEvent event) {
+		void visitBuildDeletionEvent(BuildDeletedEvent event) {
 			this.listener.onBuildDeletion(event);
 		}
 
 		@Override
-		void visitExecutionCreationEvent(ExecutionCreationEvent event) {
+		void visitExecutionCreationEvent(ExecutionCreatedEvent event) {
 			this.listener.onExecutionCreation(event);
 		}
 
 		@Override
-		void visitExecutionUpdateEvent(ExecutionUpdateEvent event) {
+		void visitExecutionUpdateEvent(ExecutionUpdatedEvent event) {
 			this.listener.onExecutionUpdate(event);
 		}
 
 		@Override
-		void visitExecutionDeletionEvent(ExecutionDeletionEvent event) {
+		void visitExecutionDeletionEvent(ExecutionDeletedEvent event) {
 			this.listener.onExecutionDeletion(event);
 		}
 
@@ -68,7 +68,7 @@ public final class JenkinsEventDispatcher {
 	private final DispatchingVisitor visitor;
 
 	private JenkinsEventDispatcher(JenkinsEventListener listener) {
-		visitor=new DispatchingVisitor(listener);
+		this.visitor=new DispatchingVisitor(listener);
 	}
 
 	public void fireEvent(JenkinsEvent event) {

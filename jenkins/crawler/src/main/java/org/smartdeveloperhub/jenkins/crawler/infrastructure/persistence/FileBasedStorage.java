@@ -61,6 +61,35 @@ import com.google.common.collect.Maps;
 
 public final class FileBasedStorage implements EntityRepository, ResourceRepository {
 
+	private final class RetrieveOperation<T> implements
+			LockManager.CallableOperation<T, IOException> {
+		private final Class<? extends T> entityClass;
+		private final URI location;
+		private final JenkinsEntityType entityType;
+
+		private RetrieveOperation(Class<? extends T> entityClass,
+				URI location, JenkinsEntityType entityType) {
+			this.entityClass = entityClass;
+			this.location = location;
+			this.entityType = entityType;
+		}
+
+		@Override
+		public T execute() throws IOException {
+			final File file=FileBasedStorage.this.strategy.allocateEntity(location,entityType,JenkinsArtifactType.RESOURCE);
+			T result=null;
+			if(file.canRead()) {
+				result=
+					XmlUtils.
+						unmarshall(
+							file,
+							entityClass,
+							new IOException("Could not load entity "+location+" ("+entityType+") from ["+file.getCanonicalPath()+"]"));
+			}
+			return result;
+		}
+	}
+
 	interface StorageAction {
 		String id();
 		File targetFile();
@@ -422,8 +451,12 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 	}
 
 	@Override
-	public <T extends Entity> T entityOfId(URI location, Class<? extends T> entityClass) {
-		throw new UnsupportedOperationException("Method not implemented yet");
+	public <T extends Entity> T entityOfId(final URI location, final JenkinsEntityType entityType, final Class<? extends T> entityClass) throws IOException {
+		T result=null;
+		if(entry(location,entityType).isEntityPersisted()) {
+			result=this.locker.read(location,new RetrieveOperation<T>(entityClass, location,entityType));
+		}
+		return result;
 	}
 
 	public static FileBasedStorageBuilder builder() {

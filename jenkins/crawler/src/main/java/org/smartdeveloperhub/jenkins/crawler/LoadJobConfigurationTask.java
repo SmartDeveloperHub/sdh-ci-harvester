@@ -24,21 +24,44 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler;
 
+import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
 
-public final class ExecutionDeletionEvent extends JenkinsEvent {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
 
-	ExecutionDeletionEvent(URI service, Date date) {
-		super(service,date);
+final class LoadJobConfigurationTask extends AbstractCrawlingSubTask<Build> {
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(LoadJobConfigurationTask.class);
+
+	LoadJobConfigurationTask(URI location, Build build, JenkinsEntityType type) {
+		super(location,type,JenkinsArtifactType.CONFIGURATION,build);
 	}
 
 	@Override
-	void accept(JenkinsEventVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitExecutionDeletionEvent(this);
+	protected String taskPrefix() {
+		return "ljct";
+	}
+
+	@Override
+	protected void processSubresource(Build parent, JenkinsResource resource) throws IOException {
+		try {
+			String rawURI=
+				XmlUtils.
+					evaluateXPath(
+						"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
+						resource.content().get());
+			parent.withCodebase(URI.create(rawURI));
+			persistEntity(parent, entityType());
+		} catch (Exception e) {
+			LOGGER.error("Could not recover SCM information",e);
 		}
 	}
 

@@ -24,40 +24,58 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler;
 
+import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
 
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeBuild;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 
+final class LoadJobTask extends AbstractCrawlingTask {
 
-public final class BuildCreationEvent extends JenkinsEvent {
-
-	private Build build;
-
-	private BuildCreationEvent(URI service, Date date) {
-		super(service,date);
-	}
-
-	BuildCreationEvent withBuild(Build build) {
-		this.build = build;
-		return this;
-	}
-
-	Build build() {
-		return this.build;
-	}
-
-	static BuildCreationEvent create(URI service) {
-		return new BuildCreationEvent(service, new Date());
+	LoadJobTask(URI location) {
+		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.RESOURCE);
 	}
 
 	@Override
-	void accept(JenkinsEventVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitBuildCreationEvent(this);
+	protected String taskPrefix() {
+		return "ljt";
+	}
+
+	@Override
+	protected void processResource(JenkinsResource resource) throws IOException {
+		Build build = super.loadBuild(resource);
+
+		super.fireEvent(
+			JenkinsEventFactory.
+				newBuildCreationEvent(super.jenkinsInstance(),build));
+
+		persistEntity(build,resource.entity());
+
+		scheduleTask(new LoadJobConfigurationTask(super.location(),build,resource.entity()));
+		scheduleTask(new LoadJobSCMTask(super.location(),build));
+
+		if(build instanceof CompositeBuild) {
+			CompositeBuild cBuild=(CompositeBuild)build;
+			for(Reference ref:cBuild.getSubBuilds().getBuilds()) {
+				scheduleTask(new LoadJobTask(ref.getValue()));
+			}
 		}
+
+		boolean first=true;
+		for(Reference ref:build.getRuns().getRuns()) {
+			if(first) {
+				scheduleTask(new LoadRunTask(ref.getValue()));
+				first=false;
+			}
+		}
+
 	}
 
 }

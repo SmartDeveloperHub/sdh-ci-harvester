@@ -39,6 +39,11 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.ResourceRepository;
 import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
+import org.smartdeveloperhub.jenkins.crawler.event.BuildCreatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventDispatcher;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
@@ -200,6 +205,29 @@ public final class JenkinsCrawler {
 					builder().
 						withDirectory(tmpDirectory).
 						withLocation(location).
+						withListener(
+							new JenkinsEventListener() {
+								@Override
+								public void onExecutionUpdate(ExecutionUpdatedEvent event) {
+									System.out.printf("[%s] Updated execution %s%n",event.date(),event.executionId());
+								}
+								@Override
+								public void onExecutionDeletion(ExecutionDeletedEvent event) {
+									System.out.printf("[%s] Deleted execution %s%n",event.date(),event.executionId());
+								}
+								@Override
+								public void onExecutionCreation(ExecutionCreatedEvent event) {
+									System.out.printf("[%s] Created execution %s%n",event.date(),event.executionId());
+								}
+								@Override
+								public void onBuildDeletion(BuildDeletedEvent event) {
+									System.out.printf("[%s] Deleted build %s%n",event.date(),event.buildId());
+								}
+								@Override
+								public void onBuildCreation(BuildCreatedEvent event) {
+									System.out.printf("[%s] Created build %s%n",event.date(),event.buildId());
+								}
+						}).
 						build();
 			crawler.start();
 			LOGGER.info("<<HIT ENTER TO STOP THE CRAWLER>>");

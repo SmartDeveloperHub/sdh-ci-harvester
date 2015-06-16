@@ -51,16 +51,17 @@ final class LoadRunTask extends AbstractCrawlingTask {
 	protected void processResource(JenkinsResource resource) throws IOException {
 		Run run = super.loadRun(resource);
 
-		persistEntity(run,resource.entity());
-		if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && run.getResult().equals(RunResult.SUCCESS)) {
-			scheduleTask(new LoadRunArtifactsTask(super.location(),run));
-		}
-
 		super.fireEvent(
 			JenkinsEventFactory.
 				newExecutionCreationEvent(
 					super.jenkinsInstance(),
 					run));
+
+		persistEntity(run,resource.entity());
+		if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && run.getResult().equals(RunResult.SUCCESS)) {
+			scheduleTask(new LoadRunArtifactsTask(super.location(),run));
+		}
+
 	}
 
 }

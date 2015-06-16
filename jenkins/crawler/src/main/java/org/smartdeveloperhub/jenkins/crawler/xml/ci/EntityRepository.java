@@ -35,6 +35,6 @@ public interface EntityRepository {
 
 	void saveEntity(Entity entity, JenkinsEntityType entityType) throws IOException;
 
-	<T extends Entity> T entityOfId(URI location, Class<? extends T> entityClass) throws IOException;
+	<T extends Entity> T entityOfId(URI location, JenkinsEntityType entityType, Class<? extends T> entityClass) throws IOException;
 
 }

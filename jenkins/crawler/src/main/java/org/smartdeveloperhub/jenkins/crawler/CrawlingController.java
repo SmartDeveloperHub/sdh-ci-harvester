@@ -26,20 +26,25 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
 import org.smartdeveloperhub.jenkins.crawler.util.Timer;
-
-import static com.google.common.base.Preconditions.*;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -79,7 +84,37 @@ final class CrawlingController {
 
 	}
 
-	private final class CrawlingBootstrap implements Runnable {
+	private static final class ControlledScheduledExecutorService extends ScheduledThreadPoolExecutor {
+
+		private ControlledScheduledExecutorService(int corePoolSize, ThreadFactory threadFactory) {
+			super(corePoolSize, threadFactory);
+		}
+
+		@Override
+		protected void afterExecute(Runnable r, Throwable t) {
+			super.afterExecute(r,t);
+			LOGGER.debug("Runnable {} completed",r.getClass().getName());
+			if(t == null && r instanceof Future<?>) {
+				try {
+					Future<?> future = (Future<?>) r;
+					if(future.isDone()) {
+						future.get();
+					}
+				} catch (CancellationException ce) {
+					t = ce;
+				} catch (ExecutionException ee) {
+					t = ee.getCause();
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt(); // ignore/reset
+				}
+			}
+			if(t != null) {
+				LOGGER.error(String.format("Runnable %s died",r.getClass().getName()),t);
+			}
+		}
+	}
+
+	final class CrawlingBootstrap implements Runnable {
 
 		private final long timeOut=1;
 		private final TimeUnit unit=TimeUnit.SECONDS;
@@ -89,39 +124,61 @@ final class CrawlingController {
 		public void run() {
 			if(this.terminate.get()) {
 				LOGGER.info(
-					"Aborted crawling of {}: termination requested",
-					CrawlingController.this.instance);
+					"Aborted crawling {}: termination requested",
+					jenkinsInstance());
 				return;
 			}
 			Timer timer=logStart();
-			bootstrapCrawling();
-			awaitCompletion();
-			logTermination(timer);
+			boolean started=bootstrapCrawling();
+			if(started) {
+				awaitCompletion();
+			}
+			logTermination(started,timer);
 			persistState();
 		}
 
-		private void bootstrapCrawling() {
-			taskScheduler().
-				schedule(
-					new LoadServiceTask(CrawlingController.this.instance));
+		private boolean bootstrapCrawling() {
+			boolean result=false;
+			try {
+				Service existingService = storage.entityOfId(jenkinsInstance(),JenkinsEntityType.SERVICE,Service.class);
+				Task task=null;
+				if(existingService==null) {
+					task=new LoadServiceTask(jenkinsInstance());
+				} else {
+					task=new RefreshServiceTask(existingService);
+				}
+				taskScheduler().schedule(task);
+				result=true;
+			} catch (IOException e) {
+				LOGGER.error("Could not bootstrap crawling process",e);
+			}
+			return result;
+		}
+
+		private URI jenkinsInstance() {
+			return CrawlingController.this.instance;
 		}
 
 		private Timer logStart() {
-			LOGGER.info("Starting crawling {}...",CrawlingController.this.instance);
+			LOGGER.info("Started crawling {}...",jenkinsInstance());
 			Timer timer = new Timer();
 			timer.start();
 			return timer;
 		}
 
-		private void logTermination(Timer timer) {
+		private void logTermination(boolean started, Timer timer) {
 			timer.stop();
-			LOGGER.info(
-				"Crawling of {} {}. Execution took {}",
-				CrawlingController.this.instance,
-				terminate.get()?
-					"aborted":
-					"completed",
-				timer);
+			if(started) {
+				LOGGER.info(
+						"Crawling of {} {}. Execution took {}",
+						jenkinsInstance(),
+						terminate.get()?
+							"aborted":
+							"completed",
+						timer);
+			} else {
+				LOGGER.error("Could not start crawling {}",jenkinsInstance());
+			}
 		}
 
 		private void awaitCompletion() {
@@ -195,21 +252,12 @@ final class CrawlingController {
 	}
 
 	private static ScheduledExecutorService createPool() {
+		ThreadFactory threadFactory =
+			new ThreadFactoryBuilder().
+				setNameFormat("JenkinsCrawler-admin-%d").
+				build();
 		return
-			Executors.
-				newScheduledThreadPool(
-					1,
-					new ThreadFactoryBuilder().
-						setNameFormat("JenkinsCrawler-admin-%d").
-					setUncaughtExceptionHandler(
-						new UncaughtExceptionHandler() {
-							@Override
-							public void uncaughtException(Thread t, Throwable e) {
-								LOGGER.error(String.format("Thread %s died",t.getName()),e);
-							}
-						}).
-						build()
-				);
+			new ControlledScheduledExecutorService(1, threadFactory);
 	}
 
 }

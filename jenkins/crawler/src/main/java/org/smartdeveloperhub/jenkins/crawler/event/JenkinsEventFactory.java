@@ -36,12 +36,24 @@ public final class JenkinsEventFactory {
 	private JenkinsEventFactory() {
 	}
 
-	public static BuildCreationEvent newBuildCreationEvent(URI service, Build build) {
-		return BuildCreationEvent.create(service).withBuild(build);
+	public static BuildCreatedEvent newBuildCreationEvent(URI service, Build build) {
+		return BuildCreatedEvent.create(service).withBuild(build);
 	}
 
-	public static ExecutionCreationEvent newExecutionCreationEvent(URI service, Run run) {
-		return ExecutionCreationEvent.create(service).withRun(run);
+	public static BuildDeletedEvent newBuildDeletionEvent(URI service, URI build) {
+		return BuildDeletedEvent.create(service,build);
+	}
+
+	public static ExecutionCreatedEvent newExecutionCreationEvent(URI service, Run run) {
+		return ExecutionCreatedEvent.create(service).withRun(run);
+	}
+
+	public static ExecutionUpdatedEvent newExecutionUpdateEvent(URI service, Run run) {
+		return ExecutionUpdatedEvent.create(service).withRun(run);
+	}
+
+	public static ExecutionDeletedEvent newExecutionDeletionEvent(URI service, URI execution) {
+		return ExecutionDeletedEvent.create(service,execution);
 	}
 
 }

@@ -26,16 +26,38 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
-public interface JenkinsEventListener {
+import java.net.URI;
+import java.util.Date;
 
-	void onBuildCreation(BuildCreatedEvent event);
+import com.google.common.base.MoreObjects.ToStringHelper;
 
-	void onBuildDeletion(BuildDeletedEvent event);
+public final class ExecutionDeletedEvent extends JenkinsEvent {
 
-	void onExecutionCreation(ExecutionCreatedEvent event);
+	private final URI execution;
 
-	void onExecutionUpdate(ExecutionUpdatedEvent event);
+	ExecutionDeletedEvent(URI service, Date date, URI execution) {
+		super(service,date);
+		this.execution = execution;
+	}
 
-	void onExecutionDeletion(ExecutionDeletedEvent event);
+	@Override
+	void accept(JenkinsEventVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitExecutionDeletionEvent(this);
+		}
+	}
+
+	public URI executionId() {
+		return this.execution;
+	}
+
+	@Override
+	protected void toString(ToStringHelper helper) {
+		helper.add("executionId", executionId());
+	}
+
+	static ExecutionDeletedEvent create(URI service, URI execution) {
+		return new ExecutionDeletedEvent(service, new Date(),execution);
+	}
 
 }

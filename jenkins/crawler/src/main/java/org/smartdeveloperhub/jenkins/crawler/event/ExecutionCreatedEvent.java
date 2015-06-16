@@ -24,45 +24,50 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.event;
 
-import java.io.IOException;
 import java.net.URI;
+import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
-import org.smartdeveloperhub.jenkins.JenkinsEntityType;
-import org.smartdeveloperhub.jenkins.JenkinsResource;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
-import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
-final class LoadProjectConfigurationTask extends AbstractCrawlingSubTask<Build> {
+import com.google.common.base.MoreObjects.ToStringHelper;
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(LoadProjectConfigurationTask.class);
+public final class ExecutionCreatedEvent extends JenkinsEvent {
 
-	LoadProjectConfigurationTask(URI location, Build build, JenkinsEntityType type) {
-		super(location,type,JenkinsArtifactType.CONFIGURATION,build);
+	private Run run;
+
+	private ExecutionCreatedEvent(URI service, Date date) {
+		super(service,date);
+	}
+
+	ExecutionCreatedEvent withRun(Run run) {
+		this.run = run;
+		return this;
 	}
 
 	@Override
-	protected String taskPrefix() {
-		return "lpct";
-	}
-
-	@Override
-	protected void processSubresource(Build parent, JenkinsResource resource) throws IOException {
-		try {
-			String rawURI=
-				XmlUtils.
-					evaluateXPath(
-						"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
-						resource.content().get());
-			parent.withCodebase(URI.create(rawURI));
-			persistEntity(parent, entityType());
-		} catch (Exception e) {
-			LOGGER.error("Could not recover SCM information",e);
+	void accept(JenkinsEventVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitExecutionCreationEvent(this);
 		}
+	}
+
+	Run run() {
+		return this.run;
+	}
+
+	public URI executionId() {
+		return this.run.getUrl();
+	}
+
+	@Override
+	protected void toString(ToStringHelper helper) {
+		helper.add("executionId", executionId());
+	}
+
+	static ExecutionCreatedEvent create(URI location) {
+		return new ExecutionCreatedEvent(location, new Date());
 	}
 
 }

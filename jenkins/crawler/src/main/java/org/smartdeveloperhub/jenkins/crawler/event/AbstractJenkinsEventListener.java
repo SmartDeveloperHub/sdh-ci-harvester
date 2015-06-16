@@ -30,27 +30,27 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 public abstract class AbstractJenkinsEventListener implements JenkinsEventListener {
 
 	@Override
-	public void onBuildCreation(BuildCreationEvent event) {
+	public void onBuildCreation(BuildCreatedEvent event) {
 		// To be implemented by subclasses
 	}
 
 	@Override
-	public void onBuildDeletion(BuildDeletionEvent event) {
+	public void onBuildDeletion(BuildDeletedEvent event) {
 		// To be implemented by subclasses
 	}
 
 	@Override
-	public void onExecutionCreation(ExecutionCreationEvent event) {
+	public void onExecutionCreation(ExecutionCreatedEvent event) {
 		// To be implemented by subclasses
 	}
 
 	@Override
-	public void onExecutionUpdate(ExecutionUpdateEvent event) {
+	public void onExecutionUpdate(ExecutionUpdatedEvent event) {
 		// To be implemented by subclasses
 	}
 
 	@Override
-	public void onExecutionDeletion(ExecutionDeletionEvent event) {
+	public void onExecutionDeletion(ExecutionDeletedEvent event) {
 		// To be implemented by subclasses
 	}
 

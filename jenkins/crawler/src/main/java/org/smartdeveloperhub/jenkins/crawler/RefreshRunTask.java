@@ -26,21 +26,47 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import java.net.URI;
+import java.io.IOException;
 
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 
-final class LoadProjectSCMTask extends AbstractCrawlingSubTask<Build> {
+final class RefreshRunTask extends AbstractCrawlingTask {
 
-	LoadProjectSCMTask(URI location, Build build) {
-		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.SCM,build);
+	private final Run run;
+
+	RefreshRunTask(Run run) {
+		super(run.getUrl(),JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
+		this.run = run;
 	}
 
 	@Override
 	protected String taskPrefix() {
-		return "lpst";
+		return "rrt";
+	}
+
+	@Override
+	protected void processResource(JenkinsResource resource) throws IOException {
+		Run currentRun = super.loadRun(resource);
+
+		if(!this.run.getStatus().equals(currentRun.getStatus())) {
+
+			persistEntity(currentRun,resource.entity());
+			if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && currentRun.getResult().equals(RunResult.SUCCESS)) {
+				scheduleTask(new LoadRunArtifactsTask(super.location(),currentRun));
+			}
+
+			super.fireEvent(
+				JenkinsEventFactory.
+					newExecutionUpdateEvent(
+						super.jenkinsInstance(),
+						currentRun));
+		}
+
 	}
 
 }

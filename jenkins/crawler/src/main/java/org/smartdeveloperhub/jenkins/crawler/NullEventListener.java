@@ -26,11 +26,11 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import org.smartdeveloperhub.jenkins.crawler.event.BuildCreationEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletionEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreationEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletionEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdateEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.BuildCreatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 
 final class NullEventListener implements JenkinsEventListener {
@@ -41,23 +41,23 @@ final class NullEventListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onExecutionUpdate(ExecutionUpdateEvent event) {
+	public void onExecutionUpdate(ExecutionUpdatedEvent event) {
 		// Nothing to do
 	}
 	@Override
-	public void onExecutionDeletion(ExecutionDeletionEvent event) {
+	public void onExecutionDeletion(ExecutionDeletedEvent event) {
 		// Nothing to do
 	}
 	@Override
-	public void onExecutionCreation(ExecutionCreationEvent event) {
+	public void onExecutionCreation(ExecutionCreatedEvent event) {
 		// Nothing to do
 	}
 	@Override
-	public void onBuildDeletion(BuildDeletionEvent event) {
+	public void onBuildDeletion(BuildDeletedEvent event) {
 		// Nothing to do
 	}
 	@Override
-	public void onBuildCreation(BuildCreationEvent event) {
+	public void onBuildCreation(BuildCreatedEvent event) {
 		// Nothing to do
 	}
 

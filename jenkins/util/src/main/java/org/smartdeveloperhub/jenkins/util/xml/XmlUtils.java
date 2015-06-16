@@ -29,6 +29,7 @@ package org.smartdeveloperhub.jenkins.util.xml;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
@@ -178,13 +179,23 @@ public final class XmlUtils {
 	}
 
 	public static <T, E extends Throwable> T unmarshall(File source, Class<? extends T> clazz, E throwable) throws E {
+		FileInputStream is = null;
 		try {
 			Unmarshaller unmarshaller=CONTEXT.createUnmarshaller();
-			Object unmarshal = unmarshaller.unmarshal(new FileInputStream(source));
+			is=new FileInputStream(source);
+			Object unmarshal = unmarshaller.unmarshal(is);
 			return clazz.cast(unmarshal);
 		} catch (Exception e) {
 			throwable.initCause(e);
 			throw throwable;
+		} finally {
+			if(is!=null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					// Ignore failure
+				}
+			}
 		}
 	}
 

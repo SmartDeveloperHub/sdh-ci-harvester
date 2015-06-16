@@ -51,7 +51,7 @@ final class LoadServiceTask extends AbstractCrawlingTask {
 		Service service = super.loadService(resource);
 		persistEntity(service,resource.entity());
 		for(Reference ref:service.getBuilds().getBuilds()) {
-			scheduleTask(new LoadProjectTask(ref.getValue()));
+			scheduleTask(new LoadJobTask(ref.getValue()));
 		}
 	}
 

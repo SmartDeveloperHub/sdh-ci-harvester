@@ -28,23 +28,23 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 
 abstract class JenkinsEventVisitor {
 
-	void visitBuildCreationEvent(BuildCreationEvent event) {
+	void visitBuildCreationEvent(BuildCreatedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitBuildDeletionEvent(BuildDeletionEvent event) {
+	void visitBuildDeletionEvent(BuildDeletedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitExecutionCreationEvent(ExecutionCreationEvent event) {
+	void visitExecutionCreationEvent(ExecutionCreatedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitExecutionUpdateEvent(ExecutionUpdateEvent event) {
+	void visitExecutionUpdateEvent(ExecutionUpdatedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitExecutionDeletionEvent(ExecutionDeletionEvent event) {
+	void visitExecutionDeletionEvent(ExecutionDeletedEvent event) {
 		// To be implemented by subclasses
 	}
 

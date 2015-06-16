@@ -36,39 +36,39 @@ import org.joda.time.Duration;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
-public class Timer {
+public final class Timer {
 
 	private static final PeriodFormatter PERIOD_FORMATTER =
-			new PeriodFormatterBuilder().
-					appendYears().
-					appendSuffix(" year", " years").
-					appendSeparator(" and ").
-					printZeroRarelyLast().
-					appendMonths().
-					appendSuffix(" month", " months").
-					appendSeparator(" and ").
-					printZeroRarelyLast().
-					appendDays().
-					appendSuffix(" day", " days").
-					appendSeparator(" and ").
-					printZeroRarelyLast().
-					appendHours().
-					appendSuffix(" hour", " hours").
-					appendSeparator(" and ").
-					printZeroRarelyLast().
-					appendMinutes().
-					appendSuffix(" minute", " minutes").
-					appendSeparator(" and ").
-					printZeroRarelyLast().
-					appendSeconds().
-					appendSuffix(" second", " seconds").
-					appendSeparator(" and ").
-					printZeroRarelyLast().
-					appendMillis().
-					appendSuffix(" millisecond", " milliseconds").
-					appendSeparator(" and ").
-					printZeroRarelyLast().
-					toFormatter();
+		new PeriodFormatterBuilder().
+				appendYears().
+				appendSuffix(" year", " years").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendMonths().
+				appendSuffix(" month", " months").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendDays().
+				appendSuffix(" day", " days").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendHours().
+				appendSuffix(" hour", " hours").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendMinutes().
+				appendSuffix(" minute", " minutes").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendSeconds().
+				appendSuffix(" second", " seconds").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				appendMillis().
+				appendSuffix(" millisecond", " milliseconds").
+				appendSeparator(" and ").
+				printZeroRarelyLast().
+				toFormatter();
 
 	private long started;
 	private long finished;
@@ -93,8 +93,11 @@ public class Timer {
 	}
 
 	public long duration() {
-		checkState(this.finished>0,"Timer has not been stopped");
-		return this.finished-this.started;
+		long result = this.finished-this.started;
+		if(result<0) {
+			result=0;
+		}
+		return result;
 	}
 
 	@Override

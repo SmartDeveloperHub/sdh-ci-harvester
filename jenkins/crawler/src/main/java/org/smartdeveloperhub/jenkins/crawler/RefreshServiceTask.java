@@ -29,48 +29,68 @@ package org.smartdeveloperhub.jenkins.crawler;
 import java.io.IOException;
 import java.net.URI;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils;
+import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils.ReferenceDifference;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeBuild;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
 
-final class LoadProjectTask extends AbstractCrawlingTask {
+final class RefreshServiceTask extends AbstractCrawlingTask {
 
-	LoadProjectTask(URI location) {
-		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.RESOURCE);
+	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshServiceTask.class);
+
+	private final Service service;
+
+	RefreshServiceTask(Service service) {
+		super(service.getUrl(), JenkinsEntityType.SERVICE, JenkinsArtifactType.RESOURCE);
+		this.service = service;
 	}
 
 	@Override
 	protected String taskPrefix() {
-		return "lpt";
+		return "rst";
 	}
 
 	@Override
 	protected void processResource(JenkinsResource resource) throws IOException {
-		Build build = super.loadBuild(resource);
+		Service currentService = super.loadService(resource);
 
-		super.fireEvent(
-			JenkinsEventFactory.
-				newBuildCreationEvent(super.jenkinsInstance(),build));
+		ReferenceDifference difference=
+			TaskUtils.
+				calculate(
+					this.service.getBuilds().getBuilds(),
+					currentService.getBuilds().getBuilds());
 
-		persistEntity(build,resource.entity());
-		scheduleTask(new LoadProjectConfigurationTask(super.location(),build,resource.entity()));
-		scheduleTask(new LoadProjectSCMTask(super.location(),build));
-		if(build instanceof CompositeBuild) {
-			CompositeBuild cBuild=(CompositeBuild)build;
-			for(Reference ref:cBuild.getSubBuilds().getBuilds()) {
-				scheduleTask(new LoadProjectTask(ref.getValue()));
+		persistEntity(currentService,resource.entity());
+
+		for(URI createdBuild:difference.created()) {
+			scheduleTask(new LoadJobTask(createdBuild));
+		}
+
+		for(URI maintainedBuild:difference.maintained()) {
+			try {
+				Build build=super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Build.class);
+				if(build==null) {
+					scheduleTask(new LoadJobTask(maintainedBuild));
+				} else {
+					scheduleTask(new RefreshJobTask(build));
+				}
+			} catch (Exception e) {
+				LOGGER.warn("Could not load persisted build '"+maintainedBuild+"'",e);
 			}
 		}
-		boolean first=true;
-		for(Reference ref:build.getRuns().getRuns()) {
-			if(first) {
-				first=false;
-				scheduleTask(new LoadRunTask(ref.getValue()));
-			}
+
+		for(URI deletedBuild:difference.deleted()) {
+			super.fireEvent(
+				JenkinsEventFactory.
+					newBuildDeletionEvent(
+						super.jenkinsInstance(),
+						deletedBuild));
 		}
 
 	}

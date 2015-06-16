@@ -26,16 +26,48 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
-public interface JenkinsEventListener {
+import java.net.URI;
+import java.util.Date;
 
-	void onBuildCreation(BuildCreatedEvent event);
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
 
-	void onBuildDeletion(BuildDeletedEvent event);
+import com.google.common.base.MoreObjects.ToStringHelper;
 
-	void onExecutionCreation(ExecutionCreatedEvent event);
+public final class BuildCreatedEvent extends JenkinsEvent {
 
-	void onExecutionUpdate(ExecutionUpdatedEvent event);
+	private Build build;
 
-	void onExecutionDeletion(ExecutionDeletedEvent event);
+	private BuildCreatedEvent(URI service, Date date) {
+		super(service,date);
+	}
+
+	BuildCreatedEvent withBuild(Build build) {
+		this.build = build;
+		return this;
+	}
+
+	Build build() {
+		return this.build;
+	}
+
+	@Override
+	void accept(JenkinsEventVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitBuildCreationEvent(this);
+		}
+	}
+
+	public URI buildId() {
+		return this.build.getUrl();
+	}
+
+	@Override
+	protected void toString(ToStringHelper helper) {
+		helper.add("buildId", buildId());
+	}
+
+	static BuildCreatedEvent create(URI service) {
+		return new BuildCreatedEvent(service, new Date());
+	}
 
 }

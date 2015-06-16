@@ -29,34 +29,35 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
+import com.google.common.base.MoreObjects.ToStringHelper;
 
-public final class ExecutionCreationEvent extends JenkinsEvent {
+public final class BuildDeletedEvent extends JenkinsEvent {
 
-	private Run run;
+	private final URI build;
 
-	private ExecutionCreationEvent(URI service, Date date) {
+	BuildDeletedEvent(URI service, Date date, URI build) {
 		super(service,date);
+		this.build = build;
 	}
 
-	ExecutionCreationEvent withRun(Run run) {
-		this.run = run;
-		return this;
-	}
-
-	Run run() {
-		return this.run;
-	}
-
-	static ExecutionCreationEvent create(URI location) {
-		return new ExecutionCreationEvent(location, new Date());
+	public URI buildId() {
+		return this.build;
 	}
 
 	@Override
 	void accept(JenkinsEventVisitor visitor) {
 		if(visitor!=null) {
-			visitor.visitExecutionCreationEvent(this);
+			visitor.visitBuildDeletionEvent(this);
 		}
+	}
+
+	@Override
+	protected void toString(ToStringHelper helper) {
+		helper.add("buildId", buildId());
+	}
+
+	static BuildDeletedEvent create(URI service, URI build) {
+		return new BuildDeletedEvent(service, new Date(),build);
 	}
 
 }
