@@ -64,10 +64,12 @@ import com.google.common.collect.Lists;
 
 public final class XmlUtils {
 
+	private static final String RESOURCE_STORAGE_FAILURE = "Resource storage failure";
+	private static final String INVALID_XPATH_EXPRESSION = "Invalid XPath expression '%s'";
+
 	private static final Logger LOGGER=LoggerFactory.getLogger(XmlUtils.class);
 
 	private static final JAXBContext CONTEXT;
-
 	private static final XPathFactory FACTORY;
 
 	static {
@@ -137,7 +139,7 @@ public final class XmlUtils {
 			XPathExpression compile = newXPath.compile(xpath);
 			return compile.evaluate(new InputSource(new StringReader(source)));
 		} catch (XPathExpressionException e) {
-			throw new XmlProcessingException("Invalid XPath expression",e);
+			throw new XmlProcessingException(String.format(INVALID_XPATH_EXPRESSION,xpath),e);
 		}
 	}
 
@@ -147,7 +149,7 @@ public final class XmlUtils {
 			XPathExpression compile = newXPath.compile(xpath);
 			return compile.evaluate(content);
 		} catch (XPathExpressionException e) {
-			throw new XmlProcessingException("Invalid XPath expression",e);
+			throw new XmlProcessingException(String.format(INVALID_XPATH_EXPRESSION,xpath),e);
 		}
 	}
 
@@ -160,7 +162,7 @@ public final class XmlUtils {
 				transform(source, result);
 			return writer.toString();
 		} catch(Exception e) {
-			throw new XmlProcessingException("Resource storage failure",e);
+			throw new XmlProcessingException(RESOURCE_STORAGE_FAILURE,e);
 		}
 	}
 
@@ -174,7 +176,7 @@ public final class XmlUtils {
 				builder.
 					parse(new ByteArrayInputStream(body.getBytes()));
 		} catch (Exception e) {
-			throw new XmlProcessingException("Resource storage failure",e);
+			throw new XmlProcessingException(RESOURCE_STORAGE_FAILURE,e);
 		}
 	}
 
@@ -241,7 +243,7 @@ public final class XmlUtils {
 			getTransformer().
 				transform(source, new StreamResult(file));
 		} catch(Exception e) {
-			throw new XmlProcessingException("Resource storage failure",e);
+			throw new XmlProcessingException(RESOURCE_STORAGE_FAILURE,e);
 		}
 	}
 

@@ -88,7 +88,7 @@ final class HttpResponseUtil {
 		return etag;
 	}
 
-	static String retrieveServiceVersion(HttpResponse response) throws JenkinsClientException {
+	static String retrieveServiceVersion(HttpResponse response) {
 		Header[] vHeaders = response.getHeaders("X-Jenkins");
 		String serviceVersion=null;
 		if(vHeaders!=null && vHeaders.length>0) {

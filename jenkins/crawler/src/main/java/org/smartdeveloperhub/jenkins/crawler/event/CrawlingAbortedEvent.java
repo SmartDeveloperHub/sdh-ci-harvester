@@ -31,8 +31,8 @@ import java.util.Date;
 public final class CrawlingAbortedEvent extends CrawlingEvent {
 
 
-	private CrawlingAbortedEvent(long sessionId, Date startedOn) {
-		super(sessionId,startedOn);
+	private CrawlingAbortedEvent(long sessionId, Date abortedOn) {
+		super(sessionId,abortedOn);
 	}
 
 	@Override
@@ -40,8 +40,8 @@ public final class CrawlingAbortedEvent extends CrawlingEvent {
 		visitor.visitCrawlingAbortedEvent(this);
 	}
 
-	static CrawlingAbortedEvent create(long sessionId, Date startedOn) {
-		return new CrawlingAbortedEvent(sessionId,startedOn);
+	static CrawlingAbortedEvent create(long sessionId, Date abortedOn) {
+		return new CrawlingAbortedEvent(sessionId,abortedOn);
 	}
 
 }

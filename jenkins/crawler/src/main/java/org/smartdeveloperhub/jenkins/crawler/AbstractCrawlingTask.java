@@ -50,7 +50,7 @@ abstract class AbstractCrawlingTask implements Task {
 
 	private static final int RETRY_THRESHOLD = 5;
 
-	private final Logger logger=LoggerFactory.getLogger(getClass());
+	private final Logger logger=LoggerFactory.getLogger(getClass()); // NOSONAR
 
 	private URI location;
 	private JenkinsEntityType entity;

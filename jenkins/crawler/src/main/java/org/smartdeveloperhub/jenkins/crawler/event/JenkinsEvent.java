@@ -41,12 +41,11 @@ public abstract class JenkinsEvent extends Event<JenkinsEventVisitor>{
 		this.service = service;
 	}
 
-	abstract void accept(JenkinsEventVisitor visitor);
-
-	public URI service() {
+	public final URI service() {
 		return this.service;
 	}
 
+	@Override
 	protected void toString(ToStringHelper helper) {
 		helper.add("service", this.service);
 	}

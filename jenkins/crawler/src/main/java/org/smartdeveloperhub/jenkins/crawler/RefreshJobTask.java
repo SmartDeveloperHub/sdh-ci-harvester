@@ -115,11 +115,11 @@ final class RefreshJobTask extends AbstractCrawlingTask {
 
 		for(URI maintainedBuild:difference.maintained()) {
 			try {
-				Build build = super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Build.class);
-				if(build==null) {
+				Build persistedBuild = super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Build.class);
+				if(persistedBuild==null) {
 					scheduleTask(new LoadJobTask(maintainedBuild));
 				} else {
-					scheduleTask(new RefreshJobTask(build));
+					scheduleTask(new RefreshJobTask(persistedBuild));
 				}
 			} catch (IOException e) {
 				LOGGER.warn("Could not recover build '"+maintainedBuild+"'",e);

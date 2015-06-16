@@ -35,6 +35,7 @@ import java.util.IllegalFormatException;
  * {@link Console} implementation that wraps a {@link java.io.Console}.
  */
 final class NativeConsole implements Console {
+
 	private final java.io.Console console;
 
 	NativeConsole(java.io.Console console) {
@@ -59,7 +60,7 @@ final class NativeConsole implements Console {
 	 */
 	@Override
 	public Reader reader() {
-		return console.reader();
+		return this.console.reader();
 	}
 
 	/**
@@ -68,7 +69,7 @@ final class NativeConsole implements Console {
 	@Override
 	public String readLine() {
 		try {
-			return console.readLine();
+			return this.console.readLine();
 		} catch (IOError e) {
 			throw new ConsoleException(e);
 		}
@@ -80,7 +81,7 @@ final class NativeConsole implements Console {
 	@Override
 	public char[] readPassword() {
 		try {
-			return console.readPassword();
+			return this.console.readPassword();
 		} catch (IOError e) {
 			throw new ConsoleException(e);
 		}
@@ -90,8 +91,8 @@ final class NativeConsole implements Console {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PrintWriter writer() throws ConsoleException {
-		return console.writer();
+	public PrintWriter writer() {
+		return this.console.writer();
 	}
 
 }

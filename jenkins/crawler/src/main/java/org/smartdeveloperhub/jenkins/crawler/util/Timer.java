@@ -38,35 +38,52 @@ import org.joda.time.format.PeriodFormatterBuilder;
 
 public final class Timer {
 
+	private static final String TIMER_HAS_NOT_BEEN_STARTED     = "Timer has not been started";
+	private static final String TIMER_HAS_ALREADY_BEEN_STOPPED = "Timer has already been stopped";
+	private static final String TIMER_HAS_ALREADY_BEEN_STARTED = "Timer has already been started";
+
+	private static final String MILLISECOND = " millisecond";
+	private static final String SECOND      = " second";
+	private static final String MINUTE      = " minute";
+	private static final String HOUR        = " hour";
+	private static final String DAY         = " day";
+	private static final String MONTH       = " month";
+	private static final String YEAR        = " year";
+	private static final String AND         = " and ";
+
+	private static String plural(String string) {
+		return string+"s";
+	}
+
 	private static final PeriodFormatter PERIOD_FORMATTER =
 		new PeriodFormatterBuilder().
 				appendYears().
-				appendSuffix(" year", " years").
-				appendSeparator(" and ").
+				appendSuffix(YEAR, plural(YEAR)).
+				appendSeparator(AND).
 				printZeroRarelyLast().
 				appendMonths().
-				appendSuffix(" month", " months").
-				appendSeparator(" and ").
+				appendSuffix(MONTH, plural(MONTH)).
+				appendSeparator(AND).
 				printZeroRarelyLast().
 				appendDays().
-				appendSuffix(" day", " days").
-				appendSeparator(" and ").
+				appendSuffix(DAY, plural(DAY)).
+				appendSeparator(AND).
 				printZeroRarelyLast().
 				appendHours().
-				appendSuffix(" hour", " hours").
-				appendSeparator(" and ").
+				appendSuffix(HOUR, plural(HOUR)).
+				appendSeparator(AND).
 				printZeroRarelyLast().
 				appendMinutes().
-				appendSuffix(" minute", " minutes").
-				appendSeparator(" and ").
+				appendSuffix(MINUTE, plural(MINUTE)).
+				appendSeparator(AND).
 				printZeroRarelyLast().
 				appendSeconds().
-				appendSuffix(" second", " seconds").
-				appendSeparator(" and ").
+				appendSuffix(SECOND, plural(SECOND)).
+				appendSeparator(AND).
 				printZeroRarelyLast().
 				appendMillis().
-				appendSuffix(" millisecond", " milliseconds").
-				appendSeparator(" and ").
+				appendSuffix(MILLISECOND, plural(MILLISECOND)).
+				appendSeparator(AND).
 				printZeroRarelyLast().
 				toFormatter();
 
@@ -80,15 +97,15 @@ public final class Timer {
 
 	public void start() {
 		long now = System.currentTimeMillis();
-		checkState(this.started<0,"Timer has already been started");
-		checkState(this.finished<0,"Timer has already been stopped");
+		checkState(this.started<0,TIMER_HAS_ALREADY_BEEN_STARTED);
+		checkState(this.finished<0,TIMER_HAS_ALREADY_BEEN_STOPPED);
 		this.started=now;
 	}
 
 	public void stop() {
 		long now = System.currentTimeMillis();
-		checkState(this.started>0,"Timer has not been started");
-		checkState(this.finished<0,"Timer has already been stopped");
+		checkState(this.started>0,TIMER_HAS_NOT_BEEN_STARTED);
+		checkState(this.finished<0,TIMER_HAS_ALREADY_BEEN_STOPPED);
 		this.finished=now;
 	}
 
@@ -108,7 +125,7 @@ public final class Timer {
 			if(init<0) {
 				init=0;
 			}
-			long end =this.finished;
+			long end=this.finished;
 			if(end<init) {
 				end=init;
 			}

@@ -31,7 +31,7 @@ import java.util.Date;
 public final class CrawlingCompletedEvent extends CrawlingEvent {
 
 	private CrawlingCompletedEvent(long sessionId, Date completedOn) {
-		super(sessionId,new Date());
+		super(sessionId,completedOn);
 	}
 
 	@Override

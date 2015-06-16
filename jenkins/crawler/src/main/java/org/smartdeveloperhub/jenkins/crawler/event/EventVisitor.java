@@ -26,6 +26,6 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
-abstract class EventVisitor {
+interface EventVisitor {
 
 }

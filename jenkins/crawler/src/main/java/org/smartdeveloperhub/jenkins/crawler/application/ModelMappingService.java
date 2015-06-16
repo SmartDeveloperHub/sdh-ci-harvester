@@ -31,8 +31,6 @@ import java.util.Map;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationException;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationService;
@@ -44,9 +42,6 @@ import org.w3c.dom.Document;
 import com.google.common.collect.ImmutableMap;
 
 public final class ModelMappingService {
-
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER=LoggerFactory.getLogger(ModelMappingService.class);
 
 	private final TransformationService transformationService;
 

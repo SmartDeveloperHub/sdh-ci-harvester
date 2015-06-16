@@ -93,23 +93,23 @@ final class CrawlingController {
 		@Override
 		protected void afterExecute(Runnable r, Throwable t) {
 			super.afterExecute(r,t);
-			LOGGER.debug("Runnable {} completed",r.getClass().getName());
-			if(t == null && r instanceof Future<?>) {
+			Throwable failure=t;
+			if(failure == null && r instanceof Future<?>) {
 				try {
 					Future<?> future = (Future<?>) r;
 					if(future.isDone()) {
 						future.get();
 					}
 				} catch (CancellationException ce) {
-					t = ce;
+					failure = ce;
 				} catch (ExecutionException ee) { // NOSONAR
-					t = ee.getCause();
+					failure = ee.getCause();
 				} catch (InterruptedException ie) {
 					Thread.currentThread().interrupt(); // ignore/reset
 				}
 			}
-			if(t != null) {
-				LOGGER.error(String.format("Runnable %s died",r.getClass().getName()),t);
+			if(failure!=null) {
+				LOGGER.error(String.format("Runnable %s died",r.getClass().getName()),failure);
 			}
 		}
 	}

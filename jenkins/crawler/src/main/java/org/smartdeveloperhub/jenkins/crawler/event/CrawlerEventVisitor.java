@@ -26,7 +26,7 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
-abstract class CrawlerEventVisitor extends EventVisitor {
+abstract class CrawlerEventVisitor implements EventVisitor {
 
 	public void visitCrawlerStartedEvent(CrawlerStartedEvent event) {
 		// To be implemented by subclasses

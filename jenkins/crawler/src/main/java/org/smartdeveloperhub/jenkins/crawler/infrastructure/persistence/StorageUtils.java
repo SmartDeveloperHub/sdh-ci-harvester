@@ -61,9 +61,82 @@ final class StorageUtils {
 
 	private static final class PersistentJenkinsResource implements JenkinsResource {
 
+		private final class ImmutableResponseExcerpt implements ResponseExcerpt {
+
+			@Override
+			public String etag() {
+				return response.getEtag();
+			}
+
+			@Override
+			public Date lastModified() {
+				return lastModified;
+			}
+
+			@Override
+			public Optional<ResponseBody> body() {
+				return Optional.fromNullable(body);
+			}
+
+			@Override
+			public int statusCode() {
+				return response.getStatusCode();
+			}
+
+			@Override
+			public String toString() {
+				return
+					MoreObjects.
+						toStringHelper(getClass()).
+							omitNullValues().
+							add("statusCode",statusCode()).
+							add("etag",etag()).
+							add("lastModified",lastModified).
+							add("body",body).
+							toString();
+			}
+		}
+
+		private final class ImmutableMetadata implements Metadata {
+
+			private final ResponseExcerpt responseExcerpt;
+
+			private ImmutableMetadata() {
+				this.responseExcerpt = new ImmutableResponseExcerpt();
+			}
+
+			@Override
+			public Date retrievedOn() {
+				return representation.getRetrievedOn().toDate();
+			}
+
+			@Override
+			public String serverVersion() {
+				return response.getServerVersion();
+			}
+
+			@Override
+			public ResponseExcerpt response() {
+				return responseExcerpt;
+			}
+
+			@Override
+			public String toString() {
+				return
+					MoreObjects.
+						toStringHelper(getClass()).
+							omitNullValues().
+							add("retrievedOn",retrievedOn()).
+							add("serverVersion",serverVersion()).
+							add("response",response()).
+							toString();
+			}
+		}
+
 		private final ResourceDescriptorDocument resource;
 		private final ResponseDescriptor response;
 		private final RepresentationDescriptor representation;
+		private final Metadata metadata;
 
 		private ResponseBody body;
 		private Document content;
@@ -76,6 +149,7 @@ final class StorageUtils {
 			this.representation = this.resource.getRepresentation();
 			this.response = this.representation.getResponse();
 			this.lastModified=date(response.getLastModified());
+			this.metadata = new ImmutableMetadata();
 		}
 
 		private PersistentJenkinsResource withBody(ResponseBody body) {
@@ -125,62 +199,7 @@ final class StorageUtils {
 
 		@Override
 		public Metadata metadata() {
-			return new Metadata() {
-				@Override
-				public Date retrievedOn() {
-					return representation.getRetrievedOn().toDate();
-				}
-				@Override
-				public String serverVersion() {
-					return response.getServerVersion();
-				}
-
-				@Override
-				public ResponseExcerpt response() {
-					return new ResponseExcerpt() {
-						@Override
-						public String etag() {
-							return response.getEtag();
-						}
-						@Override
-						public Date lastModified() {
-							return lastModified;
-						}
-						@Override
-						public Optional<ResponseBody> body() {
-							return Optional.fromNullable(body);
-						}
-						@Override
-						public int statusCode() {
-							return response.getStatusCode();
-						}
-						@Override
-						public String toString() {
-							return
-								MoreObjects.
-									toStringHelper(getClass()).
-										omitNullValues().
-										add("statusCode",statusCode()).
-										add("etag",etag()).
-										add("lastModified",lastModified).
-										add("body",body).
-										toString();
-						}
-					};
-				}
-
-				@Override
-				public String toString() {
-					return
-						MoreObjects.
-							toStringHelper(getClass()).
-								omitNullValues().
-								add("retrievedOn",retrievedOn()).
-								add("serverVersion",serverVersion()).
-								add("response",response()).
-								toString();
-				}
-			};
+			return this.metadata;
 		}
 
 		@Override
@@ -195,7 +214,7 @@ final class StorageUtils {
 						add("status",status()).
 						add("failure",this.failure).
 						add("content",this.content).
-						add("metadata",metadata()).
+						add("metadata",this.metadata).
 						toString();
 		}
 

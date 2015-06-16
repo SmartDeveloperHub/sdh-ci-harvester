@@ -54,6 +54,8 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.commands.RegisterService
 
 public class ContinuousIntegrationService {
 
+	private static final String COMMAND_CANNOT_BE_NULL = "Command cannot be null";
+
 	private ServiceRepository serviceRepository;
 	private BuildRepository buildRepository;
 	private ExecutionRepository executionRepository;
@@ -111,7 +113,7 @@ public class ContinuousIntegrationService {
 	}
 
 	public void registerService(RegisterServiceCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI serviceId=aCommand.serviceId();
 
 		Service service = serviceRepository().serviceOfId(serviceId);
@@ -122,7 +124,7 @@ public class ContinuousIntegrationService {
 	}
 
 	public void createBuild(CreateBuildCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI serviceId=aCommand.serviceId();
 		Service service = serviceRepository().serviceOfId(serviceId);
 		checkArgument(service!=null,"Service '%s' is not registered",serviceId);
@@ -138,7 +140,7 @@ public class ContinuousIntegrationService {
 	}
 
 	public void deleteBuild(DeleteBuildCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI buildId=aCommand.buildId();
 		Build build = buildRepository().buildOfId(buildId);
 		checkArgument(build!=null,"Build '%s' is not registered",buildId);
@@ -183,7 +185,7 @@ public class ContinuousIntegrationService {
 	}
 
 	public void createExecution(CreateExecutionCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI buildId=aCommand.buildId();
 		URI executionId=aCommand.executionId();
 		Date createdOn=aCommand.createdOn();
@@ -195,7 +197,7 @@ public class ContinuousIntegrationService {
 	}
 
 	public void finishExecution(FinishExecutionCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI executionId=aCommand.executionId();
 		Execution execution = executionRepository().executionOfId(executionId);
 		checkArgument(execution!=null,"Execution '%s' is not registered",executionId);
@@ -205,7 +207,7 @@ public class ContinuousIntegrationService {
 	}
 
 	public void deleteExecution(DeleteExecutionCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		URI executionId=aCommand.executionId();
 		Execution execution = executionRepository().executionOfId(executionId);
 		checkArgument(execution!=null,"Execution '%s' is not registered",executionId);

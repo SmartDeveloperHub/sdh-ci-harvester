@@ -26,7 +26,7 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
-abstract class JenkinsEventVisitor extends EventVisitor {
+abstract class JenkinsEventVisitor implements EventVisitor {
 
 	void visitBuildCreationEvent(BuildCreatedEvent event) {
 		// To be implemented by subclasses
