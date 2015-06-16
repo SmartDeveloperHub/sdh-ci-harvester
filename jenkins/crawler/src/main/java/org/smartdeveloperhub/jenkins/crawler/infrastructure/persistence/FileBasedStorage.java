@@ -264,33 +264,33 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 
 	}
 
-	public static final class FileBasedStorageBuilder {
+	public static final class Builder {
 
 		private File workingDirectory;
 		private File configFile;
 		private StorageAllocationStrategy strategy;
 
-		private FileBasedStorageBuilder() {
+		private Builder() {
 			this.workingDirectory=new File(".");
 			this.configFile=new File("repository.xml");
 			this.strategy=new DefaultStorageAllocationStrategy();
 		}
 
-		public FileBasedStorageBuilder withWorkingDirectory(File workingDirectory) {
+		public Builder withWorkingDirectory(File workingDirectory) {
 			if(workingDirectory!=null) {
 				this.workingDirectory = workingDirectory;
 			}
 			return this;
 		}
 
-		public FileBasedStorageBuilder withConfigFile(File configFile) {
+		public Builder withConfigFile(File configFile) {
 			if(configFile!=null) {
 				this.configFile=configFile;
 			}
 			return this;
 		}
 
-		public FileBasedStorageBuilder withStrategy(StorageAllocationStrategy strategy) {
+		public Builder withStrategy(StorageAllocationStrategy strategy) {
 			if(strategy!=null) {
 				this.strategy=strategy;
 			}
@@ -459,7 +459,7 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 		return result;
 	}
 
-	public static FileBasedStorageBuilder builder() {
-		return new FileBasedStorageBuilder();
+	public static Builder builder() {
+		return new Builder();
 	}
 }

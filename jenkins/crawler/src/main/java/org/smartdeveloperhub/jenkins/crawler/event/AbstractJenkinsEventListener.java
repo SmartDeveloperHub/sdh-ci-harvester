@@ -27,7 +27,7 @@
 package org.smartdeveloperhub.jenkins.crawler.event;
 
 
-public abstract class AbstractJenkinsEventListener implements JenkinsEventListener {
+abstract class AbstractJenkinsEventListener implements JenkinsEventListener {
 
 	@Override
 	public void onBuildCreation(BuildCreatedEvent event) {

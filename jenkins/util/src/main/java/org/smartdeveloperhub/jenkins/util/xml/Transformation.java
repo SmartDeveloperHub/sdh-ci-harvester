@@ -96,7 +96,7 @@ public final class Transformation {
 		this.factory = factory;
 	}
 
-	<T> Transformation setStyleSheet(T styleSheet) throws Exception {
+	<T> Transformation setStyleSheet(T styleSheet) throws TransformerConfigurationException {
 		return createNew(styleSheet,this.factory,this.parameters);
 	}
 
@@ -104,7 +104,7 @@ public final class Transformation {
 		return new Transformation(this.styleSheet,ImmutableMap.<String,Object>builder().putAll(parameters).put(parameter,object).build(),this.factory);
 	}
 
-	Transformation setTransformerFactory(TransformerFactory factory) throws Exception {
+	Transformation setTransformerFactory(TransformerFactory factory) throws TransformerConfigurationException {
 		return createNew(this.styleSheet.styleSheet(),factory,this.parameters);
 	}
 

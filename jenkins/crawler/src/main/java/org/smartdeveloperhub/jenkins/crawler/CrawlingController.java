@@ -102,7 +102,7 @@ final class CrawlingController {
 					}
 				} catch (CancellationException ce) {
 					t = ce;
-				} catch (ExecutionException ee) {
+				} catch (ExecutionException ee) { // NOSONAR
 					t = ee.getCause();
 				} catch (InterruptedException ie) {
 					Thread.currentThread().interrupt(); // ignore/reset

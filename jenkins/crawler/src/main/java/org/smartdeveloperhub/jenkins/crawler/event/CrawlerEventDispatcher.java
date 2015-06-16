@@ -26,29 +26,59 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
-import java.net.URI;
-import java.util.Date;
-import java.util.UUID;
+import static com.google.common.base.Preconditions.*;
 
-import com.google.common.base.MoreObjects.ToStringHelper;
+public final class CrawlerEventDispatcher {
 
-public abstract class JenkinsEvent extends Event<JenkinsEventVisitor>{
+	private static final class DispatchingVisitor extends CrawlerEventVisitor {
 
-	private final URI service;
+		private CrawlerEventListener listener;
 
-	JenkinsEvent(URI service, Date date) {
-		super(UUID.randomUUID(),date);
-		this.service = service;
+		DispatchingVisitor(CrawlerEventListener listener) {
+			this.listener = listener;
+		}
+
+		@Override
+		public void visitCrawlerStartedEvent(CrawlerStartedEvent event) {
+			this.listener.onCrawlerStartUp(event);
+		}
+
+		@Override
+		public void visitCrawlerStoppedEvent(CrawlerStoppedEvent event) {
+			this.listener.onCrawlerShutdown(event);
+		}
+
+		@Override
+		public void visitCrawlingStartedEvent(CrawlingStartedEvent event) {
+			this.listener.onCrawlingStartUp(event);
+		}
+
+		@Override
+		public void visitCrawlingAbortedEvent(CrawlingAbortedEvent event) {
+			this.listener.onCrawlingAbortion(event);
+		}
+
+		@Override
+		public void visitCrawlingCompletedEvent(CrawlingCompletedEvent event) {
+			this.listener.onCrawlingCompletion(event);
+		}
+
 	}
 
-	abstract void accept(JenkinsEventVisitor visitor);
+	private final DispatchingVisitor visitor;
 
-	public URI service() {
-		return this.service;
+	private CrawlerEventDispatcher(CrawlerEventListener listener) {
+		this.visitor=new DispatchingVisitor(listener);
 	}
 
-	protected void toString(ToStringHelper helper) {
-		helper.add("service", this.service);
+	public void fireEvent(CrawlerEvent event) {
+		checkNotNull(event,"Event cannot be null");
+		event.accept(this.visitor);
+	}
+
+	public static CrawlerEventDispatcher create(CrawlerEventListener listener) {
+		checkNotNull(listener,"Listener cannot be null");
+		return new CrawlerEventDispatcher(listener);
 	}
 
 }

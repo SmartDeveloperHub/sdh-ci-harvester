@@ -54,26 +54,65 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
 
 public final class JenkinsCrawler {
 
-	public static final class JenkinsCrawlerBuilder {
+	private static final class ConsoleLoggingEventListener implements JenkinsEventListener {
+
+		@Override
+		public void onExecutionUpdate(ExecutionUpdatedEvent event) {
+			Consoles.
+				defaultConsole().
+					printf("[%s] Updated execution %s%n",event.date(),event.executionId());
+		}
+
+		@Override
+		public void onExecutionDeletion(ExecutionDeletedEvent event) {
+			Consoles.
+				defaultConsole().
+					printf("[%s] Deleted execution %s%n",event.date(),event.executionId());
+		}
+
+		@Override
+		public void onExecutionCreation(ExecutionCreatedEvent event) {
+			Consoles.
+				defaultConsole().
+					printf("[%s] Created execution %s%n",event.date(),event.executionId());
+		}
+
+		@Override
+		public void onBuildDeletion(BuildDeletedEvent event) {
+			Consoles.
+				defaultConsole().
+					printf("[%s] Deleted build %s%n",event.date(),event.buildId());
+		}
+
+		@Override
+		public void onBuildCreation(BuildCreatedEvent event) {
+			Consoles.
+				defaultConsole().
+					printf("[%s] Created build %s%n",event.date(),event.buildId());
+		}
+
+	}
+
+	public static final class Builder {
 
 		private String location;
 		private File directory;
 		private JenkinsEventListener listener;
 
-		private JenkinsCrawlerBuilder() {
+		private Builder() {
 		}
 
-		public JenkinsCrawlerBuilder withListener(JenkinsEventListener listener) {
+		public Builder withListener(JenkinsEventListener listener) {
 			this.listener = listener;
 			return this;
 		}
 
-		public JenkinsCrawlerBuilder withLocation(String location) {
+		public Builder withLocation(String location) {
 			this.location = location;
 			return this;
 		}
 
-		public JenkinsCrawlerBuilder withDirectory(File directory) {
+		public Builder withDirectory(File directory) {
 			this.directory = directory;
 			return this;
 		}
@@ -191,8 +230,8 @@ public final class JenkinsCrawler {
 		LOGGER.info("Jenkins Crawler ({}) stopped.",this.instance);
 	}
 
-	public static JenkinsCrawlerBuilder builder() {
-		return new JenkinsCrawlerBuilder();
+	public static Builder builder() {
+		return new Builder();
 	}
 
 	public static void main(String[] args) {
@@ -205,29 +244,7 @@ public final class JenkinsCrawler {
 					builder().
 						withDirectory(tmpDirectory).
 						withLocation(location).
-						withListener(
-							new JenkinsEventListener() {
-								@Override
-								public void onExecutionUpdate(ExecutionUpdatedEvent event) {
-									System.out.printf("[%s] Updated execution %s%n",event.date(),event.executionId());
-								}
-								@Override
-								public void onExecutionDeletion(ExecutionDeletedEvent event) {
-									System.out.printf("[%s] Deleted execution %s%n",event.date(),event.executionId());
-								}
-								@Override
-								public void onExecutionCreation(ExecutionCreatedEvent event) {
-									System.out.printf("[%s] Created execution %s%n",event.date(),event.executionId());
-								}
-								@Override
-								public void onBuildDeletion(BuildDeletedEvent event) {
-									System.out.printf("[%s] Deleted build %s%n",event.date(),event.buildId());
-								}
-								@Override
-								public void onBuildCreation(BuildCreatedEvent event) {
-									System.out.printf("[%s] Created build %s%n",event.date(),event.buildId());
-								}
-						}).
+						withListener(new ConsoleLoggingEventListener()).
 						build();
 			crawler.start();
 			LOGGER.info("<<HIT ENTER TO STOP THE CRAWLER>>");

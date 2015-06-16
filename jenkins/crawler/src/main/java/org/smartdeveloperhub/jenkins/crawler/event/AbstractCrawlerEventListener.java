@@ -26,29 +26,31 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
-import java.net.URI;
-import java.util.Date;
-import java.util.UUID;
+public abstract class AbstractCrawlerEventListener implements CrawlerEventListener {
 
-import com.google.common.base.MoreObjects.ToStringHelper;
-
-public abstract class JenkinsEvent extends Event<JenkinsEventVisitor>{
-
-	private final URI service;
-
-	JenkinsEvent(URI service, Date date) {
-		super(UUID.randomUUID(),date);
-		this.service = service;
+	@Override
+	public void onCrawlerStartUp(CrawlerStartedEvent event) {
+		// To be implemented by subclasses
 	}
 
-	abstract void accept(JenkinsEventVisitor visitor);
-
-	public URI service() {
-		return this.service;
+	@Override
+	public void onCrawlerShutdown(CrawlerStoppedEvent crawlerStoppedEvent) {
+		// To be implemented by subclasses
 	}
 
-	protected void toString(ToStringHelper helper) {
-		helper.add("service", this.service);
+	@Override
+	public void onCrawlingStartUp(CrawlingStartedEvent event) {
+		// To be implemented by subclasses
+	}
+
+	@Override
+	public void onCrawlingAbortion(CrawlingAbortedEvent event) {
+		// To be implemented by subclasses
+	}
+
+	@Override
+	public void onCrawlingCompletion(CrawlingCompletedEvent event) {
+		// To be implemented by subclasses
 	}
 
 }

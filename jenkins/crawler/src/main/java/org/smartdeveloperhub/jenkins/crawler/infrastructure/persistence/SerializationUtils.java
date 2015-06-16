@@ -33,7 +33,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public final class SerializationUtils {
+final class SerializationUtils {
 
 	private SerializationUtils() {
 	}

@@ -172,7 +172,6 @@ abstract class AbstractCrawlingTask implements Task {
 
 	protected final void fireEvent(JenkinsEvent event) {
 		checkState(this.context!=null);
-		System.err.println(event);
 		this.context.fireEvent(event);
 	}
 

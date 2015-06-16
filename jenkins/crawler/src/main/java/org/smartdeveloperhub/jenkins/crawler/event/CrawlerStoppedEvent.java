@@ -26,29 +26,35 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
-import java.net.URI;
 import java.util.Date;
-import java.util.UUID;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
 
-public abstract class JenkinsEvent extends Event<JenkinsEventVisitor>{
+public final class CrawlerStoppedEvent extends CrawlerEvent {
 
-	private final URI service;
+	private final Date stoppedOn;
 
-	JenkinsEvent(URI service, Date date) {
-		super(UUID.randomUUID(),date);
-		this.service = service;
+	private CrawlerStoppedEvent(Date stoppedOn) {
+		super(new Date());
+		this.stoppedOn=stoppedOn;
 	}
 
-	abstract void accept(JenkinsEventVisitor visitor);
-
-	public URI service() {
-		return this.service;
+	public Date stoppedOn() {
+		return this.stoppedOn;
 	}
 
+	@Override
+	void accept(CrawlerEventVisitor visitor) {
+		visitor.visitCrawlerStoppedEvent(this);
+	}
+
+	@Override
 	protected void toString(ToStringHelper helper) {
-		helper.add("service", this.service);
+		helper.add("stoppedOn",this.stoppedOn);
+	}
+
+	static CrawlerStoppedEvent create(Date startedOn) {
+		return new CrawlerStoppedEvent(startedOn);
 	}
 
 }

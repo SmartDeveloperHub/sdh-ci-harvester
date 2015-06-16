@@ -193,7 +193,7 @@ public final class XmlUtils {
 				try {
 					is.close();
 				} catch (IOException e) {
-					// Ignore failure
+					LOGGER.warn("Could not close file output file",e);
 				}
 			}
 		}
