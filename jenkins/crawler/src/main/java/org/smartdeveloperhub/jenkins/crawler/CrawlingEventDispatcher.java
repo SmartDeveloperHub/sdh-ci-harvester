@@ -24,34 +24,12 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler;
 
-import java.util.Date;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
 
-public final class CrawlerEventFactory {
+interface CrawlingEventDispatcher {
 
-	private CrawlerEventFactory() {
-	}
-
-	public static CrawlerStartedEvent newCrawlerStartedEvent(Date startedOn) {
-		return CrawlerStartedEvent.create(startedOn);
-	}
-
-	public static CrawlerStoppedEvent newCrawlerStoppedEvent(Date stoppedOn) {
-		return CrawlerStoppedEvent.create(stoppedOn);
-	}
-
-	public static CrawlingStartedEvent newCrawlingStartedEvent(long sessionId, Date startedOn) {
-		return CrawlingStartedEvent.create(sessionId,startedOn);
-	}
-
-	public static CrawlingCompletedEvent newCrawlingCompletedEvent(long sessionId, Date completedOn) {
-		return CrawlingCompletedEvent.create(sessionId,completedOn);
-	}
-
-	public static CrawlingAbortedEvent newCrawlingAbortedEvent(long sessionId, Date abortedOn) {
-		return CrawlingAbortedEvent.create(sessionId,abortedOn);
-	}
-
+	void fireEvent(CrawlingEvent event);
 
 }

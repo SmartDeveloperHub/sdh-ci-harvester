@@ -30,19 +30,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
+import org.smartdeveloperhub.jenkins.crawler.util.ControlledScheduledExecutorService;
 import org.smartdeveloperhub.jenkins.crawler.util.Timer;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
 
@@ -50,75 +49,63 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 final class CrawlingController {
 
-	static class Builder {
+	private final class CrawlingBootstrap implements Runnable {
 
-		private TaskScheduler scheduler;
-		private URI instance;
-		private FileBasedStorage storage;
+		final class CrawlingSession {
 
-		private Builder() {
-		}
+			private final Timer timer;
+			private final long sessionId;
 
-		Builder withTaskScheduler(TaskScheduler scheduler) {
-			this.scheduler = scheduler;
-			return this;
-		}
+			private CrawlingSession() {
+				this.sessionId=session.incrementAndGet();
+				this.timer=new Timer();
+			}
 
-		Builder withJenkinsInstance(URI instance) {
-			this.instance = instance;
-			return this;
-		}
+			public void start() {
+				this.timer.start();
+				LOGGER.info("Started crawling {}...",jenkinsInstance());
+				fireEvent(CrawlerEventFactory.newCrawlingStartedEvent(sessionId,timer.startedOn()));
+			}
 
-		Builder withStorage(FileBasedStorage manager) {
-			this.storage=manager;
-			return this;
-		}
+			public void terminate() {
+				this.timer.stop();
+				fireEvent(createTerminationEvent(this.sessionId,this.timer));
+				LOGGER.info(
+					"Crawling of {} {}. Execution took {}",
+					jenkinsInstance(),
+					isAborted()?
+						"aborted":
+						"completed",
+					timer);
+			}
 
-		CrawlingController build() {
-			checkNotNull(this.instance);
-			checkNotNull(this.storage);
-			checkNotNull(this.scheduler);
-			return new CrawlingController(this.instance,this.storage,this.scheduler);
-
-		}
-
-	}
-
-	private static final class ControlledScheduledExecutorService extends ScheduledThreadPoolExecutor {
-
-		private ControlledScheduledExecutorService(int corePoolSize, ThreadFactory threadFactory) {
-			super(corePoolSize, threadFactory);
-		}
-
-		@Override
-		protected void afterExecute(Runnable r, Throwable t) {
-			super.afterExecute(r,t);
-			Throwable failure=t;
-			if(failure == null && r instanceof Future<?>) {
-				try {
-					Future<?> future = (Future<?>) r;
-					if(future.isDone()) {
-						future.get();
-					}
-				} catch (CancellationException ce) {
-					failure = ce;
-				} catch (ExecutionException ee) { // NOSONAR
-					failure = ee.getCause();
-				} catch (InterruptedException ie) {
-					Thread.currentThread().interrupt(); // ignore/reset
+			private CrawlingEvent createTerminationEvent(long sessionId, Timer timer) {
+				CrawlingEvent event=null;
+				if(!isAborted()) {
+					event=CrawlerEventFactory.newCrawlingCompletedEvent(sessionId,timer.stoppedOn());
+				} else {
+					event=CrawlerEventFactory.newCrawlingAbortedEvent(sessionId,timer.stoppedOn());
 				}
+				return event;
 			}
-			if(failure!=null) {
-				LOGGER.error(String.format("Runnable %s died",r.getClass().getName()),failure);
+
+			private boolean isAborted() {
+				return CrawlingBootstrap.this.terminate.get();
 			}
+
 		}
-	}
 
-	final class CrawlingBootstrap implements Runnable {
+		private final AtomicBoolean terminate;
+		private final AtomicLong session;
+		private final long timeOut;
+		private final TimeUnit unit;
 
-		private final long timeOut=1;
-		private final TimeUnit unit=TimeUnit.SECONDS;
-		private final AtomicBoolean terminate=new AtomicBoolean(false);
+		private CrawlingBootstrap(long timeOut, TimeUnit unit) {
+			this.timeOut = timeOut;
+			this.unit = unit;
+			this.session=new AtomicLong(0);
+			this.terminate=new AtomicBoolean(false);
+		}
 
 		@Override
 		public void run() {
@@ -128,19 +115,29 @@ final class CrawlingController {
 					jenkinsInstance());
 				return;
 			}
-			Timer timer=logStart();
-			boolean started=bootstrapCrawling();
-			if(started) {
+
+			CrawlingSession session=new CrawlingSession();
+			session.start();
+			if(bootstrapCrawling()) {
 				awaitCompletion();
+				persistState();
+				session.terminate();
 			}
-			logTermination(started,timer);
-			persistState();
+		}
+
+		private void fireEvent(CrawlingEvent event) {
+			CrawlingController.this.dispatcher.fireEvent(event);
 		}
 
 		private boolean bootstrapCrawling() {
 			boolean result=false;
 			try {
-				Service existingService = storage.entityOfId(jenkinsInstance(),JenkinsEntityType.SERVICE,Service.class);
+				Service existingService=
+					storage.
+						entityOfId(
+							jenkinsInstance(),
+							JenkinsEntityType.SERVICE,
+							Service.class);
 				Task task=null;
 				if(existingService==null) {
 					task=new LoadServiceTask(jenkinsInstance());
@@ -150,7 +147,7 @@ final class CrawlingController {
 				taskScheduler().schedule(task);
 				result=true;
 			} catch (IOException e) {
-				LOGGER.error("Could not bootstrap crawling process",e);
+				LOGGER.error("Could not start crawling {}",jenkinsInstance());
 			}
 			return result;
 		}
@@ -159,30 +156,8 @@ final class CrawlingController {
 			return CrawlingController.this.instance;
 		}
 
-		private Timer logStart() {
-			LOGGER.info("Started crawling {}...",jenkinsInstance());
-			Timer timer = new Timer();
-			timer.start();
-			return timer;
-		}
-
-		private void logTermination(boolean started, Timer timer) {
-			timer.stop();
-			if(started) {
-				LOGGER.info(
-						"Crawling of {} {}. Execution took {}",
-						jenkinsInstance(),
-						terminate.get()?
-							"aborted":
-							"completed",
-						timer);
-			} else {
-				LOGGER.error("Could not start crawling {}",jenkinsInstance());
-			}
-		}
-
 		private void awaitCompletion() {
-			while(taskScheduler().hasPendingTasks() && !terminate.get()) {
+			while(taskScheduler().hasPendingTasks() && !this.terminate.get()) {
 				try {
 					this.unit.sleep(this.timeOut);
 				} catch (InterruptedException e) {
@@ -201,6 +176,60 @@ final class CrawlingController {
 
 	}
 
+	static class Builder {
+
+		private TaskScheduler scheduler;
+		private URI instance;
+		private FileBasedStorage storage;
+		private CrawlingEventDispatcher dispatcher;
+
+		private Builder() {
+		}
+
+		private ScheduledExecutorService createPool() {
+			return
+				ControlledScheduledExecutorService.
+					builder().
+						withPoolSize(1).
+						withThreadFactory(
+							new ThreadFactoryBuilder().
+								setNameFormat("JenkinsCrawler-admin-%d").
+								build()
+						).
+						build();
+		}
+
+		Builder withTaskScheduler(TaskScheduler scheduler) {
+			this.scheduler = scheduler;
+			return this;
+		}
+
+		Builder withCrawlingEventDispatcher(CrawlingEventDispatcher dispatcher) {
+			this.dispatcher = dispatcher;
+			return this;
+		}
+
+		Builder withJenkinsInstance(URI instance) {
+			this.instance = instance;
+			return this;
+		}
+
+		Builder withStorage(FileBasedStorage manager) {
+			this.storage=manager;
+			return this;
+		}
+
+		CrawlingController build() {
+			checkNotNull(this.instance);
+			checkNotNull(this.storage);
+			checkNotNull(this.scheduler);
+			checkNotNull(this.dispatcher);
+			return new CrawlingController(this.instance,this.storage,this.scheduler,createPool(),this.dispatcher);
+
+		}
+
+	}
+
 	private static final Logger LOGGER=LoggerFactory.getLogger(CrawlingController.class);
 
 	private final ScheduledExecutorService pool;
@@ -210,12 +239,23 @@ final class CrawlingController {
 	private final TaskScheduler scheduler;
 	private final FileBasedStorage storage;
 
-	private CrawlingController(URI instance, FileBasedStorage storage, TaskScheduler scheduler) {
+	private final CrawlingEventDispatcher dispatcher;
+
+	private CrawlingController(URI instance, FileBasedStorage storage, TaskScheduler scheduler, ScheduledExecutorService pool, CrawlingEventDispatcher dispatcher) {
 		this.instance = instance;
 		this.storage = storage;
 		this.scheduler = scheduler;
-		this.pool=createPool();
-		this.bootstrap=new CrawlingBootstrap();
+		this.pool = pool;
+		this.dispatcher = dispatcher;
+		this.bootstrap=new CrawlingBootstrap(1,TimeUnit.SECONDS);
+	}
+
+	private void persistState() {
+		try {
+			CrawlingController.this.storage.save();
+		} catch (IOException e) {
+			LOGGER.warn("Could not persist crawler state",e);
+		}
 	}
 
 	void start() {
@@ -239,25 +279,8 @@ final class CrawlingController {
 		}
 	}
 
-	private void persistState() {
-		try {
-			CrawlingController.this.storage.save();
-		} catch (IOException e) {
-			LOGGER.warn("Could not persist crawler state",e);
-		}
-	}
-
 	static Builder builder() {
 		return new Builder();
-	}
-
-	private static ScheduledExecutorService createPool() {
-		ThreadFactory threadFactory =
-			new ThreadFactoryBuilder().
-				setNameFormat("JenkinsCrawler-admin-%d").
-				build();
-		return
-			new ControlledScheduledExecutorService(1, threadFactory);
 	}
 
 }

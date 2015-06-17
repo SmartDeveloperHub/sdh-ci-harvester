@@ -24,33 +24,23 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler;
 
-import java.util.Date;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
+import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
 
-public final class CrawlerEventFactory {
+final class DefaultCrawlingEventDispatcher implements CrawlingEventDispatcher {
 
-	private CrawlerEventFactory() {
+	private final ListenerManager<CrawlerEventListener> listeners;
+
+	DefaultCrawlingEventDispatcher(ListenerManager<CrawlerEventListener> listeners) {
+		this.listeners = listeners;
 	}
 
-	public static CrawlerStartedEvent newCrawlerStartedEvent(Date startedOn) {
-		return CrawlerStartedEvent.create(startedOn);
-	}
-
-	public static CrawlerStoppedEvent newCrawlerStoppedEvent(Date stoppedOn) {
-		return CrawlerStoppedEvent.create(stoppedOn);
-	}
-
-	public static CrawlingStartedEvent newCrawlingStartedEvent(long sessionId, Date startedOn) {
-		return CrawlingStartedEvent.create(sessionId,startedOn);
-	}
-
-	public static CrawlingCompletedEvent newCrawlingCompletedEvent(long sessionId, Date completedOn) {
-		return CrawlingCompletedEvent.create(sessionId,completedOn);
-	}
-
-	public static CrawlingAbortedEvent newCrawlingAbortedEvent(long sessionId, Date abortedOn) {
-		return CrawlingAbortedEvent.create(sessionId,abortedOn);
+	@Override
+	public void fireEvent(CrawlingEvent event) {
+		this.listeners.notify(new CrawlerEventNotification(event));
 	}
 
 

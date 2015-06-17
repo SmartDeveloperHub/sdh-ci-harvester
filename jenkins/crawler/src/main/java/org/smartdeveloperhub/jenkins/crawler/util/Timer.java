@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Date;
 import java.util.Locale;
 
 import org.joda.time.Duration;
@@ -103,6 +104,14 @@ public final class Timer {
 		checkState(this.started>0,TIMER_HAS_NOT_BEEN_STARTED);
 		checkState(this.finished<0,TIMER_HAS_ALREADY_BEEN_STOPPED);
 		this.finished=now;
+	}
+
+	public Date startedOn() {
+		return new Date(this.started);
+	}
+
+	public Date stoppedOn() {
+		return new Date(this.finished);
 	}
 
 	public long duration() {

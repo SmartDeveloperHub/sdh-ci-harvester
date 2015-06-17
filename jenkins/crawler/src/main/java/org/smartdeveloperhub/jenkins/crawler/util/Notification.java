@@ -24,34 +24,10 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler.util;
 
-import java.util.Date;
+public interface Notification<T> {
 
-public final class CrawlerEventFactory {
-
-	private CrawlerEventFactory() {
-	}
-
-	public static CrawlerStartedEvent newCrawlerStartedEvent(Date startedOn) {
-		return CrawlerStartedEvent.create(startedOn);
-	}
-
-	public static CrawlerStoppedEvent newCrawlerStoppedEvent(Date stoppedOn) {
-		return CrawlerStoppedEvent.create(stoppedOn);
-	}
-
-	public static CrawlingStartedEvent newCrawlingStartedEvent(long sessionId, Date startedOn) {
-		return CrawlingStartedEvent.create(sessionId,startedOn);
-	}
-
-	public static CrawlingCompletedEvent newCrawlingCompletedEvent(long sessionId, Date completedOn) {
-		return CrawlingCompletedEvent.create(sessionId,completedOn);
-	}
-
-	public static CrawlingAbortedEvent newCrawlingAbortedEvent(long sessionId, Date abortedOn) {
-		return CrawlingAbortedEvent.create(sessionId,abortedOn);
-	}
-
+	void propagate(T listener);
 
 }

@@ -35,76 +35,28 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
-import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.ResourceRepository;
 import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.BuildCreatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventDispatcher;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.transformation.TransformationManager;
-import org.smartdeveloperhub.jenkins.crawler.util.Consoles;
+import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
+import org.smartdeveloperhub.jenkins.crawler.util.Notification;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
 
 public final class JenkinsCrawler {
-
-	private static final class ConsoleLoggingEventListener implements JenkinsEventListener {
-
-		@Override
-		public void onExecutionUpdate(ExecutionUpdatedEvent event) {
-			Consoles.
-				defaultConsole().
-					printf("[%s] Updated execution %s%n",event.date(),event.executionId());
-		}
-
-		@Override
-		public void onExecutionDeletion(ExecutionDeletedEvent event) {
-			Consoles.
-				defaultConsole().
-					printf("[%s] Deleted execution %s%n",event.date(),event.executionId());
-		}
-
-		@Override
-		public void onExecutionCreation(ExecutionCreatedEvent event) {
-			Consoles.
-				defaultConsole().
-					printf("[%s] Created execution %s%n",event.date(),event.executionId());
-		}
-
-		@Override
-		public void onBuildDeletion(BuildDeletedEvent event) {
-			Consoles.
-				defaultConsole().
-					printf("[%s] Deleted build %s%n",event.date(),event.buildId());
-		}
-
-		@Override
-		public void onBuildCreation(BuildCreatedEvent event) {
-			Consoles.
-				defaultConsole().
-					printf("[%s] Created build %s%n",event.date(),event.buildId());
-		}
-
-	}
 
 	public static final class Builder {
 
 		private String location;
 		private File directory;
-		private JenkinsEventListener listener;
 
 		private Builder() {
-		}
-
-		public Builder withListener(JenkinsEventListener listener) {
-			this.listener = listener;
-			return this;
 		}
 
 		public Builder withLocation(String location) {
@@ -123,9 +75,6 @@ public final class JenkinsCrawler {
 				return
 					new JenkinsCrawler(
 						URI.create(this.location),
-						this.listener==null?
-							NullEventListener.getInstance():
-							this.listener,
 						createFileBasedStorage(),
 						ModelMappingService.
 							newInstance(TransformationManager.newInstance()));
@@ -147,13 +96,23 @@ public final class JenkinsCrawler {
 
 	}
 
-	private final class LocalContext implements Context {
+	private static final class JenkinsEventNotification implements Notification<JenkinsEventListener> {
 
-		private final JenkinsEventDispatcher dispatcher;
+		private JenkinsEvent event;
 
-		private LocalContext() {
-			this.dispatcher=JenkinsEventDispatcher.create(JenkinsCrawler.this.listener);
+		private JenkinsEventNotification(JenkinsEvent event) {
+			this.event = event;
 		}
+
+		@Override
+		public void propagate(JenkinsEventListener listener) {
+			JenkinsEventDispatcher.
+				create(listener).fireEvent(this.event);
+		}
+
+	}
+
+	private final class LocalContext implements Context {
 
 		@Override
 		public URI jenkinsInstance() {
@@ -177,97 +136,92 @@ public final class JenkinsCrawler {
 
 		@Override
 		public void fireEvent(JenkinsEvent event) {
-			this.dispatcher.fireEvent(event);
+			JenkinsCrawler.this.jenkinsEventListeners.notify(new JenkinsEventNotification(event));
 		}
 
 		@Override
 		public void schedule(Task task) {
-			JenkinsCrawler.this.taskScheduler.schedule(task);
+			JenkinsCrawler.this.scheduler.schedule(task);
 		}
 	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsCrawler.class);
 
+	private final ListenerManager<JenkinsEventListener> jenkinsEventListeners;
+	private final ListenerManager<CrawlerEventListener> crawlerEventListeners;
 
-	private URI instance;
-	private TaskScheduler taskScheduler;
-	private CrawlingController crawlingStrategy;
-	private FileBasedStorage storage;
-	private ModelMappingService mappingService;
-	private JenkinsEventListener listener;
+	private final URI instance;
+	private final TaskScheduler scheduler;
+	private final CrawlingController controller;
+	private final FileBasedStorage storage;
+	private final ModelMappingService mappingService;
 
-	private JenkinsCrawler(URI instance, JenkinsEventListener listener, FileBasedStorage storage, ModelMappingService mappingService) {
-		this.listener=listener;
+	private JenkinsCrawler(URI instance, FileBasedStorage storage, ModelMappingService mappingService) {
+		this.jenkinsEventListeners=ListenerManager.newInstance();
+		this.crawlerEventListeners=ListenerManager.newInstance();
 		this.instance=instance;
 		this.storage=storage;
 		this.mappingService=mappingService;
-		this.taskScheduler=
+		this.scheduler=
 			MultiThreadedTaskScheduler.
 				builder().
 					withContext(new LocalContext()).
 					build();
-		this.crawlingStrategy=
+		this.controller=
 			CrawlingController.
 				builder().
 					withStorage(this.storage).
+					withCrawlingEventDispatcher(
+						new DefaultCrawlingEventDispatcher(
+							this.crawlerEventListeners)).
 					withJenkinsInstance(this.instance).
-					withTaskScheduler(this.taskScheduler).
+					withTaskScheduler(this.scheduler).
 					build();
+	}
+
+	private void fireCrawlerEvent(CrawlerEvent event) {
+		this.crawlerEventListeners.notify(new CrawlerEventNotification(event));
 	}
 
 	public void start() {
 		LOGGER.info("Starting Jenkins Crawler ({})...",this.instance);
-		this.taskScheduler.start();
-		this.crawlingStrategy.start();
+		this.scheduler.start();
+		this.controller.start();
 		LOGGER.info("Jenkins Crawler ({}) started.",this.instance);
+		fireCrawlerEvent(CrawlerEventFactory.newCrawlerStartedEvent(new Date()));
 	}
 
 	public void stop() throws IOException {
 		LOGGER.info("Stopping Jenkins Crawler ({})...",this.instance);
-		this.crawlingStrategy.stop();
-		this.taskScheduler.stop();
+		this.controller.stop();
+		this.scheduler.stop();
 		this.storage.save();
 		LOGGER.info("Jenkins Crawler ({}) stopped.",this.instance);
+		fireCrawlerEvent(CrawlerEventFactory.newCrawlerStoppedEvent(new Date()));
+	}
+
+	public JenkinsCrawler registerListener(JenkinsEventListener listener) {
+		this.jenkinsEventListeners.registerListener(listener);
+		return this;
+	}
+
+	public JenkinsCrawler registerListener(CrawlerEventListener listener) {
+		this.crawlerEventListeners.registerListener(listener);
+		return this;
+	}
+
+	public JenkinsCrawler deregisterListener(JenkinsEventListener listener) {
+		this.jenkinsEventListeners.deregisterListener(listener);
+		return this;
+	}
+
+	public JenkinsCrawler deregisterListener(CrawlerEventListener listener) {
+		this.crawlerEventListeners.deregisterListener(listener);
+		return this;
 	}
 
 	public static Builder builder() {
 		return new Builder();
-	}
-
-	public static void main(String[] args) {
-		final File tmpDirectory = new File("target","jenkins"+new Date().getTime());
-		tmpDirectory.deleteOnExit();
-		String location="http://ci.jenkins-ci.org/";
-		try {
-			final JenkinsCrawler crawler=
-				JenkinsCrawler.
-					builder().
-						withDirectory(tmpDirectory).
-						withLocation(location).
-						withListener(new ConsoleLoggingEventListener()).
-						build();
-			crawler.start();
-			LOGGER.info("<<HIT ENTER TO STOP THE CRAWLER>>");
-			Consoles.defaultConsole().readLine();
-			crawler.stop();
-			FileBasedStorage tmp=
-					FileBasedStorage.
-						builder().
-							withConfigFile(new File(tmpDirectory,"repository.xml")).
-							build();
-			JenkinsResource resource=
-				tmp.
-					findResource(
-						URI.create("http://ci.jenkins-ci.org/job/jenkins_rc_branch/423/"),
-						JenkinsArtifactType.RESOURCE);
-			if(resource!=null) {
-				LOGGER.info(resource.toString());
-			}
-		} catch (JenkinsCrawlerException e) {
-			LOGGER.error("Could not create crawler",e);
-		} catch (IOException e) {
-			LOGGER.error("Unexpected failure",e);
-		}
 	}
 
 }
