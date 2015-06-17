@@ -37,6 +37,10 @@ public final class SimpleBuild extends Build {
 		super(serviceId,buildId,title);
 	}
 
+	SimpleBuild(SimpleBuild build) {
+		this(build.serviceId(),build.buildId(),build.title());
+	}
+
 	@Override
 	public void accept(BuildVisitor visitor) {
 		visitor.visitSimpleBuild(this);

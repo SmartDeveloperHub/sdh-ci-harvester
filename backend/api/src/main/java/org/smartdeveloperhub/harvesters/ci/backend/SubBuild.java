@@ -39,9 +39,17 @@ public final class SubBuild extends Build {
 	SubBuild() {
 	}
 
+	private SubBuild(URI serviceId, URI parentId, URI buildId, String title) {
+		super(serviceId,buildId,title);
+		setParentId(parentId);
+	}
+
 	SubBuild(CompositeBuild parent, URI buildId,String title) {
-		super(parent.serviceId(),buildId,title);
-		setParentId(parent.buildId());
+		this(parent.serviceId(),parent.buildId(),buildId,title);
+	}
+
+	SubBuild(SubBuild build) {
+		this(build.serviceId(),build.parentId(),build.buildId(),build.title());
 	}
 
 	protected void setParentId(URI parentId) {

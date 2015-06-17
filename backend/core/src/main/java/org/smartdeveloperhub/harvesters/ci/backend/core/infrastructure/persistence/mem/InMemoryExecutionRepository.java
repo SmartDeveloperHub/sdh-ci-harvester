@@ -45,7 +45,6 @@ public class InMemoryExecutionRepository implements ExecutionRepository {
 		this.executions=Maps.newConcurrentMap();
 	}
 
-
 	@Override
 	public void add(Execution entity) {
 		checkNotNull(entity,"Execution cannot be null");

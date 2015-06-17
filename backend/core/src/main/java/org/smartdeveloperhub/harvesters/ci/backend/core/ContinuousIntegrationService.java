@@ -51,6 +51,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteBuildComm
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteExecutionCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.FinishExecutionCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.UpdateBuildCommand;
 
 public class ContinuousIntegrationService {
 
@@ -143,17 +144,19 @@ public class ContinuousIntegrationService {
 
 	public Service getService(URI serviceId) {
 		checkNotNull(serviceId,"Service identifier be null");
-		return serviceRepository().serviceOfId(serviceId);
+		return Service.copy(serviceRepository().serviceOfId(serviceId));
 	}
 
 	public Build getBuild(URI buildId) {
 		checkNotNull(buildId,"Build identifier cannot be null");
-		return buildRepository().buildOfId(buildId);
+		Build build = buildRepository().buildOfId(buildId);
+		return Build.copy(build);
 	}
 
 	public Execution getExecution(URI executionId) {
 		checkNotNull(executionId,"Execution identifier cannot be null");
-		return executionRepository().executionOfId(executionId);
+		Execution execution = executionRepository().executionOfId(executionId);
+		return Execution.copy(execution);
 	}
 
 	public void registerService(RegisterServiceCommand aCommand) {
@@ -184,6 +187,17 @@ public class ContinuousIntegrationService {
 		build.setDescription(aCommand.description());
 		build.setCreatedOn(aCommand.createdOn());
 		buildRepository().add(build);
+	}
+
+	public void updateBuild(UpdateBuildCommand aCommand) {
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
+		URI buildId=aCommand.buildId();
+		Build build = buildRepository().buildOfId(buildId);
+		checkArgument(build!=null,BUILD_IS_NOT_REGISTERED,buildId);
+		build.setTitle(aCommand.title());
+		build.setCodebase(aCommand.codebase());
+		build.setDescription(aCommand.description());
+		build.setCreatedOn(aCommand.createdOn());
 	}
 
 	public void deleteBuild(DeleteBuildCommand aCommand) {

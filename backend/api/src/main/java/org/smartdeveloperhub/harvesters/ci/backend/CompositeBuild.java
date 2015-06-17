@@ -29,6 +29,7 @@ package org.smartdeveloperhub.harvesters.ci.backend;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
@@ -41,9 +42,17 @@ public final class CompositeBuild extends Build {
 	CompositeBuild() {
 	}
 
-	CompositeBuild(URI serviceId,URI buildId,String title) {
+	private CompositeBuild(URI serviceId,URI buildId,String title, List<URI> subBuilds) {
 		super(serviceId,buildId,title);
-		setSubBuilds(Lists.<URI>newArrayList());
+		setSubBuilds(Lists.newArrayList(subBuilds));
+	}
+
+	CompositeBuild(URI serviceId,URI buildId,String title) {
+		this(serviceId,buildId,title,Collections.<URI>emptyList());
+	}
+
+	CompositeBuild(CompositeBuild build) {
+		this(build.serviceId(),build.buildId(),build.title(),build.subBuilds());
 	}
 
 	protected void setSubBuilds(List<URI> subBuilds) {

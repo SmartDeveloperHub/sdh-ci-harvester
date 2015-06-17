@@ -39,6 +39,11 @@ public class Service {
 	private URI serviceId;
 	private List<URI> builds;
 
+	private Service(Service service) {
+		setServiceId(service.serviceId);
+		setBuilds(Lists.newArrayList(service.builds));
+	}
+
 	public Service(URI serviceId) {
 		setServiceId(serviceId);
 		setBuilds(Lists.<URI>newArrayList());
@@ -79,6 +84,13 @@ public class Service {
 
 	public List<URI> builds() {
 		return this.builds;
+	}
+
+	public static Service copy(Service service) {
+		if(service==null) {
+			return null;
+		}
+		return new Service(service);
 	}
 
 }

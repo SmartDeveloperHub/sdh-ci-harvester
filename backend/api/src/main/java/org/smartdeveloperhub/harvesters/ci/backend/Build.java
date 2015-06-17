@@ -36,6 +36,7 @@ import java.util.List;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Objects;
+import static com.google.common.base.Preconditions.*;
 import com.google.common.collect.Lists;
 
 public abstract class Build {
@@ -68,13 +69,13 @@ public abstract class Build {
 		this.buildId = buildId;
 	}
 
-	protected final void setTitle(String title) {
-		this.title = checkNotNull(title,"Title cannot be null");
-	}
-
 	protected final void setExecutions(List<URI> executions) {
 		checkNotNull(executions,"Executions cannot be null");
 		this.executions=executions;
+	}
+
+	public final void setTitle(String title) {
+		this.title = checkNotNull(title,"Title cannot be null");
 	}
 
 	public final void setCodebase(URI codebase) {
@@ -117,23 +118,23 @@ public abstract class Build {
 		return this.description;
 	}
 
-	public Date createdOn() {
+	public final Date createdOn() {
 		return this.createdOn;
 	}
 
-	public Execution addExecution(URI executionId, Date createdOn) {
+	public final Execution addExecution(URI executionId, Date createdOn) {
 		checkArgument(!executions().contains(executionId),"An execution with id '%s' already exists",executionId);
 		Execution execution=new Execution(buildId(), executionId, createdOn);
 		this.executions().add(execution.executionId());
 		return execution;
 	}
 
-	public void removeExecution(Execution execution) {
+	public final void removeExecution(Execution execution) {
 		checkArgument(execution.buildId().equals(this.buildId),"Execution does not belong to build");
 		this.executions().add(execution.executionId());
 	}
 
-	public List<URI> executions() {
+	public final List<URI> executions() {
 		return this.executions;
 	}
 
@@ -172,5 +173,26 @@ public abstract class Build {
 	}
 
 	public abstract void accept(BuildVisitor visitor);
+
+	public static Build copy(Build build) {
+		if(build==null) {
+			return null;
+		}
+		Build copy = tryCopy(build);
+		checkState(copy!=null,"Unknown build class '%s'",build.getClass().getCanonicalName());
+		return copy;
+	}
+
+	private static Build tryCopy(Build build) {
+		Build copy=null;
+		if(build instanceof SimpleBuild) {
+			copy=new SimpleBuild((SimpleBuild)build);
+		} else if(build instanceof CompositeBuild) {
+			copy=new CompositeBuild((CompositeBuild)build);
+		} else if(build instanceof SubBuild) {
+			copy=new SubBuild((SubBuild)build);
+		}
+		return copy;
+	}
 
 }

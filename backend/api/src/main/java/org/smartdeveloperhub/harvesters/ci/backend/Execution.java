@@ -44,11 +44,16 @@ public final class Execution {
 	private Date createdOn;
 	private Result result;
 
+	private Execution(Execution execution) {
+		this(execution.buildId(),execution.buildId(),execution.createdOn());
+		this.result=execution.result;
+	}
+
 	Execution() {
 		this.result=UNAVAILABLE_RESULT;
 	}
 
-	public Execution(URI buildId, URI executionId, Date createdOn) {
+	Execution(URI buildId, URI executionId, Date createdOn) {
 		this();
 		setBuildId(buildId);
 		setExecutionId(executionId);
@@ -123,6 +128,13 @@ public final class Execution {
 					add("createdOn",this.createdOn).
 					add("result",this.result).
 					toString();
+	}
+
+	public static Execution copy(Execution execution) {
+		if(execution==null) {
+			return null;
+		}
+		return new Execution(execution);
 	}
 
 }
