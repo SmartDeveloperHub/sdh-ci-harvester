@@ -155,15 +155,15 @@ public final class Transformation {
 	}
 
 	private static <R> ResultAdapter<R> toResultAdapter(Class<? extends R> result) {
-		throw new UnsupportedOperationException("Method not implemented yet");
+		throw new UnsupportedOperationException("Method not implemented yet. Cannot provide ResultAdapter for '"+result.getCanonicalName()+"'");
 	}
 
 	private static <R> Result toResult(R result) {
-		throw new UnsupportedOperationException("Method not implemented yet");
+		throw new UnsupportedOperationException("Method not implemented yet. Cannot provide Result for '"+result.getClass().getCanonicalName()+"'");
 	}
 
 	private static <T> MemoizedSource toSource(T rawSource) {
-		throw new UnsupportedOperationException("Method not supported yet");
+		throw new UnsupportedOperationException("Method not supported yet. Cannot provide MemoizedSource for '"+rawSource.getClass().getCanonicalName()+"'");
 	}
 
 }

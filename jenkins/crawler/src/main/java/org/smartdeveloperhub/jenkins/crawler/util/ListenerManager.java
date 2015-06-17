@@ -37,7 +37,7 @@ public final class ListenerManager<T> {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(ListenerManager.class);
 
-	private final CopyOnWriteArrayList<T> listeners;
+	private final CopyOnWriteArrayList<T> listeners; // NOSONAR
 
 	private ListenerManager() {
 		this.listeners=Lists.newCopyOnWriteArrayList();

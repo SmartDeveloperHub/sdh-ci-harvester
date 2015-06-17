@@ -46,6 +46,9 @@ public final class JenkinsCrawlerExec {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsCrawlerExec.class);
 
+	private JenkinsCrawlerExec() {
+	}
+
 	public static void main(String[] args) {
 		File tmpDirectory = new File("target","jenkins"+new Date().getTime());
 		tmpDirectory.deleteOnExit();

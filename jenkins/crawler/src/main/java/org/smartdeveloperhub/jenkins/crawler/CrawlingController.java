@@ -57,7 +57,7 @@ final class CrawlingController {
 			private final long sessionId;
 
 			private CrawlingSession() {
-				this.sessionId=session.incrementAndGet();
+				this.sessionId=sessionCounter.incrementAndGet();
 				this.timer=new Timer();
 			}
 
@@ -96,14 +96,14 @@ final class CrawlingController {
 		}
 
 		private final AtomicBoolean terminate;
-		private final AtomicLong session;
+		private final AtomicLong sessionCounter;
 		private final long timeOut;
 		private final TimeUnit unit;
 
 		private CrawlingBootstrap(long timeOut, TimeUnit unit) {
 			this.timeOut = timeOut;
 			this.unit = unit;
-			this.session=new AtomicLong(0);
+			this.sessionCounter=new AtomicLong(0);
 			this.terminate=new AtomicBoolean(false);
 		}
 
@@ -147,7 +147,7 @@ final class CrawlingController {
 				taskScheduler().schedule(task);
 				result=true;
 			} catch (IOException e) {
-				LOGGER.error("Could not start crawling {}",jenkinsInstance());
+				LOGGER.error("Could not start crawling "+jenkinsInstance(),e);
 			}
 			return result;
 		}
