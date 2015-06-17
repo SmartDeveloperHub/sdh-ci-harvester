@@ -51,12 +51,11 @@ final class LoadJobTask extends AbstractCrawlingTask {
 	@Override
 	protected void processResource(JenkinsResource resource) throws IOException {
 		Build build = super.loadBuild(resource);
+		persistEntity(build,resource.entity());
 
 		super.fireEvent(
 			JenkinsEventFactory.
 				newBuildCreationEvent(super.jenkinsInstance(),build));
-
-		persistEntity(build,resource.entity());
 
 		scheduleTask(new LoadJobConfigurationTask(super.location(),build,resource.entity()));
 		scheduleTask(new LoadJobSCMTask(super.location(),build));
@@ -68,12 +67,8 @@ final class LoadJobTask extends AbstractCrawlingTask {
 			}
 		}
 
-		boolean first=true;
 		for(Reference ref:build.getRuns().getRuns()) {
-			if(first) {
-				scheduleTask(new LoadRunTask(ref.getValue()));
-				first=false;
-			}
+			scheduleTask(new LoadRunTask(ref.getValue()));
 		}
 
 	}

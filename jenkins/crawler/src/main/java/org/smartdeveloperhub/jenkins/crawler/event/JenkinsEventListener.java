@@ -30,6 +30,8 @@ public interface JenkinsEventListener {
 
 	void onBuildCreation(BuildCreatedEvent event);
 
+	void onBuildUpdate(BuildUpdatedEvent event);
+
 	void onBuildDeletion(BuildDeletedEvent event);
 
 	void onExecutionCreation(ExecutionCreatedEvent event);

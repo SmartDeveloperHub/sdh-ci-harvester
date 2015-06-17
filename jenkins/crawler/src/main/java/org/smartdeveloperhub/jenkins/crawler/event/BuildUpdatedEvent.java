@@ -24,44 +24,50 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.event;
 
-import org.smartdeveloperhub.jenkins.crawler.event.BuildCreatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
+import java.net.URI;
+import java.util.Date;
 
-final class NullEventListener implements JenkinsEventListener {
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
 
-	private static final NullEventListener DEFAULT=new NullEventListener();
+import com.google.common.base.MoreObjects.ToStringHelper;
 
-	private NullEventListener() {
+public final class BuildUpdatedEvent extends JenkinsEvent {
+
+	private Build build;
+
+	private BuildUpdatedEvent(URI service, Date date) {
+		super(service,date);
+	}
+
+	BuildUpdatedEvent withBuild(Build build) {
+		this.build = build;
+		return this;
+	}
+
+	Build build() {
+		return this.build;
 	}
 
 	@Override
-	public void onExecutionUpdate(ExecutionUpdatedEvent event) {
-		// Nothing to do
-	}
-	@Override
-	public void onExecutionDeletion(ExecutionDeletedEvent event) {
-		// Nothing to do
-	}
-	@Override
-	public void onExecutionCreation(ExecutionCreatedEvent event) {
-		// Nothing to do
-	}
-	@Override
-	public void onBuildDeletion(BuildDeletedEvent event) {
-		// Nothing to do
-	}
-	@Override
-	public void onBuildCreation(BuildCreatedEvent event) {
-		// Nothing to do
+	void accept(JenkinsEventVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitBuildUpdatedEvent(this);
+		}
 	}
 
-	static JenkinsEventListener getInstance() {
-		return DEFAULT;
+	public URI buildId() {
+		return this.build.getUrl();
 	}
+
+	@Override
+	protected void toString(ToStringHelper helper) {
+		helper.add("buildId", buildId());
+	}
+
+	static BuildUpdatedEvent create(URI service) {
+		return new BuildUpdatedEvent(service, new Date());
+	}
+
 }

@@ -40,6 +40,10 @@ public final class JenkinsEventFactory {
 		return BuildCreatedEvent.create(service).withBuild(build);
 	}
 
+	public static BuildUpdatedEvent newBuildUpdatedEvent(URI service, Build build) {
+		return BuildUpdatedEvent.create(service).withBuild(build);
+	}
+
 	public static BuildDeletedEvent newBuildDeletionEvent(URI service, URI build) {
 		return BuildDeletedEvent.create(service,build);
 	}

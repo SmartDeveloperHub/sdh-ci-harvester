@@ -32,6 +32,10 @@ abstract class JenkinsEventVisitor implements EventVisitor {
 		// To be implemented by subclasses
 	}
 
+	void visitBuildUpdatedEvent(BuildUpdatedEvent event) {
+		// To be implemented by subclasses
+	}
+
 	void visitBuildDeletionEvent(BuildDeletedEvent event) {
 		// To be implemented by subclasses
 	}

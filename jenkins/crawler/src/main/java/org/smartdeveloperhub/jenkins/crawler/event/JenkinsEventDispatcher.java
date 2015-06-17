@@ -34,13 +34,18 @@ public final class JenkinsEventDispatcher {
 
 		private JenkinsEventListener listener;
 
-		DispatchingVisitor(JenkinsEventListener listener) {
+		private DispatchingVisitor(JenkinsEventListener listener) {
 			this.listener = listener;
 		}
 
 		@Override
 		void visitBuildCreationEvent(BuildCreatedEvent event) {
 			this.listener.onBuildCreation(event);
+		}
+
+		@Override
+		void visitBuildUpdatedEvent(BuildUpdatedEvent event) {
+			this.listener.onBuildUpdate(event);
 		}
 
 		@Override

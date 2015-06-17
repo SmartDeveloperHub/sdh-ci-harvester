@@ -34,7 +34,7 @@ public final class CrawlerEventDispatcher {
 
 		private CrawlerEventListener listener;
 
-		DispatchingVisitor(CrawlerEventListener listener) {
+		private DispatchingVisitor(CrawlerEventListener listener) {
 			this.listener = listener;
 		}
 

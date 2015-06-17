@@ -28,6 +28,7 @@ package org.smartdeveloperhub.jenkins.crawler.cli;
 
 import org.smartdeveloperhub.jenkins.crawler.event.BuildCreatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.BuildUpdatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdatedEvent;
@@ -69,6 +70,13 @@ final class ConsoleLoggingJenkinsEventListener implements JenkinsEventListener {
 		Consoles.
 			defaultConsole().
 				printf("[%s] Created build %s%n",event.date(),event.buildId());
+	}
+
+	@Override
+	public void onBuildUpdate(BuildUpdatedEvent event) {
+		Consoles.
+			defaultConsole().
+				printf("[%s] Updated build %s%n",event.date(),event.buildId());
 	}
 
 }

@@ -26,7 +26,6 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import java.io.IOException;
 import java.net.URI;
 
 import org.slf4j.Logger;
@@ -34,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
 import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
 
@@ -51,7 +51,7 @@ final class LoadJobConfigurationTask extends AbstractCrawlingSubTask<Build> {
 	}
 
 	@Override
-	protected void processSubresource(Build parent, JenkinsResource resource) throws IOException {
+	protected void processSubresource(Build parent, JenkinsResource resource) {
 		try {
 			String rawURI=
 				XmlUtils.
@@ -60,6 +60,7 @@ final class LoadJobConfigurationTask extends AbstractCrawlingSubTask<Build> {
 						resource.content().get());
 			parent.withCodebase(URI.create(rawURI));
 			persistEntity(parent, entityType());
+			super.fireEvent(JenkinsEventFactory.newBuildUpdatedEvent(super.jenkinsInstance(),parent));
 		} catch (Exception e) {
 			LOGGER.error("Could not recover SCM information",e);
 		}
