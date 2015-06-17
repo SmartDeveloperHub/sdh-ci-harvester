@@ -26,37 +26,6 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.net.URI;
-
-import com.google.common.base.MoreObjects;
-
-public final class DeleteExecutionCommand implements Command {
-
-	private final URI executionId;
-
-	private DeleteExecutionCommand(URI executionId) {
-		this.executionId = executionId;
-	}
-
-	public URI executionId() {
-		return this.executionId;
-	}
-
-	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					add("executionId",this.executionId).
-					toString();
-	}
-
-	public static DeleteExecutionCommand create(URI executionId) {
-		return
-			new DeleteExecutionCommand(
-				checkNotNull(executionId,"Execution identifier cannot be null"));
-	}
+public interface Command {
 
 }

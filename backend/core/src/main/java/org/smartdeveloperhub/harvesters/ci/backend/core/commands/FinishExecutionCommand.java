@@ -26,18 +26,58 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.net.URI;
 import java.util.Date;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 
-public class FinishExecutionCommand {
+import com.google.common.base.MoreObjects;
+
+public final class FinishExecutionCommand implements Command {
+
+	public static final class Builder {
+
+		private URI executionId;
+		private Status status;
+		private Date finishedOn;
+
+		private Builder() {
+			this.status=Status.PASSED;
+		}
+
+		public Builder withExecutionId(URI executionId) {
+			this.executionId = executionId;
+			return this;
+		}
+
+		public Builder withStatus(Status status) {
+			this.status = status;
+			return this;
+		}
+
+		public Builder withFinishedOn(Date finishedOn) {
+			this.finishedOn = finishedOn;
+			return this;
+		}
+
+		public FinishExecutionCommand build() {
+			return
+				new FinishExecutionCommand(
+					checkNotNull(this.executionId,"Execution identifier cannot be null"),
+					checkNotNull(this.status,"Status cannot be null"),
+					checkNotNull(this.finishedOn,"Finalization date cannot be null")
+				);
+		}
+
+	}
 
 	private final URI executionId;
 	private final Status status;
 	private final Date finishedOn;
 
-	public FinishExecutionCommand(URI executionId, Status status, Date finishedOn) {
+	private FinishExecutionCommand(URI executionId, Status status, Date finishedOn) {
 		this.executionId = executionId;
 		this.status = status;
 		this.finishedOn = finishedOn;
@@ -48,11 +88,26 @@ public class FinishExecutionCommand {
 	}
 
 	public Status status() {
-		return status;
+		return this.status;
 	}
 
 	public Date finishedOn() {
-		return finishedOn;
+		return this.finishedOn;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("executionId",this.executionId).
+					add("status",this.status).
+					add("finishedOn",this.finishedOn).
+					toString();
+	}
+
+	public static Builder builder() {
+		return new Builder();
 	}
 
 }

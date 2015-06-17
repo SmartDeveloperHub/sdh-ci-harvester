@@ -105,7 +105,7 @@ public class ContinuousIntegrationService {
 	private BuildRepository buildRepository;
 	private ExecutionRepository executionRepository;
 
-	public ContinuousIntegrationService(BuildRepository buildRepository, ServiceRepository serviceRepository, ExecutionRepository executionRepository) {
+	public ContinuousIntegrationService(ServiceRepository serviceRepository, BuildRepository buildRepository, ExecutionRepository executionRepository) {
 		setServiceRepository(serviceRepository);
 		setBuildRepository(buildRepository);
 		setExecutionRepository(executionRepository);

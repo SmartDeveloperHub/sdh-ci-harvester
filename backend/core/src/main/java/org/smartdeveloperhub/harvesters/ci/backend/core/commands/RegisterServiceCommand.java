@@ -28,16 +28,35 @@ package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
 
 import java.net.URI;
 
-public class RegisterServiceCommand {
+import com.google.common.base.MoreObjects;
+
+import static com.google.common.base.Preconditions.*;
+
+public final class RegisterServiceCommand implements Command {
 
 	private final URI serviceId;
 
-	public RegisterServiceCommand(URI serviceId) {
+	private RegisterServiceCommand(URI serviceId) {
 		this.serviceId = serviceId;
 	}
 
 	public URI serviceId() {
 		return this.serviceId;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("serviceId",this.serviceId).
+					toString();
+	}
+
+	public static RegisterServiceCommand create(URI serviceId) {
+		return
+			new RegisterServiceCommand(
+				checkNotNull(serviceId,"Service identifier cannot be null"));
 	}
 
 }

@@ -26,19 +26,38 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.net.URI;
 
+import com.google.common.base.MoreObjects;
 
-public class DeleteBuildCommand {
+
+public final class DeleteBuildCommand implements Command {
 
 	private final URI buildId;
 
-	public DeleteBuildCommand(URI buildId) {
+	private DeleteBuildCommand(URI buildId) {
 		this.buildId = buildId;
 	}
 
 	public URI buildId() {
 		return this.buildId;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("buildId",this.buildId).
+					toString();
+	}
+
+	public static DeleteBuildCommand create(URI buildId) {
+		return
+			new DeleteBuildCommand(
+				checkNotNull(buildId,"Build identifier cannot be null"));
 	}
 
 }

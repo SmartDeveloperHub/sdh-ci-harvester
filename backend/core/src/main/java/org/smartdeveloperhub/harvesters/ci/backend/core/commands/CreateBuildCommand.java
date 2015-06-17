@@ -26,36 +26,27 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.net.URI;
 import java.util.Date;
 
-import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 
-import static com.google.common.base.Preconditions.*;
+public final class CreateBuildCommand extends BuildCommand {
 
-public final class CreateBuildCommand {
-
-	public static final class Builder {
+	public static final class Builder extends BuildCommandBuilder<CreateBuildCommand,Builder> {
 
 		private URI serviceId;
-		private URI buildId;
 		private boolean simple;
-		private String title;
-		private String description;
-		private Date creationDate;
-		private URI codebase;
 
 		private Builder() {
+			super(Builder.class);
 			this.simple=true;
 		}
 
 		public Builder withServiceId(URI serviceId) {
 			this.serviceId=serviceId;
-			return this;
-		}
-
-		public Builder withBuildId(URI buildId) {
-			this.buildId = buildId;
 			return this;
 		}
 
@@ -69,101 +60,44 @@ public final class CreateBuildCommand {
 			return this;
 		}
 
-		public Builder withTitle(String title) {
-			this.title=title;
-			return this;
-		}
-
-		public Builder withDescription(String description) {
-			this.description=description;
-			return this;
-		}
-
-		public Builder withCreationDate(Date creationDate) {
-			this.creationDate=creationDate;
-			return this;
-		}
-
-		public Builder withCodebase(URI codebase) {
-			this.codebase = codebase;
-			return this;
-		}
-
+		@Override
 		public CreateBuildCommand build() {
 			return
 				new CreateBuildCommand(
 					checkNotNull(this.serviceId,"Service identifier cannot be null"),
-					checkNotNull(this.buildId,"Build identifier cannot be null"),
+					checkNotNull(super.buildId(),"Build identifier cannot be null"),
 					this.simple,
-					checkNotNull(this.title,"Title cannot be null"),
-					this.description,
-					checkNotNull(this.creationDate,"Creation date cannot be null"),
-					this.codebase
+					checkNotNull(super.title(),"Title cannot be null"),
+					super.description(),
+					super.createdOn(),
+					super.codebase()
 				);
 		}
 
 	}
 
 	private final URI serviceId;
-	private final URI buildId;
 	private final boolean simple;
-	private final String title;
-	private final String description;
-	private final Date createdOn;
-	private final URI codebase;
 
 	private CreateBuildCommand(URI serviceId, URI buildId, boolean simple, String title, String description, Date creationDate, URI codebase) {
+		super(buildId,title,description,creationDate,codebase);
 		this.serviceId = serviceId;
-		this.buildId = buildId;
 		this.simple = simple;
-		this.title = title;
-		this.description = description;
-		this.createdOn = creationDate;
-		this.codebase = codebase;
 	}
 
 	public URI serviceId() {
 		return this.serviceId;
 	}
 
-	public URI buildId() {
-		return this.buildId;
-	}
-
 	public boolean simple() {
 		return this.simple;
 	}
 
-	public String title() {
-		return this.title;
-	}
-
-	public String description() {
-		return this.description;
-	}
-
-	public Date createdOn() {
-		return this.createdOn;
-	}
-
-	public URI codebase() {
-		return this.codebase;
-	}
-
 	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					omitNullValues().
-					add("serviceId", this.serviceId).
-					add("buildId", this.buildId).
-					add("simple", this.simple).
-					add("title", this.title).
-					add("description", this.description).
-					add("createdOn", this.createdOn).
-					add("codebase", this.codebase).
-					toString();
+	protected void toString(ToStringHelper helper) {
+		helper.
+			add("serviceId", this.serviceId).
+			add("simple", this.simple);
 	}
 
 	public static Builder builder() {

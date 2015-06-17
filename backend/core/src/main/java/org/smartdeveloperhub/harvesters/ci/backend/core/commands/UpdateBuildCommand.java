@@ -26,107 +26,42 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.net.URI;
 import java.util.Date;
 
-import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 
-import static com.google.common.base.Preconditions.*;
+public final class UpdateBuildCommand extends BuildCommand {
 
-public final class UpdateBuildCommand {
+	public static final class Builder extends BuildCommandBuilder<UpdateBuildCommand,Builder> {
 
-	public static final class Builder {
-
-		private URI buildId;
-		private String title;
-		private String description;
-		private Date creationDate;
-		private URI codebase;
-
-		public Builder withBuildId(URI buildId) {
-			this.buildId = buildId;
-			return this;
+		private Builder() {
+			super(Builder.class);
 		}
 
-		public Builder withTitle(String title) {
-			this.title=title;
-			return this;
-		}
-
-		public Builder withDescription(String description) {
-			this.description=description;
-			return this;
-		}
-
-		public Builder withCreationDate(Date creationDate) {
-			this.creationDate=creationDate;
-			return this;
-		}
-
-		public Builder withCodebase(URI codebase) {
-			this.codebase = codebase;
-			return this;
-		}
-
+		@Override
 		public UpdateBuildCommand build() {
 			return
 				new UpdateBuildCommand(
-					checkNotNull(this.buildId,"Build identifier cannot be null"),
-					checkNotNull(this.title,"Title cannot be null"),
-					this.description,
-					checkNotNull(this.creationDate,"Creation date cannot be null"),
-					this.codebase
+					checkNotNull(super.buildId(),"Build identifier cannot be null"),
+					checkNotNull(super.title(),"Title cannot be null"),
+					super.description(),
+					super.createdOn(),
+					super.codebase()
 				);
 		}
 
 	}
 
-	private final URI buildId;
-	private final String title;
-	private final String description;
-	private final Date createdOn;
-	private final URI codebase;
-
 	private UpdateBuildCommand(URI buildId, String title, String description, Date creationDate, URI codebase) {
-		this.buildId = buildId;
-		this.title = title;
-		this.description = description;
-		this.createdOn = creationDate;
-		this.codebase = codebase;
-	}
-
-	public URI buildId() {
-		return this.buildId;
-	}
-
-	public String title() {
-		return this.title;
-	}
-
-	public String description() {
-		return this.description;
-	}
-
-	public Date createdOn() {
-		return this.createdOn;
-	}
-
-	public URI codebase() {
-		return this.codebase;
+		super(buildId,title,description,creationDate,codebase);
 	}
 
 	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					omitNullValues().
-					add("buildId", this.buildId).
-					add("title", this.title).
-					add("description", this.description).
-					add("createdOn", this.createdOn).
-					add("codebase", this.codebase).
-					toString();
+	protected void toString(ToStringHelper helper) {
+		// Nothing to add
 	}
 
 	public static Builder builder() {

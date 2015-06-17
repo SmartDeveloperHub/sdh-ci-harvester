@@ -32,6 +32,7 @@ import javax.persistence.EntityTransaction;
 
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
 
 public final class PersistencyFacade {
 
@@ -73,6 +74,18 @@ public final class PersistencyFacade {
 	public BuildRepository getBuildRepository() {
 		return
 			new JPABuildRepository(
+				new EntityManagerProvider(){
+					@Override
+					public EntityManager entityManager() {
+						return getManager();
+					}
+				}
+			);
+	}
+
+	public ServiceRepository getServiceRepository() {
+		return
+			new JPAServiceRepository(
 				new EntityManagerProvider(){
 					@Override
 					public EntityManager entityManager() {

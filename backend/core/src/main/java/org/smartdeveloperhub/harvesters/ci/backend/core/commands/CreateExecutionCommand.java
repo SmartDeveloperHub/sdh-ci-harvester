@@ -29,13 +29,52 @@ package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
 import java.net.URI;
 import java.util.Date;
 
-public class CreateExecutionCommand {
+import com.google.common.base.MoreObjects;
+
+import static com.google.common.base.Preconditions.*;
+
+public final class CreateExecutionCommand implements Command {
+
+	public static final class Builder {
+
+		private URI buildId;
+		private Date createdOn;
+		private URI executionId;
+
+		private Builder() {
+		}
+
+		public Builder withBuildId(URI buildId) {
+			this.buildId = buildId;
+			return this;
+		}
+
+		public Builder withExecutionId(URI buildId) {
+			this.executionId = buildId;
+			return this;
+		}
+
+		public Builder withCreatedOn(Date createdOn) {
+			this.createdOn = createdOn;
+			return this;
+		}
+
+		public CreateExecutionCommand build() {
+			return
+				new CreateExecutionCommand(
+					checkNotNull(this.buildId,"Build identifier cannot be null"),
+					checkNotNull(this.executionId,"Execution identifier cannot be null"),
+					checkNotNull(this.createdOn,"Creation date cannot be null")
+				);
+		}
+
+	}
 
 	private final URI executionId;
 	private final URI buildId;
 	private final Date createdOn;
 
-	public CreateExecutionCommand(URI buildId, URI executionId, Date createdOn) {
+	private CreateExecutionCommand(URI buildId, URI executionId, Date createdOn) {
 		this.executionId = executionId;
 		this.buildId = buildId;
 		this.createdOn = createdOn;
@@ -51,6 +90,21 @@ public class CreateExecutionCommand {
 
 	public Date createdOn() {
 		return this.createdOn;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("buildId",this.buildId).
+					add("executionId",this.executionId).
+					add("createdOn",this.createdOn).
+					toString();
+	}
+
+	public static Builder builder() {
+		return new Builder();
 	}
 
 }
