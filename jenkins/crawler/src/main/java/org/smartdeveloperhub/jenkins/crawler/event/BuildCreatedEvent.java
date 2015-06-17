@@ -61,9 +61,25 @@ public final class BuildCreatedEvent extends JenkinsEvent {
 		return this.build.getUrl();
 	}
 
+	public String title() {
+		return build.getTitle();
+	}
+
+	public String description() {
+		return build.getDescription();
+	}
+
+	public URI codebase() {
+		return build.getCodebase();
+	}
+
 	@Override
 	protected void toString(ToStringHelper helper) {
-		helper.add("buildId", buildId());
+		helper.
+			add("buildId", buildId()).
+			add("title", title()).
+			add("description", description()).
+			add("codebase", codebase());
 	}
 
 	static BuildCreatedEvent create(URI service) {

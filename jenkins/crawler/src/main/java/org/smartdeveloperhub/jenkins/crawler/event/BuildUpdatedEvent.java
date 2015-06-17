@@ -57,13 +57,29 @@ public final class BuildUpdatedEvent extends JenkinsEvent {
 		}
 	}
 
+	public String title() {
+		return build.getTitle();
+	}
+
+	public String description() {
+		return build.getDescription();
+	}
+
+	public URI codebase() {
+		return build.getCodebase();
+	}
+
 	public URI buildId() {
 		return this.build.getUrl();
 	}
 
 	@Override
 	protected void toString(ToStringHelper helper) {
-		helper.add("buildId", buildId());
+		helper.
+			add("buildId", buildId()).
+			add("title", title()).
+			add("description", description()).
+			add("codebase", codebase());
 	}
 
 	static BuildUpdatedEvent create(URI service) {

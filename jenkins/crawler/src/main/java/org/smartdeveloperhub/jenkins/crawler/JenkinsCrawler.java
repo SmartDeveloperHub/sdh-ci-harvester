@@ -183,6 +183,10 @@ public final class JenkinsCrawler {
 		this.crawlerEventListeners.notify(new CrawlerEventNotification(event));
 	}
 
+	public URI instance() {
+		return this.instance;
+	}
+
 	public void start() {
 		LOGGER.info("Starting Jenkins Crawler ({})...",this.instance);
 		this.scheduler.start();

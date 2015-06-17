@@ -54,10 +54,12 @@ public abstract class Event<T extends EventVisitor> {
 
 	@Override
 	public final String toString() {
-		ToStringHelper helper = MoreObjects.
-			toStringHelper(getClass()).
-				add("id", this.id).
-				add("date", this.date);
+		ToStringHelper helper =
+			MoreObjects.
+				toStringHelper(getClass()).
+					omitNullValues().
+					add("id", this.id).
+					add("date", this.date);
 		toString(helper);
 		return helper.toString();
 	}
