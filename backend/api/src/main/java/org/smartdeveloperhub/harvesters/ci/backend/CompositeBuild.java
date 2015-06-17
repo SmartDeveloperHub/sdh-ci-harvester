@@ -41,8 +41,8 @@ public final class CompositeBuild extends Build {
 	CompositeBuild() {
 	}
 
-	CompositeBuild(URI serviceId,URI buildId) {
-		super(serviceId,buildId);
+	CompositeBuild(URI serviceId,URI buildId,String title) {
+		super(serviceId,buildId,title);
 		setSubBuilds(Lists.<URI>newArrayList());
 	}
 
@@ -51,8 +51,8 @@ public final class CompositeBuild extends Build {
 		this.subBuilds=subBuilds;
 	}
 
-	public SubBuild addSubBuild(URI buildId) {
-		SubBuild childBuild=new SubBuild(this,buildId);
+	public SubBuild addSubBuild(URI buildId, String title) {
+		SubBuild childBuild=new SubBuild(this,buildId,title);
 		this.subBuilds().add(childBuild.buildId());
 		return childBuild;
 	}

@@ -76,6 +76,10 @@ public class PersistencyFacadeTest {
 	public static final String HSQLDB_USER = "sa";
 	public static final String HSQLDB_PASSWORD = "";
 
+	private static final String SUB_BUILD_TITLE = "SUB-BUILD TITLE";
+	private static final String BUILD_TITLE     = "BUILD TITLE";
+
+
 	private static File create;
 	private static File drop;
 
@@ -130,7 +134,7 @@ public class PersistencyFacadeTest {
 		persistencyFacade.beginTransaction();
 		try {
 			Service service=new Service(serviceId);
-			inBuild = service.addSimpleBuild(buildId);
+			inBuild = service.addSimpleBuild(buildId,BUILD_TITLE);
 			inExecution = inBuild.addExecution(executionId, createdOn);
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
@@ -207,7 +211,7 @@ public class PersistencyFacadeTest {
 		persistencyFacade.beginTransaction();
 		try {
 			Service service=new Service(serviceId);
-			inBuild = service.addCompositeBuild(buildId);
+			inBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
 			inExecution = inBuild.addExecution(executionId, createdOn);
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
@@ -287,8 +291,8 @@ public class PersistencyFacadeTest {
 		persistencyFacade.beginTransaction();
 		try {
 			Service service=new Service(serviceId);
-			CompositeBuild compositeBuild = service.addCompositeBuild(buildId);
-			inBuild=compositeBuild.addSubBuild(subBuildId);
+			CompositeBuild compositeBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
+			inBuild=compositeBuild.addSubBuild(subBuildId,SUB_BUILD_TITLE);
 			inExecution = inBuild.addExecution(executionId, createdOn);
 			buildRepository.add(compositeBuild);
 			buildRepository.add(inBuild);

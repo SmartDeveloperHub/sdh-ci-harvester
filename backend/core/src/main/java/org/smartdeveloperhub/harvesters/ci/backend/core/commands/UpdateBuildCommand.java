@@ -33,39 +33,18 @@ import com.google.common.base.MoreObjects;
 
 import static com.google.common.base.Preconditions.*;
 
-public final class CreateBuildCommand {
+public final class UpdateBuildCommand {
 
 	public static final class Builder {
 
-		private URI serviceId;
 		private URI buildId;
-		private boolean simple;
 		private String title;
 		private String description;
 		private Date creationDate;
 		private URI codebase;
 
-		private Builder() {
-			this.simple=true;
-		}
-
-		public Builder withServiceId(URI serviceId) {
-			this.serviceId=serviceId;
-			return this;
-		}
-
 		public Builder withBuildId(URI buildId) {
 			this.buildId = buildId;
-			return this;
-		}
-
-		public Builder simple() {
-			this.simple=true;
-			return this;
-		}
-
-		public Builder composite() {
-			this.simple=false;
 			return this;
 		}
 
@@ -89,12 +68,10 @@ public final class CreateBuildCommand {
 			return this;
 		}
 
-		public CreateBuildCommand build() {
+		public UpdateBuildCommand build() {
 			return
-				new CreateBuildCommand(
-					checkNotNull(this.serviceId,"Service identifier cannot be null"),
+				new UpdateBuildCommand(
 					checkNotNull(this.buildId,"Build identifier cannot be null"),
-					this.simple,
 					checkNotNull(this.title,"Title cannot be null"),
 					this.description,
 					checkNotNull(this.creationDate,"Creation date cannot be null"),
@@ -104,34 +81,22 @@ public final class CreateBuildCommand {
 
 	}
 
-	private final URI serviceId;
 	private final URI buildId;
-	private final boolean simple;
 	private final String title;
 	private final String description;
 	private final Date createdOn;
 	private final URI codebase;
 
-	private CreateBuildCommand(URI serviceId, URI buildId, boolean simple, String title, String description, Date creationDate, URI codebase) {
-		this.serviceId = serviceId;
+	private UpdateBuildCommand(URI buildId, String title, String description, Date creationDate, URI codebase) {
 		this.buildId = buildId;
-		this.simple = simple;
 		this.title = title;
 		this.description = description;
 		this.createdOn = creationDate;
 		this.codebase = codebase;
 	}
 
-	public URI serviceId() {
-		return this.serviceId;
-	}
-
 	public URI buildId() {
 		return this.buildId;
-	}
-
-	public boolean simple() {
-		return this.simple;
 	}
 
 	public String title() {
@@ -156,9 +121,7 @@ public final class CreateBuildCommand {
 			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
-					add("serviceId", this.serviceId).
 					add("buildId", this.buildId).
-					add("simple", this.simple).
 					add("title", this.title).
 					add("description", this.description).
 					add("createdOn", this.createdOn).

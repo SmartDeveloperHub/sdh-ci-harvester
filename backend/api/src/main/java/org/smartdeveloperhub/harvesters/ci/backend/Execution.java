@@ -26,15 +26,18 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 import java.net.URI;
 import java.util.Date;
 
+import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
+
 import com.google.common.base.MoreObjects;
 
 public final class Execution {
+
+	private static final Result UNAVAILABLE_RESULT = new Result();
 
 	private URI buildId;
 	private URI executionId;
@@ -42,10 +45,11 @@ public final class Execution {
 	private Result result;
 
 	Execution() {
-
+		this.result=UNAVAILABLE_RESULT;
 	}
 
 	public Execution(URI buildId, URI executionId, Date createdOn) {
+		this();
 		setBuildId(buildId);
 		setExecutionId(executionId);
 		setCreatedOn(createdOn);
@@ -83,12 +87,13 @@ public final class Execution {
 	}
 
 	public boolean isFinished() {
-		return this.result!=null;
+		return !Status.UNAVAILABLE.equals(this.result.status());
 	}
 
 	public void finish(Result result) {
 		checkNotNull(result,"Result cannot be null");
-		checkState(this.result==null,"Execution already finished");
+		checkArgument(!Status.UNAVAILABLE.equals(result.status()),"Result must be available");
+		checkState(Status.UNAVAILABLE.equals(this.result.status()),"Execution already finished");
 		this.result = result;
 	}
 

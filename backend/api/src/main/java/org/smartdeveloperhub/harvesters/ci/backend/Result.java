@@ -39,13 +39,16 @@ public final class Result {
 		PASSED,
 		FAILED,
 		WARNING,
-		ABORTED
+		ABORTED,
+		UNAVAILABLE
 	}
 
 	private Result.Status status;
 	private Date finishedOn;
 
 	Result() {
+		this.status=Status.UNAVAILABLE;
+		this.finishedOn=null;
 	}
 
 	public Result(Status status, Date finishedOn) {
@@ -54,7 +57,7 @@ public final class Result {
 	}
 
 	protected void setFinishedOn(Date finishedOn) {
-		checkNotNull(finishedOn,"Finished on date cannot be null");
+		checkNotNull(finishedOn,"Finished date cannot be null");
 		this.finishedOn = finishedOn;
 	}
 
@@ -63,11 +66,11 @@ public final class Result {
 		this.status = status;
 	}
 
-	public Status getStatus() {
+	public Status status() {
 		return this.status;
 	}
 
-	public Date getFinishedOn() {
+	public Date finishedOn() {
 		return this.finishedOn;
 	}
 

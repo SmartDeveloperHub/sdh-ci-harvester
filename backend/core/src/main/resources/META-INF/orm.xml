@@ -37,15 +37,18 @@
 	<orm:description>CI Persistency</orm:description>
 	<orm:package>org.smartdeveloperhub.harvesters.ci.backend</orm:package>
 	<orm:access>FIELD</orm:access>
-
 	<orm:entity class="Build">
 		<orm:inheritance strategy="SINGLE_TABLE"/>
 		<orm:discriminator-column name="type"/>
 		<orm:attributes>
 			<orm:id name="buildId"/>
-			<orm:basic name="serviceId"/>
-			<orm:basic name="location"/>
+			<orm:basic name="serviceId" optional="false"/>
 			<orm:basic name="codebase"/>
+			<orm:basic name="title" optional="false"/>
+			<orm:basic name="description"/>
+			<orm:basic name="createdOn">
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+			</orm:basic>
 			<orm:element-collection name="executions" target-class="java.net.URI">
 				<orm:column name="executionId"/>
 				<orm:collection-table name="BuildExecutions">
@@ -77,7 +80,7 @@
 	<orm:entity class="SubBuild">
 		<orm:discriminator-value>sub</orm:discriminator-value>
 		<orm:attributes>
-			<orm:basic name="parentId"/>
+			<orm:basic name="parentId" optional="false"/>
 		</orm:attributes>
 	</orm:entity>
 	<orm:entity class="Execution">
@@ -86,13 +89,13 @@
 			<orm:basic name="createdOn">
 				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
 			</orm:basic>
-			<orm:basic name="buildId"/>
+			<orm:basic name="buildId" optional="false"/>
 			<orm:embedded name="result"/>
 		</orm:attributes>
 	</orm:entity>
 	<orm:embeddable class="Result">
 		<orm:attributes>
-			<orm:basic name="status">
+			<orm:basic name="status" optional="false">
 				<orm:enumerated>STRING</orm:enumerated>
 			</orm:basic>
 			<orm:basic name="finishedOn">

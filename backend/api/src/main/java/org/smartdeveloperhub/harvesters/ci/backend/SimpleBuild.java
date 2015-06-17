@@ -33,8 +33,8 @@ public final class SimpleBuild extends Build {
 	SimpleBuild() {
 	}
 
-	SimpleBuild(URI serviceId, URI buildId) {
-		super(serviceId,buildId);
+	SimpleBuild(URI serviceId, URI buildId, String title) {
+		super(serviceId,buildId,title);
 	}
 
 	@Override

@@ -176,10 +176,13 @@ public class ContinuousIntegrationService {
 		URI buildId=aCommand.buildId();
 		Build build=null;
 		if(aCommand.simple()) {
-			build=service.addSimpleBuild(buildId);
+			build=service.addSimpleBuild(buildId,aCommand.title());
 		} else {
-			build=service.addCompositeBuild(buildId);
+			build=service.addCompositeBuild(buildId,aCommand.title());
 		}
+		build.setCodebase(aCommand.codebase());
+		build.setDescription(aCommand.description());
+		build.setCreatedOn(aCommand.createdOn());
 		buildRepository().add(build);
 	}
 

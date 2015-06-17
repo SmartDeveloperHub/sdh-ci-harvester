@@ -42,62 +42,83 @@ public abstract class Build {
 
 	private URI serviceId;
 	private URI buildId;
-	private URI location;
 	private URI codebase;
 	private List<URI> executions;
+	private String title;
+	private String description;
+	private Date createdOn;
 
 	Build() {
 	}
 
-	Build(URI serviceId, URI buildId) {
+	Build(URI serviceId, URI buildId, String title) {
 		setServiceId(serviceId);
 		setBuildId(buildId);
+		setTitle(title);
 		setExecutions(Lists.<URI>newArrayList());
 	}
 
-	protected void setServiceId(URI serviceId) {
+	protected final void setServiceId(URI serviceId) {
 		checkNotNull(serviceId,"Service identifier cannot be null");
 		this.serviceId = serviceId;
 	}
 
-	protected void setBuildId(URI buildId) {
+	protected final void setBuildId(URI buildId) {
 		checkNotNull(buildId,"Build identifier cannot be null");
 		this.buildId = buildId;
 	}
 
-	protected void setExecutions(List<URI> executions) {
+	protected final void setTitle(String title) {
+		this.title = checkNotNull(title,"Title cannot be null");
+	}
+
+	protected final void setExecutions(List<URI> executions) {
 		checkNotNull(executions,"Executions cannot be null");
 		this.executions=executions;
 	}
 
-	protected void setLocation(URI location) {
-		checkNotNull(location,"Build location cannot be null");
-		this.location=location;
-	}
-
-	protected void setCodebase(URI codebase) {
-		checkNotNull(location,"Build codebase cannot be null");
+	public final void setCodebase(URI codebase) {
 		this.codebase=codebase;
 	}
 
-	protected void toString(ToStringHelper helper) {
-
+	public final void setDescription(String description) {
+		this.description = description;
 	}
 
-	public URI serviceId() {
+	public final void setCreatedOn(Date creationDate) {
+		this.createdOn = creationDate;
+	}
+
+	protected void toString(ToStringHelper helper) {
+		// To be extended by subclasses
+	}
+
+	public final URI serviceId() {
 		return this.serviceId;
 	}
 
-	public URI buildId() {
+	public final URI buildId() {
 		return this.buildId;
 	}
 
-	public URI location() {
-		return this.location;
+	public final URI location() {
+		return this.buildId;
 	}
 
-	public URI codebase() {
+	public final URI codebase() {
 		return this.codebase;
+	}
+
+	public final String title() {
+		return this.title;
+	}
+
+	public final String description() {
+		return this.description;
+	}
+
+	public Date createdOn() {
+		return this.createdOn;
 	}
 
 	public Execution addExecution(URI executionId, Date createdOn) {
@@ -140,9 +161,11 @@ public abstract class Build {
 				toStringHelper(getClass()).
 					omitNullValues().
 						add("serviceId",this.serviceId).
-						add("buildId",this.serviceId).
-						add("location",this.serviceId).
-						add("codebase",this.serviceId).
+						add("buildId",this.buildId).
+						add("codebase",this.codebase).
+						add("title",this.title).
+						add("description",this.serviceId).
+						add("createdOn",this.createdOn).
 						add("executions",this.executions);
 		toString(helper);
 		return helper.toString();

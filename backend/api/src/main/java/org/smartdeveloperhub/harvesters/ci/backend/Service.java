@@ -58,16 +58,16 @@ public class Service {
 		return this.serviceId;
 	}
 
-	public SimpleBuild addSimpleBuild(URI executionId) {
-		checkArgument(!builds().contains(executionId),"A build with id '%s' already exists",executionId);
-		SimpleBuild build=new SimpleBuild(this.serviceId,executionId);
+	public SimpleBuild addSimpleBuild(URI buildId, String title) {
+		checkArgument(!builds().contains(buildId),"A build with id '%s' already exists",buildId);
+		SimpleBuild build=new SimpleBuild(this.serviceId,buildId,title);
 		this.builds().add(build.buildId());
 		return build;
 	}
 
-	public CompositeBuild addCompositeBuild(URI executionId) {
-		checkArgument(!builds().contains(executionId),"A build with id '%s' already exists",executionId);
-		CompositeBuild build=new CompositeBuild(this.serviceId,executionId);
+	public CompositeBuild addCompositeBuild(URI buildId, String title) {
+		checkArgument(!builds().contains(buildId),"A build with id '%s' already exists",buildId);
+		CompositeBuild build=new CompositeBuild(this.serviceId,buildId,title);
 		this.builds().add(build.buildId());
 		return build;
 	}
