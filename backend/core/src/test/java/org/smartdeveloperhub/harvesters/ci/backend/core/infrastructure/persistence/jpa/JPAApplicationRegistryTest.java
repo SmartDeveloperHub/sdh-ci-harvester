@@ -52,15 +52,17 @@ import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.Result;
 import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.PersistencyFacade;
+import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
 
 import com.google.common.collect.ImmutableMap;
 
-public class PersistencyFacadeTest {
+public class JPAApplicationRegistryTest {
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(PersistencyFacadeTest.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(JPAApplicationRegistryTest.class);
 
 	private static final String JDBC_DRIVER   = "javax.persistence.jdbc.driver";
 	private static final String JDBC_URL      = "javax.persistence.jdbc.url";
@@ -84,7 +86,7 @@ public class PersistencyFacadeTest {
 	private static File drop;
 
 	private static EntityManagerFactory factory;
-	private static PersistencyFacade persistencyFacade;
+	private static JPAApplicationRegistry persistencyFacade;
 
 	@BeforeClass
 	public static void startUp() throws Exception {
@@ -102,7 +104,7 @@ public class PersistencyFacadeTest {
 					put(SCHEMA_GENERATION_DROP_TARGET, drop.getAbsolutePath()).
 					build();
 		factory = Persistence.createEntityManagerFactory("jpaPersistency",properties);
-		persistencyFacade = new PersistencyFacade(factory);
+		persistencyFacade = new JPAApplicationRegistry(factory);
 	}
 
 	@AfterClass
@@ -131,42 +133,47 @@ public class PersistencyFacadeTest {
 
 		ExecutionRepository executionRepository=persistencyFacade.getExecutionRepository();
 		BuildRepository buildRepository=persistencyFacade.getBuildRepository();
-		persistencyFacade.beginTransaction();
+		TransactionManager transactionManager = persistencyFacade.getTransactionManager();
+
+		Transaction tx1 = transactionManager.currentTransaction();
+		tx1.begin();
 		try {
 			Service service=new Service(serviceId);
 			inBuild = service.addSimpleBuild(buildId,BUILD_TITLE);
 			inExecution = inBuild.addExecution(executionId, createdOn);
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
-			persistencyFacade.commitTransaction();
+			tx1.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx1.rollback();
 			e.printStackTrace();
 			throw e;
 		}
 
 		persistencyFacade.disposeManagers();
 
-		persistencyFacade.beginTransaction();
+		Transaction tx2 = transactionManager.currentTransaction();
+		tx2.begin();
 		try {
 			Execution execution = executionRepository.executionOfId(executionId);
 			execution.finish(inResult);
-			persistencyFacade.commitTransaction();
+			tx2.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx2.rollback();
 			e.printStackTrace();
 			throw e;
 		}
 
 		persistencyFacade.disposeManagers();
 
-		persistencyFacade.beginTransaction();
+		Transaction tx3 = transactionManager.currentTransaction();
+		tx3.begin();
 		try {
 			outBuild = buildRepository.buildOfId(buildId,SimpleBuild.class);
 			outExecution = executionRepository.executionOfId(executionId);
-			persistencyFacade.commitTransaction();
+			tx3.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx3.rollback();
 			e.printStackTrace();
 			throw e;
 		}
@@ -208,42 +215,47 @@ public class PersistencyFacadeTest {
 
 		ExecutionRepository executionRepository=persistencyFacade.getExecutionRepository();
 		BuildRepository buildRepository=persistencyFacade.getBuildRepository();
-		persistencyFacade.beginTransaction();
+		TransactionManager transactionManager = persistencyFacade.getTransactionManager();
+
+		Transaction tx1 = transactionManager.currentTransaction();
+		tx1.begin();
 		try {
 			Service service=new Service(serviceId);
 			inBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
 			inExecution = inBuild.addExecution(executionId, createdOn);
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
-			persistencyFacade.commitTransaction();
+			tx1.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx1.rollback();
 			e.printStackTrace();
 			throw e;
 		}
 
 		persistencyFacade.disposeManagers();
 
-		persistencyFacade.beginTransaction();
+		Transaction tx2 = transactionManager.currentTransaction();
+		tx2.begin();
 		try {
 			Execution execution = executionRepository.executionOfId(executionId);
 			execution.finish(inResult);
-			persistencyFacade.commitTransaction();
+			tx2.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx2.rollback();
 			e.printStackTrace();
 			throw e;
 		}
 
 		persistencyFacade.disposeManagers();
 
-		persistencyFacade.beginTransaction();
+		Transaction tx3 = transactionManager.currentTransaction();
+		tx3.begin();
 		try {
 			outBuild = buildRepository.buildOfId(buildId,CompositeBuild.class);
 			outExecution = executionRepository.executionOfId(executionId);
-			persistencyFacade.commitTransaction();
+			tx3.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx3.rollback();
 			e.printStackTrace();
 			throw e;
 		}
@@ -288,7 +300,10 @@ public class PersistencyFacadeTest {
 
 		ExecutionRepository executionRepository=persistencyFacade.getExecutionRepository();
 		BuildRepository buildRepository=persistencyFacade.getBuildRepository();
-		persistencyFacade.beginTransaction();
+		TransactionManager transactionManager = persistencyFacade.getTransactionManager();
+
+		Transaction tx1 = transactionManager.currentTransaction();
+		tx1.begin();
 		try {
 			Service service=new Service(serviceId);
 			CompositeBuild compositeBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
@@ -297,35 +312,37 @@ public class PersistencyFacadeTest {
 			buildRepository.add(compositeBuild);
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
-			persistencyFacade.commitTransaction();
+			tx1.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx1.rollback();
 			e.printStackTrace();
 			throw e;
 		}
 
 		persistencyFacade.disposeManagers();
 
-		persistencyFacade.beginTransaction();
+		Transaction tx2 = transactionManager.currentTransaction();
+		tx2.begin();
 		try {
 			Execution execution = executionRepository.executionOfId(executionId);
 			execution.finish(inResult);
-			persistencyFacade.commitTransaction();
+			tx2.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx2.rollback();
 			e.printStackTrace();
 			throw e;
 		}
 
 		persistencyFacade.disposeManagers();
 
-		persistencyFacade.beginTransaction();
+		Transaction tx3 = transactionManager.currentTransaction();
+		tx3.begin();
 		try {
 			outBuild = buildRepository.buildOfId(subBuildId,SubBuild.class);
 			outExecution = executionRepository.executionOfId(executionId);
-			persistencyFacade.commitTransaction();
+			tx3.commit();
 		} catch(Exception e) {
-			persistencyFacade.rollbackTransaction();
+			tx3.rollback();
 			e.printStackTrace();
 			throw e;
 		}

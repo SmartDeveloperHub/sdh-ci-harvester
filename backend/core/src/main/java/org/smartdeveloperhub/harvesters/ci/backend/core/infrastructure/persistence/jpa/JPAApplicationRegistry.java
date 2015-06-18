@@ -28,24 +28,19 @@ package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persiste
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.core.ApplicationRegistry;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
-public final class PersistencyFacade {
+public final class JPAApplicationRegistry implements ApplicationRegistry {
 
 	private final ThreadLocal<EntityManager> manager;
 	private final EntityManagerFactory emf;
 
-	interface EntityManagerProvider {
-
-		EntityManager entityManager();
-
-	}
-
-	public PersistencyFacade(EntityManagerFactory emf) {
+	public JPAApplicationRegistry(EntityManagerFactory emf) {
 		this.emf = emf;
 		this.manager=new ThreadLocal<EntityManager>();
 	}
@@ -59,6 +54,7 @@ public final class PersistencyFacade {
 		return entityManager;
 	}
 
+	@Override
 	public ExecutionRepository getExecutionRepository() {
 		return
 			new JPAExecutionRepository(
@@ -71,6 +67,7 @@ public final class PersistencyFacade {
 			);
 	}
 
+	@Override
 	public BuildRepository getBuildRepository() {
 		return
 			new JPABuildRepository(
@@ -83,6 +80,7 @@ public final class PersistencyFacade {
 			);
 	}
 
+	@Override
 	public ServiceRepository getServiceRepository() {
 		return
 			new JPAServiceRepository(
@@ -95,19 +93,16 @@ public final class PersistencyFacade {
 			);
 	}
 
-	public final void beginTransaction() {
-		getManager().getTransaction().begin();
-	}
-
-	public final void commitTransaction() {
-		getManager().getTransaction().commit();
-	}
-
-	public final void rollbackTransaction() {
-		EntityTransaction transaction = getManager().getTransaction();
-		if(transaction.isActive()) {
-			transaction.rollback();
-		}
+	@Override
+	public TransactionManager getTransactionManager() {
+		return new JPATransactionManager(
+			new EntityManagerProvider(){
+				@Override
+				public EntityManager entityManager() {
+					return getManager();
+				}
+			}
+		);
 	}
 
 	public void disposeManagers() {

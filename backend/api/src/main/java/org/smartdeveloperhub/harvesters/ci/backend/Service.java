@@ -86,7 +86,7 @@ public class Service {
 		return this.builds;
 	}
 
-	public static Service copy(Service service) {
+	public static Service newInstance(Service service) {
 		if(service==null) {
 			return null;
 		}

@@ -34,7 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.Command;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.PersistencyFacade;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawler;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawlerException;
 
@@ -43,24 +43,24 @@ import com.google.common.collect.Queues;
 public final class JenkinsIntegrationService {
 
 	private final ContinuousIntegrationService service;
-	private final PersistencyFacade facade;
+	private final TransactionManager transactionManager;
 	private final LinkedBlockingQueue<Command> commandQueue;
 	private final CommandProducerListener listener;
 
 	private JenkinsCrawler crawler;
 	private CommandProcessorService worker;
 
-	public JenkinsIntegrationService(ContinuousIntegrationService service, PersistencyFacade facade) {
+	public JenkinsIntegrationService(ContinuousIntegrationService service, TransactionManager manager) {
 		this.service=service;
-		this.facade=facade;
+		this.transactionManager = manager;
 		this.commandQueue=Queues.newLinkedBlockingQueue();
-		this.listener = new CommandProducerListener(this.commandQueue);
+		this.listener=new CommandProducerListener(this.commandQueue);
 	}
 
 	public synchronized void connect(URI jenkinsInstance) throws IOException {
 		checkState(this.crawler==null,"Already connected");
 		try {
-			this.worker=new CommandProcessorService(this.commandQueue,this.facade,this.service);
+			this.worker=new CommandProcessorService(this.commandQueue,this.transactionManager,this.service);
 			this.worker.startAsync();
 			this.crawler =
 				JenkinsCrawler.

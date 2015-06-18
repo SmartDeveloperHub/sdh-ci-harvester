@@ -27,22 +27,20 @@
 package org.smartdeveloperhub.harvesters.ci.backend.core.cli;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.PersistencyFacade;
+import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins.JenkinsIntegrationService;
 import org.smartdeveloperhub.jenkins.crawler.util.Consoles;
 
 import com.google.common.collect.ImmutableMap;
 
 public final class ContinuousIntegrationExec {
-
-	private ContinuousIntegrationExec() {
-	}
 
 	private static final String JDBC_DRIVER   = "javax.persistence.jdbc.driver";
 	private static final String JDBC_URL      = "javax.persistence.jdbc.url";
@@ -63,9 +61,12 @@ public final class ContinuousIntegrationExec {
 	private static File drop;
 
 	private static EntityManagerFactory factory;
-	private static PersistencyFacade persistencyFacade;
+	private static JPAApplicationRegistry persistencyFacade;
 
-	private static void startUp() throws Exception {
+	private ContinuousIntegrationExec() {
+	}
+
+	private static void startUp() throws IOException {
 		create = File.createTempFile("create",".ddl");
 		drop = File.createTempFile("drop",".ddl");
 		ImmutableMap<String, String> properties =
@@ -80,10 +81,10 @@ public final class ContinuousIntegrationExec {
 					put(SCHEMA_GENERATION_DROP_TARGET, drop.getAbsolutePath()).
 					build();
 		factory = Persistence.createEntityManagerFactory("jpaPersistency",properties);
-		persistencyFacade = new PersistencyFacade(factory);
+		persistencyFacade = new JPAApplicationRegistry(factory);
 	}
 
-	private static void shutDown() throws Exception {
+	private static void shutDown() {
 		if(factory!=null) {
 			factory.close();
 		}
@@ -91,7 +92,7 @@ public final class ContinuousIntegrationExec {
 		drop.delete();
 	}
 
-	public static void main(String... args) throws Exception {
+	public static void main(String... args) throws IOException {
 		startUp();
 		try {
 			ContinuousIntegrationService cis =
@@ -100,7 +101,9 @@ public final class ContinuousIntegrationExec {
 					persistencyFacade.getBuildRepository(),
 					persistencyFacade.getExecutionRepository());
 			JenkinsIntegrationService jis=
-				new JenkinsIntegrationService(cis,persistencyFacade);
+				new JenkinsIntegrationService(
+					cis,
+					persistencyFacade.getTransactionManager());
 			jis.connect(URI.create("http://ci.jenkins-ci.org/"));
 			Consoles.defaultConsole().printf("<<HIT ENTER TO STOP THE INTEGRATION SERVICE>>%n");
 			Consoles.defaultConsole().readLine();

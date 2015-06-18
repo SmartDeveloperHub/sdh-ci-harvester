@@ -130,7 +130,7 @@ public final class Execution {
 					toString();
 	}
 
-	public static Execution copy(Execution execution) {
+	public static Execution newInstance(Execution execution) {
 		if(execution==null) {
 			return null;
 		}

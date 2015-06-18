@@ -174,7 +174,7 @@ public abstract class Build {
 
 	public abstract void accept(BuildVisitor visitor);
 
-	public static Build copy(Build build) {
+	public static Build newInstance(Build build) {
 		if(build==null) {
 			return null;
 		}

@@ -24,45 +24,10 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
+package org.smartdeveloperhub.harvesters.ci.backend.core.transaction;
 
-import java.net.URI;
+public interface TransactionManager {
 
-import javax.persistence.EntityManager;
-
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
-
-public class JPABuildRepository implements BuildRepository {
-
-	private EntityManagerProvider provider;
-
-	public JPABuildRepository(EntityManagerProvider provider) {
-		this.provider = provider;
-	}
-
-	private EntityManager entityManager() {
-		return this.provider.entityManager();
-	}
-
-	@Override
-	public void add(Build build) {
-		entityManager().persist(build);
-	}
-
-	@Override
-	public void remove(Build build) {
-		entityManager().remove(build);
-	}
-
-	@Override
-	public Build buildOfId(URI id) {
-		return buildOfId(id,Build.class);
-	}
-
-	@Override
-	public <T extends Build> T buildOfId(URI id, Class<? extends T> clazz) {
-		return entityManager().find(clazz,id);
-	}
+	Transaction currentTransaction();
 
 }

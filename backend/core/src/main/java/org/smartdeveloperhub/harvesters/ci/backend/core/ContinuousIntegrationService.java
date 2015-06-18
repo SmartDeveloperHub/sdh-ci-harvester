@@ -144,19 +144,19 @@ public class ContinuousIntegrationService {
 
 	public Service getService(URI serviceId) {
 		checkNotNull(serviceId,"Service identifier be null");
-		return Service.copy(serviceRepository().serviceOfId(serviceId));
+		return Service.newInstance(serviceRepository().serviceOfId(serviceId));
 	}
 
 	public Build getBuild(URI buildId) {
 		checkNotNull(buildId,"Build identifier cannot be null");
 		Build build = buildRepository().buildOfId(buildId);
-		return Build.copy(build);
+		return Build.newInstance(build);
 	}
 
 	public Execution getExecution(URI executionId) {
 		checkNotNull(executionId,"Execution identifier cannot be null");
 		Execution execution = executionRepository().executionOfId(executionId);
-		return Execution.copy(execution);
+		return Execution.newInstance(execution);
 	}
 
 	public void registerService(RegisterServiceCommand aCommand) {

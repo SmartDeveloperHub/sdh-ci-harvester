@@ -26,43 +26,62 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
 
-import java.net.URI;
+import javax.persistence.EntityTransaction;
 
-import javax.persistence.EntityManager;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionException;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
+final class JPATransactionManager implements TransactionManager {
 
-public class JPABuildRepository implements BuildRepository {
+	private final class JPATransaction implements Transaction {
 
-	private EntityManagerProvider provider;
+		private EntityTransaction nativeTransaction() {
+			return provider.entityManager().getTransaction();
+		}
 
-	public JPABuildRepository(EntityManagerProvider provider) {
+		@Override
+		public boolean isActive() {
+			return nativeTransaction().isActive();
+		}
+
+		@Override
+		public void begin() throws TransactionException {
+			try {
+				nativeTransaction().begin();
+			} catch (Exception e) {
+				throw new TransactionException("Begin failed",e);
+			}
+		}
+
+		@Override
+		public void commit() throws TransactionException {
+			try {
+				nativeTransaction().commit();
+			} catch (Exception e) {
+				throw new TransactionException("Commit failed",e);
+			}
+		}
+
+		@Override
+		public void rollback() throws TransactionException {
+			try {
+				nativeTransaction().rollback();
+			} catch (Exception e) {
+				throw new TransactionException("Rollback failed",e);
+			}
+		}
+
+	}
+
+	private final EntityManagerProvider provider;
+
+	JPATransactionManager(EntityManagerProvider provider) {
 		this.provider = provider;
 	}
 
-	private EntityManager entityManager() {
-		return this.provider.entityManager();
-	}
-
 	@Override
-	public void add(Build build) {
-		entityManager().persist(build);
+	public Transaction currentTransaction() {
+		return new JPATransaction();
 	}
-
-	@Override
-	public void remove(Build build) {
-		entityManager().remove(build);
-	}
-
-	@Override
-	public Build buildOfId(URI id) {
-		return buildOfId(id,Build.class);
-	}
-
-	@Override
-	public <T extends Build> T buildOfId(URI id, Class<? extends T> clazz) {
-		return entityManager().find(clazz,id);
-	}
-
 }

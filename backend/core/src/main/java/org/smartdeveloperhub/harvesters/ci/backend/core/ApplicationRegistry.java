@@ -24,45 +24,21 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
+package org.smartdeveloperhub.harvesters.ci.backend.core;
 
-import java.net.URI;
-
-import javax.persistence.EntityManager;
-
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
-public class JPABuildRepository implements BuildRepository {
+public interface ApplicationRegistry {
 
-	private EntityManagerProvider provider;
+	ExecutionRepository getExecutionRepository();
 
-	public JPABuildRepository(EntityManagerProvider provider) {
-		this.provider = provider;
-	}
+	BuildRepository getBuildRepository();
 
-	private EntityManager entityManager() {
-		return this.provider.entityManager();
-	}
+	ServiceRepository getServiceRepository();
 
-	@Override
-	public void add(Build build) {
-		entityManager().persist(build);
-	}
-
-	@Override
-	public void remove(Build build) {
-		entityManager().remove(build);
-	}
-
-	@Override
-	public Build buildOfId(URI id) {
-		return buildOfId(id,Build.class);
-	}
-
-	@Override
-	public <T extends Build> T buildOfId(URI id, Class<? extends T> clazz) {
-		return entityManager().find(clazz,id);
-	}
+	TransactionManager getTransactionManager();
 
 }

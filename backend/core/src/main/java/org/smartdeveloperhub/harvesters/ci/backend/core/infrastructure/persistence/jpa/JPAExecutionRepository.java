@@ -32,7 +32,6 @@ import javax.persistence.EntityManager;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.PersistencyFacade.EntityManagerProvider;
 
 public class JPAExecutionRepository implements ExecutionRepository {
 

@@ -24,45 +24,25 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
+package org.smartdeveloperhub.harvesters.ci.backend.core.transaction;
 
-import java.net.URI;
+public class TransactionException extends Exception {
 
-import javax.persistence.EntityManager;
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 3505651186351455418L;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
-
-public class JPABuildRepository implements BuildRepository {
-
-	private EntityManagerProvider provider;
-
-	public JPABuildRepository(EntityManagerProvider provider) {
-		this.provider = provider;
+	public TransactionException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	private EntityManager entityManager() {
-		return this.provider.entityManager();
+	public TransactionException(String message) {
+		super(message);
 	}
 
-	@Override
-	public void add(Build build) {
-		entityManager().persist(build);
-	}
-
-	@Override
-	public void remove(Build build) {
-		entityManager().remove(build);
-	}
-
-	@Override
-	public Build buildOfId(URI id) {
-		return buildOfId(id,Build.class);
-	}
-
-	@Override
-	public <T extends Build> T buildOfId(URI id, Class<? extends T> clazz) {
-		return entityManager().find(clazz,id);
+	public TransactionException(Throwable cause) {
+		super(cause);
 	}
 
 }

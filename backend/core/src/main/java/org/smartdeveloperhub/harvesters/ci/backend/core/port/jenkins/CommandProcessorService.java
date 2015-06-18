@@ -32,7 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.Command;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.PersistencyFacade;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionException;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
@@ -40,7 +42,7 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 
 	private static final class Poison implements Command {
 
-		private final static CommandProcessorService.Poison SINGLETON=new Poison();
+		private static final CommandProcessorService.Poison SINGLETON=new Poison();
 
 		private Poison() {
 		}
@@ -50,34 +52,48 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 	private static final Logger LOGGER=LoggerFactory.getLogger(CommandProcessorService.class);
 
 	private final LinkedBlockingQueue<Command> commandQueue;
-	private final PersistencyFacade facade;
-	@SuppressWarnings("unused")
+	private final TransactionManager manager;
 	private final ContinuousIntegrationService service;
+	private volatile boolean shuttingDown;
 
-	CommandProcessorService(LinkedBlockingQueue<Command> commandQueue, PersistencyFacade facade, ContinuousIntegrationService service) {
+
+	CommandProcessorService(LinkedBlockingQueue<Command> commandQueue, TransactionManager manager, ContinuousIntegrationService service) {
 		this.commandQueue = commandQueue;
-		this.facade = facade;
+		this.manager = manager;
 		this.service = service;
+		this.shuttingDown=false;
 	}
 
 	@Override
-	protected void run() throws Exception {
-		Command command=null;
-		while((command=commandQueue.take())!=Poison.SINGLETON) {
-			facade.beginTransaction();
+	protected void run() {
+		do {
+			Command command=null;
 			try {
-				LOGGER.trace("TODO: process command {}",command);
-				facade.commitTransaction();
-				// TODO: from here we should propagate the creation to the frontend
-			} catch(Exception exception) {
-				facade.rollbackTransaction();
+				while((command=this.commandQueue.take())!=Poison.SINGLETON) {
+					Transaction tx = this.manager.currentTransaction();
+					try {
+						tx.begin();
+						try {
+							LOGGER.trace("TODO: process command {} using {}",command,this.service);
+							tx.commit();
+						} catch(Exception e) {
+							LOGGER.error("Could not process command "+command,e);
+							tx.rollback();
+						}
+					} catch (TransactionException e) {
+						LOGGER.error("Transactional failure when processing command"+command,e);
+					}
+				}
+			} catch (InterruptedException e) {
+				LOGGER.info("Interrupted while waiting for command",e);
 			}
-		}
+		} while(!this.shuttingDown);
 	}
 
 	@Override
 	protected void triggerShutdown() {
-		commandQueue.offer(Poison.SINGLETON);
+		this.shuttingDown=true;
+		this.commandQueue.offer(Poison.SINGLETON);
 	}
 
 }
