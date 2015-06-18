@@ -36,6 +36,10 @@ public final class JenkinsEventFactory {
 	private JenkinsEventFactory() {
 	}
 
+	public static ServiceFoundEvent newServiceFoundEvent(URI service) {
+		return ServiceFoundEvent.create(service);
+	}
+
 	public static BuildCreatedEvent newBuildCreationEvent(URI service, Build build) {
 		return BuildCreatedEvent.create(service).withBuild(build);
 	}

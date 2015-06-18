@@ -85,6 +85,13 @@ public final class CreateBuildCommand extends BuildCommand {
 		this.simple = simple;
 	}
 
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitCreateBuildCommand(this);
+		}
+	}
+
 	public URI serviceId() {
 		return this.serviceId;
 	}

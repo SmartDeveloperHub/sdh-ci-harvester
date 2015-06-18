@@ -194,6 +194,10 @@ public final class JenkinsCrawler {
 		return this.instance;
 	}
 
+	public File workingDirectory() {
+		return this.storage.workingDirectory();
+	}
+
 	public void start() {
 		LOGGER.info("Starting Jenkins Crawler ({})...",this.instance);
 		this.scheduler.start();

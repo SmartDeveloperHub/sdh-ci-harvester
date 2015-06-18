@@ -83,6 +83,13 @@ public final class FinishExecutionCommand implements Command {
 		this.finishedOn = finishedOn;
 	}
 
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitFinishExecutionCommand(this);
+		}
+	}
+
 	public URI executionId() {
 		return this.executionId;
 	}

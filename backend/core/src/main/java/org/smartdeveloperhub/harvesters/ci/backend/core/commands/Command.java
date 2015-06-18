@@ -28,4 +28,6 @@ package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
 
 public interface Command {
 
+	void accept(CommandVisitor visitor);
+
 }

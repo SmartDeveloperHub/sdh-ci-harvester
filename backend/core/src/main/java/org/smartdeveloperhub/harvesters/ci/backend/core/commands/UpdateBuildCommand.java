@@ -60,6 +60,13 @@ public final class UpdateBuildCommand extends BuildCommand {
 	}
 
 	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitUpdateBuildCommand(this);
+		}
+	}
+
+	@Override
 	protected void toString(ToStringHelper helper) {
 		// Nothing to add
 	}

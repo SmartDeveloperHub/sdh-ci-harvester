@@ -37,6 +37,20 @@
 	<orm:description>CI Persistency</orm:description>
 	<orm:package>org.smartdeveloperhub.harvesters.ci.backend</orm:package>
 	<orm:access>FIELD</orm:access>
+	<orm:entity class="Service">
+		<orm:attributes>
+			<orm:id name="serviceId"/>
+			<orm:element-collection name="builds" target-class="java.net.URI">
+				<orm:column name="buildId"/>
+				<orm:collection-table name="ServiceBuilds">
+					<orm:foreign-key name="serviceId"/>
+					<orm:unique-constraint name="Builds_are_owned_by_a_single_service">
+						<orm:column-name>buildId</orm:column-name>
+					</orm:unique-constraint>
+				</orm:collection-table>
+			</orm:element-collection>
+		</orm:attributes>
+	</orm:entity>
 	<orm:entity class="Build">
 		<orm:inheritance strategy="SINGLE_TABLE"/>
 		<orm:discriminator-column name="type"/>
@@ -44,8 +58,12 @@
 			<orm:id name="buildId"/>
 			<orm:basic name="serviceId" optional="false"/>
 			<orm:basic name="codebase"/>
-			<orm:basic name="title" optional="false"/>
-			<orm:basic name="description"/>
+			<orm:basic name="title" optional="false">
+				<orm:column length="1024"/>
+			</orm:basic>
+			<orm:basic name="description">
+				<orm:column length="65536"/>
+			</orm:basic>
 			<orm:basic name="createdOn">
 				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
 			</orm:basic>

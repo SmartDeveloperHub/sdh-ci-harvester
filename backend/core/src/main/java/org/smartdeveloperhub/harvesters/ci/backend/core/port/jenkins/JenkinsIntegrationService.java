@@ -26,12 +26,16 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins;
 
-import static com.google.common.base.Preconditions.checkState;
-
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.Command;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
@@ -42,27 +46,134 @@ import com.google.common.collect.Queues;
 
 public final class JenkinsIntegrationService {
 
+	private interface ServiceState {
+
+		void setWorkingDirectory(File directory);
+		void connectTo(URI instance) throws IOException;
+		void disconnect() throws IOException;
+
+		boolean isConnected();
+
+		File workingDirectory();
+		URI connectedTo();
+
+	}
+
+	private final class ServiceConnected implements ServiceState {
+
+		private final File workingDirectory;
+
+		private ServiceConnected(File workingDirectory) {
+			this.workingDirectory = workingDirectory;
+		}
+
+		@Override
+		public void setWorkingDirectory(File directory) {
+			throw new IllegalStateException("Cannot change working directory while connected");
+		}
+
+		@Override
+		public void connectTo(URI instance) {
+			throw new IllegalStateException("Cannot change working directory while connected");
+		}
+
+		@Override
+		public void disconnect() throws IOException {
+			try {
+				doDisconnect();
+			} catch (Exception e) {
+				state=new ServiceDisconnected(this.workingDirectory);
+				throw e;
+			}
+		}
+
+		@Override
+		public File workingDirectory() {
+			return crawler.workingDirectory();
+		}
+
+		@Override
+		public URI connectedTo() {
+			return crawler.instance();
+		}
+
+		@Override
+		public boolean isConnected() {
+			return true;
+		}
+	}
+
+	private final class ServiceDisconnected implements ServiceState {
+
+		private File workingDirectory;
+
+		private ServiceDisconnected() {
+		}
+
+		private ServiceDisconnected(File workingDirectory) {
+			this.workingDirectory = workingDirectory;
+		}
+
+		@Override
+		public void setWorkingDirectory(File directory) {
+			this.workingDirectory = directory;
+		}
+
+		@Override
+		public void connectTo(URI instance) throws IOException {
+			doConnect(instance, this.workingDirectory);
+			state=new ServiceConnected(this.workingDirectory);
+		}
+
+		@Override
+		public void disconnect() {
+			// Nothing to do
+		}
+
+		@Override
+		public File workingDirectory() {
+			return this.workingDirectory;
+		}
+
+		@Override
+		public URI connectedTo() {
+			return null;
+		}
+
+		@Override
+		public boolean isConnected() {
+			return false;
+		}
+
+	}
+
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsIntegrationService.class);
+
 	private final ContinuousIntegrationService service;
 	private final TransactionManager transactionManager;
 	private final LinkedBlockingQueue<Command> commandQueue;
 	private final CommandProducerListener listener;
 
+	private final Lock read;
+	private final Lock write;
+
 	private JenkinsCrawler crawler;
 	private CommandProcessorService worker;
+	private ServiceState state;
 
 	public JenkinsIntegrationService(ContinuousIntegrationService service, TransactionManager manager) {
 		this.service=service;
 		this.transactionManager = manager;
 		this.commandQueue=Queues.newLinkedBlockingQueue();
 		this.listener=new CommandProducerListener(this.commandQueue);
+		ReadWriteLock lock=new ReentrantReadWriteLock();
+		this.read=lock.readLock();
+		this.write=lock.writeLock();
+		this.state=new ServiceDisconnected();
 	}
 
-	public URI connectedTo() {
-		return this.crawler.instance();
-	}
-
-	public synchronized void connect(URI jenkinsInstance) throws IOException {
-		checkState(this.crawler==null,"Already connected");
+	private void doConnect(URI jenkinsInstance, File workingDirectory) throws IOException {
 		try {
 			this.worker=new CommandProcessorService(this.commandQueue,this.transactionManager,this.service);
 			this.worker.startAsync();
@@ -70,32 +181,86 @@ public final class JenkinsIntegrationService {
 				JenkinsCrawler.
 					builder().
 						withLocation(jenkinsInstance.toString()).
+						withDirectory(workingDirectory).
 						build();
 			this.crawler.registerListener(this.listener);
+			LOGGER.info("Connecting to {}...",jenkinsInstance);
 			this.crawler.start();
+			LOGGER.info("Connected to {}.",jenkinsInstance);
 		} catch (JenkinsCrawlerException e) {
 			this.worker.stopAsync();
 			this.worker.awaitTerminated();
 			this.worker=null;
+			LOGGER.error("Could not create crawler. Full stacktrace follows:",e);
 			throw new IOException("Cannot create crawler",e);
 		}
 	}
 
-	public synchronized boolean isConnected() {
-		return this.crawler!=null;
-	}
-
-	public synchronized void disconnect() throws IOException {
-		checkState(this.crawler!=null,"Not connected");
+	private void doDisconnect() throws IOException {
 		try {
 			this.crawler.stop();
-			this.crawler.deregisterListener(this.listener);
-			this.crawler=null;
+			LOGGER.info("Disconnected from {}",this.crawler.instance());
 		} finally {
-			this.worker.triggerShutdown();
+			this.crawler.deregisterListener(listener);
+			this.crawler=null;
 			this.worker.stopAsync();
 			this.worker.awaitTerminated();
 			this.worker=null;
+		}
+	}
+
+	public JenkinsIntegrationService setWorkingDirectory(File directory) {
+		this.write.lock();
+		try {
+			this.state.setWorkingDirectory(directory);
+			return this;
+		} finally {
+			this.write.unlock();
+		}
+	}
+
+	public File workingDirectory() {
+		this.read.lock();
+		try {
+			return this.state.workingDirectory();
+		} finally {
+			this.read.unlock();
+		}
+	}
+
+	public boolean isConnected() {
+		this.read.lock();
+		try {
+			return this.state.isConnected();
+		} finally {
+			this.read.unlock();
+		}
+	}
+
+	public void connect(URI jenkinsInstance) throws IOException {
+		this.write.lock();
+		try {
+			this.state.connectTo(jenkinsInstance);
+		} finally {
+			this.write.unlock();
+		}
+	}
+
+	public URI connectedTo() {
+		this.read.lock();
+		try {
+			return this.state.connectedTo();
+		} finally {
+			this.read.unlock();
+		}
+	}
+
+	public void disconnect() throws IOException {
+		this.write.lock();
+		try {
+			this.state.disconnect();
+		} finally {
+			this.write.unlock();
 		}
 	}
 

@@ -28,6 +28,8 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 
 public interface JenkinsEventListener {
 
+	void onServiceFound(ServiceFoundEvent event);
+
 	void onBuildCreation(BuildCreatedEvent event);
 
 	void onBuildUpdate(BuildUpdatedEvent event);

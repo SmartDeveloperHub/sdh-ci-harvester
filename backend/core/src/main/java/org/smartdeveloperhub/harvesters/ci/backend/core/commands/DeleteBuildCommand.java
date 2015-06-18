@@ -41,6 +41,13 @@ public final class DeleteBuildCommand implements Command {
 		this.buildId = buildId;
 	}
 
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitDeleteBuildCommand(this);
+		}
+	}
+
 	public URI buildId() {
 		return this.buildId;
 	}

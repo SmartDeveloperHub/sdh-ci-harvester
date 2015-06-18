@@ -29,6 +29,7 @@ package org.smartdeveloperhub.harvesters.ci.backend.cli;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Date;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -94,6 +95,8 @@ public final class ContinuousIntegrationExec {
 
 	public static void main(String... args) throws IOException {
 		startUp();
+		File tmpDirectory = new File("target","jenkins"+new Date().getTime());
+		tmpDirectory.deleteOnExit();
 		try {
 			ContinuousIntegrationService cis =
 				new ContinuousIntegrationService(
@@ -103,7 +106,8 @@ public final class ContinuousIntegrationExec {
 			JenkinsIntegrationService jis=
 				new JenkinsIntegrationService(
 					cis,
-					persistencyFacade.getTransactionManager());
+					persistencyFacade.getTransactionManager()).
+					setWorkingDirectory(tmpDirectory);
 			jis.connect(URI.create("http://ci.jenkins-ci.org/"));
 			Consoles.defaultConsole().printf("<<HIT ENTER TO STOP THE INTEGRATION SERVICE>>%n");
 			Consoles.defaultConsole().readLine();

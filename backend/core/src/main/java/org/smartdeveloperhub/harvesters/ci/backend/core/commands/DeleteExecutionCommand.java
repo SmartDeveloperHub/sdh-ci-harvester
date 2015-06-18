@@ -40,6 +40,13 @@ public final class DeleteExecutionCommand implements Command {
 		this.executionId = executionId;
 	}
 
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitDeleteExecutionCommand(this);
+		}
+	}
+
 	public URI executionId() {
 		return this.executionId;
 	}

@@ -32,6 +32,7 @@ import java.net.URI;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
 
@@ -50,6 +51,7 @@ final class LoadServiceTask extends AbstractCrawlingTask {
 	protected void processResource(JenkinsResource resource) throws IOException {
 		Service service = super.loadService(resource);
 		persistEntity(service,resource.entity());
+		super.fireEvent(JenkinsEventFactory.newServiceFoundEvent(super.location()));
 		for(Reference ref:service.getBuilds().getBuilds()) {
 			scheduleTask(new LoadJobTask(ref.getValue()));
 		}

@@ -80,6 +80,13 @@ public final class CreateExecutionCommand implements Command {
 		this.createdOn = createdOn;
 	}
 
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitCreateExecutionCommand(this);
+		}
+	}
+
 	public URI buildId() {
 		return this.buildId;
 	}

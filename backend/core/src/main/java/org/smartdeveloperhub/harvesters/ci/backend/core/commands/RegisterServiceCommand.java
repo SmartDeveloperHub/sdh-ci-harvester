@@ -40,6 +40,13 @@ public final class RegisterServiceCommand implements Command {
 		this.serviceId = serviceId;
 	}
 
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitRegisterServiceCommand(this);
+		}
+	}
+
 	public URI serviceId() {
 		return this.serviceId;
 	}

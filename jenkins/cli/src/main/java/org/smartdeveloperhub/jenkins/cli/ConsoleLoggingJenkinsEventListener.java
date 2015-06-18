@@ -33,9 +33,17 @@ import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
+import org.smartdeveloperhub.jenkins.crawler.event.ServiceFoundEvent;
 import org.smartdeveloperhub.util.console.Consoles;
 
 final class ConsoleLoggingJenkinsEventListener implements JenkinsEventListener {
+
+	@Override
+	public void onServiceFound(ServiceFoundEvent event) {
+		Consoles.
+			defaultConsole().
+				printf("[%s] Found service %s%n",event.date(),event.service());
+	}
 
 	@Override
 	public void onExecutionUpdate(ExecutionUpdatedEvent event) {

@@ -39,6 +39,11 @@ public final class JenkinsEventDispatcher {
 		}
 
 		@Override
+		void visitServiceFoundEvent(ServiceFoundEvent event) {
+			this.listener.onServiceFound(event);
+		}
+
+		@Override
 		void visitBuildCreationEvent(BuildCreatedEvent event) {
 			this.listener.onBuildCreation(event);
 		}

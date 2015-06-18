@@ -37,6 +37,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.commands.CreateExecution
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteBuildCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteExecutionCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.FinishExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.RegisterServiceCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.UpdateBuildCommand;
 import org.smartdeveloperhub.jenkins.crawler.event.BuildCreatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletedEvent;
@@ -46,6 +47,7 @@ import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
+import org.smartdeveloperhub.jenkins.crawler.event.ServiceFoundEvent;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 
 final class CommandProducerListener implements JenkinsEventListener {
@@ -84,6 +86,14 @@ final class CommandProducerListener implements JenkinsEventListener {
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace("Received event {}",event);
 		}
+	}
+
+	@Override
+	public void onServiceFound(ServiceFoundEvent event) {
+		logEvent(event);
+		commandQueue.offer(
+			RegisterServiceCommand.create(event.service())
+		);
 	}
 
 	@Override

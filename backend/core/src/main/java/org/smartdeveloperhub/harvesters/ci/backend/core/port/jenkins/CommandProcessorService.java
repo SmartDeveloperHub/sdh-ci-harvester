@@ -32,6 +32,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.Command;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.CommandVisitor;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.CreateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.CreateExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.FinishExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.core.commands.UpdateBuildCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionException;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
@@ -47,6 +55,50 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 		private Poison() {
 		}
 
+		@Override
+		public void accept(CommandVisitor visitor) {
+			throw new UnsupportedOperationException("Poison command is not visitable");
+		}
+
+	}
+
+	private final class CommandDispatchingVisitor implements CommandVisitor {
+
+		@Override
+		public void visitRegisterServiceCommand(RegisterServiceCommand command) {
+			service.registerService(command);
+		}
+
+		@Override
+		public void visitCreateBuildCommand(CreateBuildCommand command) {
+			service.createBuild(command);
+		}
+
+		@Override
+		public void visitUpdateBuildCommand(UpdateBuildCommand command) {
+			service.updateBuild(command);
+		}
+
+		@Override
+		public void visitDeleteBuildCommand(DeleteBuildCommand command) {
+			service.deleteBuild(command);
+		}
+
+		@Override
+		public void visitCreateExecutionCommand(CreateExecutionCommand command) {
+			service.createExecution(command);
+		}
+
+		@Override
+		public void visitFinishExecutionCommand(FinishExecutionCommand command) {
+			service.finishExecution(command);
+		}
+
+		@Override
+		public void visitDeleteExecutionCommand(DeleteExecutionCommand command) {
+			service.deleteExecution(command);
+		}
+
 	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(CommandProcessorService.class);
@@ -56,44 +108,74 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 	private final ContinuousIntegrationService service;
 	private volatile boolean shuttingDown;
 
+	private CommandDispatchingVisitor dispatcher;
+
 
 	CommandProcessorService(LinkedBlockingQueue<Command> commandQueue, TransactionManager manager, ContinuousIntegrationService service) {
 		this.commandQueue = commandQueue;
 		this.manager = manager;
 		this.service = service;
 		this.shuttingDown=false;
+		this.dispatcher=new CommandDispatchingVisitor();
 	}
 
 	@Override
 	protected void run() {
 		do {
-			Command command=null;
-			try {
-				while((command=this.commandQueue.take())!=Poison.SINGLETON) {
-					Transaction tx = this.manager.currentTransaction();
-					try {
-						tx.begin();
-						try {
-							LOGGER.trace("TODO: process command {} using {}",command,this.service);
-							tx.commit();
-						} catch(Exception e) {
-							LOGGER.error("Could not process command "+command,e);
-							tx.rollback();
-						}
-					} catch (TransactionException e) {
-						LOGGER.error("Transactional failure when processing command"+command,e);
+			processCommands();
+		} while(!this.shuttingDown);
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("Command processing terminated.");
+			if(!this.commandQueue.isEmpty()) {
+				LOGGER.info("Dismissing {} commands",this.commandQueue.size());
+				if(LOGGER.isTraceEnabled()) {
+					for(Command command:this.commandQueue) {
+						LOGGER.trace("- Dimissed {}",command);
 					}
 				}
-			} catch (InterruptedException e) {
-				LOGGER.info("Interrupted while waiting for command",e);
 			}
-		} while(!this.shuttingDown);
+		}
+	}
+
+	private void processCommands() {
+		Command command=null;
+		try {
+			while((command=this.commandQueue.take())!=Poison.SINGLETON) {
+				processCommand(command);
+			}
+		} catch (InterruptedException e) {
+			LOGGER.info("Interrupted while waiting for command",e);
+		}
+	}
+
+	private void processCommand(Command command) {
+		Transaction tx = this.manager.currentTransaction();
+		try {
+			processTransactionally(tx, command);
+		} catch (TransactionException e) {
+			LOGGER.error("Transactional failure when processing command "+command,e);
+		}
+	}
+
+	private void processTransactionally(Transaction tx, Command command) throws TransactionException {
+		tx.begin();
+		try {
+			command.accept(this.dispatcher);
+			tx.commit();
+			LOGGER.debug("Processed command {}",command);
+		} catch(TransactionException e) {
+			throw e;
+		} catch(Exception e) {
+			LOGGER.error("Could not process command "+command,e);
+			tx.rollback();
+		}
 	}
 
 	@Override
 	protected void triggerShutdown() {
 		this.shuttingDown=true;
 		this.commandQueue.offer(Poison.SINGLETON);
+		LOGGER.info("Requested command processing termination...");
 	}
 
 }
