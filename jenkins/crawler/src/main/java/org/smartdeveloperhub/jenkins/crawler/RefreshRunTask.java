@@ -62,7 +62,7 @@ final class RefreshRunTask extends AbstractCrawlingTask {
 
 			super.fireEvent(
 				JenkinsEventFactory.
-					newExecutionUpdateEvent(
+					newExecutionUpdatedEvent(
 						super.jenkinsInstance(),
 						currentRun));
 		}

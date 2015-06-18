@@ -96,7 +96,7 @@ final class RefreshJobTask extends AbstractCrawlingTask {
 		for(URI deletedRuns:difference.deleted()) {
 			super.fireEvent(
 				JenkinsEventFactory.
-					newExecutionDeletionEvent(
+					newExecutionDeletedEvent(
 						super.jenkinsInstance(),
 						deletedRuns));
 		}
@@ -129,7 +129,7 @@ final class RefreshJobTask extends AbstractCrawlingTask {
 		for(URI deletedBuild:difference.deleted()) {
 			super.fireEvent(
 				JenkinsEventFactory.
-					newBuildDeletionEvent(
+					newBuildDeletedEvent(
 						super.jenkinsInstance(),
 						deletedBuild));
 		}

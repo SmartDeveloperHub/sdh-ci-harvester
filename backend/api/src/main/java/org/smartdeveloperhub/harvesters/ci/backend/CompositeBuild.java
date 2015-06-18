@@ -49,12 +49,16 @@ public final class CompositeBuild extends Build {
 		setSubBuilds(Lists.newArrayList(subBuilds));
 	}
 
+	private CompositeBuild(CompositeBuild build) {
+		this(build.serviceId(),build.buildId(),build.title(),build.subBuilds());
+	}
+
 	CompositeBuild(URI serviceId,URI buildId,String title) {
 		this(serviceId,buildId,title,Collections.<URI>emptyList());
 	}
 
-	CompositeBuild(CompositeBuild build) {
-		this(build.serviceId(),build.buildId(),build.title(),build.subBuilds());
+	Build makeClone() {
+		return new CompositeBuild(this);
 	}
 
 	protected void setSubBuilds(List<URI> subBuilds) {

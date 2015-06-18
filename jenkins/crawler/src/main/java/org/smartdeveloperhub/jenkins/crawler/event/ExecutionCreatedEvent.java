@@ -29,23 +29,12 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
-
 import com.google.common.base.MoreObjects.ToStringHelper;
 
-public final class ExecutionCreatedEvent extends JenkinsEvent {
-
-	private Run run;
+public final class ExecutionCreatedEvent extends ExecutionEvent<ExecutionCreatedEvent> {
 
 	private ExecutionCreatedEvent(URI service, Date date) {
-		super(service,date);
-	}
-
-	ExecutionCreatedEvent withRun(Run run) {
-		this.run = run;
-		return this;
+		super(service,date,ExecutionCreatedEvent.class);
 	}
 
 	@Override
@@ -55,36 +44,12 @@ public final class ExecutionCreatedEvent extends JenkinsEvent {
 		}
 	}
 
-	Run run() {
-		return this.run;
+	public final URI buildId() {
+		return run().getBuild();
 	}
 
-	public URI buildId() {
-		return run.getBuild();
-	}
-
-	public URI executionId() {
-		return this.run.getUrl();
-	}
-
-	public Date createdOn() {
-		return new Date(this.run.getTimestamp());
-	}
-
-	public boolean isFinished() {
-		return RunStatus.FINISHED.equals(this.run.getStatus());
-	}
-
-	public Date finishedOn() {
-		Date result=null;
-		if(isFinished()) {
-			result=new Date(this.run.getTimestamp()+this.run.getDuration());
-		}
-		return result;
-	}
-
-	public RunResult result() {
-		return this.run.getResult();
+	public final Date createdOn() {
+		return new Date(run().getTimestamp());
 	}
 
 	@Override

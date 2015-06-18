@@ -138,7 +138,7 @@ public class JPAApplicationRegistryTest {
 		Transaction tx1 = transactionManager.currentTransaction();
 		tx1.begin();
 		try {
-			Service service=new Service(serviceId);
+			Service service=Service.newInstance(serviceId);
 			inBuild = service.addSimpleBuild(buildId,BUILD_TITLE);
 			inExecution = inBuild.addExecution(executionId, createdOn);
 			buildRepository.add(inBuild);
@@ -220,7 +220,7 @@ public class JPAApplicationRegistryTest {
 		Transaction tx1 = transactionManager.currentTransaction();
 		tx1.begin();
 		try {
-			Service service=new Service(serviceId);
+			Service service=Service.newInstance(serviceId);
 			inBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
 			inExecution = inBuild.addExecution(executionId, createdOn);
 			buildRepository.add(inBuild);
@@ -305,7 +305,7 @@ public class JPAApplicationRegistryTest {
 		Transaction tx1 = transactionManager.currentTransaction();
 		tx1.begin();
 		try {
-			Service service=new Service(serviceId);
+			Service service=Service.newInstance(serviceId);
 			CompositeBuild compositeBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
 			inBuild=compositeBuild.addSubBuild(subBuildId,SUB_BUILD_TITLE);
 			inExecution = inBuild.addExecution(executionId, createdOn);

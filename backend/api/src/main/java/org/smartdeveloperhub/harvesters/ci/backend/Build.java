@@ -28,7 +28,6 @@ package org.smartdeveloperhub.harvesters.ci.backend;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import java.net.URI;
 import java.util.Date;
@@ -92,6 +91,8 @@ public abstract class Build {
 	protected void toString(ToStringHelper helper) {
 		// To be extended by subclasses
 	}
+
+	abstract Build makeClone();
 
 	public final URI serviceId() {
 		return this.serviceId;
@@ -175,21 +176,7 @@ public abstract class Build {
 		if(build==null) {
 			return null;
 		}
-		Build copy = tryCopy(build);
-		checkState(copy!=null,"Unknown build class '%s'",build.getClass().getCanonicalName());
-		return copy;
-	}
-
-	private static Build tryCopy(Build build) {
-		Build copy=null;
-		if(build instanceof SimpleBuild) {
-			copy=new SimpleBuild((SimpleBuild)build);
-		} else if(build instanceof CompositeBuild) {
-			copy=new CompositeBuild((CompositeBuild)build);
-		} else if(build instanceof SubBuild) {
-			copy=new SubBuild((SubBuild)build);
-		}
-		return copy;
+		return build.makeClone();
 	}
 
 }

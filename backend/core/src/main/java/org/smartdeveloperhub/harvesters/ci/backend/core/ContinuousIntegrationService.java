@@ -166,7 +166,7 @@ public class ContinuousIntegrationService {
 		Service service = serviceRepository().serviceOfId(serviceId);
 		checkArgument(service==null,"Service '%s' is already registered",serviceId);
 
-		service=new Service(serviceId);
+		service=Service.newInstance(serviceId);
 		serviceRepository().add(service);
 	}
 

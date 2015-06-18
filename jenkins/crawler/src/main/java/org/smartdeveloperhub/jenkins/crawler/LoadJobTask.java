@@ -55,7 +55,7 @@ final class LoadJobTask extends AbstractCrawlingTask {
 
 		super.fireEvent(
 			JenkinsEventFactory.
-				newBuildCreationEvent(super.jenkinsInstance(),build));
+				newBuildCreatedEvent(super.jenkinsInstance(),build));
 
 		scheduleTask(new LoadJobConfigurationTask(super.location(),build,resource.entity()));
 		scheduleTask(new LoadJobSCMTask(super.location(),build));

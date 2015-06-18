@@ -39,14 +39,17 @@ public class Service {
 	private URI serviceId;
 	private List<URI> builds;
 
-	private Service(Service service) {
-		setServiceId(service.serviceId);
-		setBuilds(Lists.newArrayList(service.builds));
+	private Service(URI serviceId, List<URI> builds) {
+		setServiceId(serviceId);
+		setBuilds(Lists.newArrayList(builds));
 	}
 
-	public Service(URI serviceId) {
-		setServiceId(serviceId);
-		setBuilds(Lists.<URI>newArrayList());
+	private Service(Service service) {
+		this(service.serviceId,service.builds);
+	}
+
+	private Service(URI serviceId) {
+		this(serviceId,Lists.<URI>newArrayList());
 	}
 
 	protected void setServiceId(URI serviceId) {
@@ -84,6 +87,13 @@ public class Service {
 
 	public List<URI> builds() {
 		return this.builds;
+	}
+
+	public static Service newInstance(URI service) {
+		if(service==null) {
+			return null;
+		}
+		return new Service(service);
 	}
 
 	public static Service newInstance(Service service) {

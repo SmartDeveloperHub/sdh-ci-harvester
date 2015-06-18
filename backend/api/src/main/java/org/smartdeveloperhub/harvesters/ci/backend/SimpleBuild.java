@@ -35,12 +35,16 @@ public final class SimpleBuild extends Build {
 	SimpleBuild() {
 	}
 
+	private SimpleBuild(SimpleBuild build) {
+		super(build.serviceId(),build.buildId(),build.title());
+	}
+
 	SimpleBuild(URI serviceId, URI buildId, String title) {
 		super(serviceId,buildId,title);
 	}
 
-	SimpleBuild(SimpleBuild build) {
-		this(build.serviceId(),build.buildId(),build.title());
+	Build makeClone() {
+		return new SimpleBuild(this);
 	}
 
 	@Override

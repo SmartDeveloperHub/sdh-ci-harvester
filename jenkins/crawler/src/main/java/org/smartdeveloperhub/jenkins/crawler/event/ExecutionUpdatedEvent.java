@@ -29,23 +29,12 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
-
 import com.google.common.base.MoreObjects.ToStringHelper;
 
-public final class ExecutionUpdatedEvent extends JenkinsEvent {
-
-	private Run run;
+public final class ExecutionUpdatedEvent extends ExecutionEvent<ExecutionUpdatedEvent> {
 
 	ExecutionUpdatedEvent(URI service, Date date) {
-		super(service,date);
-	}
-
-	ExecutionUpdatedEvent withRun(Run run) {
-		this.run = run;
-		return this;
+		super(service,date,ExecutionUpdatedEvent.class);
 	}
 
 	@Override
@@ -53,30 +42,6 @@ public final class ExecutionUpdatedEvent extends JenkinsEvent {
 		if(visitor!=null) {
 			visitor.visitExecutionUpdateEvent(this);
 		}
-	}
-
-	Run run() {
-		return this.run;
-	}
-
-	public URI executionId() {
-		return this.run.getUrl();
-	}
-
-	public boolean isFinished() {
-		return RunStatus.FINISHED.equals(this.run.getStatus());
-	}
-
-	public Date finishedOn() {
-		Date result=null;
-		if(isFinished()) {
-			result=new Date(this.run.getTimestamp()+this.run.getDuration());
-		}
-		return result;
-	}
-
-	public RunResult result() {
-		return this.run.getResult();
 	}
 
 	@Override

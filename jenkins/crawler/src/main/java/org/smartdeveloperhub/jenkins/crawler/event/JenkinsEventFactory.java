@@ -40,7 +40,7 @@ public final class JenkinsEventFactory {
 		return ServiceFoundEvent.create(service);
 	}
 
-	public static BuildCreatedEvent newBuildCreationEvent(URI service, Build build) {
+	public static BuildCreatedEvent newBuildCreatedEvent(URI service, Build build) {
 		return BuildCreatedEvent.create(service).withBuild(build);
 	}
 
@@ -48,19 +48,19 @@ public final class JenkinsEventFactory {
 		return BuildUpdatedEvent.create(service).withBuild(build);
 	}
 
-	public static BuildDeletedEvent newBuildDeletionEvent(URI service, URI build) {
+	public static BuildDeletedEvent newBuildDeletedEvent(URI service, URI build) {
 		return BuildDeletedEvent.create(service,build);
 	}
 
-	public static ExecutionCreatedEvent newExecutionCreationEvent(URI service, Run run) {
+	public static ExecutionCreatedEvent newExecutionCreatedEvent(URI service, Run run) {
 		return ExecutionCreatedEvent.create(service).withRun(run);
 	}
 
-	public static ExecutionUpdatedEvent newExecutionUpdateEvent(URI service, Run run) {
+	public static ExecutionUpdatedEvent newExecutionUpdatedEvent(URI service, Run run) {
 		return ExecutionUpdatedEvent.create(service).withRun(run);
 	}
 
-	public static ExecutionDeletedEvent newExecutionDeletionEvent(URI service, URI execution) {
+	public static ExecutionDeletedEvent newExecutionDeletedEvent(URI service, URI execution) {
 		return ExecutionDeletedEvent.create(service,execution);
 	}
 

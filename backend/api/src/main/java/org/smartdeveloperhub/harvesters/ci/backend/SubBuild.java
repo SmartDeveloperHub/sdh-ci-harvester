@@ -46,17 +46,21 @@ public final class SubBuild extends Build {
 		setParentId(parentId);
 	}
 
-	SubBuild(CompositeBuild parent, URI buildId,String title) {
-		this(parent.serviceId(),parent.buildId(),buildId,title);
+	private SubBuild(SubBuild build) {
+		this(build.serviceId(),build.parentId(),build.buildId(),build.title());
 	}
 
-	SubBuild(SubBuild build) {
-		this(build.serviceId(),build.parentId(),build.buildId(),build.title());
+	SubBuild(CompositeBuild parent, URI buildId,String title) {
+		this(parent.serviceId(),parent.buildId(),buildId,title);
 	}
 
 	protected void setParentId(URI parentId) {
 		checkNotNull(parentId,"Parent identifier cannot be null");
 		this.parentId = parentId;
+	}
+
+	Build makeClone() {
+		return new SubBuild(this);
 	}
 
 	public URI parentId() {

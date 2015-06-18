@@ -88,7 +88,7 @@ final class RefreshServiceTask extends AbstractCrawlingTask {
 		for(URI deletedBuild:difference.deleted()) {
 			super.fireEvent(
 				JenkinsEventFactory.
-					newBuildDeletionEvent(
+					newBuildDeletedEvent(
 						super.jenkinsInstance(),
 						deletedBuild));
 		}

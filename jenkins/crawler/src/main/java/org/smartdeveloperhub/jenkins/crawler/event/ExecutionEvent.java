@@ -24,44 +24,53 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.event;
 
-import java.io.IOException;
 import java.net.URI;
+import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
-import org.smartdeveloperhub.jenkins.JenkinsEntityType;
-import org.smartdeveloperhub.jenkins.JenkinsResource;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
 
-final class LoadRunTask extends AbstractCrawlingTask {
+abstract class ExecutionEvent<T extends ExecutionEvent<T>> extends JenkinsEvent {
 
-	LoadRunTask(URI location) {
-		super(location,JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
+	private final Class<? extends T> clazz;
+
+	private Run run;
+
+	ExecutionEvent(URI service, Date date, Class<? extends T> clazz) {
+		super(service,date);
+		this.clazz = clazz;
 	}
 
-	@Override
-	protected String taskPrefix() {
-		return "lrt";
+	final T withRun(Run run) {
+		this.run = run;
+		return this.clazz.cast(this);
 	}
 
-	@Override
-	protected void processResource(JenkinsResource resource) throws IOException {
-		Run run = super.loadRun(resource);
+	final Run run() {
+		return this.run;
+	}
 
-		super.fireEvent(
-			JenkinsEventFactory.
-				newExecutionCreatedEvent(
-					super.jenkinsInstance(),
-					run));
+	public final URI executionId() {
+		return this.run.getUrl();
+	}
 
-		persistEntity(run,resource.entity());
-		if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && run.getResult().equals(RunResult.SUCCESS)) {
-			scheduleTask(new LoadRunArtifactsTask(super.location(),run));
+	public final boolean isFinished() {
+		return RunStatus.FINISHED.equals(this.run.getStatus());
+	}
+
+	public final Date finishedOn() {
+		Date result=null;
+		if(isFinished()) {
+			result=new Date(this.run.getTimestamp()+this.run.getDuration());
 		}
+		return result;
+	}
 
+	public final RunResult result() {
+		return this.run.getResult();
 	}
 
 }
