@@ -20,25 +20,21 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-util:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-util-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-console:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-console-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.util.xml;
+package org.smartdeveloperhub.util.console;
 
-import java.net.URI;
+/**
+ * Runtime exception for handling console errors.
+ */
+public class ConsoleException extends RuntimeException {
 
-public final class URIConverter {
+	private static final long serialVersionUID = 1L;
 
-	private URIConverter() {
-	}
-
-	public static URI unmarshal(String rawURI) {
-		return URI.create(rawURI);
-	}
-
-	public static String marshal(URI uri) {
-		return uri.toString();
+	public ConsoleException(Throwable t) {
+		super(t);
 	}
 
 }

@@ -51,7 +51,7 @@ import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.DigestType;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.RepresentationDescriptor;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResourceDescriptorDocument;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResponseDescriptor;
-import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
+import org.smartdeveloperhub.util.xml.XmlUtils;
 import org.w3c.dom.Document;
 
 import com.google.common.base.MoreObjects;

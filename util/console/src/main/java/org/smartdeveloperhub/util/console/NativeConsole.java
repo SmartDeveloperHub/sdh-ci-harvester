@@ -20,39 +20,37 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-console:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-console-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.util;
+package org.smartdeveloperhub.util.console;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.IOError;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.IllegalFormatException;
 
 /**
- * @{link Console} implementation that wraps character streams.
+ * {@link Console} implementation that wraps a {@link java.io.Console}.
  */
-final class CharacterConsole implements Console {
+final class NativeConsole implements Console {
 
-	private final BufferedReader in;
-	private final PrintWriter out;
+	private final java.io.Console console;
 
-	CharacterConsole(BufferedReader reader, PrintWriter writer) {
-		this.in = reader;
-		this.out = writer;
+	NativeConsole(java.io.Console console) {
+		this.console = console;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CharacterConsole printf(String fmt, Object... params) {
+	public Console printf(String fmt, Object... params) {
 		try {
-			this.out.printf(fmt, params);
+			this.console.format(fmt, params);
 			return this;
-		} catch (Exception e) {
+		} catch (IllegalFormatException e) {
 			throw new ConsoleException(e);
 		}
 	}
@@ -61,10 +59,18 @@ final class CharacterConsole implements Console {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public Reader reader() {
+		return this.console.reader();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String readLine() {
 		try {
-			return this.in.readLine();
-		} catch (IOException e) {
+			return this.console.readLine();
+		} catch (IOError e) {
 			throw new ConsoleException(e);
 		}
 	}
@@ -74,15 +80,11 @@ final class CharacterConsole implements Console {
 	 */
 	@Override
 	public char[] readPassword() {
-		return readLine().toCharArray();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Reader reader() {
-		return this.in;
+		try {
+			return this.console.readPassword();
+		} catch (IOError e) {
+			throw new ConsoleException(e);
+		}
 	}
 
 	/**
@@ -90,7 +92,7 @@ final class CharacterConsole implements Console {
 	 */
 	@Override
 	public PrintWriter writer() {
-		return this.out;
+		return this.console.writer();
 	}
 
 }

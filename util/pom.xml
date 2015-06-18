@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-util:1.0.0-SNAPSHOT
-      Bundle      : ci-jenkins-util-1.0.0-SNAPSHOT.jar
+      Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-aggregator:1.0.0-SNAPSHOT
+      Bundle      : ci-util-aggregator-1.0.0-SNAPSHOT.pom
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -37,69 +37,34 @@
 	<!-- =================================================================== -->
 
 	<parent>
-		<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
-		<artifactId>ci-jenkins-aggregator</artifactId>
+		<groupId>org.smartdeveloperhub.harvesters.ci</groupId>
+		<artifactId>ci-harvester-aggregator</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>ci-jenkins-util</artifactId>
+	<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
+	<artifactId>ci-util-aggregator</artifactId>
+	<packaging>pom</packaging>
 
 	<!-- =================================================================== -->
 	<!--   MODULE INFORMATION                                                -->
 	<!-- =================================================================== -->
 
-	<name>SDH :: CIH :: Jenkins :: Util</name>
+	<name>SDH :: CIH :: Util</name>
 
-	<description>Utilities for the Jenkins integration for the Continuous Integration Harvester of the Smart Developer Hub project</description>
+	<description>Common utilities for the Continuous Integration Harvester of the Smart Developer Hub project</description>
 
 	<!-- =================================================================== -->
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
 
-	<dependencies>
-		<!-- Catalog Resolver -->
-		<dependency>
-			<groupId>xml-resolver</groupId>
-			<artifactId>xml-resolver</artifactId>
-			<version>1.2</version>
-		</dependency>
-
-		<!-- Namespace aware DOM -->
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.11.0</version>
-		</dependency>
-
-		<!-- XSLT 2.0 -->
-		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
-			<version>9.6.0-5</version>
-		</dependency>
-
-		<!-- Date/Time management -->
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
+	<modules>
+		<module>bom</module>
+		<module>xml</module>
+		<module>console</module>
+		<module>bootstrap</module>
+		<module>depchain</module>
+	</modules>
 
 </project>

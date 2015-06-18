@@ -20,29 +20,16 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-util:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-util-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-xml-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.util.xml;
+package org.smartdeveloperhub.util.xml.spi;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.util.List;
 
+public interface XmlRegistryProvider {
 
-public final class DateTimeConverter {
+	List<Class<?>> getXmlRegistries();
 
-	private static final DateTimeFormatter DATE_PATTERN = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-
-	private DateTimeConverter() {
-	}
-
-	public static DateTime unmarshal(String dateStr) {
-		return DATE_PATTERN.parseDateTime(dateStr);
-	}
-
-	public static String marshal(DateTime dateTime) {
-		return DATE_PATTERN.print(dateTime);
-	}
 }

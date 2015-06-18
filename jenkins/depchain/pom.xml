@@ -77,10 +77,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
-			<artifactId>ci-jenkins-util</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 			<artifactId>ci-jenkins-client</artifactId>
 		</dependency>
 		<dependency>

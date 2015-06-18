@@ -57,6 +57,10 @@ public final class JenkinsIntegrationService {
 		this.listener=new CommandProducerListener(this.commandQueue);
 	}
 
+	public URI connectedTo() {
+		return this.crawler.instance();
+	}
+
 	public synchronized void connect(URI jenkinsInstance) throws IOException {
 		checkState(this.crawler==null,"Already connected");
 		try {
@@ -75,10 +79,6 @@ public final class JenkinsIntegrationService {
 			this.worker=null;
 			throw new IOException("Cannot create crawler",e);
 		}
-	}
-
-	public URI connectedTo() {
-		return this.crawler.instance();
 	}
 
 	public synchronized boolean isConnected() {

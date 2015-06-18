@@ -66,6 +66,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
+				<artifactId>ci-util-bom</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -75,8 +82,8 @@
 			<artifactId>ci-jenkins-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
-			<artifactId>ci-jenkins-util</artifactId>
+			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
+			<artifactId>ci-util-xml</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

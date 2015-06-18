@@ -59,6 +59,7 @@
 	<!-- =================================================================== -->
 
 	<modules>
+		<module>util</module>
 		<module>jenkins</module>
 		<module>backend</module>
 		<module>frontend</module>

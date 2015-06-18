@@ -43,13 +43,13 @@
 		<jaxb:javaType
 			name="java.net.URI"
 			xmlType="xs:anyURI"
-			parseMethod="org.smartdeveloperhub.jenkins.util.xml.URIConverter.unmarshal"
-			printMethod="org.smartdeveloperhub.jenkins.util.xml.URIConverter.marshal" />
+			parseMethod="org.smartdeveloperhub.util.xml.URIConverter.unmarshal"
+			printMethod="org.smartdeveloperhub.util.xml.URIConverter.marshal" />
 		<jaxb:javaType
 			name="org.joda.time.DateTime"
 			xmlType="xs:dateTime"
-			parseMethod="org.smartdeveloperhub.jenkins.util.xml.DateTimeConverter.unmarshal"
-			printMethod="org.smartdeveloperhub.jenkins.util.xml.DateTimeConverter.marshal" />
+			parseMethod="org.smartdeveloperhub.util.xml.DateTimeConverter.unmarshal"
+			printMethod="org.smartdeveloperhub.util.xml.DateTimeConverter.marshal" />
 		<jaxb:javaType
 			name="org.smartdeveloperhub.jenkins.Status"
 			xmlType="rest:ResourceStatus"

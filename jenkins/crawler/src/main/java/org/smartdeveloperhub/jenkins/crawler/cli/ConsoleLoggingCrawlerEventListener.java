@@ -32,7 +32,7 @@ import org.smartdeveloperhub.jenkins.crawler.event.CrawlerStoppedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingAbortedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingCompletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingStartedEvent;
-import org.smartdeveloperhub.jenkins.crawler.util.Consoles;
+import org.smartdeveloperhub.util.console.Consoles;
 
 final class ConsoleLoggingCrawlerEventListener implements CrawlerEventListener {
 

@@ -36,7 +36,7 @@ import javax.persistence.Persistence;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins.JenkinsIntegrationService;
-import org.smartdeveloperhub.jenkins.crawler.util.Consoles;
+import org.smartdeveloperhub.util.console.Consoles;
 
 import com.google.common.collect.ImmutableMap;
 

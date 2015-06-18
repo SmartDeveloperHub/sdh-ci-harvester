@@ -53,7 +53,7 @@ import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResourceDescriptorDocum
 import org.smartdeveloperhub.jenkins.crawler.xml.persistence.Storage;
 import org.smartdeveloperhub.jenkins.crawler.xml.persistence.StorageDescriptor;
 import org.smartdeveloperhub.jenkins.crawler.xml.persistence.StorageEntryType;
-import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
+import org.smartdeveloperhub.util.xml.XmlUtils;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;

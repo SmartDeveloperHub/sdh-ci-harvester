@@ -20,16 +20,28 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-util:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-util-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-xml-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.util.xml.spi;
+package org.smartdeveloperhub.util.xml;
 
-import java.util.List;
+import java.io.IOException;
 
-public interface XmlRegistryProvider {
+public class XmlProcessingException extends IOException {
 
-	List<Class<?>> getXmlRegistries();
+	private static final long serialVersionUID = 7949536096913542421L;
+
+	public XmlProcessingException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public XmlProcessingException(String message) {
+		super(message);
+	}
+
+	public XmlProcessingException(Throwable cause) {
+		super(cause);
+	}
 
 }

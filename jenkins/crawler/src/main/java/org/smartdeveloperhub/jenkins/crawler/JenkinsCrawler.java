@@ -53,14 +53,19 @@ public final class JenkinsCrawler {
 
 	public static final class Builder {
 
-		private String location;
+		private URI location;
 		private File directory;
 
 		private Builder() {
 		}
 
-		public Builder withLocation(String location) {
+		public Builder withLocation(URI location) {
 			this.location = location;
+			return this;
+		}
+
+		public Builder withLocation(String location) {
+			this.location = URI.create(location);
 			return this;
 		}
 
@@ -74,7 +79,7 @@ public final class JenkinsCrawler {
 			try {
 				return
 					new JenkinsCrawler(
-						URI.create(this.location),
+						this.location,
 						createFileBasedStorage(),
 						ModelMappingService.
 							newInstance(TransformationManager.newInstance()));
@@ -91,7 +96,8 @@ public final class JenkinsCrawler {
 					builder().
 						withWorkingDirectory(this.directory).
 						withConfigFile(
-							new File(this.directory,"repository.xml")).build();
+							new File(this.directory,"repository.xml")).
+						build();
 		}
 
 	}
@@ -107,7 +113,8 @@ public final class JenkinsCrawler {
 		@Override
 		public void propagate(JenkinsEventListener listener) {
 			JenkinsEventDispatcher.
-				create(listener).fireEvent(this.event);
+				create(listener).
+					fireEvent(this.event);
 		}
 
 	}

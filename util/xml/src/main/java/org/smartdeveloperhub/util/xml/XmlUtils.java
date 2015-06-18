@@ -20,11 +20,11 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-util:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-util-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-xml-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.util.xml;
+package org.smartdeveloperhub.util.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -56,7 +56,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.jenkins.util.xml.spi.XmlRegistryProvider;
+import org.smartdeveloperhub.util.xml.spi.XmlRegistryProvider;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 

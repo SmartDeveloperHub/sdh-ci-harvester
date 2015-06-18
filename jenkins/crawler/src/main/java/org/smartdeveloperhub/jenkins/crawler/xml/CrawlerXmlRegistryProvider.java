@@ -28,7 +28,7 @@ package org.smartdeveloperhub.jenkins.crawler.xml;
 
 import java.util.List;
 
-import org.smartdeveloperhub.jenkins.util.xml.spi.XmlRegistryProvider;
+import org.smartdeveloperhub.util.xml.spi.XmlRegistryProvider;
 
 import com.google.common.collect.ImmutableList;
 

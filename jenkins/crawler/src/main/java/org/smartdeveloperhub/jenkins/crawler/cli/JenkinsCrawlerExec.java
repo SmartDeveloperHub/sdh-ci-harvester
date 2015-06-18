@@ -40,7 +40,7 @@ import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawlerException;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
-import org.smartdeveloperhub.jenkins.crawler.util.Consoles;
+import org.smartdeveloperhub.util.console.Consoles;
 
 public final class JenkinsCrawlerExec {
 

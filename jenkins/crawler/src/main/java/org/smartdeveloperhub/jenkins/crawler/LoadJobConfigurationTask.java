@@ -35,7 +35,7 @@ import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
-import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
+import org.smartdeveloperhub.util.xml.XmlUtils;
 
 final class LoadJobConfigurationTask extends AbstractCrawlingSubTask<Build> {
 

@@ -20,28 +20,25 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-util:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-util-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-xml-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.util.xml;
+package org.smartdeveloperhub.util.xml;
 
-import java.io.IOException;
+import java.net.URI;
 
-public class XmlProcessingException extends IOException {
+public final class URIConverter {
 
-	private static final long serialVersionUID = 7949536096913542421L;
-
-	public XmlProcessingException(String message, Throwable cause) {
-		super(message, cause);
+	private URIConverter() {
 	}
 
-	public XmlProcessingException(String message) {
-		super(message);
+	public static URI unmarshal(String rawURI) {
+		return URI.create(rawURI);
 	}
 
-	public XmlProcessingException(Throwable cause) {
-		super(cause);
+	public static String marshal(URI uri) {
+		return uri.toString();
 	}
 
 }

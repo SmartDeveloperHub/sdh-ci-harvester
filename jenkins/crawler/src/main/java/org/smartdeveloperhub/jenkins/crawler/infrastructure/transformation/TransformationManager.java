@@ -51,7 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationException;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationService;
-import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
+import org.smartdeveloperhub.util.xml.XmlUtils;
 
 import com.google.common.collect.Maps;
 

@@ -20,21 +20,29 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-xml-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.util;
+package org.smartdeveloperhub.util.xml;
 
-/**
- * Runtime exception for handling console errors.
- */
-public class ConsoleException extends RuntimeException {
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
-	private static final long serialVersionUID = 1L;
 
-	public ConsoleException(Throwable t) {
-		super(t);
+public final class DateTimeConverter {
+
+	private static final DateTimeFormatter DATE_PATTERN = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
+	private DateTimeConverter() {
 	}
 
+	public static DateTime unmarshal(String dateStr) {
+		return DATE_PATTERN.parseDateTime(dateStr);
+	}
+
+	public static String marshal(DateTime dateTime) {
+		return DATE_PATTERN.print(dateTime);
+	}
 }

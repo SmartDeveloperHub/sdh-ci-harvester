@@ -47,7 +47,7 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.ResponseBody;
 import org.smartdeveloperhub.jenkins.ResponseBodyBuilder;
 import org.smartdeveloperhub.jenkins.Status;
-import org.smartdeveloperhub.jenkins.util.xml.XmlUtils;
+import org.smartdeveloperhub.util.xml.XmlUtils;
 import org.w3c.dom.Document;
 
 import com.google.common.base.MoreObjects;
