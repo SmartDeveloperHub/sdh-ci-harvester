@@ -34,6 +34,8 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 
 public final class SubBuild extends Build {
 
+	private static final int PRIME = 13;
+
 	private URI parentId;
 
 	SubBuild() {
@@ -64,6 +66,17 @@ public final class SubBuild extends Build {
 	@Override
 	public void accept(BuildVisitor visitor) {
 		visitor.visitSubBuild(this);
+	}
+
+
+	@Override
+	public int hashCode() {
+		return super.hashCode()+PRIME*SubBuild.class.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj) && SubBuild.class.isInstance(obj);
 	}
 
 	@Override

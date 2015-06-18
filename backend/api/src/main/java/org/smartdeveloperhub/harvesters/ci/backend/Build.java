@@ -28,6 +28,7 @@ package org.smartdeveloperhub.harvesters.ci.backend;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.net.URI;
 import java.util.Date;
@@ -35,8 +36,6 @@ import java.util.List;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.base.Objects;
-import static com.google.common.base.Preconditions.*;
 import com.google.common.collect.Lists;
 
 public abstract class Build {
@@ -140,7 +139,7 @@ public abstract class Build {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(this.buildId);
+		return this.buildId.hashCode();
 	}
 
 	@Override
@@ -148,9 +147,7 @@ public abstract class Build {
 		boolean result=false;
 		if(obj instanceof Build) {
 			Build that=(Build)obj;
-			result=
-				this.getClass()==that.getClass() &&
-				Objects.equal(this.buildId,that.buildId);
+			result=this.buildId.equals(that.buildId);
 		}
 		return result;
 	}

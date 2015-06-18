@@ -132,27 +132,39 @@ public final class JenkinsURI {
 			result.setSubJob(path.length>1?path[1]:null);
 			result.setRun(path.length>2?path[2]:null);
 			if(result.subJob()!=null) {
-				String oldRun = result.run();
-				if(oldRun==null) {
-					try {
-						Long.parseLong(result.subJob());
-						swapRunAndSubJob(result, oldRun);
-					} catch (NumberFormatException e) {
-						// Good guess
-					}
-				} else {
-					try {
-						Long.parseLong(oldRun);
-						// Good guess
-					} catch (NumberFormatException e) {
-						swapRunAndSubJob(result, oldRun);
-					}
-				}
+				verifySubresource(result);
 			}
 		} else {
 			result.setService(strLocation);
 		}
 		return result;
+	}
+
+	private static void verifySubresource(JenkinsURI result) {
+		String oldRun = result.run();
+		if(oldRun==null) {
+			verifySubJob(result, oldRun);
+		} else {
+			verifyRun(result, oldRun);
+		}
+	}
+
+	private static void verifyRun(JenkinsURI result, String oldRun) {
+		try {
+			Long.parseLong(oldRun);
+			// Good guess
+		} catch (NumberFormatException e) {
+			swapRunAndSubJob(result, oldRun);
+		}
+	}
+
+	private static void verifySubJob(JenkinsURI result, String oldRun) {
+		try {
+			Long.parseLong(result.subJob());
+			swapRunAndSubJob(result, oldRun);
+		} catch (NumberFormatException e) {
+			// Good guess
+		}
 	}
 
 	private static void swapRunAndSubJob(JenkinsURI result, String oldRun) {

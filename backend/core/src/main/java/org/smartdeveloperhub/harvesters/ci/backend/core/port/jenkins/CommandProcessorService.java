@@ -126,13 +126,21 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 		} while(!this.shuttingDown);
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("Command processing terminated.");
-			if(!this.commandQueue.isEmpty()) {
-				LOGGER.info("Dismissing {} commands",this.commandQueue.size());
-				if(LOGGER.isTraceEnabled()) {
-					for(Command command:this.commandQueue) {
-						LOGGER.trace("- Dimissed {}",command);
-					}
-				}
+			debugDismissedDetails();
+		}
+	}
+
+	private void debugDismissedDetails() {
+		if(!this.commandQueue.isEmpty()) {
+			LOGGER.info("Dismissing {} commands",this.commandQueue.size());
+			traceDismissedCommands();
+		}
+	}
+
+	private void traceDismissedCommands() {
+		if(LOGGER.isTraceEnabled()) {
+			for(Command command:this.commandQueue) {
+				LOGGER.trace("- Dimissed {}",command);
 			}
 		}
 	}

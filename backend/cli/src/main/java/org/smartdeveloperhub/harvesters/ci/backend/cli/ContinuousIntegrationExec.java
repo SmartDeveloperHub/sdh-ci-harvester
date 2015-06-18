@@ -46,7 +46,7 @@ public final class ContinuousIntegrationExec {
 	private static final String JDBC_DRIVER   = "javax.persistence.jdbc.driver";
 	private static final String JDBC_URL      = "javax.persistence.jdbc.url";
 	private static final String JDBC_USER     = "javax.persistence.jdbc.user";
-	private static final String JDBC_PASSWORD = "javax.persistence.jdbc.password";
+	private static final String JDBC_PASSWORD = "javax.persistence.jdbc.password"; // NOSONAR
 
 	private static final String SCHEMA_GENERATION_DROP_TARGET    = "javax.persistence.schema-generation.scripts.drop-target";
 	private static final String SCHEMA_GENERATION_CREATE_TARGET  = "javax.persistence.schema-generation.scripts.create-target";
@@ -55,7 +55,7 @@ public final class ContinuousIntegrationExec {
 	public static final String HSQLDB_DRIVER = "org.hsqldb.jdbcDriver";
 	public static final String HSQLDB_URL = "jdbc:hsqldb:mem:dbunit";
 	public static final String HSQLDB_USER = "sa";
-	public static final String HSQLDB_PASSWORD = "";
+	public static final String HSQLDB_PASSWORD = ""; // NOSONAR
 
 
 	private static File create;

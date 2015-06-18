@@ -37,6 +37,8 @@ import com.google.common.collect.Lists;
 
 public final class CompositeBuild extends Build {
 
+	private static final int PRIME = 17;
+
 	private List<URI> subBuilds;
 
 	CompositeBuild() {
@@ -78,6 +80,16 @@ public final class CompositeBuild extends Build {
 	@Override
 	public void accept(BuildVisitor visitor) {
 		visitor.visitCompositeBuild(this);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode()+PRIME*CompositeBuild.class.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj) && CompositeBuild.class.isInstance(obj);
 	}
 
 	@Override

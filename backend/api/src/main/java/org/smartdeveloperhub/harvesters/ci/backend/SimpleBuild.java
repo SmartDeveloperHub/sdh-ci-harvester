@@ -30,6 +30,8 @@ import java.net.URI;
 
 public final class SimpleBuild extends Build {
 
+	private static final int PRIME = 19;
+
 	SimpleBuild() {
 	}
 
@@ -44,6 +46,16 @@ public final class SimpleBuild extends Build {
 	@Override
 	public void accept(BuildVisitor visitor) {
 		visitor.visitSimpleBuild(this);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode()+PRIME*SimpleBuild.class.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj) && SimpleBuild.class.isInstance(obj);
 	}
 
 }
