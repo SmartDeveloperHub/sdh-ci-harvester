@@ -64,6 +64,7 @@
 		<module>api</module>
 		<module>client</module>
 		<module>crawler</module>
+		<module>cli</module>
 		<module>depchain</module>
 	</modules>
 

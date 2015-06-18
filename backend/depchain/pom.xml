@@ -78,7 +78,10 @@
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 			<artifactId>ci-backend-core</artifactId>
-			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
+			<artifactId>ci-backend-cli</artifactId>
 		</dependency>
 	</dependencies>
 

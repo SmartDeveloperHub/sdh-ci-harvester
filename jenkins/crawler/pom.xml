@@ -120,8 +120,7 @@
 
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
-			<artifactId>ci-util-depchain</artifactId>
-			<type>pom</type>
+			<artifactId>ci-util-xml</artifactId>
 		</dependency>
 
 		<dependency>

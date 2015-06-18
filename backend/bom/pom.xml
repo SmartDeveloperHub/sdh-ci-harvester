@@ -72,6 +72,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
+				<artifactId>ci-backend-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 				<artifactId>ci-backend-depchain</artifactId>
 				<type>pom</type>
 				<version>${project.version}</version>

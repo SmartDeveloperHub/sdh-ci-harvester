@@ -58,11 +58,11 @@
 	<!-- =================================================================== -->
 
 	<dependencies>
-		<!-- Catalog Resolver -->
+
 		<dependency>
-			<groupId>xml-resolver</groupId>
-			<artifactId>xml-resolver</artifactId>
-			<version>1.2</version>
+			<artifactId>xml-apis</artifactId>
+			<groupId>xml-apis</groupId>
+			<version>1.4.01</version>
 		</dependency>
 
 		<!-- Namespace aware DOM -->
@@ -70,6 +70,14 @@
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
 			<version>2.11.0</version>
+		</dependency>
+
+
+		<!-- Catalog Resolver -->
+		<dependency>
+			<groupId>xml-resolver</groupId>
+			<artifactId>xml-resolver</artifactId>
+			<version>1.2</version>
 		</dependency>
 
 		<!-- XSLT 2.0 -->
