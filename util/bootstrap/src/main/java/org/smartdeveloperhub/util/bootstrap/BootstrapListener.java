@@ -60,6 +60,7 @@ final class BootstrapListener extends Listener {
 
 	@Override
 	public void failure(Service service) {
+		LOGGER.info("- {}",service);
 		this.failedServices.add(service);
 	}
 

@@ -89,14 +89,14 @@ public abstract class AbstractBootstrap<T> {
 	}
 
 	private Iterable<? extends Service> prepareServices(T config) throws BootstrapException {
-		this.logger.info("Initializing {} services...",this.bootstrapId);
+		this.logger.info("Preparing {} services...",this.bootstrapId);
 		try {
 			this.logger.info("Configuring {} services using {}...",this.bootstrapId,config);
 			Iterable<? extends Service> services = getServices(config);
-			this.logger.info("{} services initialized.",this.bootstrapId);
+			this.logger.info("{} services prepared.",this.bootstrapId);
 			return services;
 		} catch (Exception e) {
-			String errorMessage = String.format("Could not initialize %s services",this.bootstrapId);
+			String errorMessage = String.format("Could not prepare %s services",this.bootstrapId);
 			logger.warn(errorMessage+". Full stacktrace follows: ",e);
 			throw new ApplicationInitializationException(errorMessage,e)
 			;
@@ -117,6 +117,7 @@ public abstract class AbstractBootstrap<T> {
 	}
 
 	private void awaitInitialization() throws BootstrapException {
+		this.logger.info("Awaiting {} service start up...",this.bootstrapId);
 		int retries=0;
 		BootstrapException failure=null;
 		Stopwatch timer=Stopwatch.createStarted();
@@ -135,17 +136,19 @@ public abstract class AbstractBootstrap<T> {
 			} catch(IllegalStateException e) {
 				failure=
 					new ApplicationInitializationException(
-						String.format("Bootstrap of %s failed",this.bootstrapId),
+						String.format("Start up of %s services failed",this.bootstrapId),
 						e,
 						extractFailures(this.listener.failedServices()));
 			}
 		}
 		if(failure!=null) {
 			this.logger.warn(failure.getMessage()+". Full stacktrace follows:",failure.getCause());
-			this.logger.info("Forcing {} termination...",this.bootstrapId);
+			this.logger.info("Aborting {} bootstrap...",this.bootstrapId);
 			doTerminate(false);
+			this.logger.info("Aborted {} bootstrap.",this.bootstrapId);
 			throw failure;
 		}
+		this.logger.info("{} services started up succesfully.",this.bootstrapId);
 	}
 
 	private Map<String, Throwable> extractFailures(Iterable<? extends Service> failedServices) {

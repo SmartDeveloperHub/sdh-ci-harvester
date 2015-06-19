@@ -85,8 +85,7 @@ public class AbstractBootstrapTest {
 		return args;
 	}
 
-	private void verifyInitializationFailure(
-			ApplicationInitializationException e, String failure) {
+	private void verifyInitializationFailure(ApplicationInitializationException e, String failure) {
 		Set<String> failedServices = e.failedServices();
 		assertThat(failedServices,hasSize(1));
 		String failedService = Iterables.get(failedServices,0);
