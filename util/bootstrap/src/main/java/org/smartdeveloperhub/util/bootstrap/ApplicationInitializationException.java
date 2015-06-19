@@ -20,47 +20,50 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-bootstrap:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-bootstrap-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.util.bootstrap;
 
-import java.net.URI;
+import java.util.Map;
+import java.util.Set;
 
-public final class SimpleBuild extends Build {
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 
-	private static final int PRIME = 19;
+public class ApplicationInitializationException extends BootstrapException {
 
-	SimpleBuild() {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 6431237800432308265L;
+
+	private final Map<String, Throwable> failures;
+
+	public ApplicationInitializationException(String message, Throwable cause, Map<String,Throwable> failures) {
+		super(message, cause);
+		this.failures = failures;
 	}
 
-	private SimpleBuild(SimpleBuild build) {
-		super(build.serviceId(),build.buildId(),build.title());
+	public ApplicationInitializationException(String message, Map<String,Throwable> failures) {
+		this(message,null,failures);
 	}
 
-	SimpleBuild(URI serviceId, URI buildId, String title) {
-		super(serviceId,buildId,title);
+	public ApplicationInitializationException(String message, Throwable cause) {
+		this(message,cause,Maps.<String,Throwable>newLinkedHashMap());
 	}
 
-	@Override
-	Build makeClone() {
-		return new SimpleBuild(this);
+	public ApplicationInitializationException(String message) {
+		this(message,(Throwable)null);
 	}
 
-	@Override
-	public void accept(BuildVisitor visitor) {
-		visitor.visitSimpleBuild(this);
+	public Set<String> failedServices() {
+		return ImmutableSet.copyOf(this.failures.keySet());
 	}
 
-	@Override
-	public int hashCode() {
-		return super.hashCode()+PRIME*SimpleBuild.class.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj) && SimpleBuild.class.isInstance(obj);
+	public Throwable serviceFailure(String service) {
+		return this.failures.get(service);
 	}
 
 }

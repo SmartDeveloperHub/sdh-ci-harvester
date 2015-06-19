@@ -57,6 +57,7 @@ public final class CompositeBuild extends Build {
 		this(serviceId,buildId,title,Collections.<URI>emptyList());
 	}
 
+	@Override
 	Build makeClone() {
 		return new CompositeBuild(this);
 	}

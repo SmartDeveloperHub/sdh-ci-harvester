@@ -20,47 +20,51 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-bootstrap:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-bootstrap-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.util.bootstrap;
 
-import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
-public final class SimpleBuild extends Build {
+import org.smartdeveloperhub.util.console.Consoles;
 
-	private static final int PRIME = 19;
+import com.google.common.util.concurrent.AbstractIdleService;
 
-	SimpleBuild() {
+class CustomApplicationService extends AbstractIdleService {
+
+	private CustomConfig config;
+
+	void setConfiguration(CustomConfig config) {
+		this.config = config;
 	}
 
-	private SimpleBuild(SimpleBuild build) {
-		super(build.serviceId(),build.buildId(),build.title());
-	}
-
-	SimpleBuild(URI serviceId, URI buildId, String title) {
-		super(serviceId,buildId,title);
-	}
-
-	@Override
-	Build makeClone() {
-		return new SimpleBuild(this);
+	CustomConfig config() {
+		return this.config;
 	}
 
 	@Override
-	public void accept(BuildVisitor visitor) {
-		visitor.visitSimpleBuild(this);
+	protected void startUp() {
+		if(this.config.isDelayInitialization()) {
+			try {
+				TimeUnit.SECONDS.sleep(25);
+			} catch (InterruptedException e) {
+				// Nothing to do
+			}
+		}
+		if(this.config.isFailServiceStartUp()) {
+			throw new IllegalStateException(CustomConfig.FAILED_SERVICE_START_UP_MESSAGE);
+		}
+		Consoles.defaultConsole().printf("{%s} Hello!%n",this.config.getSetting());
 	}
 
 	@Override
-	public int hashCode() {
-		return super.hashCode()+PRIME*SimpleBuild.class.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj) && SimpleBuild.class.isInstance(obj);
+	protected void shutDown() {
+		if(this.config.isFailServiceShutdown()) {
+			throw new IllegalStateException(CustomConfig.FAILED_SERVICE_SHUTDOWN_MESSAGE);
+		}
+		Consoles.defaultConsole().printf("{%s} Goodbye!%n",this.config.getSetting());
 	}
 
 }

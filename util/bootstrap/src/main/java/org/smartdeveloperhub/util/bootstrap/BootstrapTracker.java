@@ -20,47 +20,40 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-bootstrap:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-bootstrap-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.util.bootstrap;
 
-import java.net.URI;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
-public final class SimpleBuild extends Build {
+final class BootstrapTracker {
 
-	private static final int PRIME = 19;
+	private static final BootstrapTracker SINGLETON=new BootstrapTracker();
 
-	SimpleBuild() {
+	private final Map<Class<?>,ApplicationInstanceTracker> references;
+
+	private BootstrapTracker() {
+		this.references=new IdentityHashMap<Class<?>,ApplicationInstanceTracker>();
 	}
 
-	private SimpleBuild(SimpleBuild build) {
-		super(build.serviceId(),build.buildId(),build.title());
+	static String track(Class<?> bootstrapClass, String applicationName) {
+		return
+			BootstrapTracker.
+				SINGLETON.
+					getTracker(bootstrapClass).
+						track(applicationName);
 	}
 
-	SimpleBuild(URI serviceId, URI buildId, String title) {
-		super(serviceId,buildId,title);
-	}
-
-	@Override
-	Build makeClone() {
-		return new SimpleBuild(this);
-	}
-
-	@Override
-	public void accept(BuildVisitor visitor) {
-		visitor.visitSimpleBuild(this);
-	}
-
-	@Override
-	public int hashCode() {
-		return super.hashCode()+PRIME*SimpleBuild.class.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj) && SimpleBuild.class.isInstance(obj);
+	private synchronized ApplicationInstanceTracker getTracker(Class<?> bootstrapClass) {
+		ApplicationInstanceTracker tracker=this.references.get(bootstrapClass);
+		if(tracker==null) {
+			tracker=ApplicationInstanceTracker.newInstance(bootstrapClass);
+			this.references.put(bootstrapClass,tracker);
+		}
+		return tracker;
 	}
 
 }

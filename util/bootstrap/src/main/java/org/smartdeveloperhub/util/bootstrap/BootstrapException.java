@@ -20,47 +20,21 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-bootstrap:1.0.0-SNAPSHOT
+ *   Bundle      : ci-util-bootstrap-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.util.bootstrap;
 
-import java.net.URI;
+public class BootstrapException extends Exception {
 
-public final class SimpleBuild extends Build {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 2827657211024674198L;
 
-	private static final int PRIME = 19;
-
-	SimpleBuild() {
-	}
-
-	private SimpleBuild(SimpleBuild build) {
-		super(build.serviceId(),build.buildId(),build.title());
-	}
-
-	SimpleBuild(URI serviceId, URI buildId, String title) {
-		super(serviceId,buildId,title);
-	}
-
-	@Override
-	Build makeClone() {
-		return new SimpleBuild(this);
-	}
-
-	@Override
-	public void accept(BuildVisitor visitor) {
-		visitor.visitSimpleBuild(this);
-	}
-
-	@Override
-	public int hashCode() {
-		return super.hashCode()+PRIME*SimpleBuild.class.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj) && SimpleBuild.class.isInstance(obj);
+	public BootstrapException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 }

@@ -59,6 +59,7 @@ public final class SubBuild extends Build {
 		this.parentId = parentId;
 	}
 
+	@Override
 	Build makeClone() {
 		return new SubBuild(this);
 	}
