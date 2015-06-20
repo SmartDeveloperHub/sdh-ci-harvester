@@ -37,34 +37,34 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils.ReferenceDifference;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
-final class RefreshServiceTask extends AbstractCrawlingTask {
+final class RefreshInstanceTask extends AbstractCrawlingTask {
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshServiceTask.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshInstanceTask.class);
 
-	private final Service service;
+	private final Instance instance;
 
-	RefreshServiceTask(Service service) {
-		super(service.getUrl(), JenkinsEntityType.SERVICE, JenkinsArtifactType.RESOURCE);
-		this.service = service;
+	RefreshInstanceTask(Instance instance) {
+		super(instance.getUrl(), JenkinsEntityType.INSTANCE, JenkinsArtifactType.RESOURCE);
+		this.instance = instance;
 	}
 
 	@Override
 	protected String taskPrefix() {
-		return "rst";
+		return "rit";
 	}
 
 	@Override
 	protected void processResource(JenkinsResource resource) throws IOException {
-		Service currentService = super.loadService(resource);
+		Instance currentService = super.loadInstance(resource);
 
 		ReferenceDifference difference=
 			TaskUtils.
 				calculate(
-					this.service.getBuilds().getBuilds(),
-					currentService.getBuilds().getBuilds());
+					this.instance.getJobs().getJobs(),
+					currentService.getJobs().getJobs());
 
 		persistEntity(currentService,resource.entity());
 
@@ -74,7 +74,7 @@ final class RefreshServiceTask extends AbstractCrawlingTask {
 
 		for(URI maintainedBuild:difference.maintained()) {
 			try {
-				Build build=super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Build.class);
+				Job build=super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Job.class);
 				if(build==null) {
 					scheduleTask(new LoadJobTask(maintainedBuild));
 				} else {
@@ -88,7 +88,7 @@ final class RefreshServiceTask extends AbstractCrawlingTask {
 		for(URI deletedBuild:difference.deleted()) {
 			super.fireEvent(
 				JenkinsEventFactory.
-					newBuildDeletedEvent(
+					newJobDeletedEvent(
 						super.jenkinsInstance(),
 						deletedBuild));
 		}

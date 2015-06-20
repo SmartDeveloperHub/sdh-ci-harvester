@@ -38,8 +38,8 @@
 	<xsl:template match="mavenModuleSet">
 		<xsl:variable name="name" select="name"/>
 		<xsl:variable name="url" select="url"/>
-		<ci:compositeBuild
-			service="{substring($url,0,string-length($url)-string-length(concat('job/',$name)))}"
+		<ci:compositeJob>
+			instance="{substring($url,0,string-length($url)-string-length(concat('job/',$name)))}"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://www.sdh.org/harvester/ci/v1 http://www.sdh.org/harvester/ci/v1/schema.xsd" >
 			<url><xsl:value-of select="$url"/></url>
@@ -58,12 +58,12 @@
 					<run id="{$number}"><xsl:value-of select="url"/></run>
 				</xsl:for-each>
 			</runs>
-			<subBuilds>
+			<subJobs>
 				<xsl:for-each select="module">
 					<xsl:variable name="name" select="name"/>
-					<build id="{$name}"><xsl:value-of select="url"/></build>
+					<job id="{$name}"><xsl:value-of select="url"/></job>
 				</xsl:for-each>
-			</subBuilds>
-		</ci:compositeBuild>
+			</subJobs>
+		</ci:compositeJob>
 	</xsl:template>
 </xsl:stylesheet>

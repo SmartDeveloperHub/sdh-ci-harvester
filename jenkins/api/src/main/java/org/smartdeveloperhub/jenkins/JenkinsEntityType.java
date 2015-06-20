@@ -29,13 +29,13 @@ package org.smartdeveloperhub.jenkins;
 
 public enum JenkinsEntityType {
 
-	SERVICE("hudson",null,null) {
+	INSTANCE("hudson",null,null) {
 		@Override
-		public boolean isService() {
+		public boolean isInstance() {
 			return true;
 		}
 	},
-	JOB("build",null,SERVICE) {
+	JOB("build",null,INSTANCE) {
 		@Override
 		public boolean isJob() {
 			return true;
@@ -52,7 +52,7 @@ public enum JenkinsEntityType {
 	MAVEN_BUILD("abstractMavenProject",JOB,null),
 	MAVEN_MULTIMODULE_BUILD("mavenModuleSet",MAVEN_BUILD,null),
 	MAVEN_MODULE_BUILD("mavenModule",MAVEN_BUILD,MAVEN_MULTIMODULE_BUILD),
-	MATRIX_BUILD("matrixProject",JOB,SERVICE),
+	MATRIX_BUILD("matrixProject",JOB,INSTANCE),
 	CONFIGURATION_BUILD("matrixConfiguration",JOB,MATRIX_BUILD),
 	FREE_STYLE_RUN("freeStyleBuild",RUN,FREE_STYLE_BUILD),
 	MAVEN_RUN("abstractMavenBuild",RUN,MAVEN_BUILD),
@@ -79,10 +79,10 @@ public enum JenkinsEntityType {
 				this;
 	}
 
-	public boolean isService() {
+	public boolean isInstance() {
 		return
 			this.parent!=null?
-				this.parent.isService():
+				this.parent.isInstance():
 				false;
 	}
 

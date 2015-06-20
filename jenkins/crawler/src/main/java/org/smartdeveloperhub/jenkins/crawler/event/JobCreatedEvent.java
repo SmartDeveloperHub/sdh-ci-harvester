@@ -26,42 +26,64 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
 
+import java.net.URI;
+import java.util.Date;
 
-abstract class AbstractJenkinsEventListener implements JenkinsEventListener {
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 
-	@Override
-	public void onInstanceFound(InstanceFoundEvent event) {
-		// To be implemented by subclasses
+import com.google.common.base.MoreObjects.ToStringHelper;
+
+public final class JobCreatedEvent extends JenkinsEvent {
+
+	private Job job;
+
+	private JobCreatedEvent(URI instanceId, Date date) {
+		super(instanceId,date);
+	}
+
+	JobCreatedEvent withJob(Job job) {
+		this.job = job;
+		return this;
+	}
+
+	Job build() {
+		return this.job;
 	}
 
 	@Override
-	public void onJobCreation(JobCreatedEvent event) {
-		// To be implemented by subclasses
+	void accept(JenkinsEventVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitJobCreatedEvent(this);
+		}
+	}
+
+	public URI jobId() {
+		return this.job.getUrl();
+	}
+
+	public String title() {
+		return job.getTitle();
+	}
+
+	public String description() {
+		return job.getDescription();
+	}
+
+	public URI codebase() {
+		return job.getCodebase();
 	}
 
 	@Override
-	public void onJobUpdate(JobUpdatedEvent event) {
-		// To be implemented by subclasses
+	protected void toString(ToStringHelper helper) {
+		helper.
+			add("jobId", jobId()).
+			add("title", title()).
+			add("description", description()).
+			add("codebase", codebase());
 	}
 
-	@Override
-	public void onJobDeletion(JobDeletedEvent event) {
-		// To be implemented by subclasses
-	}
-
-	@Override
-	public void onRunCreation(RunCreatedEvent event) {
-		// To be implemented by subclasses
-	}
-
-	@Override
-	public void onRunUpdate(RunUpdatedEvent event) {
-		// To be implemented by subclasses
-	}
-
-	@Override
-	public void onRunDeletion(RunDeletedEvent event) {
-		// To be implemented by subclasses
+	static JobCreatedEvent create(URI instanceId) {
+		return new JobCreatedEvent(instanceId, new Date());
 	}
 
 }

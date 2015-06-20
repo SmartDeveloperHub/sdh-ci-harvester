@@ -28,18 +28,18 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 
 public interface JenkinsEventListener {
 
-	void onServiceFound(ServiceFoundEvent event);
+	void onInstanceFound(InstanceFoundEvent event);
 
-	void onBuildCreation(BuildCreatedEvent event);
+	void onJobCreation(JobCreatedEvent event);
 
-	void onBuildUpdate(BuildUpdatedEvent event);
+	void onJobUpdate(JobUpdatedEvent event);
 
-	void onBuildDeletion(BuildDeletedEvent event);
+	void onJobDeletion(JobDeletedEvent event);
 
-	void onExecutionCreation(ExecutionCreatedEvent event);
+	void onRunCreation(RunCreatedEvent event);
 
-	void onExecutionUpdate(ExecutionUpdatedEvent event);
+	void onRunUpdate(RunUpdatedEvent event);
 
-	void onExecutionDeletion(ExecutionDeletedEvent event);
+	void onRunDeletion(RunDeletedEvent event);
 
 }

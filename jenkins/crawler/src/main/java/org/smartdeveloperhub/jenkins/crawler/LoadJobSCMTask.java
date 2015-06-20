@@ -30,12 +30,12 @@ import java.net.URI;
 
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 
-final class LoadJobSCMTask extends AbstractCrawlingSubTask<Build> {
+final class LoadJobSCMTask extends AbstractCrawlingSubTask<Job> {
 
-	LoadJobSCMTask(URI location, Build build) {
-		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.SCM,build);
+	LoadJobSCMTask(URI location, Job job) {
+		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.SCM,job);
 	}
 
 	@Override

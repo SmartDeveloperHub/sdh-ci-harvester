@@ -33,14 +33,14 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
 
-abstract class ExecutionEvent<T extends ExecutionEvent<T>> extends JenkinsEvent {
+abstract class RunEvent<T extends RunEvent<T>> extends JenkinsEvent {
 
 	private final Class<? extends T> clazz;
 
 	private Run run;
 
-	ExecutionEvent(URI service, Date date, Class<? extends T> clazz) {
-		super(service,date);
+	RunEvent(URI instanceId, Date date, Class<? extends T> clazz) {
+		super(instanceId,date);
 		this.clazz = clazz;
 	}
 
@@ -53,7 +53,7 @@ abstract class ExecutionEvent<T extends ExecutionEvent<T>> extends JenkinsEvent 
 		return this.run;
 	}
 
-	public final URI executionId() {
+	public final URI runId() {
 		return this.run.getUrl();
 	}
 

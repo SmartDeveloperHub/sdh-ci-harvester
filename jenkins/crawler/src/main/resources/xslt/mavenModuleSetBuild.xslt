@@ -38,7 +38,7 @@
 	<xsl:template match="mavenModuleSetBuild">
 		<xsl:variable name="num" select="number"/>
 		<xsl:variable name="url" select="url"/>
-		<ci:run build="{substring($url,0,string-length($url)-string-length($num))}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sdh.org/harvester/ci/v1 http://www.sdh.org/harvester/ci/v1/schema.xsd">
+		<ci:run job="{substring($url,0,string-length($url)-string-length($num))}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sdh.org/harvester/ci/v1 http://www.sdh.org/harvester/ci/v1/schema.xsd">
 			<url><xsl:value-of select="url"/></url>
 			<id><xsl:value-of select="$num"/></id>
 			<xsl:if test="exists(fullDisplayName)">

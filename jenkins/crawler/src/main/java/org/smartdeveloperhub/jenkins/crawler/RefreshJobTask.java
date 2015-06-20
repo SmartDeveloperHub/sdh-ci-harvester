@@ -37,8 +37,8 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils.ReferenceDifference;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeBuild;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeJob;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
 
@@ -46,11 +46,11 @@ final class RefreshJobTask extends AbstractCrawlingTask {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshJobTask.class);
 
-	private final Build build;
+	private final Job job;
 
-	RefreshJobTask(Build build) {
-		super(build.getUrl(), JenkinsEntityType.JOB, JenkinsArtifactType.RESOURCE);
-		this.build = build;
+	RefreshJobTask(Job job) {
+		super(job.getUrl(), JenkinsEntityType.JOB, JenkinsArtifactType.RESOURCE);
+		this.job = job;
 	}
 	@Override
 	protected String taskPrefix() {
@@ -59,21 +59,21 @@ final class RefreshJobTask extends AbstractCrawlingTask {
 
 	@Override
 	protected void processResource(JenkinsResource resource) throws IOException {
-		Build currentBuild = super.loadBuild(resource);
+		Job currentJob = super.loadJob(resource);
 
 		ReferenceDifference difference=
 			TaskUtils.
 				calculate(
-					this.build.getRuns().getRuns(),
-					currentBuild.getRuns().getRuns());
+					this.job.getRuns().getRuns(),
+					currentJob.getRuns().getRuns());
 
-		persistEntity(currentBuild,resource.entity());
+		persistEntity(currentJob,resource.entity());
 
-		scheduleTask(new LoadJobConfigurationTask(super.location(),currentBuild,resource.entity()));
-		scheduleTask(new LoadJobSCMTask(super.location(),currentBuild));
+		scheduleTask(new LoadJobConfigurationTask(super.location(),currentJob,resource.entity()));
+		scheduleTask(new LoadJobSCMTask(super.location(),currentJob));
 
-		if(currentBuild instanceof CompositeBuild) {
-			refreshSubBuilds((CompositeBuild)currentBuild);
+		if(currentJob instanceof CompositeJob) {
+			refreshSubJobs((CompositeJob)currentJob);
 		}
 
 		for(URI createdRuns:difference.created()) {
@@ -96,40 +96,40 @@ final class RefreshJobTask extends AbstractCrawlingTask {
 		for(URI deletedRuns:difference.deleted()) {
 			super.fireEvent(
 				JenkinsEventFactory.
-					newExecutionDeletedEvent(
+					newRunDeletedEvent(
 						super.jenkinsInstance(),
 						deletedRuns));
 		}
 
 	}
-	private void refreshSubBuilds(CompositeBuild currentCompositeBuild) {
+	private void refreshSubJobs(CompositeJob currentCompositeJob) {
 		ReferenceDifference difference=
 			TaskUtils.
 				calculate(
-					((CompositeBuild)this.build).getSubBuilds().getBuilds(),
-					currentCompositeBuild.getSubBuilds().getBuilds());
+					((CompositeJob)this.job).getSubJobs().getJobs(),
+					currentCompositeJob.getSubJobs().getJobs());
 
-		for(URI createdBuild:difference.created()) {
-			scheduleTask(new LoadJobTask(createdBuild));
+		for(URI createdJob:difference.created()) {
+			scheduleTask(new LoadJobTask(createdJob));
 		}
 
-		for(URI maintainedBuild:difference.maintained()) {
+		for(URI maintainedJob:difference.maintained()) {
 			try {
-				Build persistedBuild = super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Build.class);
-				if(persistedBuild==null) {
-					scheduleTask(new LoadJobTask(maintainedBuild));
+				Job persistedJob = super.entityOfId(maintainedJob,JenkinsEntityType.JOB,Job.class);
+				if(persistedJob==null) {
+					scheduleTask(new LoadJobTask(maintainedJob));
 				} else {
-					scheduleTask(new RefreshJobTask(persistedBuild));
+					scheduleTask(new RefreshJobTask(persistedJob));
 				}
 			} catch (IOException e) {
-				LOGGER.warn("Could not recover build '"+maintainedBuild+"'",e);
+				LOGGER.warn("Could not recover persisted job '"+maintainedJob+"'",e);
 			}
 		}
 
 		for(URI deletedBuild:difference.deleted()) {
 			super.fireEvent(
 				JenkinsEventFactory.
-					newBuildDeletedEvent(
+					newJobDeletedEvent(
 						super.jenkinsInstance(),
 						deletedBuild));
 		}

@@ -41,10 +41,10 @@ import org.smartdeveloperhub.jenkins.client.JenkinsClientException;
 import org.smartdeveloperhub.jenkins.client.JenkinsResourceProxy;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationException;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
 abstract class AbstractCrawlingTask implements Task {
 
@@ -85,7 +85,7 @@ abstract class AbstractCrawlingTask implements Task {
 			}
 			scheduleTask(this);
 		} else {
-			failSilently(failure,"Could not retrieve '%s' aftet %d intents",this.location,this.retries);
+			failSilently(failure,"Could not retrieve '%s' after %d intents",this.location,this.retries);
 		}
 	}
 
@@ -145,9 +145,9 @@ abstract class AbstractCrawlingTask implements Task {
 		return this.entity;
 	}
 
-	protected final Build loadBuild(JenkinsResource resource) throws TransformationException {
+	protected final Job loadJob(JenkinsResource resource) throws TransformationException {
 		checkState(this.context!=null);
-		return this.context.modelMapper().loadBuild(resource);
+		return this.context.modelMapper().loadJob(resource);
 	}
 
 	protected final Run loadRun(JenkinsResource resource) throws TransformationException {
@@ -155,9 +155,9 @@ abstract class AbstractCrawlingTask implements Task {
 		return this.context.modelMapper().loadRun(resource);
 	}
 
-	protected final Service loadService(JenkinsResource resource) throws TransformationException {
+	protected final Instance loadInstance(JenkinsResource resource) throws TransformationException {
 		checkState(this.context!=null);
-		return this.context.modelMapper().loadService(resource);
+		return this.context.modelMapper().loadInstance(resource);
 	}
 
 	protected final void scheduleTask(Task task) {

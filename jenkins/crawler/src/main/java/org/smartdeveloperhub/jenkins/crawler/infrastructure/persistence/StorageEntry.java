@@ -34,6 +34,7 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.xml.persistence.StorageEntryType;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 final class StorageEntry {
@@ -90,6 +91,18 @@ final class StorageEntry {
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("location",this.location).
+					add("type",this.type).
+					add("persistEntity",this.persistEntity).
+					add("persistedArtifacts",this.persistedArtifacts).
+					toString();
+	}
+
 	private JenkinsArtifactType[] persistedArtifacts() {
 		return this.persistedArtifacts.toArray(new JenkinsArtifactType[this.persistedArtifacts.size()]);
 	}
@@ -98,12 +111,16 @@ final class StorageEntry {
 		return
 			new StorageEntryType().
 				withResource(this.location).
-				withEntity(this.type).
+				withType(this.type).
+				withEntity(this.persistEntity).
 				withArtifacts(persistedArtifacts());
 	}
 
 	static StorageEntry fromDescriptor(StorageEntryType descriptor) {
-		StorageEntry entry=new StorageEntry(descriptor.getResource(),descriptor.getEntity());
+		StorageEntry entry=new StorageEntry(descriptor.getResource(),descriptor.getType());
+		if(descriptor.isEntity()) {
+			entry.persistEntity();
+		}
 		for(JenkinsArtifactType artifact:descriptor.getArtifacts()) {
 			entry.persistArtifact(artifact);
 		}

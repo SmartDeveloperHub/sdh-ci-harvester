@@ -28,31 +28,31 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 
 abstract class JenkinsEventVisitor implements EventVisitor {
 
-	void visitServiceFoundEvent(ServiceFoundEvent event) {
+	void visitInstanceFoundEvent(InstanceFoundEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitBuildCreationEvent(BuildCreatedEvent event) {
+	void visitJobCreatedEvent(JobCreatedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitBuildUpdatedEvent(BuildUpdatedEvent event) {
+	void visitJobUpdatedEvent(JobUpdatedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitBuildDeletionEvent(BuildDeletedEvent event) {
+	void visitJobDeletedEvent(JobDeletedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitExecutionCreationEvent(ExecutionCreatedEvent event) {
+	void visitRunCreatedEvent(RunCreatedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitExecutionUpdateEvent(ExecutionUpdatedEvent event) {
+	void visitRunUpdatedEvent(RunUpdatedEvent event) {
 		// To be implemented by subclasses
 	}
 
-	void visitExecutionDeletionEvent(ExecutionDeletedEvent event) {
+	void visitRunDeletedEvent(RunDeletedEvent event) {
 		// To be implemented by subclasses
 	}
 

@@ -38,7 +38,7 @@ public enum JenkinsArtifactType {
 
 	RESOURCE(
 		"api/xml",
-		JenkinsEntityType.SERVICE,
+		JenkinsEntityType.INSTANCE,
 		JenkinsEntityType.JOB,
 		JenkinsEntityType.RUN
 	),

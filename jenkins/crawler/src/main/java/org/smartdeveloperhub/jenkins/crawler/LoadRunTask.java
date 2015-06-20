@@ -53,7 +53,7 @@ final class LoadRunTask extends AbstractCrawlingTask {
 
 		super.fireEvent(
 			JenkinsEventFactory.
-				newExecutionCreatedEvent(
+				newRunCreatedEvent(
 					super.jenkinsInstance(),
 					run));
 

@@ -33,8 +33,8 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeBuild;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeJob;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 
 final class LoadJobTask extends AbstractCrawlingTask {
@@ -50,24 +50,24 @@ final class LoadJobTask extends AbstractCrawlingTask {
 
 	@Override
 	protected void processResource(JenkinsResource resource) throws IOException {
-		Build build = super.loadBuild(resource);
-		persistEntity(build,resource.entity());
+		Job job = super.loadJob(resource);
+		persistEntity(job,resource.entity());
 
 		super.fireEvent(
 			JenkinsEventFactory.
-				newBuildCreatedEvent(super.jenkinsInstance(),build));
+				newJobCreatedEvent(super.jenkinsInstance(),job));
 
-		scheduleTask(new LoadJobConfigurationTask(super.location(),build,resource.entity()));
-		scheduleTask(new LoadJobSCMTask(super.location(),build));
+		scheduleTask(new LoadJobConfigurationTask(super.location(),job,resource.entity()));
+		scheduleTask(new LoadJobSCMTask(super.location(),job));
 
-		if(build instanceof CompositeBuild) {
-			CompositeBuild cBuild=(CompositeBuild)build;
-			for(Reference ref:cBuild.getSubBuilds().getBuilds()) {
+		if(job instanceof CompositeJob) {
+			CompositeJob compositeJob=(CompositeJob)job;
+			for(Reference ref:compositeJob.getSubJobs().getJobs()) {
 				scheduleTask(new LoadJobTask(ref.getValue()));
 			}
 		}
 
-		for(Reference ref:build.getRuns().getRuns()) {
+		for(Reference ref:job.getRuns().getRuns()) {
 			scheduleTask(new LoadRunTask(ref.getValue()));
 		}
 

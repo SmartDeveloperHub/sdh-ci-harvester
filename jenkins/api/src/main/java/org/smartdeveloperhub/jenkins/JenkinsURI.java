@@ -41,7 +41,7 @@ public final class JenkinsURI {
 
 	private final URI location;
 
-	private String service;
+	private String instance;
 	private String job;
 	private String run;
 	private String subJob;
@@ -63,7 +63,7 @@ public final class JenkinsURI {
 	}
 
 	private void setService(String service) {
-		this.service=service;
+		this.instance=service;
 	}
 
 	public URI location() {
@@ -74,8 +74,8 @@ public final class JenkinsURI {
 		return this.subJob;
 	}
 
-	public String service() {
-		return this.service;
+	public String instance() {
+		return this.instance;
 	}
 
 	public String run() {
@@ -86,7 +86,7 @@ public final class JenkinsURI {
 		return this.job;
 	}
 
-	public boolean isService() {
+	public boolean isInstance() {
 		return this.job==null;
 	}
 
@@ -109,7 +109,7 @@ public final class JenkinsURI {
 				toStringHelper(JenkinsURI.class).
 					omitNullValues().
 					add("location",this.location).
-					add("service",this.service).
+					add("instance",this.instance).
 					add("job",this.job).
 					add("subJob",this.subJob).
 					add("run",this.location).

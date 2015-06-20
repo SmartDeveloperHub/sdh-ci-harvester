@@ -28,7 +28,7 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
 public final class JenkinsEventFactory {
@@ -36,32 +36,32 @@ public final class JenkinsEventFactory {
 	private JenkinsEventFactory() {
 	}
 
-	public static ServiceFoundEvent newServiceFoundEvent(URI service) {
-		return ServiceFoundEvent.create(service);
+	public static InstanceFoundEvent newInstanceFoundEvent(URI instanceId) {
+		return InstanceFoundEvent.create(instanceId);
 	}
 
-	public static BuildCreatedEvent newBuildCreatedEvent(URI service, Build build) {
-		return BuildCreatedEvent.create(service).withBuild(build);
+	public static JobCreatedEvent newJobCreatedEvent(URI instanceId, Job job) {
+		return JobCreatedEvent.create(instanceId).withJob(job);
 	}
 
-	public static BuildUpdatedEvent newBuildUpdatedEvent(URI service, Build build) {
-		return BuildUpdatedEvent.create(service).withBuild(build);
+	public static JobUpdatedEvent newJobUpdatedEvent(URI instanceId, Job job) {
+		return JobUpdatedEvent.create(instanceId).withJob(job);
 	}
 
-	public static BuildDeletedEvent newBuildDeletedEvent(URI service, URI build) {
-		return BuildDeletedEvent.create(service,build);
+	public static JobDeletedEvent newJobDeletedEvent(URI instanceId, URI jobId) {
+		return JobDeletedEvent.create(instanceId,jobId);
 	}
 
-	public static ExecutionCreatedEvent newExecutionCreatedEvent(URI service, Run run) {
-		return ExecutionCreatedEvent.create(service).withRun(run);
+	public static RunCreatedEvent newRunCreatedEvent(URI instanceId, Run run) {
+		return RunCreatedEvent.create(instanceId).withRun(run);
 	}
 
-	public static ExecutionUpdatedEvent newExecutionUpdatedEvent(URI service, Run run) {
-		return ExecutionUpdatedEvent.create(service).withRun(run);
+	public static RunUpdatedEvent newRunUpdatedEvent(URI instanceId, Run run) {
+		return RunUpdatedEvent.create(instanceId).withRun(run);
 	}
 
-	public static ExecutionDeletedEvent newExecutionDeletedEvent(URI service, URI execution) {
-		return ExecutionDeletedEvent.create(service,execution);
+	public static RunDeletedEvent newRunDeletedEvent(URI instanceId, URI runId) {
+		return RunDeletedEvent.create(instanceId,runId);
 	}
 
 }

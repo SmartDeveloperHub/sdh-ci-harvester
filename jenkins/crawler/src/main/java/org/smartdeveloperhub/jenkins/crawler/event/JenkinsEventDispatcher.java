@@ -39,38 +39,38 @@ public final class JenkinsEventDispatcher {
 		}
 
 		@Override
-		void visitServiceFoundEvent(ServiceFoundEvent event) {
-			this.listener.onServiceFound(event);
+		void visitInstanceFoundEvent(InstanceFoundEvent event) {
+			this.listener.onInstanceFound(event);
 		}
 
 		@Override
-		void visitBuildCreationEvent(BuildCreatedEvent event) {
-			this.listener.onBuildCreation(event);
+		void visitJobCreatedEvent(JobCreatedEvent event) {
+			this.listener.onJobCreation(event);
 		}
 
 		@Override
-		void visitBuildUpdatedEvent(BuildUpdatedEvent event) {
-			this.listener.onBuildUpdate(event);
+		void visitJobUpdatedEvent(JobUpdatedEvent event) {
+			this.listener.onJobUpdate(event);
 		}
 
 		@Override
-		void visitBuildDeletionEvent(BuildDeletedEvent event) {
-			this.listener.onBuildDeletion(event);
+		void visitJobDeletedEvent(JobDeletedEvent event) {
+			this.listener.onJobDeletion(event);
 		}
 
 		@Override
-		void visitExecutionCreationEvent(ExecutionCreatedEvent event) {
-			this.listener.onExecutionCreation(event);
+		void visitRunCreatedEvent(RunCreatedEvent event) {
+			this.listener.onRunCreation(event);
 		}
 
 		@Override
-		void visitExecutionUpdateEvent(ExecutionUpdatedEvent event) {
-			this.listener.onExecutionUpdate(event);
+		void visitRunUpdatedEvent(RunUpdatedEvent event) {
+			this.listener.onRunUpdate(event);
 		}
 
 		@Override
-		void visitExecutionDeletionEvent(ExecutionDeletedEvent event) {
-			this.listener.onExecutionDeletion(event);
+		void visitRunDeletedEvent(RunDeletedEvent event) {
+			this.listener.onRunDeletion(event);
 		}
 
 	}

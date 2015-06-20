@@ -43,7 +43,8 @@
 	<xsd:complexType name="StorageEntryType">
 		<xsd:sequence>
 			<xsd:element name="resource" type="xsd:anyURI"/>
-			<xsd:element name="entity" type="rest:EntityType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="type" type="rest:EntityType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="entity" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
 			<xsd:element name="artifact" type="rest:ArtifactType" minOccurs="1" maxOccurs="unbounded"/>
 		</xsd:sequence>
 	</xsd:complexType>

@@ -26,65 +26,65 @@
  */
 package org.smartdeveloperhub.jenkins.cli;
 
-import org.smartdeveloperhub.jenkins.crawler.event.BuildCreatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.BuildDeletedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.BuildUpdatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionCreatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionDeletedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.ExecutionUpdatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.JobCreatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.JobDeletedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.JobUpdatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.RunCreatedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.RunDeletedEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.RunUpdatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
-import org.smartdeveloperhub.jenkins.crawler.event.ServiceFoundEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.InstanceFoundEvent;
 import org.smartdeveloperhub.util.console.Consoles;
 
 final class ConsoleLoggingJenkinsEventListener implements JenkinsEventListener {
 
 	@Override
-	public void onServiceFound(ServiceFoundEvent event) {
+	public void onInstanceFound(InstanceFoundEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Found service %s%n",event.date(),event.service());
+				printf("[%s] Found instance %s%n",event.date(),event.instanceId());
 	}
 
 	@Override
-	public void onExecutionUpdate(ExecutionUpdatedEvent event) {
+	public void onRunUpdate(RunUpdatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Updated execution %s%n",event.date(),event.executionId());
+				printf("[%s] Updated run %s%n",event.date(),event.runId());
 	}
 
 	@Override
-	public void onExecutionDeletion(ExecutionDeletedEvent event) {
+	public void onRunDeletion(RunDeletedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Deleted execution %s%n",event.date(),event.executionId());
+				printf("[%s] Deleted run %s%n",event.date(),event.runId());
 	}
 
 	@Override
-	public void onExecutionCreation(ExecutionCreatedEvent event) {
+	public void onRunCreation(RunCreatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Created execution %s%n",event.date(),event.executionId());
+				printf("[%s] Created run %s%n",event.date(),event.runId());
 	}
 
 	@Override
-	public void onBuildDeletion(BuildDeletedEvent event) {
+	public void onJobDeletion(JobDeletedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Deleted build %s%n",event.date(),event.buildId());
+				printf("[%s] Deleted job %s%n",event.date(),event.jobId());
 	}
 
 	@Override
-	public void onBuildCreation(BuildCreatedEvent event) {
+	public void onJobCreation(JobCreatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Created build %s%n",event.date(),event.buildId());
+				printf("[%s] Created job %s%n",event.date(),event.jobId());
 	}
 
 	@Override
-	public void onBuildUpdate(BuildUpdatedEvent event) {
+	public void onJobUpdate(JobUpdatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Updated build %s%n",event.date(),event.buildId());
+				printf("[%s] Updated job %s%n",event.date(),event.jobId());
 	}
 
 }

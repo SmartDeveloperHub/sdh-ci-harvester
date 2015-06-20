@@ -24,26 +24,53 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+
+import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
 
-public final class ServiceFoundEvent extends JenkinsEvent {
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestName;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
-	private ServiceFoundEvent(URI service, Date date) {
-		super(service, date);
+public class FileBasedStorageTest {
+
+	@Rule
+	public TemporaryFolder testFolder = new TemporaryFolder();
+
+	@Rule
+	public TestName testName = new TestName();
+
+	@Test
+	public void testEntityManagement() throws Exception {
+		URI instanceId=URI.create("http://www.example.org/");
+
+		FileBasedStorage write = storage();
+
+		Instance in=new Instance();
+		in.setUrl(instanceId);
+		in.setId(instanceId.toString());
+		write.saveEntity(in,JenkinsEntityType.INSTANCE);
+		write.save();
+
+		FileBasedStorage read = storage();
+		Instance out=read.entityOfId(instanceId,JenkinsEntityType.INSTANCE,Instance.class);
+		assertThat(out,equalTo(in));
 	}
 
-	@Override
-	void accept(JenkinsEventVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitServiceFoundEvent(this);
-		}
-	}
-
-	static ServiceFoundEvent create(URI service) {
-		return new ServiceFoundEvent(service, new Date());
+	private FileBasedStorage storage() throws IOException {
+		FileBasedStorage storage =
+			FileBasedStorage.
+				builder().
+					withWorkingDirectory(testFolder.getRoot()).
+					build();
+		return storage;
 	}
 
 }

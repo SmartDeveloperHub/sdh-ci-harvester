@@ -72,15 +72,6 @@
 		<jaxb:schemaBindings>
 			<jaxb:package name="org.smartdeveloperhub.jenkins.crawler.xml.ci"/>
 		</jaxb:schemaBindings>
-		<jaxb:bindings node="xs:element[@name='service']">
-			<jaxb:class name="ServiceDocument"/>
-		</jaxb:bindings>
-		<jaxb:bindings node="xs:element[@name='simpleBuild']">
-			<jaxb:class name="SimpleBuildDocument"/>
-		</jaxb:bindings>
-		<jaxb:bindings node="xs:element[@name='compositeBuild']">
-			<jaxb:class name="CompositeBuildDocument"/>
-		</jaxb:bindings>
 		<jaxb:bindings>
 			<namespace:prefix name="ci" />
 		</jaxb:bindings>

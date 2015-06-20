@@ -24,66 +24,37 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler;
 
+import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
-import com.google.common.base.MoreObjects.ToStringHelper;
+final class LoadInstanceTask extends AbstractCrawlingTask {
 
-public final class BuildUpdatedEvent extends JenkinsEvent {
-
-	private Build build;
-
-	private BuildUpdatedEvent(URI service, Date date) {
-		super(service,date);
-	}
-
-	BuildUpdatedEvent withBuild(Build build) {
-		this.build = build;
-		return this;
-	}
-
-	Build build() {
-		return this.build;
+	LoadInstanceTask(URI location) {
+		super(location,JenkinsEntityType.INSTANCE,JenkinsArtifactType.RESOURCE);
 	}
 
 	@Override
-	void accept(JenkinsEventVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitBuildUpdatedEvent(this);
+	protected String taskPrefix() {
+		return "lit";
+	}
+
+	@Override
+	protected void processResource(JenkinsResource resource) throws IOException {
+		Instance instance = super.loadInstance(resource);
+		persistEntity(instance,resource.entity());
+		super.fireEvent(JenkinsEventFactory.newInstanceFoundEvent(super.location()));
+		for(Reference ref:instance.getJobs().getJobs()) {
+			scheduleTask(new LoadJobTask(ref.getValue()));
 		}
-	}
-
-	public String title() {
-		return build.getTitle();
-	}
-
-	public String description() {
-		return build.getDescription();
-	}
-
-	public URI codebase() {
-		return build.getCodebase();
-	}
-
-	public URI buildId() {
-		return this.build.getUrl();
-	}
-
-	@Override
-	protected void toString(ToStringHelper helper) {
-		helper.
-			add("buildId", buildId()).
-			add("title", title()).
-			add("description", description()).
-			add("codebase", codebase());
-	}
-
-	static BuildUpdatedEvent create(URI service) {
-		return new BuildUpdatedEvent(service, new Date());
 	}
 
 }

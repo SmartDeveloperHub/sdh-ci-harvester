@@ -43,7 +43,7 @@ public class JenkinsResourceProxyTest {
 			JenkinsResourceProxy.
 				create(URI.create(location)).
 					withUseHttps(true).
-					withEntity(JenkinsEntityType.SERVICE);
+					withEntity(JenkinsEntityType.INSTANCE);
 		JenkinsResource representation = sut.get(JenkinsArtifactType.RESOURCE);
 		System.out.println(representation);
 	}

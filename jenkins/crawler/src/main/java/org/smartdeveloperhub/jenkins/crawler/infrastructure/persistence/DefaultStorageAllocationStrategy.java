@@ -48,7 +48,7 @@ final class DefaultStorageAllocationStrategy implements StorageAllocationStrateg
 
 	private void getServiceBase(JenkinsURI id, PathBuilder builder) {
 		try {
-			builder.addSegment(URLEncoder.encode(id.service(),"UTF-8"));
+			builder.addSegment(URLEncoder.encode(id.instance(),"UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			throw new AssertionError("UTF-8 encoding should be supported",e);
 		}
@@ -56,7 +56,7 @@ final class DefaultStorageAllocationStrategy implements StorageAllocationStrateg
 
 	private void getBuildBase(JenkinsURI id,PathBuilder builder) {
 		getServiceBase(id,builder);
-		builder.addSegment("builds").addSegment(id.job());
+		builder.addSegment("jobs").addSegment(id.job());
 		if(!id.isSimple()) {
 			builder.addSegment(id.subJob());
 		}
@@ -70,7 +70,7 @@ final class DefaultStorageAllocationStrategy implements StorageAllocationStrateg
 	private File getEntityBaseDirectory(URI location, JenkinsEntityType entity) {
 		JenkinsURI id = JenkinsURI.create(location);
 		PathBuilder builder=new PathBuilder();
-		if(entity.isService()) {
+		if(entity.isInstance()) {
 			getServiceBase(id, builder);
 		} else if(entity.isJob()) {
 			getBuildBase(id, builder);
@@ -79,7 +79,7 @@ final class DefaultStorageAllocationStrategy implements StorageAllocationStrateg
 		} else {
 			throw new AssertionError("Invalid entity type '"+entity+"'");
 		}
-		return new File(workingDirectory,builder.build());
+		return new File(this.workingDirectory,builder.build());
 	}
 
 	private String getArtifactFilename(JenkinsEntityType entity, JenkinsArtifactType type) throws AssertionError {
@@ -104,10 +104,10 @@ final class DefaultStorageAllocationStrategy implements StorageAllocationStrateg
 
 	private String getFileName(JenkinsEntityType entity) throws AssertionError {
 		String filename=null;
-		if(entity.isService()) {
-			filename="service";
+		if(entity.isInstance()) {
+			filename="instance";
 		} else if(entity.isJob()) {
-			filename="build";
+			filename="job";
 		} else if(entity.isRun()) {
 			filename="run";
 		} else {

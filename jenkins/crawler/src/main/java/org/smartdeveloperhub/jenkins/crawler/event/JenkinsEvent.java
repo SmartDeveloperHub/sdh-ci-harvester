@@ -34,20 +34,20 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 
 public abstract class JenkinsEvent extends Event<JenkinsEventVisitor>{
 
-	private final URI service;
+	private final URI instanceId;
 
-	JenkinsEvent(URI service, Date date) {
+	JenkinsEvent(URI instanceId, Date date) {
 		super(UUID.randomUUID(),date);
-		this.service = service;
+		this.instanceId = instanceId;
 	}
 
-	public final URI service() {
-		return this.service;
+	public final URI instanceId() {
+		return this.instanceId;
 	}
 
 	@Override
 	protected void toString(ToStringHelper helper) {
-		helper.add("service", this.service);
+		helper.add("instanceId", this.instanceId);
 	}
 
 }

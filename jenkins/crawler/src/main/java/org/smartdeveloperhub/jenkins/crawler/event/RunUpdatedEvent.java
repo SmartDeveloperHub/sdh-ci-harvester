@@ -31,33 +31,29 @@ import java.util.Date;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
 
-public final class ExecutionDeletedEvent extends JenkinsEvent {
+public final class RunUpdatedEvent extends RunEvent<RunUpdatedEvent> {
 
-	private final URI execution;
-
-	ExecutionDeletedEvent(URI service, Date date, URI execution) {
-		super(service,date);
-		this.execution = execution;
+	RunUpdatedEvent(URI instanceId, Date date) {
+		super(instanceId,date,RunUpdatedEvent.class);
 	}
 
 	@Override
 	void accept(JenkinsEventVisitor visitor) {
 		if(visitor!=null) {
-			visitor.visitExecutionDeletionEvent(this);
+			visitor.visitRunUpdatedEvent(this);
 		}
-	}
-
-	public URI executionId() {
-		return this.execution;
 	}
 
 	@Override
 	protected void toString(ToStringHelper helper) {
-		helper.add("executionId", executionId());
+		helper.
+			add("runId", runId()).
+			add("finishedOn",finishedOn()).
+			add("result",result());
 	}
 
-	static ExecutionDeletedEvent create(URI service, URI execution) {
-		return new ExecutionDeletedEvent(service, new Date(),execution);
+	static RunUpdatedEvent create(URI instanceId) {
+		return new RunUpdatedEvent(instanceId, new Date());
 	}
 
 }

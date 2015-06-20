@@ -34,9 +34,9 @@ import javax.xml.transform.dom.DOMSource;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationException;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationService;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 import org.w3c.dom.Document;
 
 import com.google.common.collect.ImmutableMap;
@@ -57,7 +57,7 @@ public final class ModelMappingService {
 					build();
 	}
 
-	public Service loadService(JenkinsResource resource) throws TransformationException {
+	public Instance loadInstance(JenkinsResource resource) throws TransformationException {
 		Document content = resource.content().get();
 		String localName =
 			content.
@@ -69,11 +69,11 @@ public final class ModelMappingService {
 				localName,
 				data,
 				createParameters(resource),
-				Service.class
+				Instance.class
 			);
 	}
 
-	public Build loadBuild(JenkinsResource resource) throws TransformationException {
+	public Job loadJob(JenkinsResource resource) throws TransformationException {
 		Document content = resource.content().get();
 		String localName =
 			content.
@@ -85,7 +85,7 @@ public final class ModelMappingService {
 				localName,
 				data,
 				createParameters(resource),
-				Build.class
+				Job.class
 			);
 	}
 

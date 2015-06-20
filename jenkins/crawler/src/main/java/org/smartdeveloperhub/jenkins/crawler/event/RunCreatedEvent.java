@@ -29,61 +29,41 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Build;
-
 import com.google.common.base.MoreObjects.ToStringHelper;
 
-public final class BuildCreatedEvent extends JenkinsEvent {
+public final class RunCreatedEvent extends RunEvent<RunCreatedEvent> {
 
-	private Build build;
-
-	private BuildCreatedEvent(URI service, Date date) {
-		super(service,date);
-	}
-
-	BuildCreatedEvent withBuild(Build build) {
-		this.build = build;
-		return this;
-	}
-
-	Build build() {
-		return this.build;
+	private RunCreatedEvent(URI serviceId, Date date) {
+		super(serviceId,date,RunCreatedEvent.class);
 	}
 
 	@Override
 	void accept(JenkinsEventVisitor visitor) {
 		if(visitor!=null) {
-			visitor.visitBuildCreationEvent(this);
+			visitor.visitRunCreatedEvent(this);
 		}
 	}
 
-	public URI buildId() {
-		return this.build.getUrl();
+	public final URI jobId() {
+		return run().getJob();
 	}
 
-	public String title() {
-		return build.getTitle();
-	}
-
-	public String description() {
-		return build.getDescription();
-	}
-
-	public URI codebase() {
-		return build.getCodebase();
+	public final Date createdOn() {
+		return new Date(run().getTimestamp());
 	}
 
 	@Override
 	protected void toString(ToStringHelper helper) {
 		helper.
-			add("buildId", buildId()).
-			add("title", title()).
-			add("description", description()).
-			add("codebase", codebase());
+			add("jobId", jobId()).
+			add("runId", runId()).
+			add("createdOn",createdOn()).
+			add("finishedOn",finishedOn()).
+			add("result",result());
 	}
 
-	static BuildCreatedEvent create(URI service) {
-		return new BuildCreatedEvent(service, new Date());
+	static RunCreatedEvent create(URI location) {
+		return new RunCreatedEvent(location, new Date());
 	}
 
 }

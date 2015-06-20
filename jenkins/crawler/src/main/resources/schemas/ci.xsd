@@ -33,10 +33,10 @@
 	targetNamespace="http://www.smartdeveloperhub.org/harvester/ci/model/v1">
 	<xsd:import namespace="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1" schemaLocation="rest.xsd"/>
 	<xsd:element name="entity" type="ci:Entity"/>
-	<xsd:element name="service" type="ci:Service"/>
-	<xsd:element name="simpleBuild" type="ci:SimpleBuild"/>
-	<xsd:element name="compositeBuild" type="ci:CompositeBuild"/>
-	<xsd:element name="subBuild" type="ci:SubBuild"/>
+	<xsd:element name="instance" type="ci:Instance"/>
+	<xsd:element name="simpleJob" type="ci:SimpleJob"/>
+	<xsd:element name="compositeJob" type="ci:CompositeJob"/>
+	<xsd:element name="subJob" type="ci:SubJob"/>
 	<xsd:element name="run" type="ci:Run"/>
 	<xsd:complexType name="Entity" abstract="true">
 		<xsd:sequence>
@@ -46,14 +46,14 @@
 			<xsd:element name="description" type="xsd:string" minOccurs="0"/>
 		</xsd:sequence>
 	</xsd:complexType>
-	<xsd:complexType name="Service">
+	<xsd:complexType name="Instance">
 		<xsd:complexContent>
 			<xsd:extension base="ci:Entity">
 				<xsd:sequence>
-					<xsd:element name="builds">
+					<xsd:element name="jobs">
 						<xsd:complexType>
 							<xsd:sequence>
-								<xsd:element name="build" type="ci:Reference" minOccurs="0" maxOccurs="unbounded"/>
+								<xsd:element name="job" type="ci:Reference" minOccurs="0" maxOccurs="unbounded"/>
 							</xsd:sequence>
 						</xsd:complexType>
 					</xsd:element>
@@ -61,11 +61,11 @@
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
-	<xsd:complexType name="Build" abstract="true">
+	<xsd:complexType name="Job" abstract="true">
 		<xsd:complexContent>
 			<xsd:extension base="ci:Entity">
 				<xsd:sequence>
-					<xsd:element name="type" type="ci:BuildType"/>
+					<xsd:element name="type" type="ci:JobType"/>
 					<xsd:element name="codebase" type="xsd:anyURI" minOccurs="0"/>
 					<xsd:element name="runnable" type="xsd:boolean"/>
 					<xsd:element name="runs">
@@ -76,33 +76,33 @@
 						</xsd:complexType>
 					</xsd:element>
 				</xsd:sequence>
-				<xsd:attribute name="service" type="xsd:anyURI" use="required"/>
+				<xsd:attribute name="instance" type="xsd:anyURI" use="required"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
-	<xsd:complexType name="SimpleBuild">
+	<xsd:complexType name="SimpleJob">
 		<xsd:complexContent>
-			<xsd:extension base="ci:Build">
+			<xsd:extension base="ci:Job">
 				<xsd:sequence/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
-	<xsd:complexType name="SubBuild">
+	<xsd:complexType name="SubJob">
 		<xsd:complexContent>
-			<xsd:extension base="ci:Build">
+			<xsd:extension base="ci:Job">
 				<xsd:sequence/>
 				<xsd:attribute name="parent" type="xsd:anyURI" use="required"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
-	<xsd:complexType name="CompositeBuild">
+	<xsd:complexType name="CompositeJob">
 		<xsd:complexContent>
-			<xsd:extension base="ci:Build">
+			<xsd:extension base="ci:Job">
 				<xsd:sequence>
-					<xsd:element name="subBuilds">
+					<xsd:element name="subJobs">
 						<xsd:complexType>
 							<xsd:sequence>
-								<xsd:element name="build" type="ci:Reference" minOccurs="0" maxOccurs="unbounded"/>
+								<xsd:element name="job" type="ci:Reference" minOccurs="0" maxOccurs="unbounded"/>
 							</xsd:sequence>
 						</xsd:complexType>
 					</xsd:element>
@@ -125,7 +125,7 @@
 						<xsd:element name="duration" type="xsd:long"/>
 					</xsd:sequence>
 				</xsd:sequence>
-				<xsd:attribute name="build" type="xsd:anyURI" use="required"/>
+				<xsd:attribute name="job" type="xsd:anyURI" use="required"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
@@ -136,7 +136,7 @@
 			</xsd:extension>
 		</xsd:simpleContent>
 	</xsd:complexType>
-	<xsd:simpleType name="BuildType">
+	<xsd:simpleType name="JobType">
 		<xsd:restriction base="xsd:string">
 			<xsd:enumeration value="freeStyleProject"/>
 			<xsd:enumeration value="mavenModuleSet"/>

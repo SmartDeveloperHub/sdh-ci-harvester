@@ -234,7 +234,7 @@ public final class JenkinsResourceProxy {
 
 	public static JenkinsResourceProxy create(URI location) {
 		checkNotNull(location,"Resource location cannot be null");
-		return new JenkinsResourceProxy(location,JenkinsEntityType.SERVICE,false);
+		return new JenkinsResourceProxy(location,JenkinsEntityType.INSTANCE,false);
 	}
 
 }

@@ -29,41 +29,61 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+
 import com.google.common.base.MoreObjects.ToStringHelper;
 
-public final class ExecutionCreatedEvent extends ExecutionEvent<ExecutionCreatedEvent> {
+public final class JobUpdatedEvent extends JenkinsEvent {
 
-	private ExecutionCreatedEvent(URI service, Date date) {
-		super(service,date,ExecutionCreatedEvent.class);
+	private Job job;
+
+	private JobUpdatedEvent(URI instanceId, Date date) {
+		super(instanceId,date);
+	}
+
+	JobUpdatedEvent withJob(Job job) {
+		this.job = job;
+		return this;
+	}
+
+	Job job() {
+		return this.job;
 	}
 
 	@Override
 	void accept(JenkinsEventVisitor visitor) {
 		if(visitor!=null) {
-			visitor.visitExecutionCreationEvent(this);
+			visitor.visitJobUpdatedEvent(this);
 		}
 	}
 
-	public final URI buildId() {
-		return run().getBuild();
+	public String title() {
+		return this.job.getTitle();
 	}
 
-	public final Date createdOn() {
-		return new Date(run().getTimestamp());
+	public String description() {
+		return this.job.getDescription();
+	}
+
+	public URI codebase() {
+		return this.job.getCodebase();
+	}
+
+	public URI jobId() {
+		return this.job.getUrl();
 	}
 
 	@Override
 	protected void toString(ToStringHelper helper) {
 		helper.
-			add("buildId", buildId()).
-			add("executionId", executionId()).
-			add("createdOn",createdOn()).
-			add("finishedOn",finishedOn()).
-			add("result",result());
+			add("jobId", jobId()).
+			add("title", title()).
+			add("description", description()).
+			add("codebase", codebase());
 	}
 
-	static ExecutionCreatedEvent create(URI location) {
-		return new ExecutionCreatedEvent(location, new Date());
+	static JobUpdatedEvent create(URI instanceId) {
+		return new JobUpdatedEvent(instanceId, new Date());
 	}
 
 }

@@ -41,8 +41,8 @@
 		<xsl:variable name="segments" select="tokenize($url,'/')"/>
 		<xsl:variable name="segNumber" select="count($segments)-2" as="xs:integer"/>
 		<xsl:variable name="service" select="concat(string-join(subsequence($segments,0,$segNumber),'/'),'/')"/>
-		<ci:simpleBuild
-			service="{$service}"
+		<ci:simpleJob
+			instance="{$service}"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://www.sdh.org/harvester/ci/v1 http://www.sdh.org/harvester/ci/v1/schema.xsd" >
 			<url><xsl:value-of select="$url"/></url>
@@ -61,6 +61,6 @@
 					<run id="{$number}"><xsl:value-of select="url"/></run>
 				</xsl:for-each>
 			</runs>
-		</ci:simpleBuild>
+		</ci:simpleJob>
 	</xsl:template>
 </xsl:stylesheet>

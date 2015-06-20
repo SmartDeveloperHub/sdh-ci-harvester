@@ -37,7 +37,7 @@
 	<xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes"/>
 	<xsl:param name="serviceUrl"/>
 	<xsl:template match="hudson">
-		<ci:service xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sdh.org/harvester/ci/v1 http://www.sdh.org/harvester/ci/v1/schema.xsd">
+		<ci:instance xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sdh.org/harvester/ci/v1 http://www.sdh.org/harvester/ci/v1/schema.xsd">
 			<url><xsl:value-of select="$serviceUrl"/></url>
 			<xsl:if test="exists(nodeName)">
 				<title><xsl:value-of select="nodeName"/></title>
@@ -45,11 +45,11 @@
 			<xsl:if test="exists(nodeDescription)">
 				<description><xsl:value-of select="nodeDescription"/></description>
 			</xsl:if>
-			<builds>
+			<jobs>
 				<xsl:for-each select="job">
-					<build id="{name}"><xsl:value-of select="url"/></build>
+					<job id="{name}"><xsl:value-of select="url"/></job>
 				</xsl:for-each>
-			</builds>
-		</ci:service>
+			</jobs>
+		</ci:instance>
 	</xsl:template>
 </xsl:stylesheet>

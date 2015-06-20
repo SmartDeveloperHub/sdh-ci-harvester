@@ -39,6 +39,9 @@ public class Service {
 	private URI serviceId;
 	private List<URI> builds;
 
+	private Service() {
+	}
+
 	private Service(URI serviceId, List<URI> builds) {
 		setServiceId(serviceId);
 		setBuilds(Lists.newArrayList(builds));

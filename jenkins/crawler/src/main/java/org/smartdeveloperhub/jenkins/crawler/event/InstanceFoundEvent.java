@@ -24,37 +24,26 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.event;
 
-import java.io.IOException;
 import java.net.URI;
+import java.util.Date;
 
-import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
-import org.smartdeveloperhub.jenkins.JenkinsEntityType;
-import org.smartdeveloperhub.jenkins.JenkinsResource;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
+public final class InstanceFoundEvent extends JenkinsEvent {
 
-final class LoadServiceTask extends AbstractCrawlingTask {
-
-	LoadServiceTask(URI location) {
-		super(location,JenkinsEntityType.SERVICE,JenkinsArtifactType.RESOURCE);
+	private InstanceFoundEvent(URI instanceId, Date date) {
+		super(instanceId, date);
 	}
 
 	@Override
-	protected String taskPrefix() {
-		return "lst";
-	}
-
-	@Override
-	protected void processResource(JenkinsResource resource) throws IOException {
-		Service service = super.loadService(resource);
-		persistEntity(service,resource.entity());
-		super.fireEvent(JenkinsEventFactory.newServiceFoundEvent(super.location()));
-		for(Reference ref:service.getBuilds().getBuilds()) {
-			scheduleTask(new LoadJobTask(ref.getValue()));
+	void accept(JenkinsEventVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitInstanceFoundEvent(this);
 		}
+	}
+
+	static InstanceFoundEvent create(URI instanceId) {
+		return new InstanceFoundEvent(instanceId, new Date());
 	}
 
 }

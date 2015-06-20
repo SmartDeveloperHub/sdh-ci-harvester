@@ -43,7 +43,7 @@ import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
 import org.smartdeveloperhub.jenkins.crawler.util.ControlledScheduledExecutorService;
 import org.smartdeveloperhub.jenkins.crawler.util.Timer;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Service;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -132,17 +132,17 @@ final class CrawlingController {
 		private boolean bootstrapCrawling() {
 			boolean result=false;
 			try {
-				Service existingService=
+				Instance existingService=
 					storage.
 						entityOfId(
 							jenkinsInstance(),
-							JenkinsEntityType.SERVICE,
-							Service.class);
+							JenkinsEntityType.INSTANCE,
+							Instance.class);
 				Task task=null;
 				if(existingService==null) {
-					task=new LoadServiceTask(jenkinsInstance());
+					task=new LoadInstanceTask(jenkinsInstance());
 				} else {
-					task=new RefreshServiceTask(existingService);
+					task=new RefreshInstanceTask(existingService);
 				}
 				taskScheduler().schedule(task);
 				result=true;
