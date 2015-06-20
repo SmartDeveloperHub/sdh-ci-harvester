@@ -58,7 +58,7 @@ public abstract class AbstractBootstrap<T> {
 	private static final int INITIALIZATION_WAIT_TIMEOUT = 500;
 	private static final int MAX_RETRIES = 5;
 
-	private final Logger logger;
+	private final Logger logger; // NOSONAR
 
 	private final String applicationName;
 	private final String bootstrapId;
@@ -95,11 +95,15 @@ public abstract class AbstractBootstrap<T> {
 			Iterable<? extends Service> services = getServices(config);
 			this.logger.info("{} services prepared.",this.bootstrapId);
 			return services;
+		} catch (BootstrapException e) {
+			logger.warn(
+				String.format("Could not prepare %s services. Full stacktrace follows:",this.bootstrapId),
+				e);
+			throw e;
 		} catch (Exception e) {
 			String errorMessage = String.format("Could not prepare %s services",this.bootstrapId);
 			logger.warn(errorMessage+". Full stacktrace follows: ",e);
-			throw new ApplicationInitializationException(errorMessage,e)
-			;
+			throw new ApplicationInitializationException(errorMessage,e);
 		}
 	}
 
@@ -138,7 +142,7 @@ public abstract class AbstractBootstrap<T> {
 					new ApplicationInitializationException(
 						String.format("Start up of %s services failed",this.bootstrapId),
 						e,
-						extractFailures(this.listener.failedServices()));
+						extractFailures(this.serviceManager.servicesByState().get(State.FAILED)));
 			}
 		}
 		if(failure!=null) {
@@ -221,7 +225,7 @@ public abstract class AbstractBootstrap<T> {
 		return this.applicationName;
 	}
 
-	public synchronized final void run(String[] args) throws BootstrapException {
+	public final synchronized void run(String[] args) throws BootstrapException {
 		checkArgument(args.length==1,"Usage: %s <configuration.yml>",this.applicationName);
 		checkState(this.serviceManager==null,"%s already started",this.bootstrapId);
 		this.logger.info("Bootstrapping {}...",this.bootstrapId);
@@ -233,7 +237,7 @@ public abstract class AbstractBootstrap<T> {
 		this.logger.info("{} bootstrap completed.",this.bootstrapId);
 	}
 
-	public synchronized final void terminate() throws BootstrapException {
+	public final synchronized void terminate() throws BootstrapException {
 		if(this.serviceManager!=null) {
 			doTerminate(true);
 		}
@@ -260,6 +264,6 @@ public abstract class AbstractBootstrap<T> {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	protected abstract Iterable<? extends Service> getServices(T config) throws Exception;
+	protected abstract <S extends Service> Iterable<S> getServices(T config) throws BootstrapException;
 
 }

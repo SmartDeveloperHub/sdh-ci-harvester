@@ -86,13 +86,13 @@ public class AbstractBootstrapTest {
 	}
 
 	private void verifyInitializationFailure(ApplicationInitializationException e, String failure) {
-//		Set<String> failedServices = e.failedServices();
-//		assertThat(failedServices,hasSize(1));
-//		String failedService = Iterables.get(failedServices,0);
-//		assertThat(failedService,startsWith("CustomApplicationService"));
-//		Throwable serviceFailure = e.serviceFailure(failedService);
-//		assertThat(serviceFailure,notNullValue());
-//		assertThat(serviceFailure.getMessage(),equalTo(failure));
+		Set<String> failedServices = e.failedServices();
+		assertThat(failedServices,hasSize(1));
+		String failedService = Iterables.get(failedServices,0);
+		assertThat(failedService,startsWith("CustomApplicationService"));
+		Throwable serviceFailure = e.serviceFailure(failedService);
+		assertThat(serviceFailure,notNullValue());
+		assertThat(serviceFailure.getMessage(),equalTo(failure));
 	}
 
 	private void verifyShutdownFailure(ApplicationShutdownException e, String failure) {

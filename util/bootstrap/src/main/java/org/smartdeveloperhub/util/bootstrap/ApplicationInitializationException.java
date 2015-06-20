@@ -26,6 +26,7 @@
  */
 package org.smartdeveloperhub.util.bootstrap;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,23 +40,15 @@ public class ApplicationInitializationException extends BootstrapException {
 	 */
 	private static final long serialVersionUID = 6431237800432308265L;
 
-	private final Map<String, Throwable> failures;
+	private final HashMap<String, Throwable> failures; // NOSONAR
 
 	public ApplicationInitializationException(String message, Throwable cause, Map<String,Throwable> failures) {
 		super(message, cause);
-		this.failures = failures;
-	}
-
-	public ApplicationInitializationException(String message, Map<String,Throwable> failures) {
-		this(message,null,failures);
+		this.failures=Maps.newHashMap(failures);
 	}
 
 	public ApplicationInitializationException(String message, Throwable cause) {
 		this(message,cause,Maps.<String,Throwable>newLinkedHashMap());
-	}
-
-	public ApplicationInitializationException(String message) {
-		this(message,(Throwable)null);
 	}
 
 	public Set<String> failedServices() {

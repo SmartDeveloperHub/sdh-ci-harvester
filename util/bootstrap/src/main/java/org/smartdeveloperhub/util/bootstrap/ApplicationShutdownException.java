@@ -26,6 +26,7 @@
  */
 package org.smartdeveloperhub.util.bootstrap;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,11 +40,11 @@ public class ApplicationShutdownException extends BootstrapException {
 	 */
 	private static final long serialVersionUID = 4908753969194340357L;
 
-	private final Map<String, Throwable> failures;
+	private final HashMap<String, Throwable> failures; // NOSONAR
 
 	public ApplicationShutdownException(String message, Throwable cause, Map<String,Throwable> failures) {
 		super(message,cause);
-		this.failures=failures;
+		this.failures=Maps.newHashMap(failures);
 	}
 
 	public ApplicationShutdownException(String message, Map<String,Throwable> failures) {
@@ -52,10 +53,6 @@ public class ApplicationShutdownException extends BootstrapException {
 
 	public ApplicationShutdownException(String message, Throwable cause) {
 		this(message,cause,Maps.<String,Throwable>newLinkedHashMap());
-	}
-
-	public ApplicationShutdownException(String message) {
-		this(message,(Throwable)null);
 	}
 
 	public Set<String> failedServices() {

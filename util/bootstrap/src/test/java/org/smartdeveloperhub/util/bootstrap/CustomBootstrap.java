@@ -53,13 +53,13 @@ final class CustomBootstrap extends AbstractBootstrap<CustomConfig> {
 	}
 
 	@Override
-	protected Iterable<? extends Service> getServices(CustomConfig config) {
+	protected Iterable<Service> getServices(CustomConfig config) {
 		if(config.isFailBootstrapStartUp()) {
 			throw new IllegalStateException(CustomConfig.FAILED_BOOTSTRAP_START_UP_MESSAGE);
 		}
 		this.service=new CustomApplicationService();
 		this.service.setConfiguration(config);
-		return Collections.singleton(this.service);
+		return Collections.<Service>singleton(this.service);
 	}
 
 	CustomApplicationService service() {

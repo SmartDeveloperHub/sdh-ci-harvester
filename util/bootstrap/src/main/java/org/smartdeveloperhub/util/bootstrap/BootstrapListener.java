@@ -26,13 +26,9 @@
  */
 package org.smartdeveloperhub.util.bootstrap;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager.Listener;
 
@@ -41,32 +37,26 @@ final class BootstrapListener extends Listener {
 	private static final Logger LOGGER=LoggerFactory.getLogger(BootstrapListener.class);
 
 	private final String bootstrapId;
-	private final List<Service> failedServices;
 
 	private BootstrapListener(String bootstrapId) {
 		this.bootstrapId = bootstrapId;
-		this.failedServices=Lists.newCopyOnWriteArrayList();
 	}
 
 	@Override
 	public void healthy() {
-		LOGGER.info("{} started succesfully.",this.bootstrapId);
+		LOGGER.debug("{} services started up.",this.bootstrapId);
 	}
 
 	@Override
 	public void stopped() {
-		LOGGER.info("{} stopped succesfully.",this.bootstrapId);
+		LOGGER.debug("{} services stopped.",this.bootstrapId);
 	}
 
 	@Override
 	public void failure(Service service) {
-		LOGGER.info("- {}",service);
-		this.failedServices.add(service);
+		LOGGER.debug("{} : {} --> {}",this.bootstrapId,service,service.failureCause().getMessage());
 	}
 
-	List<Service> failedServices() {
-		return ImmutableList.copyOf(this.failedServices);
-	}
 
 	static BootstrapListener newInstance(AbstractBootstrap<?> bootstrap) {
 		return new BootstrapListener(bootstrap.id());
