@@ -106,10 +106,9 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 	private final LinkedBlockingQueue<Command> commandQueue;
 	private final TransactionManager manager;
 	private final ContinuousIntegrationService service;
+	private final CommandDispatchingVisitor dispatcher;
+
 	private volatile boolean shuttingDown;
-
-	private CommandDispatchingVisitor dispatcher;
-
 
 	CommandProcessorService(LinkedBlockingQueue<Command> commandQueue, TransactionManager manager, ContinuousIntegrationService service) {
 		this.commandQueue = commandQueue;
@@ -162,6 +161,8 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 			processTransactionally(tx, command);
 		} catch (TransactionException e) {
 			LOGGER.error("Transactional failure when processing command "+command,e);
+		} finally {
+			logPendingCommands();
 		}
 	}
 
@@ -184,6 +185,17 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 		this.shuttingDown=true;
 		this.commandQueue.offer(Poison.SINGLETON);
 		LOGGER.info("Requested command processing termination...");
+	}
+
+	private void logPendingCommands() {
+		if(this.shuttingDown && LOGGER.isInfoEnabled()) {
+			int pending = this.commandQueue.size();
+			String howMany="No";
+			if(pending>0) {
+				howMany=Integer.toString(pending);
+			}
+			LOGGER.info("{} commands pending...",howMany);
+		}
 	}
 
 }
