@@ -33,7 +33,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -47,6 +48,7 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.ResourceRepository;
 import org.smartdeveloperhub.jenkins.ResponseBody;
 import org.smartdeveloperhub.jenkins.client.JenkinsClientException;
+import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.LockManager.CallableOperation;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResourceDescriptorDocument;
@@ -56,19 +58,18 @@ import org.smartdeveloperhub.jenkins.crawler.xml.persistence.StorageEntryType;
 import org.smartdeveloperhub.util.xml.XmlUtils;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public final class FileBasedStorage implements EntityRepository, ResourceRepository {
 
-	private final class RetrieveOperation<T> implements
-			LockManager.CallableOperation<T, IOException> {
+	private final class RetrieveOperation<T> implements CallableOperation<T, IOException> {
+
 		private final Class<? extends T> entityClass;
 		private final URI location;
 		private final JenkinsEntityType entityType;
 
-		private RetrieveOperation(Class<? extends T> entityClass,
-				URI location, JenkinsEntityType entityType) {
+		private RetrieveOperation(Class<? extends T> entityClass, URI location, JenkinsEntityType entityType) {
 			this.entityClass = entityClass;
 			this.location = location;
 			this.entityType = entityType;
@@ -350,14 +351,14 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 	private static final Logger LOGGER=LoggerFactory.getLogger(FileBasedStorage.class);
 
 	private final LockManager locker;
-	private final Map<URI,StorageEntry> registeredEntities;
+	private final ConcurrentMap<URI,StorageEntry> registeredEntities;
 
 	private StorageAllocationStrategy strategy;
 	private File configFile;
 
 	private FileBasedStorage() {
 		this.locker=new LockManager();
-		this.registeredEntities=Maps.newLinkedHashMap();
+		this.registeredEntities=new ConcurrentHashMap<URI, StorageEntry>();
 	}
 
 	private FileBasedStorage setStrategy(StorageAllocationStrategy strategy) {
@@ -375,24 +376,25 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 	}
 
 	private StorageEntry entry(URI location, JenkinsEntityType entityType) {
-		StorageEntry entry = this.registeredEntities.get(location);
-		if(entry==null) {
-			entry=new StorageEntry(location,entityType);
-			registerEntry(entry);
-		}
-		return entry;
+		return registerEntry(new StorageEntry(location,entityType));
 	}
 
-	private void registerEntry(StorageEntry entry) {
-		this.registeredEntities.put(entry.location(), entry);
+	private StorageEntry registerEntry(StorageEntry entry) {
+		StorageEntry result=this.registeredEntities.putIfAbsent(entry.location(),entry);
+		if(result==null) {
+			result=entry;
+		}
+		return result;
 	}
 
 	private Storage toDescriptor() {
-		StorageDescriptor descriptor=new StorageDescriptor();
-		descriptor.
-			withWorkingDirectory(this.strategy.workingDirectory().toURI()).
-			withStrategy(this.strategy.getClass().getCanonicalName());
-		for(StorageEntry entry:this.registeredEntities.values()) {
+		StorageDescriptor descriptor=
+			new StorageDescriptor().
+				withWorkingDirectory(this.strategy.workingDirectory().toURI()).
+				withStrategy(this.strategy.getClass().getCanonicalName());
+		ImmutableMap<URI,StorageEntry> entries=
+			ImmutableMap.copyOf(this.registeredEntities);
+		for(StorageEntry entry:entries.values()) {
 			descriptor.getEntries().add(entry.toDescriptor());
 		}
 		return descriptor;
