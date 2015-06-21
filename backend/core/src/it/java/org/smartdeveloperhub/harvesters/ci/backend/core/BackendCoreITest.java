@@ -71,7 +71,7 @@ public class BackendCoreITest {
 	private static final String JDBC_PASSWORD = "javax.persistence.jdbc.password";
 
 	public static final String HSQLDB_DRIVER = "org.hsqldb.jdbcDriver";
-	public static final String HSQLDB_URL = "jdbc:hsqldb:mem:dbunit";
+	public static final String HSQLDB_URL = "jdbc:hsqldb:mem:testdb;sql.enforce_strict_size=true;hsqldb.tx=mvcc";
 	public static final String HSQLDB_USER = "sa";
 	public static final String HSQLDB_PASSWORD = ""; // NOSONAR
 

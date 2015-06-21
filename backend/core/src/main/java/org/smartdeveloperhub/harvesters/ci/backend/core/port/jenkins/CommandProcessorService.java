@@ -219,16 +219,20 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 			command.accept(dispatcher);
 			if(dispatcher.mustRetry()) {
 				this.monitor.retryLater(command);
-				tx.rollback();
 			} else {
 				tx.commit();
 				LOGGER.trace("Processed command {}",command);
 			}
-		} catch(TransactionException e) {
-			throw e;
 		} catch(Exception e) {
 			LOGGER.error("Could not process command "+command,e);
-			tx.rollback();
+		} finally {
+			if(tx.isActive()) {
+				try {
+					tx.rollback();
+				} catch (Exception e) {
+					LOGGER.error("Could not rollback transaction",e);
+				}
+			}
 		}
 	}
 
