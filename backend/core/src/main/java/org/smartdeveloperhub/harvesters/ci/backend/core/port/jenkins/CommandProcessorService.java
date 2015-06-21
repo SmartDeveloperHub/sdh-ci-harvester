@@ -26,8 +26,6 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
@@ -103,15 +101,15 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(CommandProcessorService.class);
 
-	private final LinkedBlockingQueue<Command> commandQueue;
+	private final CommandProcessingMonitor monitor;
 	private final TransactionManager manager;
 	private final ContinuousIntegrationService service;
 	private final CommandDispatchingVisitor dispatcher;
 
 	private volatile boolean shuttingDown;
 
-	CommandProcessorService(LinkedBlockingQueue<Command> commandQueue, TransactionManager manager, ContinuousIntegrationService service) {
-		this.commandQueue = commandQueue;
+	CommandProcessorService(CommandProcessingMonitor monitor, TransactionManager manager, ContinuousIntegrationService service) {
+		this.monitor = monitor;
 		this.manager = manager;
 		this.service = service;
 		this.shuttingDown=false;
@@ -123,31 +121,13 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 		do {
 			processCommands();
 		} while(!this.shuttingDown);
-		if(LOGGER.isInfoEnabled()) {
-			LOGGER.info("Command processing terminated.");
-			debugDismissedDetails();
-		}
-	}
-
-	private void debugDismissedDetails() {
-		if(!this.commandQueue.isEmpty()) {
-			LOGGER.info("Dismissing {} commands",this.commandQueue.size());
-			traceDismissedCommands();
-		}
-	}
-
-	private void traceDismissedCommands() {
-		if(LOGGER.isTraceEnabled()) {
-			for(Command command:this.commandQueue) {
-				LOGGER.trace("- Dimissed {}",command);
-			}
-		}
+		LOGGER.info("Command processing terminated.");
 	}
 
 	private void processCommands() {
 		Command command=null;
 		try {
-			while((command=this.commandQueue.take())!=Poison.SINGLETON) {
+			while((command=this.monitor.take())!=Poison.SINGLETON) {
 				processCommand(command);
 			}
 		} catch (InterruptedException e) {
@@ -161,8 +141,6 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 			processTransactionally(tx, command);
 		} catch (TransactionException e) {
 			LOGGER.error("Transactional failure when processing command "+command,e);
-		} finally {
-			logPendingCommands();
 		}
 	}
 
@@ -183,19 +161,8 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 	@Override
 	protected void triggerShutdown() {
 		this.shuttingDown=true;
-		this.commandQueue.offer(Poison.SINGLETON);
+		this.monitor.offer(Poison.SINGLETON);
 		LOGGER.info("Requested command processing termination...");
-	}
-
-	private void logPendingCommands() {
-		if(this.shuttingDown && LOGGER.isInfoEnabled()) {
-			int pending = this.commandQueue.size();
-			String howMany="No";
-			if(pending>0) {
-				howMany=Integer.toString(pending);
-			}
-			LOGGER.info("{} commands pending...",howMany);
-		}
 	}
 
 }

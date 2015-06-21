@@ -29,7 +29,6 @@ package org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -37,12 +36,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.Command;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawler;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawlerException;
-
-import com.google.common.collect.Queues;
 
 public final class JenkinsIntegrationService {
 
@@ -152,8 +148,8 @@ public final class JenkinsIntegrationService {
 
 	private final ContinuousIntegrationService service;
 	private final TransactionManager transactionManager;
-	private final LinkedBlockingQueue<Command> commandQueue;
 	private final CommandProducerListener listener;
+	private final CommandProcessingMonitor monitor;
 
 	private final Lock read;
 	private final Lock write;
@@ -165,8 +161,8 @@ public final class JenkinsIntegrationService {
 	public JenkinsIntegrationService(ContinuousIntegrationService service, TransactionManager manager) {
 		this.service=service;
 		this.transactionManager = manager;
-		this.commandQueue=Queues.newLinkedBlockingQueue();
-		this.listener=new CommandProducerListener(this.commandQueue);
+		this.monitor=new CommandProcessingMonitor();
+		this.listener=new CommandProducerListener(this.monitor);
 		ReadWriteLock lock=new ReentrantReadWriteLock();
 		this.read=lock.readLock();
 		this.write=lock.writeLock();
@@ -175,7 +171,8 @@ public final class JenkinsIntegrationService {
 
 	private void doConnect(URI jenkinsInstance, File workingDirectory) throws IOException {
 		try {
-			this.worker=new CommandProcessorService(this.commandQueue,this.transactionManager,this.service);
+			this.monitor.startAsync();
+			this.worker=new CommandProcessorService(this.monitor,this.transactionManager,this.service);
 			this.worker.startAsync();
 			this.crawler =
 				JenkinsCrawler.
@@ -191,6 +188,8 @@ public final class JenkinsIntegrationService {
 			this.worker.stopAsync();
 			this.worker.awaitTerminated();
 			this.worker=null;
+			this.monitor.stopAsync();
+			this.monitor.awaitTerminated();
 			LOGGER.error("Could not create crawler. Full stacktrace follows:",e);
 			throw new IOException("Cannot create crawler",e);
 		}
@@ -205,6 +204,8 @@ public final class JenkinsIntegrationService {
 			this.crawler=null;
 			this.worker.stopAsync();
 			this.worker.awaitTerminated();
+			this.monitor.stopAsync();
+			this.monitor.awaitTerminated();
 			this.worker=null;
 		}
 	}

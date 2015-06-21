@@ -26,12 +26,9 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.Command;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.CreateBuildCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.CreateExecutionCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteBuildCommand;
@@ -39,25 +36,25 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteExecution
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.FinishExecutionCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.RegisterServiceCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.UpdateBuildCommand;
+import org.smartdeveloperhub.jenkins.crawler.event.InstanceFoundEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 import org.smartdeveloperhub.jenkins.crawler.event.JobCreatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JobDeletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JobUpdatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.RunCreatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.RunDeletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.RunUpdatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
-import org.smartdeveloperhub.jenkins.crawler.event.InstanceFoundEvent;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 
 final class CommandProducerListener implements JenkinsEventListener {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(CommandProducerListener.class);
 
-	private final LinkedBlockingQueue<Command> commandQueue;
+	private final CommandProcessingMonitor monitor;
 
-	CommandProducerListener(LinkedBlockingQueue<Command> commandQueue) {
-		this.commandQueue = commandQueue;
+	CommandProducerListener(CommandProcessingMonitor monitor) {
+		this.monitor = monitor;
 	}
 
 	private Status toStatus(RunResult result) {
@@ -91,7 +88,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onInstanceFound(InstanceFoundEvent event) {
 		logEvent(event);
-		commandQueue.offer(
+		this.monitor.offer(
 			RegisterServiceCommand.create(event.instanceId())
 		);
 	}
@@ -99,7 +96,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onJobCreation(JobCreatedEvent event) {
 		logEvent(event);
-		commandQueue.offer(
+		this.monitor.offer(
 			CreateBuildCommand.
 				builder().
 					withServiceId(event.instanceId()).
@@ -114,7 +111,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onJobUpdate(JobUpdatedEvent event) {
 		logEvent(event);
-		commandQueue.offer(
+		this.monitor.offer(
 			UpdateBuildCommand.
 				builder().
 					withBuildId(event.jobId()).
@@ -128,7 +125,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onJobDeletion(JobDeletedEvent event) {
 		logEvent(event);
-		commandQueue.offer(
+		this.monitor.offer(
 			DeleteBuildCommand.create(event.jobId())
 		);
 	}
@@ -136,7 +133,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onRunCreation(RunCreatedEvent event) {
 		logEvent(event);
-		commandQueue.offer(
+		this.monitor.offer(
 			CreateExecutionCommand.
 				builder().
 					withBuildId(event.jobId()).
@@ -145,7 +142,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 					build()
 		);
 		if(event.isFinished()) {
-			commandQueue.offer(
+			this.monitor.offer(
 				FinishExecutionCommand.
 					builder().
 						withExecutionId(event.runId()).
@@ -159,7 +156,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onRunUpdate(RunUpdatedEvent event) {
 		logEvent(event);
-		commandQueue.offer(
+		this.monitor.offer(
 			FinishExecutionCommand.
 				builder().
 					withExecutionId(event.runId()).
@@ -172,7 +169,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onRunDeletion(RunDeletedEvent event) {
 		logEvent(event);
-		commandQueue.offer(
+		this.monitor.offer(
 			DeleteExecutionCommand.create(event.runId())
 		);
 	}
