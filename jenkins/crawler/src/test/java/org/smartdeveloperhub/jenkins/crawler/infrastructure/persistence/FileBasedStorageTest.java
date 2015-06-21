@@ -51,16 +51,17 @@ public class FileBasedStorageTest {
 	public void testEntityManagement() throws Exception {
 		URI instanceId=URI.create("http://www.example.org/");
 
-		FileBasedStorage write = storage();
-
 		Instance in=new Instance();
 		in.setUrl(instanceId);
 		in.setId(instanceId.toString());
+
+		FileBasedStorage write = storage();
 		write.saveEntity(in,JenkinsEntityType.INSTANCE);
 		write.save();
 
 		FileBasedStorage read = storage();
 		Instance out=read.entityOfId(instanceId,JenkinsEntityType.INSTANCE,Instance.class);
+
 		assertThat(out,equalTo(in));
 	}
 
@@ -68,7 +69,7 @@ public class FileBasedStorageTest {
 		FileBasedStorage storage =
 			FileBasedStorage.
 				builder().
-					withWorkingDirectory(testFolder.getRoot()).
+					withWorkingDirectory(this.testFolder.getRoot()).
 					build();
 		return storage;
 	}

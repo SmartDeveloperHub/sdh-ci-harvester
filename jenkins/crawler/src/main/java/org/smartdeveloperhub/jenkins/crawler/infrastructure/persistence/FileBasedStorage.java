@@ -266,27 +266,27 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 
 	public static final class Builder {
 
+		private static final StorageAllocationStrategy DEFAULT_STORAGE_ALLOCATION_STRATEGY = new DefaultStorageAllocationStrategy();
+
+		private static final File DEFAULT_WORKING_DIR = new File(".");
+
+		private static final String DEFAULT_CONFIG_FILENAME = "repository.xml";
+
 		private File workingDirectory;
 		private File configFile;
+
 		private StorageAllocationStrategy strategy;
 
 		private Builder() {
-			this.workingDirectory=new File(".");
-			this.configFile=new File("repository.xml");
-			this.strategy=new DefaultStorageAllocationStrategy();
 		}
 
 		public Builder withWorkingDirectory(File workingDirectory) {
-			if(workingDirectory!=null) {
-				this.workingDirectory = workingDirectory;
-			}
+			this.workingDirectory = workingDirectory;
 			return this;
 		}
 
 		public Builder withConfigFile(File configFile) {
-			if(configFile!=null) {
-				this.configFile=configFile;
-			}
+			this.configFile=configFile;
 			return this;
 		}
 
@@ -297,18 +297,50 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 			return this;
 		}
 
+		private File workingDirectory() {
+			File result=
+				Optional.
+					fromNullable(this.workingDirectory).
+						or(DEFAULT_WORKING_DIR);
+			if(result.exists()) {
+				checkArgument(result.isDirectory(),"%s is not a directory",result.toPath().normalize());
+				checkArgument(result.canWrite(),"%s cannot be written",result.toPath().normalize());
+			}
+			return result;
+		}
+
+		private File configFile(File workingDirectory) {
+			File result=
+				Optional.
+					fromNullable(this.configFile).
+						or(new File(workingDirectory,DEFAULT_CONFIG_FILENAME));
+			if(result.exists()) {
+				checkArgument(result.isFile(),"%s is not a file",result.toPath().normalize());
+				checkArgument(result.canWrite(),"%s cannot be written",result.toPath().normalize());
+			}
+			return result;
+		}
+
+		private StorageAllocationStrategy strategy() {
+			return
+				Optional.
+					fromNullable(this.strategy).
+						or(DEFAULT_STORAGE_ALLOCATION_STRATEGY);
+		}
+
 		public FileBasedStorage build() throws IOException {
 			FileBasedStorage result=new FileBasedStorage();
-			if(this.configFile.exists()) {
-				checkArgument(this.configFile.isFile(),"Configuration file path %s should point to a file",configFile.getAbsolutePath());
-				checkArgument(this.configFile.canWrite(),"Configuration file %s cannot be written",configFile.getAbsolutePath());
-				result.fromConfigFile(this.configFile);
+			File fWorkingDirectory=workingDirectory();
+			File fConfigFile=configFile(fWorkingDirectory);
+			if(fConfigFile.exists()) {
+				result.fromConfigFile(fConfigFile);
 			} else {
-				StorageUtils.prepareWorkingDirectory(this.workingDirectory);
-				this.strategy.setWorkingDirectory(this.workingDirectory);
+				StorageUtils.prepareWorkingDirectory(fWorkingDirectory);
+				StorageAllocationStrategy fStrategy=strategy();
+				fStrategy.setWorkingDirectory(fWorkingDirectory);
 				result.
-					setConfigFile(this.configFile).
-					setStrategy(this.strategy);
+					setConfigFile(fConfigFile).
+					setStrategy(fStrategy);
 			}
 			return result;
 		}
@@ -373,7 +405,6 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 					configFile,
 					Storage.class,
 					new IOException("Could not parse configuration file '"+configFile.getAbsolutePath()+"'"));
-
 
 		File workingDirectory=new File(descriptor.getWorkingDirectory());
 		StorageUtils.prepareWorkingDirectory(workingDirectory);

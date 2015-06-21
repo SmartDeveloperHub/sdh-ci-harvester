@@ -52,8 +52,8 @@
 			<!-- DDL Script generation settings -->
 			<property name="javax.persistence.schema-generation.database.action" value="drop-and-create" />
 			<property name="javax.persistence.schema-generation.scripts.action" value="drop-and-create" />
-			<property name="javax.persistence.schema-generation.scripts.create-target" value="jpa21-model-source-create.ddl" />
-			<property name="javax.persistence.schema-generation.scripts.drop-target" value="jpa21-model-source-drop.ddl" />
+			<property name="javax.persistence.schema-generation.scripts.create-target" value="target/jpa21-model-source-create.ddl" />
+			<property name="javax.persistence.schema-generation.scripts.drop-target" value="target/jpa21-model-source-drop.ddl" />
 
 			<!-- Settings for loading data at startup -->
 			<property name="javax.persistence.sql-load-script-source" value="insert.sql" />
