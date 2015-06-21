@@ -43,18 +43,20 @@ final class CommandProcessingMonitor extends AbstractExecutionThreadService {
 
 		private final AtomicLong offered;
 		private final AtomicLong taken;
+		private final AtomicLong retries;
 
-		private Status(long offered, long taken) {
+		private Status(long offered, long taken, long retries) {
 			this.offered=new AtomicLong(offered);
 			this.taken=new AtomicLong(taken);
+			this.retries=new AtomicLong(retries);
 		}
 
 		private Status() {
-			this(0,0);
+			this(0,0,0);
 		}
 
 		private Status(Status status) {
-			this(status.offered.get(),status.taken.get());
+			this(status.offered.get(),status.taken.get(),status.retries.get());
 		}
 
 		void offer() {
@@ -65,15 +67,21 @@ final class CommandProcessingMonitor extends AbstractExecutionThreadService {
 			this.taken.incrementAndGet();
 		}
 
+		void retryLater() {
+			this.taken.decrementAndGet();
+			this.retries.incrementAndGet();
+		}
+
 		@Override
 		public String toString() {
 			Status tmp = new Status(this);
 			return
 				String.format(
-					"%d commands pending (%d produced / %d processed)",
+					"%d commands pending (%d produced / %d processed (%d retries))",
 					tmp.offered.get()-tmp.taken.get(),
 					tmp.offered.get(),
-					tmp.taken.get());
+					tmp.taken.get(),
+					tmp.retries.get());
 		}
 
 	}
@@ -94,6 +102,11 @@ final class CommandProcessingMonitor extends AbstractExecutionThreadService {
 	void offer(Command command) {
 		this.commandQueue.offer(command);
 		this.status.offer();
+	}
+
+	void retryLater(Command command) {
+		this.commandQueue.offer(command);
+		this.status.retryLater();
 	}
 
 	Command take() throws InterruptedException {
