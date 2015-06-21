@@ -41,6 +41,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
@@ -60,6 +62,8 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 public class BackendCoreITest {
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(BackendCoreITest.class);
 
 	private static final String JDBC_DRIVER   = "javax.persistence.jdbc.driver";
 	private static final String JDBC_URL      = "javax.persistence.jdbc.url";
@@ -109,6 +113,7 @@ public class BackendCoreITest {
 
 	@Test
 	public void smokeTest() throws Exception {
+		LOGGER.info("Starting smoke test...");
 		this.tmpDirectory = new File("target","jenkins"+new Date().getTime());
 		ContinuousIntegrationService cis =
 				new ContinuousIntegrationService(
@@ -120,6 +125,7 @@ public class BackendCoreITest {
 				cis,
 				persistencyFacade.getTransactionManager()).
 				setWorkingDirectory(tmpDirectory);
+		LOGGER.info("Warming up...");
 		jis.connect(URI.create("http://ci.jenkins-ci.org/"));
 		try {
 			TimeUnit.SECONDS.sleep(60);
@@ -127,7 +133,9 @@ public class BackendCoreITest {
 
 		}
 		jis.disconnect();
+		LOGGER.info("Warm up completed.");
 		doVerify();
+		LOGGER.info("Smoke test completed.");
 	}
 
 	private ExecutionRepository executionRepository() {
@@ -164,38 +172,39 @@ public class BackendCoreITest {
 	}
 
 	private void doVerify() throws Exception {
-		System.out.println("Starting verification...");
+		LOGGER.info("Starting verification...");
 		for(URI serviceId:serviceRepository().serviceIds()) {
 			Service service=serviceRepository().serviceOfId(serviceId);
-			System.out.printf("- Service %s :%n  + %s%n",serviceId,service);
+			LOGGER.debug("- Service {} : {}",serviceId,service);
 			assertThat(service,notNullValue());
 			for(URI buildId:service.builds()) {
 				Build build=buildRepository().buildOfId(buildId);
-				System.out.printf("  + Build %s :%n    * %s%n",buildId,build);
+				LOGGER.debug("  + Build {} : {}",buildId,build);
 				Job job=storage().entityOfId(buildId,JenkinsEntityType.JOB,Job.class);
-				verifyBuildMatchesJob(build, job);
+				verifyBuildMatchesJob(buildId,build,job);
 				for(URI executionId:build.executions()) {
 					Execution execution=executionRepository().executionOfId(executionId);
-					System.out.printf("    * Execution %s :%n      - %s%n",executionId,execution);
+					LOGGER.trace("    * Execution {} : {}",executionId,execution);
 					Run run=storage().entityOfId(executionId,JenkinsEntityType.RUN,Run.class);
-					verifyExecutionMatchesRun(execution, run);
+					verifyExecutionMatchesRun(executionId,execution,run);
 				}
 			}
 		}
+		LOGGER.info("Verification completed.");
 	}
 
-	private void verifyExecutionMatchesRun(Execution execution, Run run) {
-		assertThat(execution,notNullValue());
-		assertThat(run,notNullValue());
-		assertThat(run.getJob(),equalTo(execution.buildId()));
+	private void verifyExecutionMatchesRun(URI executionId, Execution execution, Run run) {
+		assertThat(String.format("Execution %s should exist",executionId),execution,notNullValue());
+		assertThat(String.format("Run %s should exist",executionId),run,notNullValue());
+		assertThat("Execution and run owner should match",run.getJob(),equalTo(execution.buildId()));
 	}
 
-	private void verifyBuildMatchesJob(Build build, Job job) {
-		assertThat(build,notNullValue());
-		assertThat(job,notNullValue());
-		assertThat(job.getInstance(),equalTo(build.serviceId()));
-		assertThat(job.getTitle(),equalTo(build.title()));
-		assertThat(job.getDescription(),equalTo(build.description()));
+	private void verifyBuildMatchesJob(URI buildId, Build build, Job job) {
+		assertThat(String.format("Build %s should exist",buildId),build,notNullValue());
+		assertThat(String.format("Job %s should exist",buildId),job,notNullValue());
+		assertThat("Build and job owner should match",job.getInstance(),equalTo(build.serviceId()));
+		assertThat("Build and job title should match",job.getTitle(),equalTo(build.title()));
+		assertThat("Build and job description should match",job.getDescription(),equalTo(build.description()));
 	}
 
 }

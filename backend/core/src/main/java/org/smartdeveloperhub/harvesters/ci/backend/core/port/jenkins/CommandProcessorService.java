@@ -170,7 +170,7 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 		try {
 			command.accept(this.dispatcher);
 			tx.commit();
-			LOGGER.debug("Processed command {}",command);
+			LOGGER.trace("Processed command {}",command);
 		} catch(TransactionException e) {
 			throw e;
 		} catch(Exception e) {
