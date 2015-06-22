@@ -57,12 +57,23 @@
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
 
+	<properties>
+		<ldp4j.version>1.0.0-SNAPSHOT</ldp4j.version>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 				<artifactId>ci-backend-bom</artifactId>
 				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.ldp4j.framework</groupId>
+				<artifactId>ldp4j-application-bom</artifactId>
+				<version>${ldp4j.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -75,6 +86,40 @@
 			<artifactId>ci-backend-depchain</artifactId>
 			<type>pom</type>
 		</dependency>
+		<dependency>
+			<groupId>org.ldp4j.framework</groupId>
+			<artifactId>ldp4j-application-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ldp4j.framework</groupId>
+			<artifactId>ldp4j-application-data</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ldp4j.framework</groupId>
+			<artifactId>ldp4j-application-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Default unit testing frameworks-->
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-integration</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 </project>

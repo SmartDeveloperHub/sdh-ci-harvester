@@ -1,0 +1,2248 @@
+#
+# #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+#   This file is part of the Smart Developer Hub Project:
+#     http://www.smartdeveloperhub.org/
+#
+#   Center for Open Middleware
+#     http://www.centeropenmiddleware.com/
+# #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+#   Copyright (C) 2015 Center for Open Middleware.
+# #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#             http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+# #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+#   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:1.0.0-SNAPSHOT
+#   Bundle      : ci-frontend-core-1.0.0-SNAPSHOT.jar
+# #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+#
+
+@prefix : <http://www.smartdeveloperhub.org/vocabulary/v1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.smartdeveloperhub.org/vocabulary/v1/> .
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/> rdf:type owl:Ontology .
+
+
+#################################################################
+#
+#    Datatypes
+#
+#################################################################
+
+
+###  internal:anonymous-constants
+
+<internal:anonymous-constants> rdf:type rdfs:Datatype .
+
+
+
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://open-services.net/ns/auto#executesAutomationPlan
+
+<http://open-services.net/ns/auto#executesAutomationPlan> rdf:type owl:ObjectProperty .
+
+
+
+###  http://open-services.net/ns/auto#producedByAutomationRequest
+
+<http://open-services.net/ns/auto#producedByAutomationRequest> rdf:type owl:ObjectProperty .
+
+
+
+###  http://open-services.net/ns/auto#reportsOnAutomationPlan
+
+<http://open-services.net/ns/auto#reportsOnAutomationPlan> rdf:type owl:ObjectProperty .
+
+
+
+###  http://open-services.net/ns/auto#state
+
+<http://open-services.net/ns/auto#state> rdf:type owl:ObjectProperty .
+
+
+
+###  http://open-services.net/ns/auto#verdict
+
+<http://open-services.net/ns/auto#verdict> rdf:type owl:ObjectProperty .
+
+
+
+###  http://purl.org/dc/terms/publisher
+
+<http://purl.org/dc/terms/publisher> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#hasBuild
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#hasBuild> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#hasExecution
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#hasExecution> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#hasResult
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#hasResult> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#calculatesMetric
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#calculatesMetric> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#hasEndpoint
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#hasEndpoint> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#supports
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#supports> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#domain
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#domain> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#hasParameter
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#hasParameter> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#hasResource
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#hasResource> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#hasResourceType
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#hasResourceType> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#hasResult
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#hasResult> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#hasSignature
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#hasSignature> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#implements
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#implements> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#providesDomain
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#providesDomain> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#providesOperation
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#providesOperation> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#targetType
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#targetType> rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#vocabulary
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#vocabulary> rdf:type owl:ObjectProperty .
+
+
+
+
+
+#################################################################
+#
+#    Data properties
+#
+#################################################################
+
+
+###  http://purl.org/dc/terms/date
+
+<http://purl.org/dc/terms/date> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://purl.org/dc/terms/description
+
+<http://purl.org/dc/terms/description> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://purl.org/dc/terms/identifier
+
+<http://purl.org/dc/terms/identifier> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://purl.org/dc/terms/issued
+
+<http://purl.org/dc/terms/issued> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://purl.org/dc/terms/modified
+
+<http://purl.org/dc/terms/modified> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://purl.org/dc/terms/source
+
+<http://purl.org/dc/terms/source> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://purl.org/dc/terms/title
+
+<http://purl.org/dc/terms/title> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#codebase
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#codebase> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#finished
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#finished> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#location
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#location> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#description
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#description> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#identifier
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#identifier> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#isOptional
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#isOptional> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#isSequence
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#isSequence> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#name
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#name> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#source
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#source> rdf:type owl:DatatypeProperty .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#title
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#title> rdf:type owl:DatatypeProperty .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://open-services.net/ns/auto#AutomationPlan
+
+<http://open-services.net/ns/auto#AutomationPlan> rdf:type owl:Class .
+
+
+
+###  http://open-services.net/ns/auto#AutomationRequest
+
+<http://open-services.net/ns/auto#AutomationRequest> rdf:type owl:Class .
+
+
+
+###  http://open-services.net/ns/auto#AutomationResult
+
+<http://open-services.net/ns/auto#AutomationResult> rdf:type owl:Class .
+
+
+
+###  http://purl.org/dc/dcam/VocabularyEncodingScheme
+
+<http://purl.org/dc/dcam/VocabularyEncodingScheme> rdf:type owl:Class .
+
+
+
+###  http://purl.org/dc/dcmitype/Service
+
+<http://purl.org/dc/dcmitype/Service> rdf:type owl:Class .
+
+
+
+###  http://purl.org/dc/terms/Agent
+
+<http://purl.org/dc/terms/Agent> rdf:type owl:Class .
+
+
+
+###  http://purl.org/dc/terms/AgentClass
+
+<http://purl.org/dc/terms/AgentClass> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#AvailableExecutionResult
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#AvailableExecutionResult> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#Build
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#Build> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#CIHarvester
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#CIHarvester> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#CIVocabulary
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#CIVocabulary> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#Execution
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#Execution> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionResult
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionResult> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionState
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionState> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionVerdict
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionVerdict> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#FinishedExecution
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#FinishedExecution> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#MetricDefinition
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#MetricDefinition> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#MetricEndpoint
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#MetricEndpoint> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#MetricService
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#MetricService> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#MetricVocabulary
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#MetricVocabulary> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#Domain
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#Domain> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#Endpoint
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#Endpoint> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#Harvester
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#Harvester> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#LinkedDataMicroService
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#LinkedDataMicroService> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#MicroService
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#MicroService> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#Operation
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#Operation> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#Parameter
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#Parameter> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#Result
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#Result> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#Signature
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#Signature> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#ValueType
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#ValueType> rdf:type owl:Class .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/platform#Vocabulary
+
+<http://www.smartdeveloperhub.org/vocabulary/platform#Vocabulary> rdf:type owl:Class .
+
+
+
+###  http://www.w3.org/2000/01/rdf-schema#Class
+
+rdfs:Class rdf:type owl:Class .
+
+
+
+###  http://xmlns.com/foaf/0.1/Agent
+
+<http://xmlns.com/foaf/0.1/Agent> rdf:type owl:Class .
+
+
+
+
+
+#################################################################
+#
+#    Individuals
+#
+#################################################################
+
+
+###  http://open-services.net/ns/auto#canceled
+
+<http://open-services.net/ns/auto#canceled> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionState> ,
+                                                     owl:NamedIndividual .
+
+
+
+###  http://open-services.net/ns/auto#complete
+
+<http://open-services.net/ns/auto#complete> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionState> ,
+                                                     owl:NamedIndividual .
+
+
+
+###  http://open-services.net/ns/auto#error
+
+<http://open-services.net/ns/auto#error> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionVerdict> ,
+                                                  owl:NamedIndividual .
+
+
+
+###  http://open-services.net/ns/auto#failed
+
+<http://open-services.net/ns/auto#failed> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionVerdict> ,
+                                                   owl:NamedIndividual .
+
+
+
+###  http://open-services.net/ns/auto#inProgress
+
+<http://open-services.net/ns/auto#inProgress> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionState> ,
+                                                       owl:NamedIndividual .
+
+
+
+###  http://open-services.net/ns/auto#passed
+
+<http://open-services.net/ns/auto#passed> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionVerdict> ,
+                                                   owl:NamedIndividual .
+
+
+
+###  http://open-services.net/ns/auto#unavailable
+
+<http://open-services.net/ns/auto#unavailable> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionVerdict> ,
+                                                        owl:NamedIndividual .
+
+
+
+###  http://open-services.net/ns/auto#warning
+
+<http://open-services.net/ns/auto#warning> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionVerdict> ,
+                                                    owl:NamedIndividual .
+
+
+
+###  http://purl.org/dc/aboutdcmi#DCMI
+
+<http://purl.org/dc/aboutdcmi#DCMI> rdf:type <http://purl.org/dc/terms/Agent> ,
+                                             owl:NamedIndividual ,
+                                             <http://xmlns.com/foaf/0.1/Agent> .
+
+
+
+###  http://purl.org/dc/terms/
+
+<http://purl.org/dc/terms/> rdf:type owl:NamedIndividual ;
+                            
+                            <http://purl.org/dc/terms/date> "2012-06-14"^^<internal:anonymous-constants> ;
+                            
+                            <http://purl.org/dc/terms/modified> "2012-06-14"^^<internal:anonymous-constants> ;
+                            
+                            <http://purl.org/dc/terms/title> "DCMI Metadata Terms - other"@en ;
+                            
+                            <http://purl.org/dc/terms/publisher> <http://purl.org/dc/aboutdcmi#DCMI> .
+
+
+
+###  http://purl.org/dc/terms/Agent
+
+<http://purl.org/dc/terms/Agent> rdf:type <http://purl.org/dc/terms/AgentClass> ,
+                                          rdfs:Class ,
+                                          owl:NamedIndividual ;
+                                 
+                                 <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/AgentClass
+
+<http://purl.org/dc/terms/AgentClass> rdf:type owl:NamedIndividual ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/modified> "2012-06-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2012-06-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/BibliographicResource
+
+<http://purl.org/dc/terms/BibliographicResource> rdf:type owl:NamedIndividual ;
+                                                 
+                                                 <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                                 
+                                                 <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/Box
+
+<http://purl.org/dc/terms/Box> rdf:type owl:NamedIndividual ;
+                               
+                               <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/DCMIType
+
+<http://purl.org/dc/terms/DCMIType> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                             owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2012-06-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2012-06-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/DDC
+
+<http://purl.org/dc/terms/DDC> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                        owl:NamedIndividual ;
+                               
+                               <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/FileFormat
+
+<http://purl.org/dc/terms/FileFormat> rdf:type owl:NamedIndividual ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/Frequency
+
+<http://purl.org/dc/terms/Frequency> rdf:type owl:NamedIndividual ;
+                                     
+                                     <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/IMT
+
+<http://purl.org/dc/terms/IMT> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                        owl:NamedIndividual ;
+                               
+                               <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/ISO3166
+
+<http://purl.org/dc/terms/ISO3166> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/ISO639-2
+
+<http://purl.org/dc/terms/ISO639-2> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/ISO639-3
+
+<http://purl.org/dc/terms/ISO639-3> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/Jurisdiction
+
+<http://purl.org/dc/terms/Jurisdiction> rdf:type owl:NamedIndividual ;
+                                        
+                                        <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/LCC
+
+<http://purl.org/dc/terms/LCC> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                        owl:NamedIndividual ;
+                               
+                               <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/LCSH
+
+<http://purl.org/dc/terms/LCSH> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                         owl:NamedIndividual ;
+                                
+                                <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/LicenseDocument
+
+<http://purl.org/dc/terms/LicenseDocument> rdf:type owl:NamedIndividual ;
+                                           
+                                           <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/LinguisticSystem
+
+<http://purl.org/dc/terms/LinguisticSystem> rdf:type owl:NamedIndividual ;
+                                            
+                                            <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                            
+                                            <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/Location
+
+<http://purl.org/dc/terms/Location> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/LocationPeriodOrJurisdiction
+
+<http://purl.org/dc/terms/LocationPeriodOrJurisdiction> rdf:type owl:NamedIndividual ;
+                                                        
+                                                        <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                                        
+                                                        <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/MESH
+
+<http://purl.org/dc/terms/MESH> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                         owl:NamedIndividual ;
+                                
+                                <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                "2008-01-14"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/MediaType
+
+<http://purl.org/dc/terms/MediaType> rdf:type owl:NamedIndividual ;
+                                     
+                                     <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/MediaTypeOrExtent
+
+<http://purl.org/dc/terms/MediaTypeOrExtent> rdf:type owl:NamedIndividual ;
+                                             
+                                             <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                             
+                                             <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/MethodOfAccrual
+
+<http://purl.org/dc/terms/MethodOfAccrual> rdf:type owl:NamedIndividual ;
+                                           
+                                           <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/MethodOfInstruction
+
+<http://purl.org/dc/terms/MethodOfInstruction> rdf:type owl:NamedIndividual ;
+                                               
+                                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                               
+                                               <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/NLM
+
+<http://purl.org/dc/terms/NLM> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                        owl:NamedIndividual ;
+                               
+                               <http://purl.org/dc/terms/date> "2005-06-13"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/issued> "2005-06-13"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/Period
+
+<http://purl.org/dc/terms/Period> rdf:type owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/PeriodOfTime
+
+<http://purl.org/dc/terms/PeriodOfTime> rdf:type owl:NamedIndividual ;
+                                        
+                                        <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/PhysicalMedium
+
+<http://purl.org/dc/terms/PhysicalMedium> rdf:type owl:NamedIndividual ;
+                                          
+                                          <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                          
+                                          <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/PhysicalResource
+
+<http://purl.org/dc/terms/PhysicalResource> rdf:type owl:NamedIndividual ;
+                                            
+                                            <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                            
+                                            <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/Point
+
+<http://purl.org/dc/terms/Point> rdf:type owl:NamedIndividual ;
+                                 
+                                 <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/Policy
+
+<http://purl.org/dc/terms/Policy> rdf:type owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/ProvenanceStatement
+
+<http://purl.org/dc/terms/ProvenanceStatement> rdf:type owl:NamedIndividual ;
+                                               
+                                               <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                               
+                                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/RFC1766
+
+<http://purl.org/dc/terms/RFC1766> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/RFC3066
+
+<http://purl.org/dc/terms/RFC3066> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2002-07-13"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2002-07-13"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/RFC4646
+
+<http://purl.org/dc/terms/RFC4646> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/RFC5646
+
+<http://purl.org/dc/terms/RFC5646> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2010-10-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/RightsStatement
+
+<http://purl.org/dc/terms/RightsStatement> rdf:type owl:NamedIndividual ;
+                                           
+                                           <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/SizeOrDuration
+
+<http://purl.org/dc/terms/SizeOrDuration> rdf:type owl:NamedIndividual ;
+                                          
+                                          <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                          
+                                          <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/Standard
+
+<http://purl.org/dc/terms/Standard> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/TGN
+
+<http://purl.org/dc/terms/TGN> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                        owl:NamedIndividual ;
+                               
+                               <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/UDC
+
+<http://purl.org/dc/terms/UDC> rdf:type <http://purl.org/dc/dcam/VocabularyEncodingScheme> ,
+                                        owl:NamedIndividual ;
+                               
+                               <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                               "2008-01-14"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/URI
+
+<http://purl.org/dc/terms/URI> rdf:type owl:NamedIndividual ;
+                               
+                               <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                               
+                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/W3CDTF
+
+<http://purl.org/dc/terms/W3CDTF> rdf:type owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                  "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/abstract
+
+<http://purl.org/dc/terms/abstract> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/accessRights
+
+<http://purl.org/dc/terms/accessRights> rdf:type owl:NamedIndividual ;
+                                        
+                                        <http://purl.org/dc/terms/issued> "2003-02-15"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2003-02-15"^^<internal:anonymous-constants> ,
+                                                                        "2008-01-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/accrualMethod
+
+<http://purl.org/dc/terms/accrualMethod> rdf:type owl:NamedIndividual ;
+                                         
+                                         <http://purl.org/dc/terms/issued> "2005-06-13"^^<internal:anonymous-constants> ;
+                                         
+                                         <http://purl.org/dc/terms/date> "2005-06-13"^^<internal:anonymous-constants> ;
+                                         
+                                         <http://purl.org/dc/terms/modified> "2010-10-11"^^<internal:anonymous-constants> ;
+                                         
+                                         <http://purl.org/dc/terms/date> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/accrualPeriodicity
+
+<http://purl.org/dc/terms/accrualPeriodicity> rdf:type owl:NamedIndividual ;
+                                              
+                                              <http://purl.org/dc/terms/issued> "2005-06-13"^^<internal:anonymous-constants> ;
+                                              
+                                              <http://purl.org/dc/terms/date> "2005-06-13"^^<internal:anonymous-constants> ;
+                                              
+                                              <http://purl.org/dc/terms/modified> "2010-10-11"^^<internal:anonymous-constants> ;
+                                              
+                                              <http://purl.org/dc/terms/date> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/accrualPolicy
+
+<http://purl.org/dc/terms/accrualPolicy> rdf:type owl:NamedIndividual ;
+                                         
+                                         <http://purl.org/dc/terms/issued> "2005-06-13"^^<internal:anonymous-constants> ;
+                                         
+                                         <http://purl.org/dc/terms/date> "2005-06-13"^^<internal:anonymous-constants> ,
+                                                                         "2010-10-11"^^<internal:anonymous-constants> ;
+                                         
+                                         <http://purl.org/dc/terms/modified> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/alternative
+
+<http://purl.org/dc/terms/alternative> rdf:type owl:NamedIndividual ;
+                                       
+                                       <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/date> "2010-10-11"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/modified> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/audience
+
+<http://purl.org/dc/terms/audience> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2001-05-21"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2001-05-21"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/available
+
+<http://purl.org/dc/terms/available> rdf:type owl:NamedIndividual ;
+                                     
+                                     <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/bibliographicCitation
+
+<http://purl.org/dc/terms/bibliographicCitation> rdf:type owl:NamedIndividual ;
+                                                 
+                                                 <http://purl.org/dc/terms/issued> "2003-02-15"^^<internal:anonymous-constants> ;
+                                                 
+                                                 <http://purl.org/dc/terms/date> "2003-02-15"^^<internal:anonymous-constants> ,
+                                                                                 "2008-01-14"^^<internal:anonymous-constants> ;
+                                                 
+                                                 <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/conformsTo
+
+<http://purl.org/dc/terms/conformsTo> rdf:type owl:NamedIndividual ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2001-05-21"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/issued> "2001-05-21"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/contributor
+
+<http://purl.org/dc/terms/contributor> rdf:type owl:NamedIndividual ;
+                                       
+                                       <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/date> "2010-10-11"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/modified> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/coverage
+
+<http://purl.org/dc/terms/coverage> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/created
+
+<http://purl.org/dc/terms/created> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                   "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/creator
+
+<http://purl.org/dc/terms/creator> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2010-10-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/date
+
+<http://purl.org/dc/terms/date> rdf:type owl:DatatypeProperty ,
+                                         owl:NamedIndividual ;
+                                
+                                <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/dateAccepted
+
+<http://purl.org/dc/terms/dateAccepted> rdf:type owl:NamedIndividual ;
+                                        
+                                        <http://purl.org/dc/terms/issued> "2002-07-13"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2002-07-13"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/dateCopyrighted
+
+<http://purl.org/dc/terms/dateCopyrighted> rdf:type owl:NamedIndividual ;
+                                           
+                                           <http://purl.org/dc/terms/date> "2002-07-13"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/issued> "2002-07-13"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/dateSubmitted
+
+<http://purl.org/dc/terms/dateSubmitted> rdf:type owl:NamedIndividual ;
+                                         
+                                         <http://purl.org/dc/terms/issued> "2002-07-13"^^<internal:anonymous-constants> ;
+                                         
+                                         <http://purl.org/dc/terms/date> "2002-07-13"^^<internal:anonymous-constants> ;
+                                         
+                                         <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                         
+                                         <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/description
+
+<http://purl.org/dc/terms/description> rdf:type owl:NamedIndividual ;
+                                       
+                                       <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/educationLevel
+
+<http://purl.org/dc/terms/educationLevel> rdf:type owl:NamedIndividual ;
+                                          
+                                          <http://purl.org/dc/terms/issued> "2002-07-13"^^<internal:anonymous-constants> ;
+                                          
+                                          <http://purl.org/dc/terms/date> "2002-07-13"^^<internal:anonymous-constants> ,
+                                                                          "2008-01-14"^^<internal:anonymous-constants> ;
+                                          
+                                          <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/extent
+
+<http://purl.org/dc/terms/extent> rdf:type owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                  "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/format
+
+<http://purl.org/dc/terms/format> rdf:type owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/hasFormat
+
+<http://purl.org/dc/terms/hasFormat> rdf:type owl:NamedIndividual ;
+                                     
+                                     <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                     "2008-01-14"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/hasPart
+
+<http://purl.org/dc/terms/hasPart> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                   "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/hasVersion
+
+<http://purl.org/dc/terms/hasVersion> rdf:type owl:NamedIndividual ;
+                                      
+                                      <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                      "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/identifier
+
+<http://purl.org/dc/terms/identifier> rdf:type owl:NamedIndividual ;
+                                      
+                                      <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/instructionalMethod
+
+<http://purl.org/dc/terms/instructionalMethod> rdf:type owl:NamedIndividual ;
+                                               
+                                               <http://purl.org/dc/terms/issued> "2005-06-13"^^<internal:anonymous-constants> ;
+                                               
+                                               <http://purl.org/dc/terms/date> "2005-06-13"^^<internal:anonymous-constants> ;
+                                               
+                                               <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                               
+                                               <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/isFormatOf
+
+<http://purl.org/dc/terms/isFormatOf> rdf:type owl:NamedIndividual ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/isPartOf
+
+<http://purl.org/dc/terms/isPartOf> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/isReferencedBy
+
+<http://purl.org/dc/terms/isReferencedBy> rdf:type owl:NamedIndividual ;
+                                          
+                                          <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                          
+                                          <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                          
+                                          <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                          
+                                          <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/isReplacedBy
+
+<http://purl.org/dc/terms/isReplacedBy> rdf:type owl:NamedIndividual ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/isRequiredBy
+
+<http://purl.org/dc/terms/isRequiredBy> rdf:type owl:NamedIndividual ;
+                                        
+                                        <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/isVersionOf
+
+<http://purl.org/dc/terms/isVersionOf> rdf:type owl:NamedIndividual ;
+                                       
+                                       <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                       "2008-01-14"^^<internal:anonymous-constants> ;
+                                       
+                                       <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/issued
+
+<http://purl.org/dc/terms/issued> rdf:type owl:DatatypeProperty ,
+                                           owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/language
+
+<http://purl.org/dc/terms/language> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/license
+
+<http://purl.org/dc/terms/license> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2004-06-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2004-06-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/mediator
+
+<http://purl.org/dc/terms/mediator> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2001-05-21"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2001-05-21"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/medium
+
+<http://purl.org/dc/terms/medium> rdf:type owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                  "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/modified
+
+<http://purl.org/dc/terms/modified> rdf:type owl:DatatypeProperty ,
+                                             owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                    "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/provenance
+
+<http://purl.org/dc/terms/provenance> rdf:type owl:NamedIndividual ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2004-09-20"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/issued> "2004-09-20"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/publisher
+
+<http://purl.org/dc/terms/publisher> rdf:type owl:NamedIndividual ;
+                                     
+                                     <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ,
+                                                                     "2010-10-11"^^<internal:anonymous-constants> ;
+                                     
+                                     <http://purl.org/dc/terms/modified> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/references
+
+<http://purl.org/dc/terms/references> rdf:type owl:NamedIndividual ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                      
+                                      <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/relation
+
+<http://purl.org/dc/terms/relation> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/replaces
+
+<http://purl.org/dc/terms/replaces> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/requires
+
+<http://purl.org/dc/terms/requires> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/rights
+
+<http://purl.org/dc/terms/rights> rdf:type owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/rightsHolder
+
+<http://purl.org/dc/terms/rightsHolder> rdf:type owl:NamedIndividual ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2004-06-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/issued> "2004-06-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                        
+                                        <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/source
+
+<http://purl.org/dc/terms/source> rdf:type owl:NamedIndividual ;
+                                  
+                                  <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                  
+                                  <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/spatial
+
+<http://purl.org/dc/terms/spatial> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ,
+                                                                   "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/subject
+
+<http://purl.org/dc/terms/subject> rdf:type owl:NamedIndividual ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/date> "2012-06-14"^^<internal:anonymous-constants> ;
+                                   
+                                   <http://purl.org/dc/terms/modified> "2012-06-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/tableOfContents
+
+<http://purl.org/dc/terms/tableOfContents> rdf:type owl:NamedIndividual ;
+                                           
+                                           <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                           
+                                           <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/temporal
+
+<http://purl.org/dc/terms/temporal> rdf:type owl:NamedIndividual ;
+                                    
+                                    <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                    
+                                    <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/title
+
+<http://purl.org/dc/terms/title> rdf:type owl:NamedIndividual ;
+                                 
+                                 <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/date> "2010-10-11"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/modified> "2010-10-11"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/type
+
+<http://purl.org/dc/terms/type> rdf:type owl:NamedIndividual ;
+                                
+                                <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> ;
+                                
+                                <http://purl.org/dc/terms/issued> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://purl.org/dc/terms/valid
+
+<http://purl.org/dc/terms/valid> rdf:type owl:NamedIndividual ;
+                                 
+                                 <http://purl.org/dc/terms/issued> "2000-07-11"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/date> "2000-07-11"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/modified> "2008-01-14"^^<internal:anonymous-constants> ;
+                                 
+                                 <http://purl.org/dc/terms/date> "2008-01-14"^^<internal:anonymous-constants> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#Build
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#Build> rdf:type rdfs:Class ,
+                                                                owl:NamedIndividual .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/ci#CIDomain
+
+<http://www.smartdeveloperhub.org/vocabulary/ci#CIDomain> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Domain> ,
+                                                                   owl:NamedIndividual ;
+                                                          
+                                                          <http://purl.org/dc/terms/title> "Continuous Integration" ;
+                                                          
+                                                          <http://www.smartdeveloperhub.org/vocabulary/platform#identifier> "CI" ;
+                                                          
+                                                          <http://purl.org/dc/terms/identifier> "CI" ;
+                                                          
+                                                          <http://purl.org/dc/terms/description> "Continuous Integration Domain" ;
+                                                          
+                                                          <http://www.smartdeveloperhub.org/vocabulary/platform#description> "Continuous Integration Domain" ;
+                                                          
+                                                          <http://www.smartdeveloperhub.org/vocabulary/platform#title> "Continuous Integration" .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#MetricDomain
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#MetricDomain> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Domain> ,
+                                                                            owl:NamedIndividual ;
+                                                                   
+                                                                   <http://purl.org/dc/terms/identifier> "Metrics" ;
+                                                                   
+                                                                   <http://www.smartdeveloperhub.org/vocabulary/platform#identifier> "Metrics" ;
+                                                                   
+                                                                   <http://purl.org/dc/terms/description> "Metrics Domain" ;
+                                                                   
+                                                                   <http://www.smartdeveloperhub.org/vocabulary/platform#description> "Metrics Domain" ;
+                                                                   
+                                                                   <http://www.smartdeveloperhub.org/vocabulary/platform#title> "Metrics" ;
+                                                                   
+                                                                   <http://purl.org/dc/terms/title> "Metrics" .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/metrics#MetricEndpoint
+
+<http://www.smartdeveloperhub.org/vocabulary/metrics#MetricEndpoint> rdf:type rdfs:Class ,
+                                                                              owl:NamedIndividual .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/scm#SCMDomain
+
+<http://www.smartdeveloperhub.org/vocabulary/scm#SCMDomain> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Domain> ,
+                                                                     owl:NamedIndividual ;
+                                                            
+                                                            <http://purl.org/dc/terms/description> "Software Configuration Management" ;
+                                                            
+                                                            <http://purl.org/dc/terms/identifier> "SCM" ;
+                                                            
+                                                            <http://www.smartdeveloperhub.org/vocabulary/platform#identifier> "SCM" ;
+                                                            
+                                                            <http://purl.org/dc/terms/title> "Software Configuration Management" ;
+                                                            
+                                                            <http://www.smartdeveloperhub.org/vocabulary/platform#title> "Software Configuration Management" ;
+                                                            
+                                                            <http://www.smartdeveloperhub.org/vocabulary/platform#description> "Software Configuration Management" .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/a1
+
+:a1 rdf:type <http://open-services.net/ns/auto#AutomationPlan> ,
+             <http://www.smartdeveloperhub.org/vocabulary/ci#Build> ,
+             owl:NamedIndividual ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/ci#location> "http://ci.smartdeveloperhub.org/jobs/example-build"^^xsd:anyURI ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/ci#codebase> "http://git.smartdeveloperhub.org/example-build"^^xsd:anyURI ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/ci#hasExecution> :e1 .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/cis
+
+:cis rdf:type <http://purl.org/dc/dcmitype/Service> ,
+              <http://www.smartdeveloperhub.org/vocabulary/ci#CIHarvester> ,
+              <http://www.smartdeveloperhub.org/vocabulary/platform#Harvester> ,
+              <http://www.smartdeveloperhub.org/vocabulary/platform#LinkedDataMicroService> ,
+              <http://www.smartdeveloperhub.org/vocabulary/platform#MicroService> ,
+              owl:NamedIndividual ;
+     
+     <http://www.smartdeveloperhub.org/vocabulary/platform#hasResourceType> <http://www.smartdeveloperhub.org/vocabulary/ci#Build> ;
+     
+     <http://www.smartdeveloperhub.org/vocabulary/platform#domain> <http://www.smartdeveloperhub.org/vocabulary/ci#CIDomain> ;
+     
+     <http://www.smartdeveloperhub.org/vocabulary/platform#providesDomain> <http://www.smartdeveloperhub.org/vocabulary/ci#CIDomain> ;
+     
+     <http://www.smartdeveloperhub.org/vocabulary/platform#hasResource> :a1 ;
+     
+     <http://www.smartdeveloperhub.org/vocabulary/ci#hasBuild> :a1 ;
+     
+     <http://www.smartdeveloperhub.org/vocabulary/platform#vocabulary> <http://www.smartdeveloperhub.org/vocabulary/v1/cis#vocab> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/e1
+
+:e1 rdf:type <http://open-services.net/ns/auto#AutomationRequest> ,
+             <http://www.smartdeveloperhub.org/vocabulary/ci#Execution> ,
+             <http://www.smartdeveloperhub.org/vocabulary/ci#FinishedExecution> ,
+             owl:NamedIndividual ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/ci#finished> "2015-04-28T10:00:00Z"^^xsd:dateTime ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/ci#location> "http://ci.smartdeveloperhub.org/jobs/example-build/1/"^^xsd:anyURI ;
+    
+    <http://open-services.net/ns/auto#state> <http://open-services.net/ns/auto#complete> ;
+    
+    <http://open-services.net/ns/auto#executesAutomationPlan> :a1 ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/ci#hasResult> :r1 .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ep1
+
+:ep1 rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Endpoint> ,
+              owl:NamedIndividual ;
+     
+     <http://www.smartdeveloperhub.org/vocabulary/platform#providesOperation> <http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/m1
+
+:m1 rdf:type <http://www.smartdeveloperhub.org/vocabulary/metrics#MetricDefinition> ,
+             <http://www.smartdeveloperhub.org/vocabulary/platform#Operation> ,
+             owl:NamedIndividual ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#description> "Retrieve the total number of builds available between ?begin and ?end" ;
+    
+    <http://purl.org/dc/terms/description> "Retrieve the total number of builds available between ?begin and ?end" ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#identifier> "get-total-builds" ;
+    
+    <http://purl.org/dc/terms/title> "getTotalBuilds" ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#title> "getTotalBuilds" ;
+    
+    <http://purl.org/dc/terms/identifier> "get-total-builds" ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#hasResult> <http://www.smartdeveloperhub.org/vocabulary/v1/m1#result> ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#hasSignature> <http://www.smartdeveloperhub.org/vocabulary/v1/m1#signature> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ms
+
+:ms rdf:type <http://purl.org/dc/dcmitype/Service> ,
+             <http://www.smartdeveloperhub.org/vocabulary/metrics#MetricService> ,
+             <http://www.smartdeveloperhub.org/vocabulary/platform#Harvester> ,
+             <http://www.smartdeveloperhub.org/vocabulary/platform#LinkedDataMicroService> ,
+             <http://www.smartdeveloperhub.org/vocabulary/platform#MicroService> ,
+             owl:NamedIndividual ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#domain> <http://www.smartdeveloperhub.org/vocabulary/metrics#MetricDomain> ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#providesDomain> <http://www.smartdeveloperhub.org/vocabulary/metrics#MetricDomain> ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#hasResourceType> <http://www.smartdeveloperhub.org/vocabulary/metrics#MetricEndpoint> ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/metrics#calculatesMetric> :m1 ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#vocabulary> <http://www.smartdeveloperhub.org/vocabulary/v1/ms#vocab> ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/platform#hasResource> <http://www.smartdeveloperhub.org/vocabulary/v1/ms/e1> ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/metrics#hasEndpoint> <http://www.smartdeveloperhub.org/vocabulary/v1/ms/e1> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/r1
+
+:r1 rdf:type <http://open-services.net/ns/auto#AutomationResult> ,
+             <http://www.smartdeveloperhub.org/vocabulary/ci#AvailableExecutionResult> ,
+             <http://www.smartdeveloperhub.org/vocabulary/ci#ExecutionResult> ,
+             owl:NamedIndividual ;
+    
+    <http://www.smartdeveloperhub.org/vocabulary/ci#location> "http://ci.smartdeveloperhub.org/jobs/example-build/1/"^^xsd:anyURI ;
+    
+    <http://open-services.net/ns/auto#state> <http://open-services.net/ns/auto#complete> ;
+    
+    <http://open-services.net/ns/auto#verdict> <http://open-services.net/ns/auto#passed> ;
+    
+    <http://open-services.net/ns/auto#reportsOnAutomationPlan> :a1 ;
+    
+    <http://open-services.net/ns/auto#producedByAutomationRequest> :e1 .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/cis#vocab
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/cis#vocab> rdf:type <http://www.smartdeveloperhub.org/vocabulary/ci#CIVocabulary> ,
+                                                                    <http://www.smartdeveloperhub.org/vocabulary/platform#Vocabulary> ,
+                                                                    owl:NamedIndividual ;
+                                                           
+                                                           <http://www.smartdeveloperhub.org/vocabulary/platform#source> "http://www.smartdeveloperhub.org/vocabulary/v1/ci.ttl"^^xsd:anyURI ;
+                                                           
+                                                           <http://purl.org/dc/terms/source> "http://www.smartdeveloperhub.org/vocabulary/v1/ci.ttl"^^xsd:anyURI ;
+                                                           
+                                                           <http://www.smartdeveloperhub.org/vocabulary/platform#implements> <http://www.smartdeveloperhub.org/vocabulary/ci#CIDomain> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Operation> ,
+                                                                  owl:NamedIndividual ;
+                                                         
+                                                         <http://purl.org/dc/terms/description> "Retrieve the total number of builds available between ?begin and ?end" ;
+                                                         
+                                                         <http://www.smartdeveloperhub.org/vocabulary/platform#description> "Retrieve the total number of builds available between ?begin and ?end" ;
+                                                         
+                                                         <http://purl.org/dc/terms/identifier> "get-total-builds" ;
+                                                         
+                                                         <http://www.smartdeveloperhub.org/vocabulary/platform#identifier> "get-total-builds" ;
+                                                         
+                                                         <http://purl.org/dc/terms/title> "getTotalBuilds" ;
+                                                         
+                                                         <http://www.smartdeveloperhub.org/vocabulary/platform#title> "getTotalBuilds" ;
+                                                         
+                                                         <http://www.smartdeveloperhub.org/vocabulary/platform#hasResult> <http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#result> ;
+                                                         
+                                                         <http://www.smartdeveloperhub.org/vocabulary/platform#hasSignature> <http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#signature> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#beginParam
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#beginParam> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Parameter> ,
+                                                                             <http://www.smartdeveloperhub.org/vocabulary/platform#ValueType> ,
+                                                                             owl:NamedIndividual ;
+                                                                    
+                                                                    <http://www.smartdeveloperhub.org/vocabulary/platform#isOptional> "false"^^xsd:boolean ;
+                                                                    
+                                                                    <http://www.smartdeveloperhub.org/vocabulary/platform#isSequence> "false"^^xsd:boolean ;
+                                                                    
+                                                                    <http://www.smartdeveloperhub.org/vocabulary/platform#name> "begin" ;
+                                                                    
+                                                                    <http://www.smartdeveloperhub.org/vocabulary/platform#targetType> xsd:dateTime .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#endParam
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#endParam> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Parameter> ,
+                                                                           <http://www.smartdeveloperhub.org/vocabulary/platform#ValueType> ,
+                                                                           owl:NamedIndividual ;
+                                                                  
+                                                                  <http://www.smartdeveloperhub.org/vocabulary/platform#isOptional> "false"^^xsd:boolean ;
+                                                                  
+                                                                  <http://www.smartdeveloperhub.org/vocabulary/platform#isSequence> "false"^^xsd:boolean ;
+                                                                  
+                                                                  <http://www.smartdeveloperhub.org/vocabulary/platform#name> "end" ;
+                                                                  
+                                                                  <http://www.smartdeveloperhub.org/vocabulary/platform#targetType> xsd:dateTime .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#result
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#result> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Result> ,
+                                                                         <http://www.smartdeveloperhub.org/vocabulary/platform#ValueType> ,
+                                                                         owl:NamedIndividual ;
+                                                                
+                                                                <http://www.smartdeveloperhub.org/vocabulary/platform#isSequence> "false"^^xsd:boolean ;
+                                                                
+                                                                <http://www.smartdeveloperhub.org/vocabulary/platform#targetType> xsd:unsignedLong .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#signature
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#signature> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Signature> ,
+                                                                            owl:NamedIndividual ;
+                                                                   
+                                                                   <http://www.smartdeveloperhub.org/vocabulary/platform#hasParameter> <http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#beginParam> ,
+                                                                                                                                       <http://www.smartdeveloperhub.org/vocabulary/v1/ep1/op1#endParam> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/m1#beginParam
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/m1#beginParam> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Parameter> ,
+                                                                        <http://www.smartdeveloperhub.org/vocabulary/platform#ValueType> ,
+                                                                        owl:NamedIndividual ;
+                                                               
+                                                               <http://www.smartdeveloperhub.org/vocabulary/platform#isOptional> "false"^^xsd:boolean ;
+                                                               
+                                                               <http://www.smartdeveloperhub.org/vocabulary/platform#isSequence> "false"^^xsd:boolean ;
+                                                               
+                                                               <http://www.smartdeveloperhub.org/vocabulary/platform#name> "begin" ;
+                                                               
+                                                               <http://www.smartdeveloperhub.org/vocabulary/platform#targetType> xsd:dateTime .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/m1#endParam
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/m1#endParam> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Parameter> ,
+                                                                      <http://www.smartdeveloperhub.org/vocabulary/platform#ValueType> ,
+                                                                      owl:NamedIndividual ;
+                                                             
+                                                             <http://www.smartdeveloperhub.org/vocabulary/platform#isOptional> "false"^^xsd:boolean ;
+                                                             
+                                                             <http://www.smartdeveloperhub.org/vocabulary/platform#isSequence> "false"^^xsd:boolean ;
+                                                             
+                                                             <http://www.smartdeveloperhub.org/vocabulary/platform#name> "end" ;
+                                                             
+                                                             <http://www.smartdeveloperhub.org/vocabulary/platform#targetType> xsd:dateTime .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/m1#result
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/m1#result> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Result> ,
+                                                                    <http://www.smartdeveloperhub.org/vocabulary/platform#ValueType> ,
+                                                                    owl:NamedIndividual ;
+                                                           
+                                                           <http://www.smartdeveloperhub.org/vocabulary/platform#isSequence> "false"^^xsd:boolean ;
+                                                           
+                                                           <http://www.smartdeveloperhub.org/vocabulary/platform#targetType> xsd:unsignedLong .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/m1#signature
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/m1#signature> rdf:type <http://www.smartdeveloperhub.org/vocabulary/platform#Signature> ,
+                                                                       owl:NamedIndividual ;
+                                                              
+                                                              <http://www.smartdeveloperhub.org/vocabulary/platform#hasParameter> <http://www.smartdeveloperhub.org/vocabulary/v1/m1#beginParam> ,
+                                                                                                                                  <http://www.smartdeveloperhub.org/vocabulary/v1/m1#endParam> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ms#vocab
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/ms#vocab> rdf:type <http://www.smartdeveloperhub.org/vocabulary/metrics#MetricVocabulary> ,
+                                                                   <http://www.smartdeveloperhub.org/vocabulary/platform#Vocabulary> ,
+                                                                   owl:NamedIndividual ;
+                                                          
+                                                          <http://www.smartdeveloperhub.org/vocabulary/platform#source> "http://www.smartdeveloperhub.org/vocabulary/v1/metrics.ttl"^^xsd:anyURI ;
+                                                          
+                                                          <http://purl.org/dc/terms/source> "http://www.smartdeveloperhub.org/vocabulary/v1/metrics.ttl"^^xsd:anyURI ;
+                                                          
+                                                          <http://www.smartdeveloperhub.org/vocabulary/platform#implements> <http://www.smartdeveloperhub.org/vocabulary/metrics#MetricDomain> .
+
+
+
+###  http://www.smartdeveloperhub.org/vocabulary/v1/ms/e1
+
+<http://www.smartdeveloperhub.org/vocabulary/v1/ms/e1> rdf:type <http://www.smartdeveloperhub.org/vocabulary/metrics#MetricEndpoint> ,
+                                                                <http://www.smartdeveloperhub.org/vocabulary/platform#Endpoint> ,
+                                                                owl:NamedIndividual ;
+                                                       
+                                                       <http://www.smartdeveloperhub.org/vocabulary/metrics#supports> :m1 ;
+                                                       
+                                                       <http://www.smartdeveloperhub.org/vocabulary/platform#providesOperation> :m1 .
+
+
+
+###  http://www.w3.org/2001/XMLSchema#dateTime
+
+xsd:dateTime rdf:type rdfs:Class ,
+                      owl:NamedIndividual .
+
+
+
+###  http://www.w3.org/2001/XMLSchema#unsignedLong
+
+xsd:unsignedLong rdf:type rdfs:Class ,
+                          owl:NamedIndividual .
+
+
+
+
+###  Generated by the OWL API (version 3.5.1) http://owlapi.sourceforge.net
+

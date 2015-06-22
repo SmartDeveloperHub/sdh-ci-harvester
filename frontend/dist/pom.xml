@@ -58,12 +58,24 @@
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
 
+	<properties>
+		<ldp4j.version>1.0.0-SNAPSHOT</ldp4j.version>
+		<frontend.http.port>80</frontend.http.port>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
 				<artifactId>ci-frontend-bom</artifactId>
 				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.ldp4j.framework</groupId>
+				<artifactId>ldp4j-server-bom</artifactId>
+				<version>${ldp4j.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -75,6 +87,84 @@
 			<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
 			<artifactId>ci-frontend-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.ldp4j.framework</groupId>
+			<artifactId>ldp4j-server-core</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>geronimo-servlet_3.0_spec</artifactId>
+					<groupId>org.apache.geronimo.specs</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jetty-security</artifactId>
+					<groupId>org.eclipse.jetty</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jetty-http</artifactId>
+					<groupId>org.eclipse.jetty</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jetty-server</artifactId>
+					<groupId>org.eclipse.jetty</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jetty-util</artifactId>
+					<groupId>org.eclipse.jetty</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jetty-io</artifactId>
+					<groupId>org.eclipse.jetty</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jetty-continuation</artifactId>
+					<groupId>org.eclipse.jetty</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
 	</dependencies>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>apache.snapshots</id>
+			<url>http://repository.apache.org/snapshots/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.3-SNAPSHOT</version>
+				<configuration>
+					<!-- http port -->
+					<port>${frontend.http.port}</port>
+					<!-- application path always starts with / -->
+					<path>/harvester</path>
+					<!-- optional path to a context file -->
+					<!--
+					<contextFile>${tomcatContextXml}</contextFile>
+					 -->
+					<!-- optional system propoerties you want to add -->
+					<systemProperties>
+						<appserver.base>${basedir}${file.separator}.container${file.separator}base</appserver.base>
+						<appserver.home>${basedir}${file.separator}.container${file.separator}home</appserver.home>
+						<java.io.tmpdir>${basedir}${file.separator}.container${file.separator}base${file.separator}tmp</java.io.tmpdir>
+					</systemProperties>
+					<!-- if you want to use test dependencies rather than only runtime -->
+					<useTestClasspath>false</useTestClasspath>
+					<!-- optional if you want to add some extra directories into the classloader -->
+					<additionalClasspathDirs>
+						<additionalClasspathDir></additionalClasspathDir>
+					</additionalClasspathDirs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 
 </project>
