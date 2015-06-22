@@ -32,6 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.net.URI;
 import java.util.List;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 
 public class Service {
@@ -90,6 +91,16 @@ public class Service {
 
 	public List<URI> builds() {
 		return this.builds;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("serviceId", this.serviceId).
+					add("builds",this.builds).
+					toString();
 	}
 
 	public static Service newInstance(URI service) {

@@ -84,8 +84,8 @@ public abstract class Build {
 		this.description = description;
 	}
 
-	public final void setCreatedOn(Date creationDate) {
-		this.createdOn = creationDate;
+	public final void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
 	}
 
 	protected void toString(ToStringHelper helper) {
@@ -176,7 +176,11 @@ public abstract class Build {
 		if(build==null) {
 			return null;
 		}
-		return build.makeClone();
+		Build clone = build.makeClone();
+		clone.setCodebase(build.codebase);
+		clone.setCreatedOn(build.createdOn);
+		clone.setDescription(build.description);
+		return clone;
 	}
 
 }
