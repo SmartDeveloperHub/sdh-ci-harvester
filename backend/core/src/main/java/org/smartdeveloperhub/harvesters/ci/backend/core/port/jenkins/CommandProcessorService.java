@@ -26,6 +26,10 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins;
 
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
@@ -43,8 +47,23 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionE
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 final class CommandProcessorService extends AbstractExecutionThreadService {
+
+	private final class CommandProcessor implements Runnable {
+
+		private final Command command;
+
+		private CommandProcessor(Command command) {
+			this.command=command;
+		}
+
+		@Override
+		public void run() {
+			processCommand(command);
+		}
+	}
 
 	private static final class Poison implements Command {
 
@@ -62,39 +81,68 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 
 	private final class CommandDispatchingVisitor implements CommandVisitor {
 
+		private boolean retry;
+
+		private CommandDispatchingVisitor() {
+			this.retry=true;
+		}
+
 		@Override
 		public void visitRegisterServiceCommand(RegisterServiceCommand command) {
 			service.registerService(command);
+			this.retry=false;
 		}
 
 		@Override
 		public void visitCreateBuildCommand(CreateBuildCommand command) {
-			service.createBuild(command);
+			if(service.getService(command.serviceId())!=null) {
+				service.createBuild(command);
+				this.retry=false;
+			}
 		}
 
 		@Override
 		public void visitUpdateBuildCommand(UpdateBuildCommand command) {
-			service.updateBuild(command);
+			if(service.getBuild(command.buildId())!=null) {
+				service.updateBuild(command);
+				this.retry=false;
+			}
 		}
 
 		@Override
 		public void visitDeleteBuildCommand(DeleteBuildCommand command) {
-			service.deleteBuild(command);
+			if(service.getBuild(command.buildId())!=null) {
+				service.deleteBuild(command);
+				this.retry=false;
+			}
 		}
 
 		@Override
 		public void visitCreateExecutionCommand(CreateExecutionCommand command) {
-			service.createExecution(command);
+			if(service.getBuild(command.buildId())!=null) {
+				service.createExecution(command);
+				this.retry=false;
+			}
 		}
 
 		@Override
 		public void visitFinishExecutionCommand(FinishExecutionCommand command) {
-			service.finishExecution(command);
+			if(service.getExecution(command.executionId())!=null) {
+				service.finishExecution(command);
+				this.retry=false;
+			}
 		}
 
 		@Override
 		public void visitDeleteExecutionCommand(DeleteExecutionCommand command) {
-			service.deleteExecution(command);
+			if(service.getExecution(command.executionId())!=null) {
+				service.deleteExecution(command);
+				this.retry=false;
+			}
+		}
+
+		private boolean mustRetry() {
+			return this.retry;
 		}
 
 	}
@@ -104,31 +152,51 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 	private final CommandProcessingMonitor monitor;
 	private final TransactionManager manager;
 	private final ContinuousIntegrationService service;
-	private final CommandDispatchingVisitor dispatcher;
 
 	private volatile boolean shuttingDown;
+
+	private ExecutorService executor;
 
 	CommandProcessorService(CommandProcessingMonitor monitor, TransactionManager manager, ContinuousIntegrationService service) {
 		this.monitor = monitor;
 		this.manager = manager;
 		this.service = service;
 		this.shuttingDown=false;
-		this.dispatcher=new CommandDispatchingVisitor();
 	}
 
 	@Override
 	protected void run() {
+		this.executor=createExecutor();
 		do {
 			processCommands();
 		} while(!this.shuttingDown);
+		this.executor.shutdownNow();
 		LOGGER.info("Command processing terminated.");
+	}
+
+	private ExecutorService createExecutor() {
+		return
+			Executors.
+				newCachedThreadPool(
+					new ThreadFactoryBuilder().
+						setNameFormat("CommandProcessor-worker-%d").
+						setUncaughtExceptionHandler(
+							new UncaughtExceptionHandler() {
+								@Override
+								public void uncaughtException(Thread t, Throwable e) {
+									LOGGER.error(String.format("Thread %s died",t.getName()),e);
+								}
+							}
+						).
+						build()
+				);
 	}
 
 	private void processCommands() {
 		Command command=null;
 		try {
 			while((command=this.monitor.take())!=Poison.SINGLETON) {
-				processCommand(command);
+				this.executor.execute(new CommandProcessor(command));
 			}
 		} catch (InterruptedException e) {
 			LOGGER.info("Interrupted while waiting for command",e);
@@ -147,14 +215,24 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 	private void processTransactionally(Transaction tx, Command command) throws TransactionException {
 		tx.begin();
 		try {
-			command.accept(this.dispatcher);
-			tx.commit();
-			LOGGER.trace("Processed command {}",command);
-		} catch(TransactionException e) {
-			throw e;
+			CommandDispatchingVisitor dispatcher = new CommandDispatchingVisitor();
+			command.accept(dispatcher);
+			if(dispatcher.mustRetry()) {
+				this.monitor.retryLater(command);
+			} else {
+				tx.commit();
+				LOGGER.trace("Processed command {}",command);
+			}
 		} catch(Exception e) {
 			LOGGER.error("Could not process command "+command,e);
-			tx.rollback();
+		} finally {
+			if(tx.isActive()) {
+				try {
+					tx.rollback();
+				} catch (Exception e) {
+					LOGGER.error("Could not rollback transaction",e);
+				}
+			}
 		}
 	}
 
