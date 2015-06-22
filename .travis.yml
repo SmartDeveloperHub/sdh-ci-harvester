@@ -1,9 +1,6 @@
 language: java
 jdk:
 - oraclejdk7
-before_install:
-- git fetch
-- git checkout ${TRAVIS_BRANCH}
 before_script:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in target/config/ci/secring.gpg.enc
   -out local.secring.gpg -d
