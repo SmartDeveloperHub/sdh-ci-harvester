@@ -32,12 +32,15 @@ import java.util.Random;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.Result;
 import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryBuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryExecutionRepository;
@@ -53,8 +56,16 @@ final class BackendController {
 		return new Date(date.getTime()+(random.nextLong() % 3600000));
 	}
 
-	private static URI executionId(Build defaultBuild, int executionIdi) {
-		return defaultBuild.buildId().resolve(executionIdi+"/");
+	private static URI buildId(Service service, String id) {
+		return service.serviceId().resolve("jobs/"+id+"/");
+	}
+
+	private static URI buildId(CompositeBuild build, String id) {
+		return build.buildId().resolve(id+"/");
+	}
+
+	private static URI executionId(Build build, int executionIdi) {
+		return build.buildId().resolve(executionIdi+"/");
 	}
 
 	private static Execution createExecution(ExecutionRepository repository, Build build, Execution execution, int executionIdi, Status status) {
@@ -74,6 +85,22 @@ final class BackendController {
 		return newExecution;
 	}
 
+	private static void createExecutions(ExecutionRepository repository, Build build) {
+		Execution failedExecution  = createExecution(repository,build,null,            1,Status.FAILED);
+		Execution warningExecution = createExecution(repository,build,failedExecution, 2,Status.WARNING);
+		Execution errorExecution   = createExecution(repository,build,warningExecution,3,Status.NOT_BUILT);
+		Execution passedExecution  = createExecution(repository,build,errorExecution,  4,Status.PASSED);
+		Execution abortedExecution = createExecution(repository,build,passedExecution, 5,Status.ABORTED);
+									 createExecution(repository,build,abortedExecution,6,null);
+	}
+
+	private static void createBuild(BuildRepository repository, Build build, Date createdOn, String description) {
+		build.setCreatedOn(after(createdOn));
+		build.setDescription(description);
+		build.setCodebase(build.buildId().resolve("repository.git"));
+		repository.add(build);
+	}
+
 	// TODO: Change to JPA persistency layer when ready
 	static ContinuousIntegrationService inititializeBackend(URI jenkinsInstance) {
 		ServiceRepository serviceRepository=new InMemoryServiceRepository();
@@ -85,18 +112,17 @@ final class BackendController {
 		Service defaultService = Service.newInstance(jenkinsInstance);
 		serviceRepository.add(defaultService);
 
-		Build simpleBuild=defaultService.addSimpleBuild(jenkinsInstance.resolve("jobs/example-job/"),"Example build");
-		simpleBuild.setCreatedOn(after(initTime));
-		simpleBuild.setDescription("An example build for testing");
-		simpleBuild.setCodebase(simpleBuild.buildId().resolve("repository.git"));
-		buildRepository.add(simpleBuild);
+		SimpleBuild simpleBuild=defaultService.addSimpleBuild(buildId(defaultService, "simple-job"),"Example simple build");
+		createBuild(buildRepository, simpleBuild, initTime, "An example simple build for testing");
+		createExecutions(executionRepository,simpleBuild);
 
-		Execution failedExecution  = createExecution(executionRepository,simpleBuild,null,            1,Status.FAILED);
-		Execution warningExecution = createExecution(executionRepository,simpleBuild,failedExecution, 2,Status.WARNING);
-		Execution errorExecution   = createExecution(executionRepository,simpleBuild,warningExecution,3,Status.NOT_BUILT);
-		Execution passedExecution  = createExecution(executionRepository,simpleBuild,errorExecution,  4,Status.PASSED);
-		Execution abortedExecution = createExecution(executionRepository,simpleBuild,passedExecution, 5,Status.ABORTED);
-		                             createExecution(executionRepository,simpleBuild,abortedExecution,6,null);
+		CompositeBuild compositeBuild=defaultService.addCompositeBuild(buildId(defaultService, "composite-job"),"Example composite build");
+		createBuild(buildRepository, compositeBuild, initTime, "An example composite build for testing");
+		createExecutions(executionRepository, compositeBuild);
+
+		SubBuild subBuild=compositeBuild.addSubBuild(buildId(compositeBuild, "sub-job"),"Example sub build");
+		createBuild(buildRepository, subBuild, initTime, "An example sub build for testing");
+		createExecutions(executionRepository, subBuild);
 
 		return
 			new ContinuousIntegrationService(

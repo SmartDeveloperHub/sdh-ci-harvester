@@ -161,4 +161,8 @@ public final class IdentityUtil {
 		return NamingScheme.getDefault().name(execution.buildId());
 	}
 
+	public static Name<?> parentBuildContainer(SubBuild build) {
+		return NamingScheme.getDefault().name(build.parentId());
+	}
+
 }

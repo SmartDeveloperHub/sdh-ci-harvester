@@ -35,8 +35,10 @@ import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.service.ServiceHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
@@ -49,6 +51,26 @@ final class BackendModelPublisher {
 
 	private BackendModelPublisher(WriteSession session) {
 		this.session = session;
+	}
+
+	private ContainerSnapshot findBuildContainer(Build build) {
+		ContainerSnapshot buildContainerSnapshot=null;
+		if(build instanceof SubBuild) {
+			buildContainerSnapshot=
+				this.session.
+					find(
+						ContainerSnapshot.class,
+						IdentityUtil.parentBuildContainer((SubBuild)build),
+						SubBuildContainerHandler.class);
+		} else {
+			buildContainerSnapshot=
+				this.session.
+					find(
+						ContainerSnapshot.class,
+						IdentityUtil.buildContainer(build),
+						BuildContainerHandler.class);
+		}
+		return buildContainerSnapshot;
 	}
 
 	void publish(Service service) {
@@ -68,16 +90,11 @@ final class BackendModelPublisher {
 	}
 
 	void publish(Build build) {
-		ContainerSnapshot buildContainerSnapshot=
-			this.session.
-				find(
-					ContainerSnapshot.class,
-					IdentityUtil.buildContainer(build),
-					BuildContainerHandler.class);
+		ContainerSnapshot buildContainerSnapshot=findBuildContainer(build);
 		ResourceSnapshot buildSnapshot=
 			buildContainerSnapshot.
 				addMember(IdentityUtil.name(build));
-		LOGGER.debug("Published resource for build {} ({})",build.buildId(),build);
+		LOGGER.debug("Published resource for build {} @ {} ({})",build.buildId(),buildContainerSnapshot.name(),buildContainerSnapshot.templateId());
 		buildSnapshot.
 			createAttachedResource(
 				ContainerSnapshot.class,
@@ -91,7 +108,7 @@ final class BackendModelPublisher {
 					ContainerSnapshot.class,
 					BuildHandler.BUILD_SUB_BUILDS,
 					IdentityUtil.name(build),
-					BuildContainerHandler.class);
+					SubBuildContainerHandler.class);
 			LOGGER.debug("Published sub-build container for composite build {}",build.buildId());
 		}
 	}
@@ -103,8 +120,7 @@ final class BackendModelPublisher {
 					ContainerSnapshot.class,
 					IdentityUtil.executionContainer(execution),
 					ExecutionContainerHandler.class);
-		executionContainerSnapshot.
-			addMember(IdentityUtil.name(execution));
+		executionContainerSnapshot.addMember(IdentityUtil.name(execution));
 		LOGGER.debug("Published resource for execution {} ({})",execution.executionId(),execution);
 	}
 

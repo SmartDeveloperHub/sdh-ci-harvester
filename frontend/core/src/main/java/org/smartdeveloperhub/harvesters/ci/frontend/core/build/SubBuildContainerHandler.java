@@ -26,62 +26,52 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.build;
 
-import java.net.URI;
-
 import org.ldp4j.application.data.DataSet;
-import org.ldp4j.application.ext.ResourceHandler;
+import org.ldp4j.application.data.DataSetFactory;
+import org.ldp4j.application.ext.ApplicationRuntimeException;
+import org.ldp4j.application.ext.ContainerHandler;
 import org.ldp4j.application.ext.UnknownResourceException;
-import org.ldp4j.application.ext.annotations.Attachment;
-import org.ldp4j.application.ext.annotations.Resource;
+import org.ldp4j.application.ext.UnsupportedContentException;
+import org.ldp4j.application.ext.annotations.DirectContainer;
+import org.ldp4j.application.session.ContainerSnapshot;
 import org.ldp4j.application.session.ResourceSnapshot;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.ldp4j.application.session.WriteSession;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
-import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
 
-@Resource(
-	id=BuildHandler.ID,
-	attachments={
-		@Attachment(
-			id=BuildHandler.BUILD_EXECUTIONS,
-			path="executions/",
-			handler=ExecutionContainerHandler.class
-		),
-		@Attachment(
-			id=BuildHandler.BUILD_SUB_BUILDS,
-			path="child/",
-			handler=SubBuildContainerHandler.class
-		)
-	}
+@DirectContainer(
+	id = SubBuildContainerHandler.ID,
+	memberHandler = BuildHandler.class,
+	membershipPredicate="http://www.smartdeveloperhub.org/vocabulary/ci#includesBuild"
 )
-public class BuildHandler extends Serviceable implements ResourceHandler {
+public class SubBuildContainerHandler extends Serviceable implements ContainerHandler {
 
-	public static final String ID="BuildHandler";
+	public static final String ID="SubBuildContainerHandler";
 
-	public static final String BUILD_EXECUTIONS="BuildExecutions";
-	public static final String BUILD_SUB_BUILDS="BuildSubBuilds";
-
-	public BuildHandler(ContinuousIntegrationService service) {
+	public SubBuildContainerHandler(ContinuousIntegrationService service) {
 		super(service);
 	}
 
-	private Build findBuild(URI id) throws UnknownResourceException {
-		Build build=
-			contactsService().getBuild(id);
-		if(build==null) {
-			super.unknownResource(id,"Build");
-		}
-		return build;
+	@Override
+	public DataSet get(ResourceSnapshot resource)
+			throws UnknownResourceException, ApplicationRuntimeException {
+		// For the time there is nothing to return
+		return
+			DataSetFactory.
+				createDataSet(resource.name());
 	}
 
 	@Override
-	public DataSet get(ResourceSnapshot resource) throws UnknownResourceException {
-		URI buildId = IdentityUtil.buildId(resource);
-		trace("Requested build %s retrieval",buildId);
-		Build build = findBuild(buildId);
-		info("Retrieved build %s: %s",buildId,build);
-		return BuildMapper.toDataSet(build);
+	public ResourceSnapshot create(
+			ContainerSnapshot container,
+			DataSet representation,
+			WriteSession session)
+					throws
+						UnknownResourceException,
+						UnsupportedContentException,
+						ApplicationRuntimeException {
+		trace("Requested sub build creation from: %n%s",representation);
+		throw super.unexpectedFailure("Sub build creation is not supported");
 	}
 
 }

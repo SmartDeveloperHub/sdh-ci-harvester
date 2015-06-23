@@ -32,17 +32,18 @@ import org.ldp4j.application.data.Name;
 import org.ldp4j.application.data.NamingScheme;
 import org.ldp4j.application.ext.Application;
 import org.ldp4j.application.session.WriteSession;
-import org.ldp4j.application.session.WriteSessionException;
 import org.ldp4j.application.setup.Bootstrap;
 import org.ldp4j.application.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.service.ServiceHandler;
@@ -74,6 +75,7 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 
 		bootstrap.addHandler(new ServiceHandler(this.backendService));
 		bootstrap.addHandler(new BuildContainerHandler(this.backendService));
+		bootstrap.addHandler(new SubBuildContainerHandler(this.backendService));
 		bootstrap.addHandler(new BuildHandler(this.backendService));
 		bootstrap.addHandler(new ExecutionContainerHandler(this.backendService));
 		bootstrap.addHandler(new ExecutionHandler(this.backendService));
@@ -95,19 +97,33 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 			Service service=this.backendService.getService(SERVICE_ID);
 			publisher.publish(service);
 			for(URI buildId:service.builds()) {
-				Build build = this.backendService.getBuild(buildId);
-				publisher.publish(build);
-				for(URI executionId:build.executions()) {
-					Execution execution = this.backendService.getExecution(executionId);
-					publisher.publish(execution);
+				Build build=publishBuild(publisher, buildId);
+				if(build instanceof CompositeBuild) {
+					publishSubBuilds(publisher, (CompositeBuild)build);
 				}
 			}
 			session.saveChanges();
 			LOGGER.info("CI Harvester Application initialization completed.");
-		} catch (WriteSessionException e) {
+		} catch (Exception e) {
 			LOGGER.warn("CI Harvester Application initialization failed.",e);
 			throw new IllegalStateException(e);
 		}
+	}
+
+	private void publishSubBuilds(BackendModelPublisher publisher, CompositeBuild compositeBuild) {
+		for(URI subBuildId:compositeBuild.subBuilds()) {
+			publishBuild(publisher,subBuildId);
+		}
+	}
+
+	private Build publishBuild(BackendModelPublisher publisher, URI buildId) {
+		Build build = this.backendService.getBuild(buildId);
+		publisher.publish(build);
+		for(URI executionId:build.executions()) {
+			Execution execution = this.backendService.getExecution(executionId);
+			publisher.publish(execution);
+		}
+		return build;
 	}
 
 	@Override
