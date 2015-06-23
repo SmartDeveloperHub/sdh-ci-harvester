@@ -180,6 +180,7 @@ public abstract class Build {
 		clone.setCodebase(build.codebase);
 		clone.setCreatedOn(build.createdOn);
 		clone.setDescription(build.description);
+		clone.setExecutions(Lists.newArrayList(build.executions));
 		return clone;
 	}
 
