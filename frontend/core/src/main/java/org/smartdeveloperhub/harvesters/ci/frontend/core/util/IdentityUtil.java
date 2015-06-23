@@ -153,4 +153,12 @@ public final class IdentityUtil {
 		return NamingScheme.getDefault().name(subBuild);
 	}
 
+	public static Name<URI> buildContainer(Build build) {
+		return NamingScheme.getDefault().name(build.serviceId());
+	}
+
+	public static Name<?> executionContainer(Execution execution) {
+		return NamingScheme.getDefault().name(execution.buildId());
+	}
+
 }

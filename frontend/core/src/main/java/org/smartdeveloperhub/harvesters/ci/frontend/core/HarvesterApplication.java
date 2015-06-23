@@ -32,8 +32,6 @@ import java.util.Date;
 import org.ldp4j.application.data.Name;
 import org.ldp4j.application.data.NamingScheme;
 import org.ldp4j.application.ext.Application;
-import org.ldp4j.application.session.ContainerSnapshot;
-import org.ldp4j.application.session.ResourceSnapshot;
 import org.ldp4j.application.session.WriteSession;
 import org.ldp4j.application.session.WriteSessionException;
 import org.ldp4j.application.setup.Bootstrap;
@@ -67,39 +65,38 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	private static final String SERVICE_PATH= "service/";
 
 	private final Name<URI> serviceName;
-	private final Name<URI> buildName;
-	private final Name<URI> executionName;
 
-	private final Name<URI> buildContainerName;
-	private final Name<URI> executionContainerName;
+	private ContinuousIntegrationService backendService;
 
 	public HarvesterApplication() {
 		this.serviceName=
 			NamingScheme.
 				getDefault().
 					name(SERVICE_ID);
-		this.buildName=
-			NamingScheme.
-				getDefault().
-					name(BUILD_ID);
-		this.executionName=
-				NamingScheme.
-					getDefault().
-						name(EXECUTION_ID);
-		this.buildContainerName=
-				NamingScheme.
-					getDefault().
-						name(SERVICE_ID);
-		this.executionContainerName=
-				NamingScheme.
-					getDefault().
-						name(BUILD_ID);
 	}
 
 	@Override
 	public void setup(Environment environment, Bootstrap<HarvesterConfiguration> bootstrap) {
 		LOGGER.info("Starting CI Harvester Application configuration...");
 
+		this.backendService=inititializeBackend();
+
+		bootstrap.addHandler(new ServiceHandler(backendService));
+		bootstrap.addHandler(new BuildContainerHandler(backendService));
+		bootstrap.addHandler(new BuildHandler(backendService));
+		bootstrap.addHandler(new ExecutionContainerHandler(backendService));
+		bootstrap.addHandler(new ExecutionHandler(backendService));
+
+		environment.
+			publishResource(
+				this.serviceName,
+				ServiceHandler.class,
+				SERVICE_PATH);
+
+		LOGGER.info("Contacts CI Harvester Application configuration completed.");
+	}
+
+	private ContinuousIntegrationService inititializeBackend() {
 		// TODO: Change to JPS persistency layer when ready
 		ServiceRepository serviceRepository=new InMemoryServiceRepository();
 		BuildRepository buildRepository=new InMemoryBuildRepository();
@@ -120,40 +117,28 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 		buildRepository.add(defaultBuild);
 		executionRepository.add(defaultExecution);
 
-		LOGGER.debug("Default service  : {}",defaultService);
-		LOGGER.debug("Default build    : {}",defaultBuild);
-		LOGGER.debug("Default execution: {}",defaultExecution);
-
-		ContinuousIntegrationService service =
+		return
 			new ContinuousIntegrationService(
 				serviceRepository,
 				buildRepository,
 				executionRepository);
-
-		bootstrap.addHandler(new ServiceHandler(service));
-		bootstrap.addHandler(new BuildContainerHandler(service));
-		bootstrap.addHandler(new BuildHandler(service));
-		bootstrap.addHandler(new ExecutionContainerHandler(service));
-		bootstrap.addHandler(new ExecutionHandler(service));
-
-		environment.
-			publishResource(
-				this.serviceName,
-				ServiceHandler.class,
-				SERVICE_PATH);
-
-		LOGGER.info("Contacts CI Harvester Application configuration completed.");
 	}
 
 	@Override
 	public void initialize(WriteSession session) {
 		LOGGER.info("Initializing CI Harvester Application...");
 		try {
-			ResourceSnapshot serviceSnapshot = session.find(ResourceSnapshot.class, this.serviceName, ServiceHandler.class);
-			ContainerSnapshot buildContainerSnapshot=serviceSnapshot.createAttachedResource(ContainerSnapshot.class, ServiceHandler.SERVICE_BUILDS,this.buildContainerName,BuildContainerHandler.class);
-			ResourceSnapshot buildSnapshot = buildContainerSnapshot.addMember(buildName);
-			ContainerSnapshot executionContainerSnapshot=buildSnapshot.createAttachedResource(ContainerSnapshot.class, BuildHandler.BUILD_EXECUTIONS,this.executionContainerName,ExecutionContainerHandler.class);
-			executionContainerSnapshot.addMember(executionName);
+			BackendModelPublisher publisher=BackendModelPublisher.newInstance(session);
+			Service service=this.backendService.getService(SERVICE_ID);
+			publisher.publish(service);
+			for(URI buildId:service.builds()) {
+				Build build = this.backendService.getBuild(buildId);
+				publisher.publish(build);
+				for(URI executionId:build.executions()) {
+					Execution execution = this.backendService.getExecution(executionId);
+					publisher.publish(execution);
+				}
+			}
 			session.saveChanges();
 			LOGGER.info("CI Harvester Application initialization completed.");
 		} catch (WriteSessionException e) {
