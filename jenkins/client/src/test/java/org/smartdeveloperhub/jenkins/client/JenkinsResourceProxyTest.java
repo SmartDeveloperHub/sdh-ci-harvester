@@ -26,10 +26,10 @@
  */
 package org.smartdeveloperhub.jenkins.client;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.junit.Test;
-
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
@@ -44,8 +44,14 @@ public class JenkinsResourceProxyTest {
 				create(URI.create(location)).
 					withUseHttps(true).
 					withEntity(JenkinsEntityType.INSTANCE);
-		JenkinsResource representation = sut.get(JenkinsArtifactType.RESOURCE);
-		System.out.println(representation);
+		try {
+			JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			System.out.println("Resource from '"+location+"':");
+			System.out.println(representation);
+		} catch (IOException e) {
+			System.err.println("Could not retrieve service: "+e.getMessage());
+			e.printStackTrace(System.err);
+		}
 	}
 
 }
