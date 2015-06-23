@@ -74,6 +74,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 				break;
 			case NOT_BUILT:
 				status=Status.NOT_BUILT;
+				break;
 			default:
 				status=Status.UNAVAILABLE;
 				break;
