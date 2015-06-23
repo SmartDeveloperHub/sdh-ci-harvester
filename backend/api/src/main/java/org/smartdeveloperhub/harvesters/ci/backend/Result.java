@@ -40,7 +40,8 @@ public final class Result {
 		FAILED,
 		WARNING,
 		ABORTED,
-		UNAVAILABLE
+		UNAVAILABLE,
+		NOT_BUILT
 	}
 
 	private Result.Status status;

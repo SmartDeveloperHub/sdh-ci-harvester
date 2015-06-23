@@ -45,7 +45,7 @@ public final class Execution {
 	private Result result;
 
 	private Execution(Execution execution) {
-		this(execution.buildId(),execution.buildId(),execution.createdOn());
+		this(execution.buildId(),execution.executionId(),execution.createdOn());
 		this.result=execution.result;
 	}
 
