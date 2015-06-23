@@ -33,7 +33,10 @@ import org.ldp4j.application.data.Name;
 import org.ldp4j.application.data.NamingScheme;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -112,12 +115,14 @@ public final class IdentityUtil {
 		return (URI)buildId;
 	}
 
-	public static Name<URI> name(Service service) {
-		return NamingScheme.getDefault().name(service.serviceId());
+	public static URI executionId(ResourceSnapshot resource) {
+		Serializable executionId=resource.name().id();
+		checkState(executionId instanceof URI,"Execution identifier should be a URI not a %s",executionId.getClass().getCanonicalName());
+		return (URI)executionId;
 	}
 
-	public static Name<String> name(Service service, String vocabulary) {
-		return NamingScheme.getDefault().name(service.serviceId().toString(),vocabulary);
+	public static Name<URI> name(Service service) {
+		return NamingScheme.getDefault().name(service.serviceId());
 	}
 
 	public static Name<URI> name(Service service, URI buildId) {
@@ -130,6 +135,22 @@ public final class IdentityUtil {
 
 	public static Name<URI> name(Build build, URI executionId) {
 		return NamingScheme.getDefault().name(executionId);
+	}
+
+	public static Name<URI> name(Execution execution) {
+		return NamingScheme.getDefault().name(execution.executionId());
+	}
+
+	public static Name<URI> buildName(Execution execution) {
+		return NamingScheme.getDefault().name(execution.buildId());
+	}
+
+	public static Name<URI> parentBuild(SubBuild subBuild) {
+		return NamingScheme.getDefault().name(subBuild.parentId());
+	}
+
+	public static Name<?> subBuild(CompositeBuild compositeBuild, URI subBuild) {
+		return NamingScheme.getDefault().name(subBuild);
 	}
 
 }

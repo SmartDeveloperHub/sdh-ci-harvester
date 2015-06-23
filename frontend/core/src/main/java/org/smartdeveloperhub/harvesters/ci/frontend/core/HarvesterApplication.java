@@ -52,6 +52,8 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persisten
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.service.ServiceHandler;
 
 public final class HarvesterApplication extends Application<HarvesterConfiguration> {
@@ -66,10 +68,10 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 
 	private final Name<URI> serviceName;
 	private final Name<URI> buildName;
-	@SuppressWarnings("unused")
 	private final Name<URI> executionName;
 
 	private final Name<URI> buildContainerName;
+	private final Name<URI> executionContainerName;
 
 	public HarvesterApplication() {
 		this.serviceName=
@@ -88,7 +90,10 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 				NamingScheme.
 					getDefault().
 						name(SERVICE_ID);
-
+		this.executionContainerName=
+				NamingScheme.
+					getDefault().
+						name(BUILD_ID);
 	}
 
 	@Override
@@ -115,6 +120,10 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 		buildRepository.add(defaultBuild);
 		executionRepository.add(defaultExecution);
 
+		LOGGER.debug("Default service  : {}",defaultService);
+		LOGGER.debug("Default build    : {}",defaultBuild);
+		LOGGER.debug("Default execution: {}",defaultExecution);
+
 		ContinuousIntegrationService service =
 			new ContinuousIntegrationService(
 				serviceRepository,
@@ -124,9 +133,8 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 		bootstrap.addHandler(new ServiceHandler(service));
 		bootstrap.addHandler(new BuildContainerHandler(service));
 		bootstrap.addHandler(new BuildHandler(service));
-//		bootstrap.addHandler(new ExecutionContainerHandler(service));
-//		bootstrap.addHandler(new ExecutionHandler(service));
-//		bootstrap.addHandler(new ResultHandler(service));
+		bootstrap.addHandler(new ExecutionContainerHandler(service));
+		bootstrap.addHandler(new ExecutionHandler(service));
 
 		environment.
 			publishResource(
@@ -141,9 +149,11 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	public void initialize(WriteSession session) {
 		LOGGER.info("Initializing CI Harvester Application...");
 		try {
-			ResourceSnapshot ss = session.find(ResourceSnapshot.class, this.serviceName, ServiceHandler.class);
-			ContainerSnapshot bcs=ss.createAttachedResource(ContainerSnapshot.class, ServiceHandler.SERVICE_BUILDS, this.buildContainerName, BuildContainerHandler.class);
-			bcs.addMember(buildName);
+			ResourceSnapshot serviceSnapshot = session.find(ResourceSnapshot.class, this.serviceName, ServiceHandler.class);
+			ContainerSnapshot buildContainerSnapshot=serviceSnapshot.createAttachedResource(ContainerSnapshot.class, ServiceHandler.SERVICE_BUILDS,this.buildContainerName,BuildContainerHandler.class);
+			ResourceSnapshot buildSnapshot = buildContainerSnapshot.addMember(buildName);
+			ContainerSnapshot executionContainerSnapshot=buildSnapshot.createAttachedResource(ContainerSnapshot.class, BuildHandler.BUILD_EXECUTIONS,this.executionContainerName,ExecutionContainerHandler.class);
+			executionContainerSnapshot.addMember(executionName);
 			session.saveChanges();
 			LOGGER.info("CI Harvester Application initialization completed.");
 		} catch (WriteSessionException e) {

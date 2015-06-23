@@ -31,21 +31,36 @@ import java.net.URI;
 import org.ldp4j.application.data.DataSet;
 import org.ldp4j.application.ext.ResourceHandler;
 import org.ldp4j.application.ext.UnknownResourceException;
+import org.ldp4j.application.ext.annotations.Attachment;
 import org.ldp4j.application.ext.annotations.Resource;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
 
 @Resource(
-	id=BuildHandler.ID
+	id=BuildHandler.ID,
+	attachments={
+		@Attachment(
+			id=BuildHandler.BUILD_EXECUTIONS,
+			path="executions/",
+			handler=ExecutionContainerHandler.class
+		),
+		@Attachment(
+			id=BuildHandler.BUILD_SUB_BUILDS,
+			path="child/",
+			handler=BuildContainerHandler.class
+		)
+	}
 )
 public class BuildHandler extends Serviceable implements ResourceHandler {
 
-	public static final String ID="ContactHandler";
+	public static final String ID="BuildHandler";
 
-	public static final String SERVICE_BUILDS="ServiceBuilds";
+	public static final String BUILD_EXECUTIONS="BuildExecutions";
+	public static final String BUILD_SUB_BUILDS="BuildSubBuilds";
 
 	public BuildHandler(ContinuousIntegrationService service) {
 		super(service);
@@ -64,9 +79,9 @@ public class BuildHandler extends Serviceable implements ResourceHandler {
 	public DataSet get(ResourceSnapshot resource) throws UnknownResourceException {
 		URI buildId = IdentityUtil.buildId(resource);
 		trace("Requested build %s retrieval",buildId);
-		Build contact = findBuild(buildId);
-		info("Retrieved build %s: %s",buildId,contact);
-		return BuildMapper.toDataSet(contact);
+		Build build = findBuild(buildId);
+		info("Retrieved build %s: %s",buildId,build);
+		return BuildMapper.toDataSet(build);
 	}
 
 }

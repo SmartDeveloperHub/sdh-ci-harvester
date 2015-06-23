@@ -35,6 +35,8 @@ import org.ldp4j.application.data.DataSetUtils;
 import org.ldp4j.application.data.IndividualPropertyHelper;
 import org.ldp4j.application.data.Name;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Mapper;
 
@@ -50,7 +52,7 @@ final class BuildMapper implements BuildVocabulary {
 
 		DataSetHelper helper=DataSetUtils.newHelper(dataSet);
 
-		IndividualPropertyHelper buildHelper =
+		IndividualPropertyHelper buildHeper =
 			helper.
 				managedIndividual(buildName, BuildHandler.ID).
 					property(TYPE).
@@ -69,15 +71,31 @@ final class BuildMapper implements BuildVocabulary {
 					property(CI_LOCATION).
 						withLiteral(build.location());
 
-		for(URI buildId:build.executions()) {
-			Name<URI> executionName=IdentityUtil.name(build,buildId);
-			buildHelper.
-				property(CI_HAS_EXECUTION).
-					withIndividual(executionName);
-			// TODO: Update to ManagedIndividuals when ready
+		if(build instanceof SubBuild) {
+			addSubBuildDescription(buildHeper, (SubBuild)build);
+		} else if(build instanceof CompositeBuild) {
+			addCompositeBuildDescription(buildHeper, (CompositeBuild)build);
 		}
-
 		return dataSet;
+	}
+
+	private static void addCompositeBuildDescription(IndividualPropertyHelper buildHeper, CompositeBuild compositeBuild) {
+		buildHeper.
+			property(TYPE).
+				withIndividual(CI_COMPOSITE_BUILD_TYPE);
+		for(URI subBuild:compositeBuild.subBuilds()) {
+			buildHeper.
+				property(CI_INCLUDES_BUILD).
+					withIndividual(IdentityUtil.subBuild(compositeBuild,subBuild),BuildHandler.ID);
+		}
+	}
+
+	private static void addSubBuildDescription(IndividualPropertyHelper buildHeper, SubBuild subBuild) {
+		buildHeper.
+			property(TYPE).
+				withIndividual(CI_SUB_BUILD_TYPE).
+			property(CI_IS_PART_OF).
+				withIndividual(IdentityUtil.parentBuild(subBuild),BuildHandler.ID);
 	}
 
 }

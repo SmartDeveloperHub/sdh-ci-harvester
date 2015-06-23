@@ -35,16 +35,18 @@ import org.ldp4j.application.data.DataSetUtils;
 import org.ldp4j.application.data.IndividualPropertyHelper;
 import org.ldp4j.application.data.Name;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 
 final class ServiceMapper implements ServiceVocabulary {
+
+	private static final URI VOCABULARY_PATH = URI.create("#vocabulary");
 
 	private ServiceMapper() {
 	}
 
 	static DataSet toDataSet(Service service) {
 		Name<URI> serviceName=IdentityUtil.name(service);
-		Name<String> vocabularyName=IdentityUtil.name(service,"vocabulary");
 
 		DataSet dataSet=DataSetFactory.createDataSet(serviceName);
 
@@ -66,18 +68,17 @@ final class ServiceMapper implements ServiceVocabulary {
 					property(PROVIDES_DOMAIN).
 						withIndividual(CI_DOMAIN_TYPE).
 					property(VOCABULARY).
-						withIndividual(vocabularyName);
+						withIndividual(serviceName,ServiceHandler.ID,VOCABULARY_PATH);
 
 		for(URI buildId:service.builds()) {
 			Name<URI> buildName=IdentityUtil.name(service,buildId);
 			serviceHelper.
 				property(HAS_RESOURCE).
-					withIndividual(buildName);
-			// TODO: Update to ManagedIndividuals when ready
+					withIndividual(buildName,BuildHandler.ID);
 		}
 
 		helper.
-			localIndividual(vocabularyName).
+			relativeIndividual(serviceName,ServiceHandler.ID,VOCABULARY_PATH).
 				property(TYPE).
 					withIndividual(CI_VOCABULARY_TYPE).
 					withIndividual(VOCABULARY_TYPE).

@@ -38,9 +38,13 @@ interface BuildVocabulary {
 	static final String DC_TERMS_IDENTIFIER  = "http://purl.org/dc/terms/identifier";
 	static final String DC_TERMS_DESCRIPTION = "http://purl.org/dc/terms/description";
 
-	static final String CI_BUILD_TYPE    = "http://www.smartdeveloperhub.org/vocabulary/ci#Build";
-	static final String CI_LOCATION      = "http://www.smartdeveloperhub.org/vocabulary/ci#location";
-	static final String CI_CODEBASE      = "http://www.smartdeveloperhub.org/vocabulary/ci#codebase";
-	static final String CI_HAS_EXECUTION = "http://www.smartdeveloperhub.org/vocabulary/ci#hasResource";
+	static final String CI_BUILD_TYPE           = "http://www.smartdeveloperhub.org/vocabulary/ci#Build";
+	static final String CI_COMPOSITE_BUILD_TYPE = "http://www.smartdeveloperhub.org/vocabulary/ci#CompositeBuild";
+	static final String CI_SUB_BUILD_TYPE       = "http://www.smartdeveloperhub.org/vocabulary/ci#SubBuild";
+	static final String CI_LOCATION             = "http://www.smartdeveloperhub.org/vocabulary/ci#location";
+	static final String CI_CODEBASE             = "http://www.smartdeveloperhub.org/vocabulary/ci#codebase";
+	static final String CI_HAS_EXECUTION        = "http://www.smartdeveloperhub.org/vocabulary/ci#hasResource";
+	static final String CI_INCLUDES_BUILD       = "http://www.smartdeveloperhub.org/vocabulary/ci#includesBuild";
+	static final String CI_IS_PART_OF           = "http://www.smartdeveloperhub.org/vocabulary/ci#isPartOf";
 
 }

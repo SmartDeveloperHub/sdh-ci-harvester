@@ -24,58 +24,47 @@
  *   Bundle      : ci-frontend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.core.service;
+package org.smartdeveloperhub.harvesters.ci.frontend.core.execution;
 
 import java.net.URI;
 
 import org.ldp4j.application.data.DataSet;
 import org.ldp4j.application.ext.ResourceHandler;
 import org.ldp4j.application.ext.UnknownResourceException;
-import org.ldp4j.application.ext.annotations.Attachment;
 import org.ldp4j.application.ext.annotations.Resource;
 import org.ldp4j.application.session.ResourceSnapshot;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
 
 @Resource(
-	id=ServiceHandler.ID,
-	attachments={
-		@Attachment(
-			id=ServiceHandler.SERVICE_BUILDS,
-			path="builds/",
-			handler=BuildContainerHandler.class
-		)
-	}
+	id=ExecutionHandler.ID
 )
-public class ServiceHandler extends Serviceable implements ResourceHandler {
+public class ExecutionHandler extends Serviceable implements ResourceHandler {
 
-	public static final String ID="ServiceHandler";
+	public static final String ID="ExecutionHandler";
 
-	public static final String SERVICE_BUILDS="ServiceBuilds";
-
-	public ServiceHandler(ContinuousIntegrationService service) {
+	public ExecutionHandler(ContinuousIntegrationService service) {
 		super(service);
 	}
 
-	private Service findService(URI id) throws UnknownResourceException {
-		Service service=
-			contactsService().getService(id);
-		if(service==null) {
-			super.unknownResource(id,"Service");
+	private Execution findExecution(URI id) throws UnknownResourceException {
+		Execution execution=
+			contactsService().getExecution(id);
+		if(execution==null) {
+			super.unknownResource(id,"Execution");
 		}
-		return service;
+		return execution;
 	}
 
 	@Override
 	public DataSet get(ResourceSnapshot resource) throws UnknownResourceException {
-		URI serviceId = IdentityUtil.serviceId(resource);
-		trace("Requested service %s retrieval",serviceId);
-		Service service = findService(serviceId);
-		info("Retrieved service %s: %s",serviceId,service);
-		return ServiceMapper.toDataSet(service);
+		URI executionId = IdentityUtil.executionId(resource);
+		trace("Requested execution %s retrieval",executionId);
+		Execution execution = findExecution(executionId);
+		info("Retrieved execution %s: %s",executionId,execution);
+		return ExecutionMapper.toDataSet(execution);
 	}
 
 }

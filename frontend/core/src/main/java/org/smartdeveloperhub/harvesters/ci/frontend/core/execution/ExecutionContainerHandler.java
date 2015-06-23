@@ -24,58 +24,54 @@
  *   Bundle      : ci-frontend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.core.service;
-
-import java.net.URI;
+package org.smartdeveloperhub.harvesters.ci.frontend.core.execution;
 
 import org.ldp4j.application.data.DataSet;
-import org.ldp4j.application.ext.ResourceHandler;
+import org.ldp4j.application.data.DataSetFactory;
+import org.ldp4j.application.ext.ApplicationRuntimeException;
+import org.ldp4j.application.ext.ContainerHandler;
 import org.ldp4j.application.ext.UnknownResourceException;
-import org.ldp4j.application.ext.annotations.Attachment;
-import org.ldp4j.application.ext.annotations.Resource;
+import org.ldp4j.application.ext.UnsupportedContentException;
+import org.ldp4j.application.ext.annotations.DirectContainer;
+import org.ldp4j.application.session.ContainerSnapshot;
 import org.ldp4j.application.session.ResourceSnapshot;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.ldp4j.application.session.WriteSession;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
-import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
 
-@Resource(
-	id=ServiceHandler.ID,
-	attachments={
-		@Attachment(
-			id=ServiceHandler.SERVICE_BUILDS,
-			path="builds/",
-			handler=BuildContainerHandler.class
-		)
-	}
+@DirectContainer(
+	id = ExecutionContainerHandler.ID,
+	memberHandler = ExecutionHandler.class,
+	membershipPredicate="http://www.smartdeveloperhub.org/vocabulary/ci#hasExecution"
 )
-public class ServiceHandler extends Serviceable implements ResourceHandler {
+public class ExecutionContainerHandler extends Serviceable implements ContainerHandler {
 
-	public static final String ID="ServiceHandler";
+	public static final String ID="ExecutionContainerHandler";
 
-	public static final String SERVICE_BUILDS="ServiceBuilds";
-
-	public ServiceHandler(ContinuousIntegrationService service) {
+	public ExecutionContainerHandler(ContinuousIntegrationService service) {
 		super(service);
 	}
 
-	private Service findService(URI id) throws UnknownResourceException {
-		Service service=
-			contactsService().getService(id);
-		if(service==null) {
-			super.unknownResource(id,"Service");
-		}
-		return service;
+	@Override
+	public DataSet get(ResourceSnapshot resource)
+			throws UnknownResourceException, ApplicationRuntimeException {
+		// For the time there is nothing to return
+		return
+			DataSetFactory.
+				createDataSet(resource.name());
 	}
 
 	@Override
-	public DataSet get(ResourceSnapshot resource) throws UnknownResourceException {
-		URI serviceId = IdentityUtil.serviceId(resource);
-		trace("Requested service %s retrieval",serviceId);
-		Service service = findService(serviceId);
-		info("Retrieved service %s: %s",serviceId,service);
-		return ServiceMapper.toDataSet(service);
+	public ResourceSnapshot create(
+			ContainerSnapshot container,
+			DataSet representation,
+			WriteSession session)
+					throws
+						UnknownResourceException,
+						UnsupportedContentException,
+						ApplicationRuntimeException {
+		trace("Requested execution creation from: %n%s",representation);
+		throw super.unexpectedFailure("Execution creation is not supported");
 	}
 
 }
