@@ -28,18 +28,14 @@ package org.smartdeveloperhub.harvesters.ci.frontend.core;
 
 import java.net.URI;
 
-import org.ldp4j.application.data.Name;
 import org.ldp4j.application.data.NamingScheme;
 import org.ldp4j.application.ext.Application;
+import org.ldp4j.application.ext.ApplicationInitializationException;
 import org.ldp4j.application.session.WriteSession;
 import org.ldp4j.application.setup.Bootstrap;
 import org.ldp4j.application.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
@@ -52,26 +48,19 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(HarvesterApplication.class);
 
-	private static final URI SERVICE_ID= URI.create("http://ci.travis-ci.org/");
+	private static final URI SERVICE_ID=URI.create("http://ci.travis-ci.org/");
 
-	private static final String SERVICE_PATH= "service/";
-
-	private final Name<URI> serviceName;
+	private static final String SERVICE_PATH="service/";
 
 	private ContinuousIntegrationService backendService;
-
-	public HarvesterApplication() {
-		this.serviceName=
-			NamingScheme.
-				getDefault().
-					name(HarvesterApplication.SERVICE_ID);
-	}
 
 	@Override
 	public void setup(Environment environment, Bootstrap<HarvesterConfiguration> bootstrap) {
 		LOGGER.info("Starting CI Harvester Application configuration...");
 
-		this.backendService=BackendController.inititializeBackend(HarvesterApplication.SERVICE_ID);
+		this.backendService=
+			BackendController.
+				inititializeBackend(HarvesterApplication.SERVICE_ID);
 
 		bootstrap.addHandler(new ServiceHandler(this.backendService));
 		bootstrap.addHandler(new BuildContainerHandler(this.backendService));
@@ -82,7 +71,9 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 
 		environment.
 			publishResource(
-				this.serviceName,
+				NamingScheme.
+					getDefault().
+						name(HarvesterApplication.SERVICE_ID),
 				ServiceHandler.class,
 				SERVICE_PATH);
 
@@ -90,40 +81,23 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	}
 
 	@Override
-	public void initialize(WriteSession session) {
+	public void initialize(WriteSession session) throws ApplicationInitializationException {
 		LOGGER.info("Initializing CI Harvester Application...");
 		try {
-			BackendModelPublisher publisher=BackendModelPublisher.newInstance(session);
-			Service service=this.backendService.getService(SERVICE_ID);
-			publisher.publish(service);
-			for(URI buildId:service.builds()) {
-				Build build=publishBuild(publisher, buildId);
-				if(build instanceof CompositeBuild) {
-					publishSubBuilds(publisher, (CompositeBuild)build);
-				}
-			}
+			BackendModelPublisher publisher=
+				BackendModelPublisher.
+					builder().
+						withBackendService(this.backendService).
+						withMainService(SERVICE_ID).
+						build();
+			publisher.publish(session);
 			session.saveChanges();
 			LOGGER.info("CI Harvester Application initialization completed.");
 		} catch (Exception e) {
-			LOGGER.warn("CI Harvester Application initialization failed.",e);
-			throw new IllegalStateException(e);
+			String errorMessage = "CI Harvester Application initialization failed";
+			LOGGER.warn(errorMessage+". Full stacktrace follows: ",e);
+			throw new ApplicationInitializationException(e);
 		}
-	}
-
-	private void publishSubBuilds(BackendModelPublisher publisher, CompositeBuild compositeBuild) {
-		for(URI subBuildId:compositeBuild.subBuilds()) {
-			publishBuild(publisher,subBuildId);
-		}
-	}
-
-	private Build publishBuild(BackendModelPublisher publisher, URI buildId) {
-		Build build = this.backendService.getBuild(buildId);
-		publisher.publish(build);
-		for(URI executionId:build.executions()) {
-			Execution execution = this.backendService.getExecution(executionId);
-			publisher.publish(execution);
-		}
-		return build;
 	}
 
 	@Override

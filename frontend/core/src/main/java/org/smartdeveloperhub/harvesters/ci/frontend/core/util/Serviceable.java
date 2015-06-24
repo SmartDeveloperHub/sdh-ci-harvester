@@ -44,7 +44,7 @@ public abstract class Serviceable {
 		this.logger=LoggerFactory.getLogger(getClass());
 	}
 
-	protected final ContinuousIntegrationService contactsService() {
+	protected final ContinuousIntegrationService continuousIntegrationService() {
 		return this.service;
 	}
 

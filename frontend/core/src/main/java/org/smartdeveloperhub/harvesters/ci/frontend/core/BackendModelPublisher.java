@@ -26,6 +26,8 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
 
+import java.net.URI;
+
 import org.ldp4j.application.session.ContainerSnapshot;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.ldp4j.application.session.WriteSession;
@@ -36,6 +38,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainerHandler;
@@ -47,24 +50,47 @@ final class BackendModelPublisher {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendModelPublisher.class);
 
-	private final WriteSession session;
+	static final class Builder {
 
-	private BackendModelPublisher(WriteSession session) {
-		this.session = session;
+		private ContinuousIntegrationService service;
+		private URI serviceId;
+
+		Builder withBackendService(ContinuousIntegrationService service) {
+			this.service = service;
+			return this;
+		}
+
+		Builder withMainService(URI serviceId) {
+			this.serviceId = serviceId;
+			return this;
+		}
+
+		BackendModelPublisher build() {
+			return new BackendModelPublisher(this.service,this.serviceId);
+		}
 	}
 
-	private ContainerSnapshot findBuildContainer(Build build) {
+	private final ContinuousIntegrationService service;
+
+	private final URI serviceId;
+
+	private BackendModelPublisher(ContinuousIntegrationService service, URI serviceId) {
+		this.service = service;
+		this.serviceId = serviceId;
+	}
+
+	private ContainerSnapshot findBuildContainer(WriteSession session, Build build) {
 		ContainerSnapshot buildContainerSnapshot=null;
 		if(build instanceof SubBuild) {
 			buildContainerSnapshot=
-				this.session.
+				session.
 					find(
 						ContainerSnapshot.class,
 						IdentityUtil.parentBuildContainer((SubBuild)build),
 						SubBuildContainerHandler.class);
 		} else {
 			buildContainerSnapshot=
-				this.session.
+				session.
 					find(
 						ContainerSnapshot.class,
 						IdentityUtil.buildContainer(build),
@@ -73,9 +99,9 @@ final class BackendModelPublisher {
 		return buildContainerSnapshot;
 	}
 
-	void publish(Service service) {
+	private void publish(WriteSession session, Service service) {
 		ResourceSnapshot serviceSnapshot=
-			this.session.
+			session.
 				find(
 					ResourceSnapshot.class,
 					IdentityUtil.name(service),
@@ -89,8 +115,8 @@ final class BackendModelPublisher {
 		LOGGER.debug("Published build container for service {}",service.serviceId());
 	}
 
-	void publish(Build build) {
-		ContainerSnapshot buildContainerSnapshot=findBuildContainer(build);
+	private void publish(WriteSession session, Build build) {
+		ContainerSnapshot buildContainerSnapshot=findBuildContainer(session,build);
 		ResourceSnapshot buildSnapshot=
 			buildContainerSnapshot.
 				addMember(IdentityUtil.name(build));
@@ -113,9 +139,9 @@ final class BackendModelPublisher {
 		}
 	}
 
-	void publish(Execution execution) {
+	private void publish(WriteSession session, Execution execution) {
 		ContainerSnapshot executionContainerSnapshot=
-			this.session.
+			session.
 				find(
 					ContainerSnapshot.class,
 					IdentityUtil.executionContainer(execution),
@@ -124,8 +150,36 @@ final class BackendModelPublisher {
 		LOGGER.debug("Published resource for execution {} ({})",execution.executionId(),execution);
 	}
 
-	static BackendModelPublisher newInstance(WriteSession session) {
-		return new BackendModelPublisher(session);
+	private void publishSubBuilds(WriteSession session, CompositeBuild compositeBuild) {
+		for(URI subBuildId:compositeBuild.subBuilds()) {
+			publishBuild(session,subBuildId);
+		}
+	}
+
+	private Build publishBuild(WriteSession session, URI buildId) {
+		Build build = this.service.getBuild(buildId);
+		publish(session,build);
+		for(URI executionId:build.executions()) {
+			Execution execution = this.service.getExecution(executionId);
+			publish(session,execution);
+		}
+		return build;
+	}
+
+	void publish(WriteSession session) {
+		Service service=this.service.getService(this.serviceId);
+		publish(session,service);
+		for(URI buildId:service.builds()) {
+			Build build=publishBuild(session, buildId);
+			if(build instanceof CompositeBuild) {
+				publishSubBuilds(session, (CompositeBuild)build);
+			}
+		}
+
+	}
+
+	static Builder builder() {
+		return new Builder();
 	}
 
 }

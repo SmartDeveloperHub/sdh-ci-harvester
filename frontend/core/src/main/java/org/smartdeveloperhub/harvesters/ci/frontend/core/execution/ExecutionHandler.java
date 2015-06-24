@@ -51,7 +51,7 @@ public class ExecutionHandler extends Serviceable implements ResourceHandler {
 
 	private Execution findExecution(URI id) throws UnknownResourceException {
 		Execution execution=
-			contactsService().getExecution(id);
+			continuousIntegrationService().getExecution(id);
 		if(execution==null) {
 			super.unknownResource(id,"Execution");
 		}

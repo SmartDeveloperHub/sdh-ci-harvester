@@ -62,7 +62,7 @@ public class ServiceHandler extends Serviceable implements ResourceHandler {
 
 	private Service findService(URI id) throws UnknownResourceException {
 		Service service=
-			contactsService().getService(id);
+			continuousIntegrationService().getService(id);
 		if(service==null) {
 			super.unknownResource(id,"Service");
 		}
