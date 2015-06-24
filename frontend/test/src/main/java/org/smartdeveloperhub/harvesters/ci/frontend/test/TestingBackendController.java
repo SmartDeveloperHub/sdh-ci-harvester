@@ -20,16 +20,18 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-frontend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:1.0.0-SNAPSHOT
+ *   Bundle      : ci-frontend-test-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.core;
+package org.smartdeveloperhub.harvesters.ci.frontend.test;
 
 import java.net.URI;
 import java.util.Date;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
@@ -45,11 +47,13 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationSer
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryBuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
-final class BackendController {
+final class TestingBackendController implements BackendController {
 
-	private BackendController() {
-	}
+	private final static Logger LOGGER=LoggerFactory.getLogger(TestingBackendController.class);
+
+	private final URI jenkinsInstance;
 
 	private static Date after(Date date) {
 		Random random=new Random(System.nanoTime());
@@ -101,8 +105,7 @@ final class BackendController {
 		repository.add(build);
 	}
 
-	// TODO: Change to JPA persistency layer when ready
-	static ContinuousIntegrationService inititializeBackend(URI jenkinsInstance) {
+	private static ContinuousIntegrationService inititializeBackend(URI jenkinsInstance) {
 		ServiceRepository serviceRepository=new InMemoryServiceRepository();
 		BuildRepository buildRepository=new InMemoryBuildRepository();
 		ExecutionRepository executionRepository=new InMemoryExecutionRepository();
@@ -129,6 +132,29 @@ final class BackendController {
 				serviceRepository,
 				buildRepository,
 				executionRepository);
+	}
+
+	TestingBackendController(URI jenkinsInstance) {
+		this.jenkinsInstance = jenkinsInstance;
+		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
+		LOGGER.info("Connected.",this.jenkinsInstance);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public ContinuousIntegrationService continuousIntegrationService() {
+		return inititializeBackend(jenkinsInstance);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void disconnect() {
+		LOGGER.info("Disconnecting from {}...",this.jenkinsInstance);
+		LOGGER.info("Disconnected.",this.jenkinsInstance);
 	}
 
 }

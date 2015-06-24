@@ -43,6 +43,7 @@ import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainer
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.service.ServiceHandler;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 public final class HarvesterApplication extends Application<HarvesterConfiguration> {
 
@@ -54,13 +55,15 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 
 	private ContinuousIntegrationService backendService;
 
+	private BackendController controller;
+
 	@Override
 	public void setup(Environment environment, Bootstrap<HarvesterConfiguration> bootstrap) {
 		LOGGER.info("Starting CI Harvester Application configuration...");
 
-		this.backendService=
-			BackendController.
-				inititializeBackend(HarvesterApplication.SERVICE_ID);
+		this.controller=BackendControllerManager.connect(SERVICE_ID);
+
+		this.backendService=this.controller.continuousIntegrationService();
 
 		bootstrap.addHandler(new ServiceHandler(this.backendService));
 		bootstrap.addHandler(new BuildContainerHandler(this.backendService));
@@ -103,6 +106,7 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	@Override
 	public void shutdown() {
 		LOGGER.info("Starting CI Harvester Application shutdown...");
+		this.controller.disconnect();
 		LOGGER.info("CI Harvester Application shutdown completed.");
 	}
 

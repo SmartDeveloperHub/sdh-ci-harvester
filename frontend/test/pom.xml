@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-bom:1.0.0-SNAPSHOT
-      Bundle      : ci-frontend-bom-1.0.0-SNAPSHOT.pom
+      Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:1.0.0-SNAPSHOT
+      Bundle      : ci-frontend-test-1.0.0-SNAPSHOT.jar
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -43,16 +43,15 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>ci-frontend-bom</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>ci-frontend-test</artifactId>
 
 	<!-- =================================================================== -->
 	<!--   MODULE INFORMATION                                                -->
 	<!-- =================================================================== -->
 
-	<name>SDH :: CIH :: Frontend :: Bill-of-Materials</name>
+	<name>SDH :: CIH :: Frontend :: Test</name>
 
-	<description>Bill of Materials of the Frontend of the Continuous Integration Harvester of the Smart Developer Hub project</description>
+	<description>The Business Logic of the Frontend of the Continuous Integration Harvester of the Smart Developer Hub project</description>
 
 	<!-- =================================================================== -->
 	<!--   BUILD SETTINGS                                                    -->
@@ -62,26 +61,32 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
-				<artifactId>ci-frontend-spi</artifactId>
+				<artifactId>ci-frontend-bom</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
-				<artifactId>ci-frontend-core</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
-				<artifactId>ci-frontend-test</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
-				<artifactId>ci-frontend-dist</artifactId>
-				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
+			<artifactId>ci-frontend-spi</artifactId>
+		</dependency>
+
+		<!-- Default unit testing frameworks-->
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-integration</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 
 </project>

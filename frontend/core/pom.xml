@@ -71,6 +71,13 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
+				<artifactId>ci-frontend-bom</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.ldp4j.framework</groupId>
 				<artifactId>ldp4j-application-bom</artifactId>
 				<version>${ldp4j.version}</version>
@@ -81,6 +88,10 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
+			<artifactId>ci-frontend-spi</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 			<artifactId>ci-backend-depchain</artifactId>

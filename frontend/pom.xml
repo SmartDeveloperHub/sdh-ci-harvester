@@ -61,7 +61,9 @@
 
 	<modules>
 		<module>bom</module>
+		<module>spi</module>
 		<module>core</module>
+		<module>test</module>
 		<module>dist</module>
 	</modules>
 
