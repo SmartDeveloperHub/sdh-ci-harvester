@@ -267,8 +267,7 @@ public class AbstractBootstrapTest {
 			bs.terminate();
 			fail("Should not terminate");
 		} catch (ApplicationShutdownException e) {
-			Set<String> failedServices = e.failedServices();
-			assertThat(failedServices,hasSize(0));
+			verifyShutdownFailure(e, "failedServiceShutdown");
 		}
 	}
 

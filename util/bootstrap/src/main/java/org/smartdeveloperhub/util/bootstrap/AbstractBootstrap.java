@@ -178,10 +178,10 @@ public abstract class AbstractBootstrap<T> {
 		return shutdownFailure;
 	}
 
-	private boolean verifyTermination(boolean fail, BootstrapException shutdownFailure, BootstrapException serviceFailure) throws BootstrapException {
-		BootstrapException failure=shutdownFailure;
+	private boolean verifyTermination(boolean fail, BootstrapException serviceFailure, BootstrapException shutdownFailure) throws BootstrapException {
+		BootstrapException failure=serviceFailure;
 		if(failure==null) {
-			failure=serviceFailure;
+			failure=shutdownFailure;
 		}
 		if(failure!=null) {
 			this.logger.warn("{} terminated abruptly.",this.bootstrapId);
@@ -245,10 +245,10 @@ public abstract class AbstractBootstrap<T> {
 
 	private void doTerminate(boolean fail) throws BootstrapException {
 		this.logger.info("Terminating {}...",this.bootstrapId);
-		BootstrapException shutdownFailure = shutdownBootstrap();
 		BootstrapException serviceFailure = shutdownServices();
+		BootstrapException shutdownFailure = shutdownBootstrap();
 		this.serviceManager=null;
-		if(verifyTermination(fail,shutdownFailure, serviceFailure)) {
+		if(verifyTermination(fail,serviceFailure,shutdownFailure)) {
 			this.logger.info("{} terminated succesfully.",this.bootstrapId);
 		}
 	}
