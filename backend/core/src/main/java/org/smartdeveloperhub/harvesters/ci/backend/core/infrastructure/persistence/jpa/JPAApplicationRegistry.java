@@ -38,6 +38,19 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionM
 
 public final class JPAApplicationRegistry implements ApplicationRegistry {
 
+	private final class JPAEntityManagerProvider implements EntityManagerProvider {
+
+		@Override
+		public EntityManager entityManager() {
+			return getManager();
+		}
+
+		@Override
+		public void close() {
+			disposeManager();
+		}
+	}
+
 	private final ThreadLocal<EntityManager> manager;
 	private final EntityManagerFactory emf;
 
@@ -55,20 +68,21 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 		return entityManager;
 	}
 
+	private void disposeManager() {
+		EntityManager entityManager = this.manager.get();
+		if(entityManager!=null) {
+			entityManager.close();
+			this.manager.remove();
+		}
+	}
+
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public ExecutionRepository getExecutionRepository() {
-		return
-			new JPAExecutionRepository(
-				new EntityManagerProvider(){
-					@Override
-					public EntityManager entityManager() {
-						return getManager();
-					}
-				}
-			);
+		return new JPAExecutionRepository(new JPAEntityManagerProvider());
 	}
 
 	/**
@@ -76,15 +90,7 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public BuildRepository getBuildRepository() {
-		return
-			new JPABuildRepository(
-				new EntityManagerProvider(){
-					@Override
-					public EntityManager entityManager() {
-						return getManager();
-					}
-				}
-			);
+		return new JPABuildRepository(new JPAEntityManagerProvider());
 	}
 
 	/**
@@ -92,15 +98,7 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public ServiceRepository getServiceRepository() {
-		return
-			new JPAServiceRepository(
-				new EntityManagerProvider(){
-					@Override
-					public EntityManager entityManager() {
-						return getManager();
-					}
-				}
-			);
+		return new JPAServiceRepository(new JPAEntityManagerProvider());
 	}
 
 	/**
@@ -108,14 +106,7 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public LifecycleDescriptorRepository getLifecycleDescriptorRepository() {
-		return new JPALifecycleDescriptorRepository(
-			new EntityManagerProvider(){
-				@Override
-				public EntityManager entityManager() {
-					return getManager();
-				}
-			}
-		);
+		return new JPALifecycleDescriptorRepository(new JPAEntityManagerProvider());
 	}
 
 	/**
@@ -123,14 +114,7 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public TransactionManager getTransactionManager() {
-		return new JPATransactionManager(
-			new EntityManagerProvider(){
-				@Override
-				public EntityManager entityManager() {
-					return getManager();
-				}
-			}
-		);
+		return new JPATransactionManager(new JPAEntityManagerProvider());
 	}
 
 	public void disposeManagers() {

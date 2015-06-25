@@ -27,8 +27,7 @@
 package org.smartdeveloperhub.harvesters.ci.backend.core;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,10 +48,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins.JenkinsIntegrationService;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
@@ -186,6 +188,23 @@ public class BackendCoreITest {
 		assertThat(String.format("{%s} Build and job owner should match",buildId),build.serviceId(),equalTo(job.getInstance()));
 		assertThat(String.format("{%s} Build and job title should match",buildId),build.title(),equalTo(job.getTitle()));
 		assertThat(String.format("{%s} Build and job description should match",buildId),build.description(),equalTo(job.getDescription()));
+		Class<?> clazz=null;
+		switch(job.getType()) {
+			case FREE_STYLE_PROJECT:
+				clazz=SimpleBuild.class;
+				break;
+			case MATRIX_CONFIGURATION:
+			case MAVEN_MODULE:
+				clazz=SubBuild.class;
+				break;
+			case MATRIX_PROJECT:
+			case MAVEN_MODULE_SET:
+				clazz=CompositeBuild.class;
+				break;
+			default:
+				break;
+		}
+		assertThat(String.format("{%s} Build does not match job type",buildId),build,instanceOf(clazz));
 	}
 
 }

@@ -68,11 +68,11 @@ public final class ListenerManager<T> {
 			} catch (Exception e) {
 				if(LOGGER.isWarnEnabled()) {
 					LOGGER.warn(
-						"Propagation of notification {} to listener {} ({}) failed ({})",
+						"Propagation of notification {} to listener {} ({}) failed",
 						notification,
 						Integer.toHexString(listener.hashCode()).toUpperCase(),
 						listener.getClass().getName(),
-						e.getMessage());
+						e);
 					LOGGER.debug("Notification failure stacktrace follows",e);
 				}
 			}

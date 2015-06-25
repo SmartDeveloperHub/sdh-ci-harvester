@@ -140,29 +140,28 @@ public class JPAApplicationRegistryTest {
 		try {
 			outBuild = buildRepository.buildOfId(buildId,SimpleBuild.class);
 			outExecution = executionRepository.executionOfId(executionId);
+			assertThat(outBuild,notNullValue());
+			assertThat(outBuild,not(sameInstance(inBuild)));
+			assertThat(outBuild.buildId(),equalTo(inBuild.buildId()));
+			assertThat(outBuild.serviceId(),equalTo(inBuild.serviceId()));
+			assertThat(outBuild.codebase(),equalTo(inBuild.codebase()));
+			assertThat(outBuild.location(),equalTo(inBuild.location()));
+			assertThat(outBuild.executions(),hasItems(inBuild.executions().toArray(new URI[0])));
+
+			assertThat(outExecution,notNullValue());
+			assertThat(outExecution,not(sameInstance(inExecution)));
+			assertThat(outExecution,equalTo(inExecution));
+			assertThat(outExecution.executionId(),equalTo(inExecution.executionId()));
+			assertThat(outExecution.buildId(),equalTo(inExecution.buildId()));
+			assertThat(outExecution.createdOn(),equalTo(inExecution.createdOn()));
+			assertThat(outExecution.result(),not(sameInstance(inResult)));
+			assertThat(outExecution.result(),equalTo(inResult));
 			tx3.commit();
 		} catch(Exception e) {
 			tx3.rollback();
 			e.printStackTrace();
 			throw e;
 		}
-
-		assertThat(outBuild,notNullValue());
-		assertThat(outBuild,not(sameInstance(inBuild)));
-		assertThat(outBuild.buildId(),equalTo(inBuild.buildId()));
-		assertThat(outBuild.serviceId(),equalTo(inBuild.serviceId()));
-		assertThat(outBuild.codebase(),equalTo(inBuild.codebase()));
-		assertThat(outBuild.location(),equalTo(inBuild.location()));
-		assertThat(outBuild.executions(),hasItems(inBuild.executions().toArray(new URI[0])));
-
-		assertThat(outExecution,notNullValue());
-		assertThat(outExecution,not(sameInstance(inExecution)));
-		assertThat(outExecution,equalTo(inExecution));
-		assertThat(outExecution.executionId(),equalTo(inExecution.executionId()));
-		assertThat(outExecution.buildId(),equalTo(inExecution.buildId()));
-		assertThat(outExecution.createdOn(),equalTo(inExecution.createdOn()));
-		assertThat(outExecution.result(),not(sameInstance(inResult)));
-		assertThat(outExecution.result(),equalTo(inResult));
 
 		LOGGER.debug("Completed Simple Build management");
 	}
@@ -222,31 +221,30 @@ public class JPAApplicationRegistryTest {
 		try {
 			outBuild = buildRepository.buildOfId(buildId,CompositeBuild.class);
 			outExecution = executionRepository.executionOfId(executionId);
+			assertThat(outBuild,notNullValue());
+			assertThat(outBuild,not(sameInstance(inBuild)));
+			assertThat(outBuild,equalTo(inBuild));
+			assertThat(outBuild.buildId(),equalTo(inBuild.buildId()));
+			assertThat(outBuild.serviceId(),equalTo(inBuild.serviceId()));
+			assertThat(outBuild.codebase(),equalTo(inBuild.codebase()));
+			assertThat(outBuild.location(),equalTo(inBuild.location()));
+			assertThat(outBuild.executions(),hasItems(inBuild.executions().toArray(new URI[0])));
+			assertThat(outBuild.subBuilds(),hasItems(inBuild.subBuilds().toArray(new URI[0])));
+
+			assertThat(outExecution,notNullValue());
+			assertThat(outExecution,not(sameInstance(inExecution)));
+			assertThat(outExecution,equalTo(inExecution));
+			assertThat(outExecution.executionId(),equalTo(inExecution.executionId()));
+			assertThat(outExecution.buildId(),equalTo(inExecution.buildId()));
+			assertThat(outExecution.createdOn(),equalTo(inExecution.createdOn()));
+			assertThat(outExecution.result(),not(sameInstance(inResult)));
+			assertThat(outExecution.result(),equalTo(inResult));
 			tx3.commit();
 		} catch(Exception e) {
 			tx3.rollback();
 			e.printStackTrace();
 			throw e;
 		}
-
-		assertThat(outBuild,notNullValue());
-		assertThat(outBuild,not(sameInstance(inBuild)));
-		assertThat(outBuild,equalTo(inBuild));
-		assertThat(outBuild.buildId(),equalTo(inBuild.buildId()));
-		assertThat(outBuild.serviceId(),equalTo(inBuild.serviceId()));
-		assertThat(outBuild.codebase(),equalTo(inBuild.codebase()));
-		assertThat(outBuild.location(),equalTo(inBuild.location()));
-		assertThat(outBuild.executions(),hasItems(inBuild.executions().toArray(new URI[0])));
-		assertThat(outBuild.subBuilds(),hasItems(inBuild.subBuilds().toArray(new URI[0])));
-
-		assertThat(outExecution,notNullValue());
-		assertThat(outExecution,not(sameInstance(inExecution)));
-		assertThat(outExecution,equalTo(inExecution));
-		assertThat(outExecution.executionId(),equalTo(inExecution.executionId()));
-		assertThat(outExecution.buildId(),equalTo(inExecution.buildId()));
-		assertThat(outExecution.createdOn(),equalTo(inExecution.createdOn()));
-		assertThat(outExecution.result(),not(sameInstance(inResult)));
-		assertThat(outExecution.result(),equalTo(inResult));
 
 		LOGGER.debug("Completed Composite Build management");
 	}
@@ -309,31 +307,32 @@ public class JPAApplicationRegistryTest {
 		try {
 			outBuild = buildRepository.buildOfId(subBuildId,SubBuild.class);
 			outExecution = executionRepository.executionOfId(executionId);
+
+			assertThat(outBuild,notNullValue());
+			assertThat(outBuild,not(sameInstance(inBuild)));
+			assertThat(outBuild,equalTo(inBuild));
+			assertThat(outBuild.buildId(),equalTo(inBuild.buildId()));
+			assertThat(outBuild.serviceId(),equalTo(inBuild.serviceId()));
+			assertThat(outBuild.codebase(),equalTo(inBuild.codebase()));
+			assertThat(outBuild.location(),equalTo(inBuild.location()));
+			assertThat(outBuild.executions(),hasItems(inBuild.executions().toArray(new URI[0])));
+			assertThat(outBuild.parentId(),equalTo(inBuild.parentId()));
+
+			assertThat(outExecution,notNullValue());
+			assertThat(outExecution,not(sameInstance(inExecution)));
+			assertThat(outExecution,equalTo(inExecution));
+			assertThat(outExecution.executionId(),equalTo(inExecution.executionId()));
+			assertThat(outExecution.buildId(),equalTo(inExecution.buildId()));
+			assertThat(outExecution.createdOn(),equalTo(inExecution.createdOn()));
+			assertThat(outExecution.result(),not(sameInstance(inResult)));
+			assertThat(outExecution.result(),equalTo(inResult));
+
 			tx3.commit();
 		} catch(Exception e) {
 			tx3.rollback();
 			e.printStackTrace();
 			throw e;
 		}
-
-		assertThat(outBuild,notNullValue());
-		assertThat(outBuild,not(sameInstance(inBuild)));
-		assertThat(outBuild,equalTo(inBuild));
-		assertThat(outBuild.buildId(),equalTo(inBuild.buildId()));
-		assertThat(outBuild.serviceId(),equalTo(inBuild.serviceId()));
-		assertThat(outBuild.codebase(),equalTo(inBuild.codebase()));
-		assertThat(outBuild.location(),equalTo(inBuild.location()));
-		assertThat(outBuild.executions(),hasItems(inBuild.executions().toArray(new URI[0])));
-		assertThat(outBuild.parentId(),equalTo(inBuild.parentId()));
-
-		assertThat(outExecution,notNullValue());
-		assertThat(outExecution,not(sameInstance(inExecution)));
-		assertThat(outExecution,equalTo(inExecution));
-		assertThat(outExecution.executionId(),equalTo(inExecution.executionId()));
-		assertThat(outExecution.buildId(),equalTo(inExecution.buildId()));
-		assertThat(outExecution.createdOn(),equalTo(inExecution.createdOn()));
-		assertThat(outExecution.result(),not(sameInstance(inResult)));
-		assertThat(outExecution.result(),equalTo(inResult));
 
 		LOGGER.debug("Completed Sub Build management");
 	}

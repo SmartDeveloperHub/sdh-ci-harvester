@@ -32,4 +32,6 @@ interface EntityManagerProvider {
 
 	EntityManager entityManager();
 
+	void close();
+
 }

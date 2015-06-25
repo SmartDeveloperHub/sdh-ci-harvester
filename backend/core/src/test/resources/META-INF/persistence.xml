@@ -107,6 +107,10 @@
 			<!-- Disable the second-level cache -->
 			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.internal.NoCacheProvider"/>
 
+<!--
+			<property name="hibernate.connection.isolation" value="8"/>
+ -->
+
 			<!-- Echo all executed SQL to stdout -->
 			<property name="hibernate.show_sql" value="false"/>
 			<!-- Pretty print echoed SQL -->

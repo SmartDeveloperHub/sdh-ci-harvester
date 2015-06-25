@@ -180,8 +180,15 @@ public class ContinuousIntegrationService {
 		Build build=null;
 		if(aCommand.simple()) {
 			build=service.addSimpleBuild(buildId,aCommand.title());
-		} else {
+		} else if(aCommand.composite()) {
 			build=service.addCompositeBuild(buildId,aCommand.title());
+		} else {
+			URI parentId = aCommand.subBuildOf();
+			checkArgument(service.builds().contains(parentId),"Unknown parent build '%s'",parentId);
+			Build parent = buildRepository().buildOfId(parentId);
+			checkArgument(parent instanceof CompositeBuild,"Parent build '%s' is not composite",parentId);
+			CompositeBuild cb=(CompositeBuild)parent;
+			build=cb.addSubBuild(buildId, aCommand.title());
 		}
 		build.setCodebase(aCommand.codebase());
 		build.setDescription(aCommand.description());

@@ -30,12 +30,20 @@ import java.net.URI;
 import java.util.Date;
 
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.SubJob;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
 
 public final class JobCreatedEvent extends JenkinsEvent {
 
+	public enum Type {
+		SIMPLE,
+		COMPOSITE,
+		SUB_JOB
+	}
+
 	private Job job;
+	private Type type;
 
 	private JobCreatedEvent(URI instanceId, Date date) {
 		super(instanceId,date);
@@ -46,7 +54,7 @@ public final class JobCreatedEvent extends JenkinsEvent {
 		return this;
 	}
 
-	Job build() {
+	Job job() {
 		return this.job;
 	}
 
@@ -73,13 +81,48 @@ public final class JobCreatedEvent extends JenkinsEvent {
 		return job.getCodebase();
 	}
 
+	public Type type() {
+		if(this.type==null) {
+			switch(this.job.getType()) {
+				case FREE_STYLE_PROJECT:
+					this.type=Type.SIMPLE;
+					break;
+				case MATRIX_CONFIGURATION:
+					this.type=Type.SUB_JOB;
+					break;
+				case MATRIX_PROJECT:
+					this.type=Type.COMPOSITE;
+					break;
+				case MAVEN_MODULE:
+					this.type=Type.SUB_JOB;
+					break;
+				case MAVEN_MODULE_SET:
+					this.type=Type.COMPOSITE;
+					break;
+				default:
+					throw new AssertionError("Unknown job type '"+this.job.getType());
+			}
+		}
+		return this.type;
+	}
+
+	public URI parent() {
+		URI result=null;
+		if(this.job instanceof SubJob) {
+			result=((SubJob)this.job).getParent();
+		}
+		return result;
+	}
+
 	@Override
 	protected void toString(ToStringHelper helper) {
 		helper.
-			add("jobId", jobId()).
-			add("title", title()).
-			add("description", description()).
-			add("codebase", codebase());
+			add("jobId",jobId()).
+			add("title",title()).
+			add("description",description()).
+			add("codebase", codebase()).
+			add("type",type()).
+			add("parent",parent());
 	}
 
 	static JobCreatedEvent create(URI instanceId) {

@@ -144,7 +144,7 @@ final class CommandProcessingMonitor extends AbstractExecutionThreadService {
 	private void traceDismissedCommands() {
 		if(LOGGER.isInfoEnabled()) {
 			for(Command command:this.commandQueue) {
-				LOGGER.info("- Dimissed {}",command);
+				LOGGER.info("- Dismissed {}",command);
 			}
 		}
 	}

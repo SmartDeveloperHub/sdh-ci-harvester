@@ -99,16 +99,28 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onJobCreation(JobCreatedEvent event) {
 		logEvent(event);
-		this.monitor.offer(
+		CreateBuildCommand.Builder builder=
 			CreateBuildCommand.
 				builder().
-					withServiceId(event.instanceId()).
-					withBuildId(event.jobId()).
-					withTitle(event.title()).
-					withDescription(event.description()).
-					withCodebase(event.codebase()).
-					build()
-		);
+				withServiceId(event.instanceId()).
+				withBuildId(event.jobId()).
+				withTitle(event.title()).
+				withDescription(event.description()).
+				withCodebase(event.codebase());
+		switch(event.type()) {
+			case SIMPLE:
+				builder.simple();
+				break;
+			case COMPOSITE:
+				builder.composite();
+				break;
+			case SUB_JOB:
+				builder.subBuildOf(event.parent());
+				break;
+			default:
+				break;
+		}
+		this.monitor.offer(builder.build());
 	}
 
 	@Override

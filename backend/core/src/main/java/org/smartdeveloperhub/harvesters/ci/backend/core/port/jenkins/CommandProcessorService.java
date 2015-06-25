@@ -27,6 +27,7 @@
 package org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -95,7 +96,11 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 
 		@Override
 		public void visitCreateBuildCommand(CreateBuildCommand command) {
-			if(service.getService(command.serviceId())!=null) {
+			URI parentId = command.subBuildOf();
+			if(parentId!=null && service.getBuild(parentId)!=null) {
+				service.createBuild(command);
+				this.retry=false;
+			} else if(service.getService(command.serviceId())!=null) {
 				service.createBuild(command);
 				this.retry=false;
 			}

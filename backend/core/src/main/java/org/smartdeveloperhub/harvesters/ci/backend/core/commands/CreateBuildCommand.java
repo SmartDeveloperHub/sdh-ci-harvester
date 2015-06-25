@@ -39,6 +39,7 @@ public final class CreateBuildCommand extends BuildCommand {
 
 		private URI serviceId;
 		private boolean simple;
+		private URI parent;
 
 		private Builder() {
 			super(Builder.class);
@@ -52,10 +53,18 @@ public final class CreateBuildCommand extends BuildCommand {
 
 		public Builder simple() {
 			this.simple=true;
+			this.parent=null;
 			return this;
 		}
 
 		public Builder composite() {
+			this.simple=false;
+			this.parent=null;
+			return this;
+		}
+
+		public Builder subBuildOf(URI parent) {
+			this.parent=parent;
 			this.simple=false;
 			return this;
 		}
@@ -67,6 +76,7 @@ public final class CreateBuildCommand extends BuildCommand {
 					checkNotNull(this.serviceId,"Service identifier cannot be null"),
 					checkNotNull(super.buildId(),"Build identifier cannot be null"),
 					this.simple,
+					this.parent,
 					checkNotNull(super.title(),"Title cannot be null"),
 					super.description(),
 					super.createdOn(),
@@ -78,11 +88,13 @@ public final class CreateBuildCommand extends BuildCommand {
 
 	private final URI serviceId;
 	private final boolean simple;
+	private final URI parent;
 
-	private CreateBuildCommand(URI serviceId, URI buildId, boolean simple, String title, String description, Date creationDate, URI codebase) {
+	private CreateBuildCommand(URI serviceId, URI buildId, boolean simple, URI parent, String title, String description, Date creationDate, URI codebase) {
 		super(buildId,title,description,creationDate,codebase);
 		this.serviceId = serviceId;
 		this.simple = simple;
+		this.parent = parent;
 	}
 
 	@Override
@@ -97,14 +109,23 @@ public final class CreateBuildCommand extends BuildCommand {
 	}
 
 	public boolean simple() {
-		return this.simple;
+		return this.parent==null && this.simple;
+	}
+
+	public boolean composite() {
+		return this.parent==null && !this.simple;
+	}
+
+	public URI subBuildOf() {
+		return this.parent;
 	}
 
 	@Override
 	protected void toString(ToStringHelper helper) {
 		helper.
 			add("serviceId", this.serviceId).
-			add("simple", this.simple);
+			add("simple", simple()).
+			add("parent", this.parent);
 	}
 
 	public static Builder builder() {

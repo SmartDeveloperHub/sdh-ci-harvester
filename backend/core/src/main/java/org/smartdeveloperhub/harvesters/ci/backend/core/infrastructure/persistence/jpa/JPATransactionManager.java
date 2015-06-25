@@ -58,6 +58,7 @@ final class JPATransactionManager implements TransactionManager {
 		public void commit() throws TransactionException {
 			try {
 				nativeTransaction().commit();
+				provider.close();
 			} catch (Exception e) {
 				throw new TransactionException("Commit failed",e);
 			}
@@ -69,6 +70,8 @@ final class JPATransactionManager implements TransactionManager {
 				nativeTransaction().rollback();
 			} catch (Exception e) {
 				throw new TransactionException("Rollback failed",e);
+			} finally {
+				provider.close();
 			}
 		}
 
