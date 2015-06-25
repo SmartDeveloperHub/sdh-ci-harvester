@@ -26,20 +26,27 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.cli;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.cli.hsqldb.Utils;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
 import org.smartdeveloperhub.util.bootstrap.AbstractBootstrap;
 import org.smartdeveloperhub.util.console.Consoles;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
 import com.google.common.util.concurrent.Service;
 
 public class BackendDump extends AbstractBootstrap<BackendConfig> {
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(BackendDump.class);
 
 	static final String NAME = "BackendDump";;
 
@@ -57,36 +64,54 @@ public class BackendDump extends AbstractBootstrap<BackendConfig> {
 
 	@Override
 	protected void shutdown() {
-		Consoles.defaultConsole().printf("Shutting down dumper...%n");
+		LOGGER.info("Shutting down application...");
 		try {
 			this.factory.close();
 		} catch (Exception e) {
-			Consoles.defaultConsole().printf("Failed to shutdown the dumper. Full stacktrace follows%n");
-			e.printStackTrace(Consoles.defaultConsole().writer());
+			LOGGER.warn("Failed to shutdown the application. Full stacktrace follows",e);
 		}
 	}
 
 	@Override
 	protected Iterable<Service> getServices(BackendConfig config) {
-		String fqDatabaseFile = config.getWorkingDirectory()+config.getDatabase();
+		this.factory = Persistence.createEntityManagerFactory("dumper",configure(config));
+		JPAApplicationRegistry applicationRegistry = new JPAApplicationRegistry(factory);
+		return Collections.<Service>singleton(new BackendDumpService(applicationRegistry));
+	}
+
+	private ImmutableMap<String, String> configure(BackendConfig config) {
+		String specifiedDatabaseFile = config.targetDatabase();
+		Consoles.
+			defaultConsole().
+				printf("Dumping data stored in '%s'%n",specifiedDatabaseFile);
+		String usedDatabaseFile=specifiedDatabaseFile;
+		if(config.pack()) {
+			usedDatabaseFile=unpack(specifiedDatabaseFile);
+		}
 		String connectionURL=
 			Utils.
 				urlBuilder().
 					mustExist().
-					persistent(fqDatabaseFile).
+					persistent(usedDatabaseFile).
 					build();
-		Consoles.
-			defaultConsole().
-				printf("Dumping data stored in '%s'%n",fqDatabaseFile).
-				printf("Connecting to DB: %s%n",connectionURL);
-		ImmutableMap<String, String> properties =
+		LOGGER.debug("Connecting to DB: {}%n",connectionURL);
+		return
 			ImmutableMap.
 				<String,String>builder().
 					put(JPAProperties.JDBC_URL, connectionURL).
 					build();
-		this.factory = Persistence.createEntityManagerFactory("dumper",properties);
-		JPAApplicationRegistry applicationRegistry = new JPAApplicationRegistry(factory);
-		return Collections.<Service>singleton(new BackendDumpService(applicationRegistry));
+	}
+
+	private String unpack(String sourceFile) {
+		try {
+			File targetDirectory=Files.createTempDir();
+			File dbFile=Packer.unpack(sourceFile, targetDirectory.getAbsolutePath());
+			LOGGER.debug("Unpacked data to {}...",dbFile);
+			return dbFile.toURI().getSchemeSpecificPart().substring(1);
+		} catch (IOException e) {
+			LOGGER.error("Could not unpack database. Full stacktrace follows",e);
+			throw new RuntimeException(e);
+		}
 	}
 
 }

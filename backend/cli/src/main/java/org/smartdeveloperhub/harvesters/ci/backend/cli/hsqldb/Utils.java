@@ -26,6 +26,12 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.cli.hsqldb;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 public abstract class Utils {
 
 	public static final class URLBuilder {
@@ -69,8 +75,19 @@ public abstract class Utils {
 
 	}
 
+	private static final String[] DATABASE_FILES={".properties",".script",".data",".backup",".log",".lck"};
+
 	public static URLBuilder urlBuilder() {
 		return new URLBuilder();
+	}
+
+	public static List<File> dbResources(String location) throws IOException {
+		List<File> result=Lists.newArrayList();
+		for(String dbFile:DATABASE_FILES) {
+			String targetFile = location+dbFile;
+			result.add(new File(targetFile));
+		}
+		return result;
 	}
 
 }

@@ -57,6 +57,10 @@
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
 
+	<properties>
+		<truevfs.version>0.11.0</truevfs.version>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -111,6 +115,13 @@
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.java.truevfs</groupId>
+			<artifactId>truevfs-profile-default</artifactId>
+			<version>${truevfs.version}</version>
+			<type>pom</type>
 		</dependency>
 
 		<!-- Default unit testing frameworks-->

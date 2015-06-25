@@ -26,45 +26,27 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.cli;
 
-import java.io.File;
-
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 
-public final class BackendConfig {
+public final class DatabaseConfig {
 
-	private String workingDirectory;
-	private DatabaseConfig database;
+	private String location;
+	private boolean pack;
 
-	public void setWorkingDirectory(String workingDirectory) {
-		this.workingDirectory = workingDirectory;
+	public String getLocation() {
+		return this.location;
 	}
 
-	public String getWorkingDirectory() {
-		return this.workingDirectory;
+	public void setLocation(String location) {
+		this.location = location;
 	}
 
-	public DatabaseConfig getDatabase() {
-		return this.database;
+	public boolean isPack() {
+		return pack;
 	}
 
-	public void setDatabase(DatabaseConfig dbConfig) {
-		this.database=dbConfig;
-	}
-
-	public String targetDatabase() {
-		String base=
-			Optional.
-				fromNullable(this.workingDirectory).
-				or("");
-		if(!base.isEmpty() && !base.endsWith(File.separator)) {
-			base+=File.separator;
-		}
-		return base+this.database.getLocation();
-	}
-
-	public boolean pack() {
-		return this.database.isPack();
+	public void setPack(boolean pack) {
+		this.pack = pack;
 	}
 
 	@Override
@@ -72,8 +54,8 @@ public final class BackendConfig {
 		return
 			MoreObjects.
 				toStringHelper(getClass()).
-					add("workingDirectory",this.workingDirectory).
-					add("database",this.database).
+					add("location",this.location).
+					add("pack",this.pack).
 					toString();
 	}
 

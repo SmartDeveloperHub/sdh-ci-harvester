@@ -30,24 +30,26 @@ import java.net.URI;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ApplicationRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
 import org.smartdeveloperhub.util.console.Consoles;
 
 import com.google.common.util.concurrent.AbstractIdleService;
 
-public class BackendDumpService extends AbstractIdleService {
+final class BackendDumpService extends AbstractIdleService {
 
 	private ApplicationRegistry registry;
 	private ServiceRepository serviceRepository;
 	private BuildRepository buildRepository;
 	private ExecutionRepository executionRepository;
 
-	public BackendDumpService(ApplicationRegistry registry) {
+	BackendDumpService(ApplicationRegistry registry) {
 		this.registry = registry;
 	}
 
@@ -83,10 +85,26 @@ public class BackendDumpService extends AbstractIdleService {
 				Consoles.defaultConsole().printf("- Service %s : %s%n",serviceId,service);
 				for(URI buildId:service.builds()) {
 					Build build=buildRepository().buildOfId(buildId);
-					Consoles.defaultConsole().printf("  + Build %s : %s%n",buildId,build);
-					for(URI executionId:build.executions()) {
-						Execution execution=executionRepository().executionOfId(executionId);
-						Consoles.defaultConsole().printf("    * Execution %s : %s%n",executionId,execution);
+					if(build instanceof SimpleBuild) {
+						Consoles.defaultConsole().printf("  + Simple build %s : %s%n",buildId,build);
+						for(URI executionId:build.executions()) {
+							Execution execution=executionRepository().executionOfId(executionId);
+							Consoles.defaultConsole().printf("    * Execution %s : %s%n",executionId,execution);
+						}
+					} else {
+						Consoles.defaultConsole().printf("  + Composite build %s : %s%n",buildId,build);
+						for(URI executionId:build.executions()) {
+							Execution execution=executionRepository().executionOfId(executionId);
+							Consoles.defaultConsole().printf("    * Execution %s : %s%n",executionId,execution);
+						}
+						for(URI subBuildId:((CompositeBuild)build).subBuilds()) {
+							Build subBuild=buildRepository().buildOfId(subBuildId);
+							Consoles.defaultConsole().printf("    * Sub-build %s : %s%n",subBuildId,subBuild);
+							for(URI executionId:subBuild.executions()) {
+								Execution execution=executionRepository().executionOfId(executionId);
+								Consoles.defaultConsole().printf("      + Execution %s : %s%n",executionId,execution);
+							}
+						}
 					}
 				}
 			}

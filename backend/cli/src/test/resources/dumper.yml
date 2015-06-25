@@ -25,5 +25,7 @@
 # #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 #
 
-workingDirectory: target/populator/
-database: db/population
+---
+database:
+  location: target/populator/db/population
+  pack: true

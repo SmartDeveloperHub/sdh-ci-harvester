@@ -31,6 +31,8 @@ import java.util.Collections;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.cli.hsqldb.Utils;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
 import org.smartdeveloperhub.util.bootstrap.AbstractBootstrap;
@@ -41,11 +43,15 @@ import com.google.common.util.concurrent.Service;
 
 public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 
-	static final String NAME = "BackendPopulator";;
+	private static final Logger LOGGER=LoggerFactory.getLogger(BackendPopulator.class);
+
+ 	static final String NAME = "BackendPopulator";;
 
 	private BackendPopulatorService service;
 
 	private EntityManagerFactory factory;
+
+	private BackendConfig config;
 
 	public BackendPopulator() {
 		super(NAME,BackendConfig.class);
@@ -54,45 +60,53 @@ public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 	public static void main(String[] args) throws Exception {
 		BackendPopulator bs = new BackendPopulator();
 		bs.run(args);
-		Consoles.defaultConsole().printf("<<HIT ENTER TO STOP THE INTEGRATION SERVICE>>%n");
+		Consoles.defaultConsole().printf("<<HIT ENTER TO TERMINATE THE POPULATION PROCESS>>%n");
 		Consoles.defaultConsole().readLine();
 		bs.terminate();
-		Consoles.defaultConsole().printf("<<POPULATOR ENDED>>%n");
 	}
 
 	@Override
 	protected void shutdown() {
-		Consoles.defaultConsole().printf("Shutting down populator...%n");
+		LOGGER.info("Shutting down application...");
 		try {
 			this.factory.close();
+			String fqDatabaseFile=this.config.targetDatabase();
+			if(this.config.pack()) {
+				fqDatabaseFile=Packer.pack(fqDatabaseFile,Utils.dbResources(fqDatabaseFile)).toString();
+			}
+			Consoles.defaultConsole().printf("Retrieved data available at %s.",fqDatabaseFile);
 		} catch (Exception e) {
-			Consoles.defaultConsole().printf("Failed to shutdown the populator. Full stacktrace follows");
-			e.printStackTrace(Consoles.defaultConsole().writer());
+			Consoles.defaultConsole().printf("Failed to shutdown the populator");
+			LOGGER.error("Failed to shutdown the application. Full stacktrace follows",e);
 		}
 	}
 
 	@Override
 	protected Iterable<Service> getServices(BackendConfig config) {
-		String fqDatabaseFile = config.getWorkingDirectory()+config.getDatabase();
+		this.factory = Persistence.createEntityManagerFactory("populator",configure(config));
+		JPAApplicationRegistry applicationRegistry = new JPAApplicationRegistry(factory);
+		this.service=new BackendPopulatorService(config,applicationRegistry);
+		return Collections.<Service>singleton(this.service);
+	}
+
+	private ImmutableMap<String, String> configure(BackendConfig config) {
+		this.config = config;
+		String fqDatabaseFile = this.config.targetDatabase();
 		String connectionURL=
 			Utils.
 				urlBuilder().
 					persistent(fqDatabaseFile).
 					build();
 		Consoles.
-		defaultConsole().
-			printf("Using '%s' as working directory%n",config.getWorkingDirectory()).
-			printf("Persisting retrieved data in '%s'%n",fqDatabaseFile).
-			printf("Connecting to DB: %s%n",connectionURL);
-		ImmutableMap<String, String> properties =
+			defaultConsole().
+				printf("Using '%s' as working directory%n",config.getWorkingDirectory()).
+				printf("Persisting retrieved data in '%s'%n",fqDatabaseFile);
+		LOGGER.debug("Connecting to DB: {}%n",connectionURL);
+		return
 			ImmutableMap.
 				<String,String>builder().
 					put(JPAProperties.JDBC_URL, connectionURL).
 					build();
-		this.factory = Persistence.createEntityManagerFactory("populator",properties);
-		JPAApplicationRegistry applicationRegistry = new JPAApplicationRegistry(factory);
-		this.service=new BackendPopulatorService(config,applicationRegistry);
-		return Collections.<Service>singleton(this.service);
 	}
 
 }

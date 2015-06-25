@@ -31,14 +31,17 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.Phaser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ApplicationRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins.JenkinsIntegrationService;
-import org.smartdeveloperhub.util.console.Consoles;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
 final class BackendPopulatorService extends AbstractExecutionThreadService {
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(BackendPopulatorService.class);
 
 	private final BackendConfig config;
 	private final ApplicationRegistry registry;
@@ -53,33 +56,47 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 
 	@Override
 	protected void run() throws Exception {
-		File tmpDirectory=new File(this.config.getWorkingDirectory());
-		ContinuousIntegrationService cis =
-				new ContinuousIntegrationService(
-					this.registry.getServiceRepository(),
-					this.registry.getBuildRepository(),
-					this.registry.getExecutionRepository());
-		this.jis=
-			new JenkinsIntegrationService(
-				cis,
-				this.registry.getTransactionManager()).
-				setWorkingDirectory(tmpDirectory);
-		this.jis.connect(URI.create("http://ci.jenkins-ci.org/"));
-		this.phaser.arriveAndAwaitAdvance();
-		try {
-			this.jis.disconnect();
-		} catch (IOException e) {
-			Consoles.defaultConsole().printf("Could not disconnect integration service. Full stacktrace follows");
-			e.printStackTrace(Consoles.defaultConsole().writer());
-		}
-
+		setUp();
+		execute();
+		tearDown();
 	}
 
 	@Override
 	protected void triggerShutdown() {
+		LOGGER.info("Requested population termination...");
 		this.phaser.arrive();
 	}
 
+	private void execute() throws IOException {
+		LOGGER.info("Starting population...");
+		this.jis.connect(URI.create("http://ci.jenkins-ci.org/"));
+		this.phaser.arriveAndAwaitAdvance();
+	}
 
+	private void tearDown() {
+		try {
+			LOGGER.info("Terminating population...");
+			this.jis.disconnect();
+			LOGGER.info("Population completed.");
+		} catch (IOException e) {
+			LOGGER.error("Could not disconnect integration service. Full stacktrace follows",e);
+		}
+	}
+
+	private void setUp() {
+		LOGGER.info("Preparing backend...");
+		File tmpDirectory=new File(this.config.getWorkingDirectory());
+		ContinuousIntegrationService cis =
+			new ContinuousIntegrationService(
+				this.registry.getServiceRepository(),
+				this.registry.getBuildRepository(),
+				this.registry.getExecutionRepository());
+		this.jis=
+			new JenkinsIntegrationService(
+				cis,
+				this.registry.getTransactionManager());
+		this.jis.setWorkingDirectory(tmpDirectory);
+		LOGGER.info("Backend ready.");
+	}
 
 }
