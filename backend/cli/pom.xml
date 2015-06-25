@@ -59,7 +59,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-
 			<dependency>
 				<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 				<artifactId>ci-backend-bom</artifactId>
@@ -90,6 +89,10 @@
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
 			<artifactId>ci-util-xml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
+			<artifactId>ci-util-bootstrap</artifactId>
 		</dependency>
 
 		<dependency>

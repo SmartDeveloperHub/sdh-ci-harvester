@@ -25,40 +25,5 @@
 # #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 #
 
-# Set root logger level to DEBUG and its only appender to A1.
-log4j.rootLogger=OFF
-
-log4j.logger.org.smartdeveloperhub=TRACE, file
-
-#log4j.logger.org.smartdeveloperhub.harvesters=INFO, console
-
-#log4j.logger.org.smartdeveloperhub.jenkins=INFO, console
-
-log4j.logger.org.hsqldb=OFF, console
-
-log4j.logger.org.hibernate=OFF, console
-#log4j.logger.org.hibernate.SQL=OFF
-#log4j.logger.org.hibernate.type=OFF
-
-log4j.logger.org.hibernate.SQL=OFF, console
-log4j.additivity.org.hibernate.SQL=false
-
-#log4j.logger.org.hibernate.type=TRACE, console
-#log4j.additivity.org.hibernate.type=false
-
-log4j.logger.org.hibernate.type.descriptor.sql=OFF, console
-log4j.additivity.org.hibernate.type.descriptor.sql=false
-
-log4j.logger.org.hibernate.type.EnumType=OFF, console
-log4j.additivity.org.hibernate.type.EnumType=false
-
-log4j.logger.net.sf.saxon=WARN, file
-
-log4j.appender.console=org.apache.log4j.ConsoleAppender
-log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=[%d][%-5.5p ][%-25.25t][%-80.80c] %m%n
-
-log4j.appender.file=org.apache.log4j.FileAppender
-log4j.appender.file.File=target/test.log
-log4j.appender.file.layout=org.apache.log4j.PatternLayout
-log4j.appender.file.layout.ConversionPattern=[%d][%-5.5p ][%-25.25t][%-80.80c] %m%n
+workingDirectory: target/populator/
+database: db/population
