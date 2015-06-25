@@ -26,6 +26,10 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -56,24 +60,9 @@ import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBase
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
-import com.google.common.collect.ImmutableMap;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-
 public class BackendCoreITest {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendCoreITest.class);
-
-	private static final String JDBC_DRIVER   = "javax.persistence.jdbc.driver";
-	private static final String JDBC_URL      = "javax.persistence.jdbc.url";
-	private static final String JDBC_USER     = "javax.persistence.jdbc.user";
-	private static final String JDBC_PASSWORD = "javax.persistence.jdbc.password";
-
-	public static final String HSQLDB_DRIVER = "org.hsqldb.jdbcDriver";
-	public static final String HSQLDB_URL = "jdbc:hsqldb:mem:testdb;sql.enforce_strict_size=true;hsqldb.tx=mvcc";
-	public static final String HSQLDB_USER = "sa";
-	public static final String HSQLDB_PASSWORD = ""; // NOSONAR
 
 	private static EntityManagerFactory factory;
 	private static JPAApplicationRegistry persistencyFacade;
@@ -92,15 +81,7 @@ public class BackendCoreITest {
 
 	@BeforeClass
 	public static void startUp() throws IOException {
-		ImmutableMap<String, String> properties =
-			ImmutableMap.
-				<String,String>builder().
-					put(JDBC_DRIVER, HSQLDB_DRIVER).
-					put(JDBC_URL, HSQLDB_URL).
-					put(JDBC_USER, HSQLDB_USER).
-					put(JDBC_PASSWORD, HSQLDB_PASSWORD).
-					build();
-		factory = Persistence.createEntityManagerFactory("jpaPersistency",properties);
+		factory = Persistence.createEntityManagerFactory("itTests");
 		persistencyFacade = new JPAApplicationRegistry(factory);
 	}
 

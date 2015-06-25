@@ -33,6 +33,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ApplicationRegistry;
+import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescriptorRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
 public final class JPAApplicationRegistry implements ApplicationRegistry {
@@ -54,6 +55,9 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 		return entityManager;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ExecutionRepository getExecutionRepository() {
 		return
@@ -67,6 +71,9 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 			);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public BuildRepository getBuildRepository() {
 		return
@@ -80,6 +87,9 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 			);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ServiceRepository getServiceRepository() {
 		return
@@ -93,6 +103,24 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 			);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public LifecycleDescriptorRepository getLifecycleDescriptorRepository() {
+		return new JPALifecycleDescriptorRepository(
+			new EntityManagerProvider(){
+				@Override
+				public EntityManager entityManager() {
+					return getManager();
+				}
+			}
+		);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public TransactionManager getTransactionManager() {
 		return new JPATransactionManager(

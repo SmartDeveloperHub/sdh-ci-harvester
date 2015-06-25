@@ -34,7 +34,7 @@
 		http://xmlns.jcp.org/xml/ns/persistence/orm
 		http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
 	version="2.1">
-	<orm:description>CI Persistency</orm:description>
+	<orm:description>Backend Persistency for the Continuous Integration Harvester of the Smart Developer Hub project</orm:description>
 	<orm:package>org.smartdeveloperhub.harvesters.ci.backend</orm:package>
 	<orm:access>FIELD</orm:access>
 	<orm:entity class="Service">
@@ -62,7 +62,7 @@
 				<orm:column length="1024"/>
 			</orm:basic>
 			<orm:basic name="description">
-				<orm:column length="65536"/>
+				<orm:column length="8192"/>
 			</orm:basic>
 			<orm:basic name="createdOn">
 				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
@@ -111,6 +111,38 @@
 			<orm:embedded name="result"/>
 		</orm:attributes>
 	</orm:entity>
+	<orm:entity class="org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescriptor">
+		<orm:table>
+			<orm:unique-constraint name="Unique_Entity_ID">
+				<orm:column-name>nativeId</orm:column-name>
+				<orm:column-name>type</orm:column-name>
+			</orm:unique-constraint>
+		</orm:table>
+		<orm:attributes>
+			<orm:id name="index">
+				<orm:generated-value/>
+				<orm:sequence-generator name="lifecycleIndexGenerator" sequence-name="indexSeq"/>
+			</orm:id>
+			<orm:basic name="registeredOn">
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+			</orm:basic>
+			<orm:basic name="deletedOn">
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+			</orm:basic>
+			<orm:embedded name="entityId"/>
+		</orm:attributes>
+	</orm:entity>
+	<orm:embeddable class="org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.EntityId">
+		<orm:attributes>
+			<orm:basic name="nativeId" optional="false"/>
+			<orm:basic name="type" optional="false">
+				<orm:enumerated>STRING</orm:enumerated>
+			</orm:basic>
+			<orm:basic name="finishedOn">
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+			</orm:basic>
+		</orm:attributes>
+	</orm:embeddable>
 	<orm:embeddable class="Result">
 		<orm:attributes>
 			<orm:basic name="status" optional="false">

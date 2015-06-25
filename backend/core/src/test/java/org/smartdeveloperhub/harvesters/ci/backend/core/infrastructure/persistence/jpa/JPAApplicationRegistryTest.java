@@ -31,9 +31,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.net.URI;
 import java.util.Date;
 
@@ -51,59 +52,29 @@ import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.Result;
 import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
-import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
-import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
-import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
-
-import com.google.common.collect.ImmutableMap;
+import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.EntityId;
+import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.EntityId.Type;
+import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescriptor;
+import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescriptorRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
+import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
 public class JPAApplicationRegistryTest {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JPAApplicationRegistryTest.class);
 
-	private static final String JDBC_DRIVER   = "javax.persistence.jdbc.driver";
-	private static final String JDBC_URL      = "javax.persistence.jdbc.url";
-	private static final String JDBC_USER     = "javax.persistence.jdbc.user";
-	private static final String JDBC_PASSWORD = "javax.persistence.jdbc.password";
-
-	private static final String SCHEMA_GENERATION_DROP_TARGET    = "javax.persistence.schema-generation.scripts.drop-target";
-	private static final String SCHEMA_GENERATION_CREATE_TARGET  = "javax.persistence.schema-generation.scripts.create-target";
-	private static final String SCHEMA_GENERATION_SCRIPTS_ACTION = "javax.persistence.schema-generation.scripts.action";
-
-	public static final String HSQLDB_DRIVER = "org.hsqldb.jdbcDriver";
-	public static final String HSQLDB_URL = "jdbc:hsqldb:mem:dbunit";
-	public static final String HSQLDB_USER = "sa";
-	public static final String HSQLDB_PASSWORD = "";
-
 	private static final String SUB_BUILD_TITLE = "SUB-BUILD TITLE";
 	private static final String BUILD_TITLE     = "BUILD TITLE";
-
-
-	private static File create;
-	private static File drop;
 
 	private static EntityManagerFactory factory;
 	private static JPAApplicationRegistry persistencyFacade;
 
 	@BeforeClass
 	public static void startUp() throws Exception {
-		create = File.createTempFile("create",".ddl");
-		drop = File.createTempFile("drop",".ddl");
-		ImmutableMap<String, String> properties =
-			ImmutableMap.
-				<String,String>builder().
-					put(JDBC_DRIVER, HSQLDB_DRIVER).
-					put(JDBC_URL, HSQLDB_URL).
-					put(JDBC_USER, HSQLDB_USER).
-					put(JDBC_PASSWORD, HSQLDB_PASSWORD).
-					put(SCHEMA_GENERATION_SCRIPTS_ACTION, "drop-and-create").
-					put(SCHEMA_GENERATION_CREATE_TARGET, create.getAbsolutePath()).
-					put(SCHEMA_GENERATION_DROP_TARGET, drop.getAbsolutePath()).
-					build();
-		factory = Persistence.createEntityManagerFactory("jpaPersistency",properties);
+		factory = Persistence.createEntityManagerFactory("unitTests");
 		persistencyFacade = new JPAApplicationRegistry(factory);
 	}
 
@@ -112,8 +83,6 @@ public class JPAApplicationRegistryTest {
 		if(factory!=null) {
 			factory.close();
 		}
-		create.delete();
-		drop.delete();
 	}
 
 	@Test
@@ -367,6 +336,112 @@ public class JPAApplicationRegistryTest {
 		assertThat(outExecution.result(),equalTo(inResult));
 
 		LOGGER.debug("Completed Sub Build management");
+	}
+
+	@Test
+	public void testLifecycleManagement() throws Exception {
+		LOGGER.debug("Started Lifecycle management");
+
+		URI nativeId = URI.create("http://localhost/jenkins/");
+		EntityId serviceId=EntityId.newInstance(nativeId, Type.SERVICE);
+		EntityId buildId=EntityId.newInstance(serviceId.nativeId().resolve("job/my-build/"), Type.BUILD);
+		EntityId executionId=EntityId.newInstance(buildId.nativeId().resolve("3/"), Type.EXECUTION);
+
+		Date registeredOn = new Date();
+		Date deletedOn = new Date();
+
+		LifecycleDescriptorRepository repository=persistencyFacade.getLifecycleDescriptorRepository();
+		TransactionManager transactionManager = persistencyFacade.getTransactionManager();
+
+		Transaction tx1 = transactionManager.currentTransaction();
+		tx1.begin();
+		try {
+			LifecycleDescriptor descriptor=LifecycleDescriptor.newInstance(serviceId);
+			descriptor.register(registeredOn);
+			LifecycleDescriptor b=LifecycleDescriptor.newInstance(buildId);
+			LifecycleDescriptor e=LifecycleDescriptor.newInstance(executionId);
+			repository.add(descriptor);
+			repository.add(b);
+			repository.add(e);
+			LOGGER.debug("TX1: {}",descriptor);
+			LOGGER.debug("TX1: {}",b);
+			LOGGER.debug("TX1: {}",e);
+			tx1.commit();
+		} catch(Exception e) {
+			tx1.rollback();
+			e.printStackTrace();
+			throw e;
+		}
+
+		persistencyFacade.disposeManagers();
+
+		Transaction tx2 = transactionManager.currentTransaction();
+		tx2.begin();
+		try {
+			LifecycleDescriptor descriptor = repository.descriptorOfId(serviceId);
+			LOGGER.debug("TX2-in: {}",descriptor);
+			assertThat(descriptor.index(),notNullValue());
+			assertThat(descriptor.registeredOn(),equalTo(registeredOn));
+			assertThat(descriptor.deletedOn(),nullValue());
+			assertThat(descriptor.isTransient(),equalTo(false));
+			assertThat(descriptor.isActive(),equalTo(true));
+			assertThat(descriptor.isDeleted(),equalTo(false));
+			descriptor.delete(deletedOn);
+			LOGGER.debug("TX2-out: {}",descriptor);
+			tx2.commit();
+		} catch(Exception e) {
+			tx2.rollback();
+			e.printStackTrace();
+			throw e;
+		}
+
+		persistencyFacade.disposeManagers();
+
+		Transaction tx3 = transactionManager.currentTransaction();
+		tx3.begin();
+		try {
+			LifecycleDescriptor descriptor = repository.descriptorOfId(serviceId);
+			LOGGER.debug("TX3-in: {}",descriptor);
+			assertThat(descriptor.index(),notNullValue());
+			assertThat(descriptor.registeredOn(),equalTo(registeredOn));
+			assertThat(descriptor.deletedOn(),equalTo(deletedOn));
+			assertThat(descriptor.isTransient(),equalTo(false));
+			assertThat(descriptor.isActive(),equalTo(false));
+			assertThat(descriptor.isDeleted(),equalTo(true));
+			repository.remove(descriptor);
+			LOGGER.debug("TX3-out: {}",(String)null);
+			tx3.commit();
+		} catch(Exception e) {
+			tx3.rollback();
+			e.printStackTrace();
+			throw e;
+		}
+
+		Transaction tx4 = transactionManager.currentTransaction();
+		tx4.begin();
+		try {
+			LifecycleDescriptor descriptor = repository.descriptorOfId(serviceId);
+			LOGGER.debug("TX4-in: {}",descriptor);
+			assertThat(descriptor,nullValue());
+			tx4.commit();
+		} catch(Exception e) {
+			tx4.rollback();
+			e.printStackTrace();
+			throw e;
+		}
+
+		Transaction tx5 = transactionManager.currentTransaction();
+		tx5.begin();
+		try {
+			LifecycleDescriptor b=LifecycleDescriptor.newInstance(buildId);
+			repository.add(b);
+			tx5.commit();
+			fail("Should not add descriptors with the non-unique entity identifiers");
+		} catch(Exception e) {
+			tx5.rollback();
+		}
+
+		LOGGER.debug("Completed Lifecycle management");
 	}
 
 }

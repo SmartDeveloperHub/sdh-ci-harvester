@@ -24,24 +24,15 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core;
+package org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle;
 
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescriptorRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
-public interface ApplicationRegistry {
+public interface LifecycleDescriptorRepository {
 
-	ServiceRepository getServiceRepository();
+	void add(LifecycleDescriptor descriptor);
 
-	BuildRepository getBuildRepository();
+	void remove(LifecycleDescriptor descriptor);
 
-	ExecutionRepository getExecutionRepository();
-
-	LifecycleDescriptorRepository getLifecycleDescriptorRepository();
-
-	TransactionManager getTransactionManager();
+	LifecycleDescriptor descriptorOfId(EntityId entityId);
 
 }

@@ -24,24 +24,28 @@
  *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core;
+package org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle;
 
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescriptorRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
+import java.util.Date;
 
-public interface ApplicationRegistry {
+public interface Lifecycle {
 
-	ServiceRepository getServiceRepository();
+	long index();
 
-	BuildRepository getBuildRepository();
+	Date registeredOn();
 
-	ExecutionRepository getExecutionRepository();
+	Date deletedOn();
 
-	LifecycleDescriptorRepository getLifecycleDescriptorRepository();
+	boolean isTransient();
 
-	TransactionManager getTransactionManager();
+	boolean isActive();
+
+	boolean isDeleted();
+
+	EntityId entityId();
+
+	void register(Date date);
+
+	void delete(Date date);
 
 }
