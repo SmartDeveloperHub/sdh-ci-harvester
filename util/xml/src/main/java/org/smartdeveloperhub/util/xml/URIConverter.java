@@ -34,10 +34,16 @@ public final class URIConverter {
 	}
 
 	public static URI unmarshal(String rawURI) {
+		if(rawURI==null) {
+			return null;
+		}
 		return URI.create(rawURI);
 	}
 
 	public static String marshal(URI uri) {
+		if(uri==null) {
+			return null;
+		}
 		return uri.toString();
 	}
 

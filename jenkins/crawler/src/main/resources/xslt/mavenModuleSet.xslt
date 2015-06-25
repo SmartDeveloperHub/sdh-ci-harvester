@@ -38,8 +38,11 @@
 	<xsl:template match="mavenModuleSet">
 		<xsl:variable name="name" select="name"/>
 		<xsl:variable name="url" select="url"/>
-		<ci:compositeJob>
-			instance="{substring($url,0,string-length($url)-string-length(concat('job/',$name)))}"
+		<xsl:variable name="segments" select="tokenize($url,'/')"/>
+		<xsl:variable name="segNumber" select="count($segments)-2" as="xs:integer"/>
+		<xsl:variable name="service" select="concat(string-join(subsequence($segments,0,$segNumber),'/'),'/')"/>
+		<ci:compositeJob
+			instance="{$service}"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://www.sdh.org/harvester/ci/v1 http://www.sdh.org/harvester/ci/v1/schema.xsd" >
 			<url><xsl:value-of select="$url"/></url>

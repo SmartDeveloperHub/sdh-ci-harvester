@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      This file is part of the Smart Developer Hub Project:
+        http://www.smartdeveloperhub.org/
+
+      Center for Open Middleware
+        http://www.centeropenmiddleware.com/
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Copyright (C) 2015 Center for Open Middleware.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+
+                http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+      Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+
+-->
+<freeStyleProject>
+   <action/>
+   <action/>
+   <action/>
+   <action/>
+   <description>Runs and generate tool installer metadata. Must run on master because it requires sensitive private keys to sign bits.</description>
+   <displayName>infra_backend_crawler</displayName>
+   <name>infra_backend_crawler</name>
+   <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/</url>
+   <buildable>true</buildable>
+   <build>
+      <number>19</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/19/</url>
+   </build>
+   <build>
+      <number>18</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/18/</url>
+   </build>
+   <build>
+      <number>17</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/17/</url>
+   </build>
+   <build>
+      <number>16</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/16/</url>
+   </build>
+   <build>
+      <number>15</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/15/</url>
+   </build>
+   <build>
+      <number>14</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/14/</url>
+   </build>
+   <build>
+      <number>13</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/13/</url>
+   </build>
+   <build>
+      <number>12</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/12/</url>
+   </build>
+   <build>
+      <number>11</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/11/</url>
+   </build>
+   <build>
+      <number>10</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/10/</url>
+   </build>
+   <build>
+      <number>9</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/9/</url>
+   </build>
+   <build>
+      <number>8</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/8/</url>
+   </build>
+   <build>
+      <number>7</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/7/</url>
+   </build>
+   <build>
+      <number>6</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/6/</url>
+   </build>
+   <build>
+      <number>5</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/5/</url>
+   </build>
+   <build>
+      <number>4</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/4/</url>
+   </build>
+   <build>
+      <number>3</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/3/</url>
+   </build>
+   <build>
+      <number>2</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/2/</url>
+   </build>
+   <build>
+      <number>1</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/1/</url>
+   </build>
+   <color>blue</color>
+   <firstBuild>
+      <number>1</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/1/</url>
+   </firstBuild>
+   <healthReport>
+      <description>Build stability: No recent builds failed.</description>
+      <iconClassName>icon-health-80plus</iconClassName>
+      <iconUrl>health-80plus.png</iconUrl>
+      <score>100</score>
+   </healthReport>
+   <inQueue>false</inQueue>
+   <keepDependencies>false</keepDependencies>
+   <lastBuild>
+      <number>19</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/19/</url>
+   </lastBuild>
+   <lastCompletedBuild>
+      <number>19</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/19/</url>
+   </lastCompletedBuild>
+   <lastFailedBuild>
+      <number>2</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/2/</url>
+   </lastFailedBuild>
+   <lastStableBuild>
+      <number>19</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/19/</url>
+   </lastStableBuild>
+   <lastSuccessfulBuild>
+      <number>19</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/19/</url>
+   </lastSuccessfulBuild>
+   <lastUnsuccessfulBuild>
+      <number>2</number>
+      <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/2/</url>
+   </lastUnsuccessfulBuild>
+   <nextBuildNumber>20</nextBuildNumber>
+   <property/>
+   <property/>
+   <concurrentBuild>false</concurrentBuild>
+   <scm/>
+</freeStyleProject>

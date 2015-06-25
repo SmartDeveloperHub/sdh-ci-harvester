@@ -177,15 +177,15 @@ public class BackendCoreITest {
 	private void verifyExecutionMatchesRun(URI executionId, Execution execution, Run run) {
 		assertThat(String.format("Execution %s should exist",executionId),execution,notNullValue());
 		assertThat(String.format("Run %s should exist",executionId),run,notNullValue());
-		assertThat("Execution and run owner should match",run.getJob(),equalTo(execution.buildId()));
+		assertThat(String.format("{%s} Execution and run owner should match",executionId),run.getJob(),equalTo(execution.buildId()));
 	}
 
 	private void verifyBuildMatchesJob(URI buildId, Build build, Job job) {
 		assertThat(String.format("Build %s should exist",buildId),build,notNullValue());
 		assertThat(String.format("Job %s should exist",buildId),job,notNullValue());
-		assertThat("Build and job owner should match",job.getInstance(),equalTo(build.serviceId()));
-		assertThat("Build and job title should match",job.getTitle(),equalTo(build.title()));
-		assertThat("Build and job description should match",job.getDescription(),equalTo(build.description()));
+		assertThat(String.format("{%s} Build and job owner should match",buildId),build.serviceId(),equalTo(job.getInstance()));
+		assertThat(String.format("{%s} Build and job title should match",buildId),build.title(),equalTo(job.getTitle()));
+		assertThat(String.format("{%s} Build and job description should match",buildId),build.description(),equalTo(job.getDescription()));
 	}
 
 }

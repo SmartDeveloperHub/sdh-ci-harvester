@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      This file is part of the Smart Developer Hub Project:
+        http://www.smartdeveloperhub.org/
+
+      Center for Open Middleware
+        http://www.centeropenmiddleware.com/
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Copyright (C) 2015 Center for Open Middleware.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+
+                http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+      Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+
+-->
+<freeStyleBuild>
+   <action>
+      <cause>
+         <shortDescription>Started by user danielbeck</shortDescription>
+         <userId>danielbeck</userId>
+         <userName>danielbeck</userName>
+      </cause>
+   </action>
+   <action>
+      <buildsByBranchName>
+         <refsremotesoriginmaster>
+            <buildNumber>10</buildNumber>
+            <marked>
+               <SHA1>537854615082e00fc444ea29caf49d9bf9fb4135</SHA1>
+               <branch>
+                  <SHA1>537854615082e00fc444ea29caf49d9bf9fb4135</SHA1>
+                  <name>refs/remotes/origin/master</name>
+               </branch>
+            </marked>
+            <revision>
+               <SHA1>537854615082e00fc444ea29caf49d9bf9fb4135</SHA1>
+               <branch>
+                  <SHA1>537854615082e00fc444ea29caf49d9bf9fb4135</SHA1>
+                  <name>refs/remotes/origin/master</name>
+               </branch>
+            </revision>
+         </refsremotesoriginmaster>
+      </buildsByBranchName>
+      <lastBuiltRevision>
+         <SHA1>537854615082e00fc444ea29caf49d9bf9fb4135</SHA1>
+         <branch>
+            <SHA1>537854615082e00fc444ea29caf49d9bf9fb4135</SHA1>
+            <name>refs/remotes/origin/master</name>
+         </branch>
+      </lastBuiltRevision>
+      <remoteUrl>git://github.com/jenkinsci/backend-crawler.git</remoteUrl>
+      <scmName/>
+   </action>
+   <action/>
+   <action/>
+   <action/>
+   <action/>
+   <artifact>
+      <fileName>biz.neustar.jenkins.plugins.packer.PackerInstaller.json</fileName>
+      <relativePath>target/biz.neustar.jenkins.plugins.packer.PackerInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>biz.neustar.jenkins.plugins.packer.PackerInstaller.json.html</fileName>
+      <relativePath>target/biz.neustar.jenkins.plugins.packer.PackerInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.buckminster.BuckminsterInstallation.BuckminsterInstaller.json</fileName>
+      <relativePath>target/hudson.plugins.buckminster.BuckminsterInstallation.BuckminsterInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.buckminster.BuckminsterInstallation.BuckminsterInstaller.json.html</fileName>
+      <relativePath>target/hudson.plugins.buckminster.BuckminsterInstallation.BuckminsterInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.gradle.GradleInstaller.json</fileName>
+      <relativePath>target/hudson.plugins.gradle.GradleInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.gradle.GradleInstaller.json.html</fileName>
+      <relativePath>target/hudson.plugins.gradle.GradleInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.nodejs.tools.NodeJSInstaller.json</fileName>
+      <relativePath>target/hudson.plugins.nodejs.tools.NodeJSInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.nodejs.tools.NodeJSInstaller.json.html</fileName>
+      <relativePath>target/hudson.plugins.nodejs.tools.NodeJSInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.scala.ScalaInstaller.json</fileName>
+      <relativePath>target/hudson.plugins.scala.ScalaInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.scala.ScalaInstaller.json.html</fileName>
+      <relativePath>target/hudson.plugins.scala.ScalaInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.sonar.SonarRunnerInstaller.json</fileName>
+      <relativePath>target/hudson.plugins.sonar.SonarRunnerInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.plugins.sonar.SonarRunnerInstaller.json.html</fileName>
+      <relativePath>target/hudson.plugins.sonar.SonarRunnerInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.tasks.Ant.AntInstaller.json</fileName>
+      <relativePath>target/hudson.tasks.Ant.AntInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.tasks.Ant.AntInstaller.json.html</fileName>
+      <relativePath>target/hudson.tasks.Ant.AntInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.tasks.Maven.MavenInstaller.json</fileName>
+      <relativePath>target/hudson.tasks.Maven.MavenInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.tasks.Maven.MavenInstaller.json.html</fileName>
+      <relativePath>target/hudson.tasks.Maven.MavenInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.tools.JDKInstaller.json</fileName>
+      <relativePath>target/hudson.tools.JDKInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>hudson.tools.JDKInstaller.json.html</fileName>
+      <relativePath>target/hudson.tools.JDKInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkins-ci.plugins.chromedriver.ChromeDriver.json</fileName>
+      <relativePath>target/org.jenkins-ci.plugins.chromedriver.ChromeDriver.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkins-ci.plugins.chromedriver.ChromeDriver.json.html</fileName>
+      <relativePath>target/org.jenkins-ci.plugins.chromedriver.ChromeDriver.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkins-ci.plugins.leiningen.LeinInstaller.json</fileName>
+      <relativePath>target/org.jenkins-ci.plugins.leiningen.LeinInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkins-ci.plugins.leiningen.LeinInstaller.json.html</fileName>
+      <relativePath>target/org.jenkins-ci.plugins.leiningen.LeinInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.golang.GolangInstaller.json</fileName>
+      <relativePath>target/org.jenkinsci.plugins.golang.GolangInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.golang.GolangInstaller.json.html</fileName>
+      <relativePath>target/org.jenkinsci.plugins.golang.GolangInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.mongodb.MongoDBInstaller.json</fileName>
+      <relativePath>target/org.jenkinsci.plugins.mongodb.MongoDBInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.mongodb.MongoDBInstaller.json.html</fileName>
+      <relativePath>target/org.jenkinsci.plugins.mongodb.MongoDBInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.perlinstaller.PerlInstaller.json</fileName>
+      <relativePath>target/org.jenkinsci.plugins.perlinstaller.PerlInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.perlinstaller.PerlInstaller.json.html</fileName>
+      <relativePath>target/org.jenkinsci.plugins.perlinstaller.PerlInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.recipe.RecipeCatalog.json</fileName>
+      <relativePath>target/org.jenkinsci.plugins.recipe.RecipeCatalog.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.recipe.RecipeCatalog.json.html</fileName>
+      <relativePath>target/org.jenkinsci.plugins.recipe.RecipeCatalog.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json</fileName>
+      <relativePath>target/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json.html</fileName>
+      <relativePath>target/org.jenkinsci.plugins.scriptler.CentralScriptJsonCatalog.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jvnet.hudson.plugins.SbtPluginBuilder.SbtInstaller.json</fileName>
+      <relativePath>target/org.jvnet.hudson.plugins.SbtPluginBuilder.SbtInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.jvnet.hudson.plugins.SbtPluginBuilder.SbtInstaller.json.html</fileName>
+      <relativePath>target/org.jvnet.hudson.plugins.SbtPluginBuilder.SbtInstaller.json.html</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.sbuild.jenkins.plugin.SBuildInstaller.json</fileName>
+      <relativePath>target/org.sbuild.jenkins.plugin.SBuildInstaller.json</relativePath>
+   </artifact>
+   <artifact>
+      <fileName>org.sbuild.jenkins.plugin.SBuildInstaller.json.html</fileName>
+      <relativePath>target/org.sbuild.jenkins.plugin.SBuildInstaller.json.html</relativePath>
+   </artifact>
+   <building>false</building>
+   <displayName>#10</displayName>
+   <duration>482341</duration>
+   <estimatedDuration>504347</estimatedDuration>
+   <fullDisplayName>infra_backend_crawler #10</fullDisplayName>
+   <id>10</id>
+   <keepLog>false</keepLog>
+   <number>10</number>
+   <queueId>77</queueId>
+   <result>SUCCESS</result>
+   <timestamp>1434556204195</timestamp>
+   <url>http://ci.jenkins-ci.org/job/infra_backend_crawler/10/</url>
+   <builtOn/>
+   <changeSet>
+      <item>
+         <affectedPath>ant.groovy</affectedPath>
+         <affectedPath>maven.groovy</affectedPath>
+         <affectedPath>ant_maven.groovy</affectedPath>
+         <commitId>76970d8ba2dd8e25492edac210d21e0d860fbac1</commitId>
+         <timestamp>1433275540000</timestamp>
+         <author>
+            <absoluteUrl>http://ci.jenkins-ci.org/user/arnaud%20he%CC%81ritier</absoluteUrl>
+            <fullName>Arnaud Héritier</fullName>
+         </author>
+         <comment>[FIXED JENKINS-23826] Allow automatic install of Maven 3.2.2
+</comment>
+         <date>2015-06-02T16:05:40-0400 +0200</date>
+         <id>76970d8ba2dd8e25492edac210d21e0d860fbac1</id>
+         <msg>[FIXED JENKINS-23826] Allow automatic install of Maven 3.2.2</msg>
+         <path>
+            <editType>add</editType>
+            <file>ant.groovy</file>
+         </path>
+         <path>
+            <editType>add</editType>
+            <file>maven.groovy</file>
+         </path>
+         <path>
+            <editType>delete</editType>
+            <file>ant_maven.groovy</file>
+         </path>
+      </item>
+      <item>
+         <affectedPath>maven.groovy</affectedPath>
+         <commitId>29e5aab997607b29e1568ebab070700da928986c</commitId>
+         <timestamp>1433283118000</timestamp>
+         <author>
+            <absoluteUrl>http://ci.jenkins-ci.org/user/arnaud%20he%CC%81ritier</absoluteUrl>
+            <fullName>Arnaud Héritier</fullName>
+         </author>
+         <comment>INFRA-181 : Append recent releases from Maven central and not from Apache archives like discussed on Maven mailing list :
+http://mail-archives.apache.org/mod_mbox/maven-dev/201505.mbox/%3cCAFNCU--iq2nYb3wnO715CbcXN+S8umRTyRnfk4_JSZ2qCR+1fg@mail.gmail.com%3e
+
+Based on @zregvart proposal https://github.com/zregvart/backend-crawler/commit/23c03462a688eb7c6db46209c0dbd1ff0328e464 - Thx a lot
+</comment>
+         <date>2015-06-02T18:11:58-0400 +0200</date>
+         <id>29e5aab997607b29e1568ebab070700da928986c</id>
+         <msg>INFRA-181 : Append recent releases from Maven central and not from Apache archives like discussed on Maven mailing list :</msg>
+         <path>
+            <editType>edit</editType>
+            <file>maven.groovy</file>
+         </path>
+      </item>
+      <kind>git</kind>
+   </changeSet>
+   <culprit>
+      <absoluteUrl>http://ci.jenkins-ci.org/user/arnaud%20he%CC%81ritier</absoluteUrl>
+      <fullName>Arnaud Héritier</fullName>
+   </culprit>
+</freeStyleBuild>

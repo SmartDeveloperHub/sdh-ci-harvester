@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      This file is part of the Smart Developer Hub Project:
+        http://www.smartdeveloperhub.org/
+
+      Center for Open Middleware
+        http://www.centeropenmiddleware.com/
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Copyright (C) 2015 Center for Open Middleware.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+
+                http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+      Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+
+-->
+<project>
+  <actions/>
+  <description>Runs and generate tool installer metadata. Must run on master because it requires sensitive private keys to sign bits.</description>
+  <logRotator class="hudson.tasks.LogRotator">
+      <daysToKeep>100</daysToKeep>
+      <numToKeep>-1</numToKeep>
+      <artifactDaysToKeep>-1</artifactDaysToKeep>
+      <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+      <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.11">
+         <projectUrl>http://github.com/jenkinsci/backend-crawler/</projectUrl>
+      </com.coravy.hudson.plugins.github.GithubProjectProperty>
+      <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.7.2">
+         <maxConcurrentPerNode>0</maxConcurrentPerNode>
+         <maxConcurrentTotal>0</maxConcurrentTotal>
+         <throttleEnabled>false</throttleEnabled>
+         <throttleOption>project</throttleOption>
+      </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.3.5">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+         <hudson.plugins.git.UserRemoteConfig>
+            <url>git://github.com/jenkinsci/backend-crawler.git</url>
+         </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+         <hudson.plugins.git.BranchSpec>
+            <name>*/master</name>
+         </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="list"/>
+      <extensions/>
+  </scm>
+  <assignedNode>master</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(Default)</jdk>
+  <triggers>
+      <hudson.triggers.TimerTrigger>
+         <spec>@daily</spec>
+      </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+      <hudson.tasks.Shell>
+         <command>./ci.sh</command>
+      </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+      <hudson.tasks.ArtifactArchiver>
+         <artifacts>target/**</artifacts>
+         <allowEmptyArchive>false</allowEmptyArchive>
+         <onlyIfSuccessful>false</onlyIfSuccessful>
+         <fingerprint>false</fingerprint>
+         <defaultExcludes>true</defaultExcludes>
+      </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers>
+      <hudson.plugins.secret.SecretBuildWrapper plugin="secret@1.7">
+         <var>SECRET</var>
+      </hudson.plugins.secret.SecretBuildWrapper>
+  </buildWrappers>
+</project>
