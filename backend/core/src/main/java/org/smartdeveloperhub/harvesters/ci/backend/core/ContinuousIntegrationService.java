@@ -184,7 +184,7 @@ public class ContinuousIntegrationService {
 			build=service.addCompositeBuild(buildId,aCommand.title());
 		} else {
 			URI parentId = aCommand.subBuildOf();
-			checkArgument(service.builds().contains(parentId),"Unknown parent build '%s'",parentId);
+//			checkArgument(service.builds().contains(parentId),"Unknown parent build '%s'",parentId);
 			Build parent = buildRepository().buildOfId(parentId);
 			checkArgument(parent instanceof CompositeBuild,"Parent build '%s' is not composite",parentId);
 			CompositeBuild cb=(CompositeBuild)parent;

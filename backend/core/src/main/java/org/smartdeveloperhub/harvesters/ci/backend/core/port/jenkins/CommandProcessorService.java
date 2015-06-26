@@ -222,14 +222,14 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 		try {
 			CommandDispatchingVisitor dispatcher = new CommandDispatchingVisitor();
 			command.accept(dispatcher);
-			tx.commit();
 			if(dispatcher.mustRetry()) {
 				this.monitor.retryLater(command);
 			} else {
 				LOGGER.trace("Processed command {}",command);
 			}
+			tx.commit();
 		} catch(Exception e) {
-			LOGGER.error("Could not process command "+command,e);
+			LOGGER.error("Could not process command {}",command,e);
 		} finally {
 			if(tx.isActive()) {
 				try {
