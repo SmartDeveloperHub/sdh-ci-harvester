@@ -63,7 +63,7 @@ public abstract class Utils {
 			} else if(this.mustExist) {
 				builder.append(";ifexists=true");
 			} else {
-				builder.append(";sql.enforce_strict_size=true;hsqldb.tx=mvcc;hsqldb.write_delay=false;hsqldb.default_table_type=CACHED");
+				builder.append(";sql.enforce_strict_size=true;hsqldb.tx=locks;hsqldb.write_delay=false;hsqldb.default_table_type=CACHED");
 			}
 			return builder.toString();
 		}

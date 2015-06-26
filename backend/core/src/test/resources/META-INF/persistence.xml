@@ -82,7 +82,7 @@
 		<properties>
 			<!-- Default HSQLDB connection settings -->
 			<property name="javax.persistence.jdbc.driver"   value="org.hsqldb.jdbc.JDBCDriver"/>
-			<property name="javax.persistence.jdbc.url"      value="jdbc:hsqldb:file:target/smoke_test.db;sql.enforce_strict_size=true;hsqldb.tx=mvcc;hsqldb.write_delay=false;hsqldb.default_table_type=CACHED"/>
+			<property name="javax.persistence.jdbc.url"      value="jdbc:hsqldb:file:target/smoke_test.db;sql.enforce_strict_size=true;hsqldb.tx=locks;hsqldb.write_delay=false;hsqldb.default_table_type=CACHED"/>
 			<property name="javax.persistence.jdbc.user"     value="sa"/>
 			<property name="javax.persistence.jdbc.password" value=""/>
 
