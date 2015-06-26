@@ -26,6 +26,7 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.commands.Command;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
@@ -135,15 +137,11 @@ final class CommandProcessingMonitor extends AbstractExecutionThreadService {
 	}
 
 	private void debugDismissedDetails() {
-		if(!this.commandQueue.isEmpty()) {
-			LOGGER.info("Dismissing {} commands",this.commandQueue.size());
-			traceDismissedCommands();
-		}
-	}
-
-	private void traceDismissedCommands() {
-		if(LOGGER.isInfoEnabled()) {
-			for(Command command:this.commandQueue) {
+		List<Command> abandoned=Lists.newArrayList();
+		this.commandQueue.drainTo(abandoned);
+		if(!abandoned.isEmpty()) {
+			LOGGER.info("Dismissing {} commands",abandoned.size());
+			for(Command command:abandoned) {
 				LOGGER.info("- Dismissed {}",command);
 			}
 		}

@@ -138,6 +138,13 @@ public class ContinuousIntegrationService {
 		return this.executionRepository;
 	}
 
+	private Service findService(CreateBuildCommand aCommand) {
+		URI serviceId=aCommand.serviceId();
+		Service service = serviceRepository().serviceOfId(serviceId);
+		checkArgument(service!=null,"Service '%s' is not registered",serviceId);
+		return service;
+	}
+
 	public List<URI> getRegisteredServices() {
 		return serviceRepository().serviceIds();
 	}
@@ -172,19 +179,16 @@ public class ContinuousIntegrationService {
 
 	public void createBuild(CreateBuildCommand aCommand) {
 		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
-		URI serviceId=aCommand.serviceId();
-		Service service = serviceRepository().serviceOfId(serviceId);
-		checkArgument(service!=null,"Service '%s' is not registered",serviceId);
-
 		URI buildId=aCommand.buildId();
 		Build build=null;
 		if(aCommand.simple()) {
+			Service service = findService(aCommand);
 			build=service.addSimpleBuild(buildId,aCommand.title());
 		} else if(aCommand.composite()) {
+			Service service = findService(aCommand);
 			build=service.addCompositeBuild(buildId,aCommand.title());
 		} else {
 			URI parentId = aCommand.subBuildOf();
-//			checkArgument(service.builds().contains(parentId),"Unknown parent build '%s'",parentId);
 			Build parent = buildRepository().buildOfId(parentId);
 			checkArgument(parent instanceof CompositeBuild,"Parent build '%s' is not composite",parentId);
 			CompositeBuild cb=(CompositeBuild)parent;

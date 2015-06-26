@@ -26,10 +26,7 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,44 +44,13 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionException;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
-import com.google.common.util.concurrent.AbstractExecutionThreadService;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+final class CommandProcessor {
 
-final class CommandProcessorService extends AbstractExecutionThreadService {
-
-	private final class CommandProcessor implements Runnable {
-
-		private final Command command;
-
-		private CommandProcessor(Command command) {
-			this.command=command;
-		}
-
-		@Override
-		public void run() {
-			processCommand(command);
-		}
-	}
-
-	private static final class Poison implements Command {
-
-		private static final CommandProcessorService.Poison SINGLETON=new Poison();
-
-		private Poison() {
-		}
-
-		@Override
-		public void accept(CommandVisitor visitor) {
-			throw new UnsupportedOperationException("Poison command is not visitable");
-		}
-
-	}
-
-	private final class CommandDispatchingVisitor implements CommandVisitor {
+	private final class Dispatcher implements CommandVisitor {
 
 		private boolean retry;
 
-		private CommandDispatchingVisitor() {
+		private Dispatcher() {
 			this.retry=true;
 		}
 
@@ -152,100 +118,60 @@ final class CommandProcessorService extends AbstractExecutionThreadService {
 
 	}
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(CommandProcessorService.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(CommandProcessor.class);
 
-	private final CommandProcessingMonitor monitor;
 	private final TransactionManager manager;
 	private final ContinuousIntegrationService service;
 
-	private volatile boolean shuttingDown;
-
-	private ExecutorService executor;
-
-	CommandProcessorService(CommandProcessingMonitor monitor, TransactionManager manager, ContinuousIntegrationService service) {
-		this.monitor = monitor;
+	private CommandProcessor(TransactionManager manager, ContinuousIntegrationService service) {
 		this.manager = manager;
 		this.service = service;
-		this.shuttingDown=false;
 	}
 
-	@Override
-	protected void run() {
-		this.executor=createExecutor();
-		do {
-			processCommands();
-		} while(!this.shuttingDown);
-		this.executor.shutdownNow();
-		LOGGER.info("Command processing terminated.");
-	}
-
-	private ExecutorService createExecutor() {
-		return
-			Executors.
-				newCachedThreadPool(
-					new ThreadFactoryBuilder().
-						setNameFormat("CommandProcessor-worker-%d").
-						setUncaughtExceptionHandler(
-							new UncaughtExceptionHandler() {
-								@Override
-								public void uncaughtException(Thread t, Throwable e) {
-									LOGGER.error(String.format("Thread %s died",t.getName()),e);
-								}
-							}
-						).
-						build()
-				);
-	}
-
-	private void processCommands() {
-		Command command=null;
-		try {
-			while((command=this.monitor.take())!=Poison.SINGLETON) {
-				this.executor.execute(new CommandProcessor(command));
-			}
-		} catch (InterruptedException e) {
-			LOGGER.info("Interrupted while waiting for command",e);
-		}
-	}
-
-	private void processCommand(Command command) {
+	boolean processCommand(Command command) throws CommandProcessingException {
 		Transaction tx = this.manager.currentTransaction();
 		try {
-			processTransactionally(tx, command);
-		} catch (TransactionException e) {
-			LOGGER.error("Transactional failure when processing command "+command,e);
+			tx.begin();
+			boolean result = processTransactionally(command);
+			tx.commit();
+			return result;
+		} catch(Exception e) {
+			LOGGER.error("Could not process command {} ({})",command,e.getMessage());
+			throw new CommandProcessingException("Could not process command", e);
+		} finally {
+			rollbackQuietly(tx);
 		}
 	}
 
-	private void processTransactionally(Transaction tx, Command command) throws TransactionException {
-		tx.begin();
-		try {
-			CommandDispatchingVisitor dispatcher = new CommandDispatchingVisitor();
-			command.accept(dispatcher);
-			tx.commit();
-			if(dispatcher.mustRetry()) {
-				this.monitor.retryLater(command);
-			} else {
-				LOGGER.trace("Processed command {}",command);
-			}
-		} catch(Exception e) {
-			LOGGER.error("Could not process command {}",command,e);
-		} finally {
+	private void rollbackQuietly(Transaction tx) {
+		if(tx!=null) {
 			if(tx.isActive()) {
 				try {
 					tx.rollback();
 				} catch (Exception e) {
-					LOGGER.error("Could not rollback transaction",e);
+					LOGGER.error("Could not rollback transaction for command",e);
 				}
 			}
 		}
 	}
 
-	@Override
-	protected void triggerShutdown() {
-		this.shuttingDown=true;
-		this.monitor.offer(Poison.SINGLETON);
-		LOGGER.info("Requested command processing termination...");
+	private boolean processTransactionally(Command command) throws TransactionException {
+		LOGGER.trace("Processing command {}",command);
+		Dispatcher dispatcher = new Dispatcher();
+		command.accept(dispatcher);
+		if(LOGGER.isTraceEnabled()) {
+			LOGGER.trace(
+				"{} processing of command {}",
+				dispatcher.mustRetry()?
+					"Aborted":
+					"Completed",
+				command);
+		}
+		return !dispatcher.mustRetry();
+	}
+
+	static CommandProcessor newInstance(TransactionManager manager, ContinuousIntegrationService service) {
+		return new CommandProcessor(manager, service);
 	}
 
 }

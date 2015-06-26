@@ -40,6 +40,8 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionM
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawler;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawlerException;
 
+import com.google.common.util.concurrent.Service;
+
 public final class JenkinsIntegrationService {
 
 	private interface ServiceState {
@@ -155,7 +157,7 @@ public final class JenkinsIntegrationService {
 	private final Lock write;
 
 	private JenkinsCrawler crawler;
-	private CommandProcessorService worker;
+	private Service worker;
 	private ServiceState state;
 
 	public JenkinsIntegrationService(ContinuousIntegrationService service, TransactionManager manager) {
@@ -172,7 +174,7 @@ public final class JenkinsIntegrationService {
 	private void doConnect(URI jenkinsInstance, File workingDirectory) throws IOException {
 		try {
 			this.monitor.startAsync();
-			this.worker=new CommandProcessorService(this.monitor,this.transactionManager,this.service);
+			this.worker=new SimpleCommandProcessorService(this.monitor,this.transactionManager,this.service);
 			this.worker.startAsync();
 			this.crawler =
 				JenkinsCrawler.
