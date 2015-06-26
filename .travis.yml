@@ -1,4 +1,9 @@
+sudo: false
 language: java
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.sonar
 jdk:
 - oraclejdk7
 before_install:
@@ -9,9 +14,9 @@ before_script:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in target/config/ci/pubring.gpg.enc
   -out local.pubring.gpg -d
 script:
-- if [ ${TRAVIS_PULL_REQUEST} = 'false' ]; then mvn deploy -Dossrh -Dcodebase.directory=`pwd`
+- if [ ${TRAVIS_PULL_REQUEST} = 'false' ]; then mvn deploy -U -Dossrh -Dcodebase.directory=`pwd`
   -Dcoverage.reports.dir=`pwd`/target/all
-  --settings target/config/ci/settings.xml; else mvn verify -Dcodebase.directory=`pwd`
+  --settings target/config/ci/settings.xml; else mvn verify -U -Dcodebase.directory=`pwd`
   -Dcoverage.reports.dir=`pwd`/target/all
   --settings target/config/ci/settings.xml; fi
 after_success:
