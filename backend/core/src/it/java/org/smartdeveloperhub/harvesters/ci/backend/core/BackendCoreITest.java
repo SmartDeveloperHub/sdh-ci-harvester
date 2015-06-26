@@ -83,7 +83,7 @@ public class BackendCoreITest {
 
 	@BeforeClass
 	public static void startUp() throws IOException {
-		factory = Persistence.createEntityManagerFactory("itTests");
+		factory = Persistence.createEntityManagerFactory("itTestsDerby");
 		persistencyFacade = new JPAApplicationRegistry(factory);
 	}
 
