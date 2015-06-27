@@ -42,7 +42,7 @@ final class JPATransactionManager implements TransactionManager {
 
 		@Override
 		public boolean isActive() {
-			return nativeTransaction().isActive();
+			return provider.isActive();
 		}
 
 		@Override

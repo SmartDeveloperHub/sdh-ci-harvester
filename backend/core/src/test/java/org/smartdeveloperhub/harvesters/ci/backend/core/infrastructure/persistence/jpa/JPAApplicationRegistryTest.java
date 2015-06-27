@@ -119,7 +119,7 @@ public class JPAApplicationRegistryTest {
 			throw e;
 		}
 
-		persistencyFacade.disposeManagers();
+		persistencyFacade.clear();
 
 		Transaction tx2 = transactionManager.currentTransaction();
 		tx2.begin();
@@ -133,7 +133,7 @@ public class JPAApplicationRegistryTest {
 			throw e;
 		}
 
-		persistencyFacade.disposeManagers();
+		persistencyFacade.clear();
 
 		Transaction tx3 = transactionManager.currentTransaction();
 		tx3.begin();
@@ -200,7 +200,7 @@ public class JPAApplicationRegistryTest {
 			throw e;
 		}
 
-		persistencyFacade.disposeManagers();
+		persistencyFacade.clear();
 
 		Transaction tx2 = transactionManager.currentTransaction();
 		tx2.begin();
@@ -214,7 +214,7 @@ public class JPAApplicationRegistryTest {
 			throw e;
 		}
 
-		persistencyFacade.disposeManagers();
+		persistencyFacade.clear();
 
 		Transaction tx3 = transactionManager.currentTransaction();
 		tx3.begin();
@@ -286,7 +286,7 @@ public class JPAApplicationRegistryTest {
 			throw e;
 		}
 
-		persistencyFacade.disposeManagers();
+		persistencyFacade.clear();
 
 		Transaction tx2 = transactionManager.currentTransaction();
 		tx2.begin();
@@ -300,7 +300,7 @@ public class JPAApplicationRegistryTest {
 			throw e;
 		}
 
-		persistencyFacade.disposeManagers();
+		persistencyFacade.clear();
 
 		Transaction tx3 = transactionManager.currentTransaction();
 		tx3.begin();
@@ -372,7 +372,7 @@ public class JPAApplicationRegistryTest {
 			throw e;
 		}
 
-		persistencyFacade.disposeManagers();
+		persistencyFacade.clear();
 
 		Transaction tx2 = transactionManager.currentTransaction();
 		tx2.begin();
@@ -394,7 +394,7 @@ public class JPAApplicationRegistryTest {
 			throw e;
 		}
 
-		persistencyFacade.disposeManagers();
+		persistencyFacade.clear();
 
 		Transaction tx3 = transactionManager.currentTransaction();
 		tx3.begin();

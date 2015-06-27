@@ -26,14 +26,30 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
 
-import javax.persistence.EntityManager;
+final class Context {
 
-interface EntityManagerProvider {
 
-	EntityManager entityManager();
+	private static final String DEFAULT_CONTEXT = "";
 
-	void close();
+	private Context() {
+	}
 
-	boolean isActive();
+	private static String getName(StackTraceElement ste) {
+		String[] fqcn = ste.getClassName().split("\\.");
+		String[] lcn = fqcn[fqcn.length-1].split("\\$");
+		return lcn[lcn.length-1]+"."+ste.getMethodName()+"("+ste.getLineNumber()+")";
+	}
 
+	static String getContext(String packageName) {
+		Exception exception = new Exception();
+		exception.fillInStackTrace();
+		StackTraceElement candidate=null;
+		for(StackTraceElement tmp:exception.getStackTrace()) {
+			if(!tmp.getClassName().startsWith(packageName)) {
+				return getName(candidate);
+			}
+			candidate=tmp;
+		}
+		return DEFAULT_CONTEXT;
+	}
 }

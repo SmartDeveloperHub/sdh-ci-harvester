@@ -29,6 +29,8 @@ package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persiste
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
@@ -37,6 +39,8 @@ import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescr
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 
 public final class JPAApplicationRegistry implements ApplicationRegistry {
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(JPAApplicationRegistry.class);
 
 	private final class JPAEntityManagerProvider implements EntityManagerProvider {
 
@@ -49,14 +53,42 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 		public void close() {
 			disposeManager();
 		}
+		@Override
+		public boolean isActive() {
+			return isTransactionActive();
+		}
+
 	}
 
 	private final ThreadLocal<EntityManager> manager;
 	private final EntityManagerFactory emf;
+	private final JPAEntityManagerProvider provider;
+	private final String id;
 
 	public JPAApplicationRegistry(EntityManagerFactory emf) {
 		this.emf = emf;
 		this.manager=new ThreadLocal<EntityManager>();
+		this.provider = new JPAEntityManagerProvider();
+		this.id = String.format("%08X",hashCode());
+
+	}
+
+	private void trace(String message, Object... args) {
+		if(LOGGER.isTraceEnabled()) {
+			LOGGER.trace("{} - {} - {}",
+				this.id,
+				String.format(message,args),
+				Context.getContext("org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa"));
+		}
+	}
+
+	private boolean isTransactionActive() {
+		boolean result = false;
+		EntityManager entityManager = this.manager.get();
+		if(entityManager!=null) {
+			result=entityManager.getTransaction().isActive();
+		}
+		return result;
 	}
 
 	private EntityManager getManager() {
@@ -64,6 +96,9 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 		if(entityManager==null) {
 			entityManager = this.emf.createEntityManager();
 			this.manager.set(entityManager);
+			trace("Assigned manager %08X",entityManager.hashCode());
+		} else {
+			trace("Returned manager %08X",entityManager.hashCode());
 		}
 		return entityManager;
 	}
@@ -73,6 +108,9 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 		if(entityManager!=null) {
 			entityManager.close();
 			this.manager.remove();
+			trace("Disposed manager %08X",entityManager.hashCode());
+		} else {
+			trace("Nothing to dispose");
 		}
 	}
 
@@ -82,7 +120,7 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public ExecutionRepository getExecutionRepository() {
-		return new JPAExecutionRepository(new JPAEntityManagerProvider());
+		return new JPAExecutionRepository(this.provider);
 	}
 
 	/**
@@ -90,7 +128,7 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public BuildRepository getBuildRepository() {
-		return new JPABuildRepository(new JPAEntityManagerProvider());
+		return new JPABuildRepository(this.provider);
 	}
 
 	/**
@@ -98,7 +136,7 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public ServiceRepository getServiceRepository() {
-		return new JPAServiceRepository(new JPAEntityManagerProvider());
+		return new JPAServiceRepository(this.provider);
 	}
 
 	/**
@@ -106,7 +144,7 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public LifecycleDescriptorRepository getLifecycleDescriptorRepository() {
-		return new JPALifecycleDescriptorRepository(new JPAEntityManagerProvider());
+		return new JPALifecycleDescriptorRepository(this.provider);
 	}
 
 	/**
@@ -114,15 +152,11 @@ public final class JPAApplicationRegistry implements ApplicationRegistry {
 	 */
 	@Override
 	public TransactionManager getTransactionManager() {
-		return new JPATransactionManager(new JPAEntityManagerProvider());
+		return new JPATransactionManager(this.provider);
 	}
 
-	public void disposeManagers() {
-		EntityManager entityManager = this.manager.get();
-		if(entityManager!=null) {
-			this.manager.set(null);
-			entityManager.close();
-		}
+	public void clear() {
+		disposeManager();
 	}
 
 }
