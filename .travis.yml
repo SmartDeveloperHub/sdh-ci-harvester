@@ -1,9 +1,9 @@
 sudo: false
-language: java
 cache:
   directories:
-  - $HOME/.m2
+  - $HOME/.m2/repository
   - $HOME/.sonar
+language: java
 jdk:
 - oraclejdk7
 before_install:
@@ -14,15 +14,15 @@ before_script:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in target/config/ci/pubring.gpg.enc
   -out local.pubring.gpg -d
 script:
-- if [ ${TRAVIS_PULL_REQUEST} = 'false' ]; then mvn deploy -U -Dossrh -Dcodebase.directory=`pwd`
-  -Dcoverage.reports.dir=`pwd`/target/all
-  --settings target/config/ci/settings.xml; else mvn verify -U -Dcodebase.directory=`pwd`
-  -Dcoverage.reports.dir=`pwd`/target/all
-  --settings target/config/ci/settings.xml; fi
-after_success:
-- if [ ${TRAVIS_PULL_REQUEST} = 'false' ]; then mvn sonar:sonar -Dcodebase.directory=`pwd`
-  -Dcoverage.reports.dir=`pwd`/target/all
-  --settings target/config/ci/settings.xml; else mvn clean; fi
+- if [ ${TRAVIS_BRANCH} == 'master' ] && [ ${TRAVIS_PULL_REQUEST} = 'false' ];
+  then mvn clean deploy -B -Dcodebase.directory=`pwd` -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;
+  else mvn clean verify -B --settings target/config/ci/settings.xml;
+  fi
+- if [ ${TRAVIS_PULL_REQUEST} = 'false' ];
+  then mvn sonar:sonar -B -Dsonar.branch=$TRAVIS_BRANCH -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;
+  fi
+- mkdir /tmp/cache-trick
+- mv $HOME/.m2/repository/org/smartdeveloperhub /tmp/cache-trick/
 env:
   global:
   - secure: fGejDkt2Gpmfio8VaqGB4hqn+F/n0pK/IMM4nM3W5+Sft0PC+fVc6xcA1rQKyEt9YuwsLeYrTCflehgwK3EnXczAoKdaGYfdIwLRe28HaLwWrBtVGj9Tp3Oc1i2zD7KetV/RzApkycUz6DCOc2Sv2i7eYOYBF0nWn7aSvNxygNuw1tBgJWZUpiQxXi9ST62ZVb7CqOkt9uNNgYESOrPeaRrBA9cqtw9UkM+MnYHPO2TiKvaeJuNGkXA9zptUreyKeHwvmLp0AZnBpnwAo8AWXmf3WuOE19Xmi731PNOqSOj71AmqeL+JEJ3wXkakkn7lO48hTDzHjezzERVitzZOHaHQ7SjW1acb9y5OpilY9e/nOk6hXxNykMShHUp6ym0t6xYkqc6OhlNd3Mpbru6KoXlYdQR88OVGNQKI1Sa8ED3b/vo1QuA+AYyjHxRVCV9ZUJTvzlK7QIR4cW9Kayd5jVYQMEXi0K1T3TJUqIXDiy5U6hozYKTdJxTGZDp5zqRtw1eyoB7yZFI/DgWGylM9462Cg1ZhCELzIfc2YP7R1v7fFihX2UE3QMngiVc5fJ4U+9uUIBy8Lsr+OsI+ZQ9PZJT08pj9cjXUT4dpk4TmXWi9RF4fL/JCdj5U/DBHEn8psE4f1KxJDIb9Nvk5yUShseD81wKfQssf/XJ7xrNjNio=
