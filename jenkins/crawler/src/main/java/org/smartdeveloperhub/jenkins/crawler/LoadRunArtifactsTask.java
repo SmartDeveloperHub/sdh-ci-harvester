@@ -32,7 +32,7 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
-final class LoadRunArtifactsTask extends AbstractCrawlingSubTask<Run> {
+final class LoadRunArtifactsTask extends AbstractArtifactCrawlingTask<Run> {
 
 	LoadRunArtifactsTask(URI location, Run run) {
 		super(location,JenkinsEntityType.RUN,JenkinsArtifactType.ARTIFACTS,run);

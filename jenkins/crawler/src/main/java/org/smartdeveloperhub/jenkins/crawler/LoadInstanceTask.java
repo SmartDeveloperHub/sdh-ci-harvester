@@ -33,13 +33,13 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 
-final class LoadInstanceTask extends AbstractCrawlingTask {
+final class LoadInstanceTask extends AbstractEntityCrawlingTask<Instance> {
 
 	LoadInstanceTask(URI location) {
-		super(location,JenkinsEntityType.INSTANCE,JenkinsArtifactType.RESOURCE);
+		super(location,Instance.class,JenkinsEntityType.INSTANCE,JenkinsArtifactType.RESOURCE);
 	}
 
 	@Override
@@ -48,10 +48,10 @@ final class LoadInstanceTask extends AbstractCrawlingTask {
 	}
 
 	@Override
-	protected void processResource(JenkinsResource resource) throws IOException {
-		Instance instance = super.loadInstance(resource);
-		persistEntity(instance,resource.entity());
-		super.fireEvent(JenkinsEventFactory.newInstanceFoundEvent(super.location()));
+	protected void processEntity(Instance instance, JenkinsResource resource) throws IOException {
+		super.fireEvent(
+			JenkinsEventFactory.
+				newInstanceFoundEvent(super.location()));
 		for(Reference ref:instance.getJobs().getJobs()) {
 			scheduleTask(new LoadJobTask(ref.getValue()));
 		}

@@ -37,7 +37,7 @@ import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.util.xml.XmlUtils;
 
-final class LoadJobConfigurationTask extends AbstractCrawlingSubTask<Job> {
+final class LoadJobConfigurationTask extends AbstractArtifactCrawlingTask<Job> {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(LoadJobConfigurationTask.class);
 

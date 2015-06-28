@@ -37,10 +37,10 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeJob;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 
-final class LoadJobTask extends AbstractCrawlingTask {
+final class LoadJobTask extends AbstractEntityCrawlingTask<Job> {
 
 	LoadJobTask(URI location) {
-		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.RESOURCE);
+		super(location,Job.class,JenkinsEntityType.JOB,JenkinsArtifactType.RESOURCE);
 	}
 
 	@Override
@@ -49,10 +49,7 @@ final class LoadJobTask extends AbstractCrawlingTask {
 	}
 
 	@Override
-	protected void processResource(JenkinsResource resource) throws IOException {
-		Job job = super.loadJob(resource);
-		persistEntity(job,resource.entity());
-
+	protected void processEntity(Job job, JenkinsResource resource) throws IOException {
 		super.fireEvent(
 			JenkinsEventFactory.
 				newJobCreatedEvent(super.jenkinsInstance(),job));

@@ -53,7 +53,7 @@ final class MultiThreadedTaskScheduler implements TaskScheduler {
 		}
 
 		Builder withNumberOfThreads(int threads) {
-			checkArgument(0>threads,"Thread number must be greater than 0 (%s)",threads);
+			checkArgument(threads>0,"Thread number must be greater than 0 (%s)",threads);
 			checkArgument(threads<=MAX_THREADS,"Thread number cannot be greater than %s (%s)",MAX_THREADS,threads);
 			this.threads = threads;
 			return this;

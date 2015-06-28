@@ -20,32 +20,29 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+ *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins;
+package org.smartdeveloperhub.jenkins.crawler;
 
-import org.junit.Test;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
+import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+interface CrawlingDecissionPoint {
 
-public class JenkinsEntityTypeTest {
+	boolean canProcessEntityType(JenkinsEntityType entityType, JenkinsInformationPoint jip, CrawlingSession session);
 
-	@Test
-	public void testIsCompatible() throws Exception {
-		for(JenkinsEntityType type:JenkinsEntityType.values()) {
-			JenkinsEntityType base=null;
-			if(type.isInstance()) {
-				base=JenkinsEntityType.INSTANCE;
-			} else if(type.isJob()) {
-				base=JenkinsEntityType.JOB;
-			} else if(type.isRun()) {
-				base=JenkinsEntityType.RUN;
-			}
-			assertThat(String.format("%s should be compatible with %s",type,base),base.isCompatible(type),equalTo(true));
-		}
-	}
+	boolean canProcessArtifactType(JenkinsArtifactType artifactType, JenkinsInformationPoint jip, CrawlingSession session);
+
+	boolean canProcessJob(Job job, JenkinsInformationPoint jip, CrawlingSession session);
+
+	boolean canProcessRun(Run run, JenkinsInformationPoint jip, CrawlingSession session);
+
+	boolean canProcessReference(Entity entity, Reference reference, JenkinsInformationPoint jip, CrawlingSession session);
 
 }

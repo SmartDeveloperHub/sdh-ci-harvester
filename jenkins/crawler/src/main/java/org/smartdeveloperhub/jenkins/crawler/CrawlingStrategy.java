@@ -26,39 +26,45 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
-import org.smartdeveloperhub.jenkins.JenkinsResource;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 
-final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
+public final class CrawlingStrategy {
 
-	LoadRunTask(URI location) {
-		super(location,Run.class,JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
-	}
+	private static final class DefaultCrawlingDecissionPoint implements CrawlingDecissionPoint {
 
-	@Override
-	protected String taskPrefix() {
-		return "lrt";
-	}
-
-	@Override
-	protected void processEntity(Run run, JenkinsResource resource) throws IOException {
-		super.fireEvent(
-			JenkinsEventFactory.
-				newRunCreatedEvent(
-					super.jenkinsInstance(),
-					run));
-
-		if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && run.getResult().equals(RunResult.SUCCESS)) {
-			scheduleTask(new LoadRunArtifactsTask(super.location(),run));
+		@Override
+		public boolean canProcessRun(Run run, JenkinsInformationPoint jip, CrawlingSession session) {
+			return true;
 		}
 
+		@Override
+		public boolean canProcessReference(Entity entity, Reference reference, JenkinsInformationPoint jip, CrawlingSession session) {
+			return true;
+		}
+
+		@Override
+		public boolean canProcessJob(Job job, JenkinsInformationPoint jip, CrawlingSession session) {
+			return true;
+		}
+
+		@Override
+		public boolean canProcessEntityType(JenkinsEntityType entityType, JenkinsInformationPoint jip, CrawlingSession session) {
+			return true;
+		}
+
+		@Override
+		public boolean canProcessArtifactType(JenkinsArtifactType artifactType, JenkinsInformationPoint jip, CrawlingSession session) {
+			return true;
+		}
+	}
+
+	CrawlingDecissionPoint decissionPoint() {
+		return new DefaultCrawlingDecissionPoint();
 	}
 
 }

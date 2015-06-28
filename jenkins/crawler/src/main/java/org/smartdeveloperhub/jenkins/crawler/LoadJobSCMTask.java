@@ -32,7 +32,7 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 
-final class LoadJobSCMTask extends AbstractCrawlingSubTask<Job> {
+final class LoadJobSCMTask extends AbstractArtifactCrawlingTask<Job> {
 
 	LoadJobSCMTask(URI location, Job job) {
 		super(location,JenkinsEntityType.JOB,JenkinsArtifactType.SCM,job);

@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -41,140 +41,12 @@ import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
-import org.smartdeveloperhub.jenkins.crawler.util.ControlledScheduledExecutorService;
 import org.smartdeveloperhub.jenkins.crawler.util.Timer;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
-final class CrawlingController {
-
-	private final class CrawlingBootstrap implements Runnable {
-
-		final class CrawlingSession {
-
-			private final Timer timer;
-			private final long sessionId;
-
-			private CrawlingSession() {
-				this.sessionId=sessionCounter.incrementAndGet();
-				this.timer=new Timer();
-			}
-
-			public void start() {
-				this.timer.start();
-				LOGGER.info("Started crawling {}...",jenkinsInstance());
-				fireEvent(CrawlerEventFactory.newCrawlingStartedEvent(sessionId,timer.startedOn()));
-			}
-
-			public void terminate() {
-				this.timer.stop();
-				fireEvent(createTerminationEvent(this.sessionId,this.timer));
-				LOGGER.info(
-					"Crawling of {} {}. Execution took {}",
-					jenkinsInstance(),
-					isAborted()?
-						"aborted":
-						"completed",
-					timer);
-			}
-
-			private CrawlingEvent createTerminationEvent(long sessionId, Timer timer) {
-				CrawlingEvent event=null;
-				if(!isAborted()) {
-					event=CrawlerEventFactory.newCrawlingCompletedEvent(sessionId,timer.stoppedOn());
-				} else {
-					event=CrawlerEventFactory.newCrawlingAbortedEvent(sessionId,timer.stoppedOn());
-				}
-				return event;
-			}
-
-			private boolean isAborted() {
-				return CrawlingBootstrap.this.terminate.get();
-			}
-
-		}
-
-		private final AtomicBoolean terminate;
-		private final AtomicLong sessionCounter;
-		private final long timeOut;
-		private final TimeUnit unit;
-
-		private CrawlingBootstrap(long timeOut, TimeUnit unit) {
-			this.timeOut = timeOut;
-			this.unit = unit;
-			this.sessionCounter=new AtomicLong(0);
-			this.terminate=new AtomicBoolean(false);
-		}
-
-		@Override
-		public void run() {
-			if(this.terminate.get()) {
-				LOGGER.info(
-					"Aborted crawling {}: termination requested",
-					jenkinsInstance());
-				return;
-			}
-
-			CrawlingSession session=new CrawlingSession();
-			session.start();
-			if(bootstrapCrawling()) {
-				awaitCompletion();
-				persistState();
-				session.terminate();
-			}
-		}
-
-		private void fireEvent(CrawlingEvent event) {
-			CrawlingController.this.dispatcher.fireEvent(event);
-		}
-
-		private boolean bootstrapCrawling() {
-			boolean result=false;
-			try {
-				Instance existingService=
-					storage.
-						entityOfId(
-							jenkinsInstance(),
-							JenkinsEntityType.INSTANCE,
-							Instance.class);
-				Task task=null;
-				if(existingService==null) {
-					task=new LoadInstanceTask(jenkinsInstance());
-				} else {
-					task=new RefreshInstanceTask(existingService);
-				}
-				taskScheduler().schedule(task);
-				result=true;
-			} catch (IOException e) {
-				LOGGER.error("Could not start crawling "+jenkinsInstance(),e);
-			}
-			return result;
-		}
-
-		private URI jenkinsInstance() {
-			return CrawlingController.this.instance;
-		}
-
-		private void awaitCompletion() {
-			while(taskScheduler().hasPendingTasks() && !this.terminate.get()) {
-				try {
-					this.unit.sleep(this.timeOut);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		}
-
-		private void terminate() {
-			this.terminate.set(true);
-		}
-
-		private TaskScheduler taskScheduler() {
-			return CrawlingController.this.scheduler;
-		}
-
-	}
+final class CrawlingController extends AbstractExecutionThreadService {
 
 	static class Builder {
 
@@ -182,21 +54,16 @@ final class CrawlingController {
 		private URI instance;
 		private FileBasedStorage storage;
 		private CrawlingEventDispatcher dispatcher;
+		private OperationDecissionPoint odp;
+		private CrawlerInformationPoint cip;
+		private CrawlingDecissionPoint cdp;
 
 		private Builder() {
 		}
 
-		private ScheduledExecutorService createPool() {
-			return
-				ControlledScheduledExecutorService.
-					builder().
-						withPoolSize(1).
-						withThreadFactory(
-							new ThreadFactoryBuilder().
-								setNameFormat("JenkinsCrawler-admin-%d").
-								build()
-						).
-						build();
+		Builder withJenkinsInstance(URI instance) {
+			this.instance = instance;
+			return this;
 		}
 
 		Builder withTaskScheduler(TaskScheduler scheduler) {
@@ -209,13 +76,23 @@ final class CrawlingController {
 			return this;
 		}
 
-		Builder withJenkinsInstance(URI instance) {
-			this.instance = instance;
+		Builder withStorage(FileBasedStorage manager) {
+			this.storage=manager;
 			return this;
 		}
 
-		Builder withStorage(FileBasedStorage manager) {
-			this.storage=manager;
+		Builder withCrawlerInformationPoint(CrawlerInformationPoint cip) {
+			this.cip=cip;
+			return this;
+		}
+
+		Builder withOperationDecissionPoint(OperationDecissionPoint odp) {
+			this.odp=odp;
+			return this;
+		}
+
+		Builder withCrawlingDecissionPoint(CrawlingDecissionPoint cdp) {
+			this.cdp=cdp;
 			return this;
 		}
 
@@ -224,16 +101,70 @@ final class CrawlingController {
 			checkNotNull(this.storage);
 			checkNotNull(this.scheduler);
 			checkNotNull(this.dispatcher);
-			return new CrawlingController(this.instance,this.storage,this.scheduler,createPool(),this.dispatcher);
+			checkNotNull(this.cip);
+			checkNotNull(this.odp);
+			checkNotNull(this.cdp);
+			return
+				new CrawlingController(
+					this.cip,
+					this.odp,
+					this.cdp,
+					this.instance,
+					this.storage,
+					this.scheduler,
+					this.dispatcher);
 
 		}
 
 	}
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(CrawlingController.class);
+	private final class CrawlingSession {
 
-	private final ScheduledExecutorService pool;
-	private final CrawlingBootstrap bootstrap;
+		private final Timer timer;
+		private final long sessionId;
+
+		private CrawlingSession(long sessionId) {
+			this.sessionId=sessionId;
+			this.timer=new Timer();
+		}
+
+		public void start() {
+			this.timer.start();
+			LOGGER.info("Started crawling {}...",CrawlingController.this.instance);
+			fireEvent(CrawlerEventFactory.newCrawlingStartedEvent(this.sessionId,timer.startedOn()));
+		}
+
+		public void terminate() {
+			this.timer.stop();
+			LOGGER.info(
+				"Crawling of {} {}. Execution took {}",
+				CrawlingController.this.instance,
+				isAborted()?"aborted":"completed",
+				this.timer);
+			fireEvent(createTerminationEvent());
+		}
+
+		private CrawlingEvent createTerminationEvent() {
+			CrawlingEvent event=null;
+			if(!isAborted()) {
+				event=CrawlerEventFactory.newCrawlingCompletedEvent(this.sessionId,this.timer.stoppedOn());
+			} else {
+				event=CrawlerEventFactory.newCrawlingAbortedEvent(this.sessionId,this.timer.stoppedOn());
+			}
+			return event;
+		}
+
+		private void fireEvent(CrawlingEvent event) {
+			CrawlingController.this.dispatcher.fireEvent(event);
+		}
+
+		private boolean isAborted() {
+			return CrawlingController.this.terminate.get();
+		}
+
+	}
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(CrawlingController.class);
 
 	private final URI instance;
 	private final TaskScheduler scheduler;
@@ -241,41 +172,122 @@ final class CrawlingController {
 
 	private final CrawlingEventDispatcher dispatcher;
 
-	private CrawlingController(URI instance, FileBasedStorage storage, TaskScheduler scheduler, ScheduledExecutorService pool, CrawlingEventDispatcher dispatcher) {
+	private final CrawlerInformationPoint cip;
+	private final OperationDecissionPoint odp;
+
+	@SuppressWarnings("unused")
+	private final CrawlingDecissionPoint cdp;
+
+	private final AtomicBoolean terminate;
+	private final AtomicLong sessionCounter;
+	private final long timeOut;
+	private final TimeUnit unit;
+
+	private CrawlingController(
+			CrawlerInformationPoint cip,
+			OperationDecissionPoint odp,
+			CrawlingDecissionPoint cdp,
+			URI instance,
+			FileBasedStorage storage,
+			TaskScheduler scheduler,
+			CrawlingEventDispatcher dispatcher) {
 		this.instance = instance;
 		this.storage = storage;
 		this.scheduler = scheduler;
-		this.pool = pool;
 		this.dispatcher = dispatcher;
-		this.bootstrap=new CrawlingBootstrap(1,TimeUnit.SECONDS);
+		this.timeOut = 1;
+		this.unit = TimeUnit.SECONDS;
+		this.cip = cip;
+		this.odp = odp;
+		this.cdp = cdp;
+		this.sessionCounter=new AtomicLong(0);
+		this.terminate=new AtomicBoolean(false);
 	}
 
-	private void persistState() {
-		try {
-			CrawlingController.this.storage.save();
-		} catch (IOException e) {
-			LOGGER.warn("Could not persist crawler state",e);
+	@Override
+	protected void run() throws Exception {
+		boolean completed=false;
+		while(!this.terminate.get() && !completed) {
+			CrawlingSession session=
+				new CrawlingSession(this.sessionCounter.incrementAndGet());
+			session.start();
+			if(bootstrapCrawling()) {
+				awaitCrawlingCompletion();
+				persistCrawlerState();
+				session.terminate();
+			}
+			completed = this.odp.canContinueCrawling(this.cip);
+			if(!completed) {
+				suspendCrawling();
+			}
+		}
+		if(LOGGER.isInfoEnabled()) {
+			String message =
+				completed?
+					"Completed crawling of {}":
+					"Aborted crawling {}: termination requested";
+			LOGGER.info(message,this.instance);
 		}
 	}
 
-	void start() {
-		this.pool.
-			scheduleWithFixedDelay(
-				bootstrap,
-				1,
-				60,
-				TimeUnit.SECONDS);
+	@Override
+	protected void triggerShutdown() {
+		LOGGER.info("Requested crawler termination {}",this.instance);
+		this.terminate.set(true);
 	}
 
-	void stop() {
-		this.bootstrap.terminate();
-		this.pool.shutdown();
-		while(!this.pool.isTerminated()) {
+	private boolean bootstrapCrawling() {
+		boolean result=false;
+		try {
+			Instance existingService=
+				this.storage.
+					entityOfId(
+						this.instance,
+						JenkinsEntityType.INSTANCE,
+						Instance.class);
+			Task task=null;
+			if(existingService==null) {
+				task=new LoadInstanceTask(this.instance);
+			} else {
+				task=new RefreshInstanceTask(existingService);
+			}
+			this.scheduler.schedule(task);
+			result=true;
+		} catch (IOException e) {
+			LOGGER.error("Could not start crawling "+this.instance,e);
+		}
+		return result;
+	}
+
+	private void suspendCrawling() {
+		try {
+			Delayed crawlingDelay = this.odp.getCrawlingDelay(this.cip);
+			LOGGER.info("Suspend crawling of {} for {}",this.instance,crawlingDelay);
+			TimeUnit.MILLISECONDS.sleep(
+				crawlingDelay.
+					getDelay(TimeUnit.MILLISECONDS));
+			LOGGER.info("Resuming crawling of {}",this.instance);
+		} catch (InterruptedException e) {
+			LOGGER.info("Interrupted while suspended crawling of {}",this.instance);
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void awaitCrawlingCompletion() {
+		while(this.scheduler.hasPendingTasks() && !this.terminate.get()) {
 			try {
-				this.pool.awaitTermination(1, TimeUnit.SECONDS);
+				this.unit.sleep(this.timeOut);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
+		}
+	}
+
+	private void persistCrawlerState() {
+		try {
+			this.storage.save();
+		} catch (IOException e) {
+			LOGGER.warn("Could not persist crawler state",e);
 		}
 	}
 

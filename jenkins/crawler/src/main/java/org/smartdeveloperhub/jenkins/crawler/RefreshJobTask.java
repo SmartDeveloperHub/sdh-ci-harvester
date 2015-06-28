@@ -42,14 +42,14 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeJob;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
 
-final class RefreshJobTask extends AbstractCrawlingTask {
+final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshJobTask.class);
 
 	private final Job job;
 
 	RefreshJobTask(Job job) {
-		super(job.getUrl(), JenkinsEntityType.JOB, JenkinsArtifactType.RESOURCE);
+		super(job.getUrl(),Job.class,JenkinsEntityType.JOB,JenkinsArtifactType.RESOURCE);
 		this.job = job;
 	}
 	@Override
@@ -58,16 +58,12 @@ final class RefreshJobTask extends AbstractCrawlingTask {
 	}
 
 	@Override
-	protected void processResource(JenkinsResource resource) throws IOException {
-		Job currentJob = super.loadJob(resource);
-
+	protected void processEntity(Job currentJob, JenkinsResource resource) throws IOException {
 		ReferenceDifference difference=
 			TaskUtils.
 				calculate(
 					this.job.getRuns().getRuns(),
 					currentJob.getRuns().getRuns());
-
-		persistEntity(currentJob,resource.entity());
 
 		scheduleTask(new LoadJobConfigurationTask(super.location(),currentJob,resource.entity()));
 		scheduleTask(new LoadJobSCMTask(super.location(),currentJob));

@@ -20,32 +20,19 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+ *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins;
+package org.smartdeveloperhub.jenkins.crawler;
 
-import org.junit.Test;
+import java.util.concurrent.Delayed;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
 
-public class JenkinsEntityTypeTest {
+interface OperationDecissionPoint {
 
-	@Test
-	public void testIsCompatible() throws Exception {
-		for(JenkinsEntityType type:JenkinsEntityType.values()) {
-			JenkinsEntityType base=null;
-			if(type.isInstance()) {
-				base=JenkinsEntityType.INSTANCE;
-			} else if(type.isJob()) {
-				base=JenkinsEntityType.JOB;
-			} else if(type.isRun()) {
-				base=JenkinsEntityType.RUN;
-			}
-			assertThat(String.format("%s should be compatible with %s",type,base),base.isCompatible(type),equalTo(true));
-		}
-	}
+	boolean canContinueCrawling(CrawlerInformationPoint cip);
+
+	Delayed getCrawlingDelay(CrawlerInformationPoint cip);
 
 }

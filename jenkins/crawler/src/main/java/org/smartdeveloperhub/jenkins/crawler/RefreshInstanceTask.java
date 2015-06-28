@@ -37,17 +37,17 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils.ReferenceDifference;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 
-final class RefreshInstanceTask extends AbstractCrawlingTask {
+final class RefreshInstanceTask extends AbstractEntityCrawlingTask<Instance> {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshInstanceTask.class);
 
 	private final Instance instance;
 
 	RefreshInstanceTask(Instance instance) {
-		super(instance.getUrl(), JenkinsEntityType.INSTANCE, JenkinsArtifactType.RESOURCE);
+		super(instance.getUrl(),Instance.class,JenkinsEntityType.INSTANCE, JenkinsArtifactType.RESOURCE);
 		this.instance = instance;
 	}
 
@@ -57,16 +57,12 @@ final class RefreshInstanceTask extends AbstractCrawlingTask {
 	}
 
 	@Override
-	protected void processResource(JenkinsResource resource) throws IOException {
-		Instance currentService = super.loadInstance(resource);
-
+	protected void processEntity(Instance currentService, JenkinsResource resource) throws IOException {
 		ReferenceDifference difference=
 			TaskUtils.
 				calculate(
 					this.instance.getJobs().getJobs(),
 					currentService.getJobs().getJobs());
-
-		persistEntity(currentService,resource.entity());
 
 		for(URI createdBuild:difference.created()) {
 			scheduleTask(new LoadJobTask(createdBuild));

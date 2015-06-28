@@ -39,6 +39,7 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.Status;
 import org.smartdeveloperhub.jenkins.client.JenkinsClientException;
 import org.smartdeveloperhub.jenkins.client.JenkinsResourceProxy;
+import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationException;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
@@ -46,7 +47,7 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
-abstract class AbstractCrawlingTask implements Task {
+abstract class AbstractCrawlingTask<T extends Entity> implements Task {
 
 	private static final int RETRY_THRESHOLD = 5;
 
@@ -80,8 +81,8 @@ abstract class AbstractCrawlingTask implements Task {
 	private void retryTask(Throwable failure) {
 		this.retries++;
 		if(this.retries<RETRY_THRESHOLD) {
-			if(logger.isInfoEnabled()) {
-				logger.info("Retrying {} ({})",this.location,this.retries+1);
+			if(this.logger.isInfoEnabled()) {
+				this.logger.info("Retrying {} ({})",this.location,this.retries+1);
 			}
 			scheduleTask(this);
 		} else {
@@ -91,7 +92,7 @@ abstract class AbstractCrawlingTask implements Task {
 
 	private void failSilently(Throwable failure, String errorMessage, Object... args) {
 		String log=String.format(errorMessage,args);
-		logger.error(log,failure);
+		this.logger.error(log,failure);
 		throw new JenkinsClientException(log,failure);
 	}
 
@@ -110,6 +111,8 @@ abstract class AbstractCrawlingTask implements Task {
 			} catch (IOException e) {
 				failSilently(e,"Could not process resource %s",resource);
 			}
+		} else {
+			this.logger.warn("Resource {} not available ({})",resource.location(),resource.status());
 		}
 	}
 
@@ -120,16 +123,35 @@ abstract class AbstractCrawlingTask implements Task {
 
 	@Override
 	public final void execute(Context context) {
+		if(!context.
+				crawlingDecissionPoint().
+					canProcessEntityType(
+						this.entity,
+						context.jenkinsInformationPoint(),
+						context.currentSession())) {
+			this.logger.info("Dismissing execution of task {}: not allowed",id());
+			return;
+		}
+
 		setContext(context);
 		try {
 			JenkinsResource resource=
-					createProxy().
-						get(this.artifact);
+				createProxy().
+					get(this.artifact);
 			persistResource(resource);
+
+			if(!this.entity.isCompatible(resource.entity())) {
+				this.logger.warn("Aborted processing of task {}: incompatible returned entity type ({} not compatible with {})",id(),resource.entity(),this.entity);
+				return;
+			}
 			dispatchResource(resource);
 		} catch (IOException e) {
 			retryTask(e);
 		}
+	}
+
+	protected final Logger logger() {
+		return this.logger;
 	}
 
 	protected final URI jenkinsInstance() {
@@ -143,6 +165,11 @@ abstract class AbstractCrawlingTask implements Task {
 
 	protected final JenkinsEntityType entityType() {
 		return this.entity;
+	}
+
+	protected final  void persistEntity(Entity entity, JenkinsEntityType type) throws IOException {
+		checkState(this.context!=null);
+		this.context.entityRepository().saveEntity(entity,type);
 	}
 
 	protected final Job loadJob(JenkinsResource resource) throws TransformationException {
@@ -165,22 +192,37 @@ abstract class AbstractCrawlingTask implements Task {
 		this.context.schedule(task);
 	}
 
-	protected final void persistEntity(Entity entity, JenkinsEntityType type) throws IOException {
-		checkState(this.context!=null);
-		this.context.entityRepository().saveEntity(entity,type);
-	}
-
 	protected final void fireEvent(JenkinsEvent event) {
 		checkState(this.context!=null);
 		this.context.fireEvent(event);
+	}
+
+	protected final <T extends Entity> T entityOfId(URI id, JenkinsEntityType entityType, Class<? extends T> entityClass) throws IOException {
+		checkState(this.context!=null);
+		return this.context.entityRepository().entityOfId(id,entityType,entityClass);
+	}
+
+	protected final ModelMappingService modelMapper() {
+		return this.context.modelMapper();
+	}
+
+	protected final CrawlingDecissionPoint crawlingDecissionPoint() {
+		checkState(this.context!=null);
+		return this.context.crawlingDecissionPoint();
+	}
+
+	protected final JenkinsInformationPoint jenkinsInformationPoint() {
+		checkState(this.context!=null);
+		return this.context.jenkinsInformationPoint();
+	}
+
+	protected final CrawlingSession currentCrawlingSession() {
+		checkState(this.context!=null);
+		return this.context.currentSession();
 	}
 
 	protected abstract String taskPrefix();
 
 	protected abstract void processResource(JenkinsResource resource) throws IOException;
 
-	public <T extends Entity> T entityOfId(URI id, JenkinsEntityType entityType, Class<? extends T> entityClass) throws IOException {
-		checkState(this.context!=null);
-		return this.context.entityRepository().entityOfId(id,entityType,entityClass);
-	}
 }

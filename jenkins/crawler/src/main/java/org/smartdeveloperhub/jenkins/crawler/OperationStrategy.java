@@ -20,32 +20,50 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+ *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins;
+package org.smartdeveloperhub.jenkins.crawler;
 
-import org.junit.Test;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+public final class OperationStrategy {
 
-public class JenkinsEntityTypeTest {
+	private static final class DefaultOperationDecissionPoint implements OperationDecissionPoint {
 
-	@Test
-	public void testIsCompatible() throws Exception {
-		for(JenkinsEntityType type:JenkinsEntityType.values()) {
-			JenkinsEntityType base=null;
-			if(type.isInstance()) {
-				base=JenkinsEntityType.INSTANCE;
-			} else if(type.isJob()) {
-				base=JenkinsEntityType.JOB;
-			} else if(type.isRun()) {
-				base=JenkinsEntityType.RUN;
+		private static final class DefaultCrawlingDelay implements Delayed {
+
+			private static final long DELAY_TIME = 60L;
+
+			private static final TimeUnit DELAY_UNIT = TimeUnit.SECONDS;
+
+			@Override
+			public int compareTo(Delayed o) {
+				return (int)(o.getDelay(DELAY_UNIT)-DELAY_TIME);
 			}
-			assertThat(String.format("%s should be compatible with %s",type,base),base.isCompatible(type),equalTo(true));
+
+			@Override
+			public long getDelay(TimeUnit unit) {
+				return unit.convert(DELAY_TIME, DELAY_UNIT);
+			}
+
 		}
+
+		@Override
+		public Delayed getCrawlingDelay(CrawlerInformationPoint cip) {
+			return new DefaultCrawlingDelay();
+		}
+
+		@Override
+		public boolean canContinueCrawling(CrawlerInformationPoint cip) {
+			return true;
+		}
+	}
+
+	OperationDecissionPoint decissionPoint() {
+		return new DefaultOperationDecissionPoint();
 	}
 
 }

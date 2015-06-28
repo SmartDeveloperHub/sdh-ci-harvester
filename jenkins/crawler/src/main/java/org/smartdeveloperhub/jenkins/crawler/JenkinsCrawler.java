@@ -26,7 +26,7 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,14 +49,20 @@ import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
 import org.smartdeveloperhub.jenkins.crawler.util.Notification;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.EntityRepository;
 
+import com.google.common.base.Optional;
+
 public final class JenkinsCrawler {
 
 	public static final class Builder {
 
 		private URI location;
 		private File directory;
+		private OperationStrategy operationStrategy;
+		private CrawlingStrategy crawlingStrategy;
+		private int numberOfWorkers;
 
 		private Builder() {
+			this.numberOfWorkers=Runtime.getRuntime().availableProcessors();
 		}
 
 		public Builder withLocation(URI location) {
@@ -74,6 +80,23 @@ public final class JenkinsCrawler {
 			return this;
 		}
 
+		public Builder withWorkerCount(int numberOfWorkers) {
+			checkArgument(0<numberOfWorkers,"At least one worker is required (%s)",numberOfWorkers);
+			checkArgument(numberOfWorkers<=Runtime.getRuntime().availableProcessors(),"No more than %s workers can be used (%s)",Runtime.getRuntime().availableProcessors(),numberOfWorkers);
+			this.numberOfWorkers=numberOfWorkers;
+			return this;
+		}
+
+		public Builder withOperationStrategy(OperationStrategy operationStrategy) {
+			this.operationStrategy = operationStrategy;
+			return this;
+		}
+
+		public Builder withCrawlingStrategy(CrawlingStrategy crawlingStrategy) {
+			this.crawlingStrategy = crawlingStrategy;
+			return this;
+		}
+
 		public JenkinsCrawler build() throws JenkinsCrawlerException {
 			checkNotNull(this.location,"Service instance cannot be null");
 			try {
@@ -82,7 +105,10 @@ public final class JenkinsCrawler {
 						this.location,
 						createFileBasedStorage(),
 						ModelMappingService.
-							newInstance(TransformationManager.newInstance()));
+							newInstance(TransformationManager.newInstance()),
+						Optional.fromNullable(this.operationStrategy).or(new OperationStrategy()),
+						Optional.fromNullable(this.crawlingStrategy).or(new CrawlingStrategy()),
+						this.numberOfWorkers);
 			} catch (IOException e) {
 				String errorMessage = "Could not setup persistency layer";
 				LOGGER.debug(errorMessage+". Full stacktrace follows",e);
@@ -150,6 +176,22 @@ public final class JenkinsCrawler {
 		public void schedule(Task task) {
 			JenkinsCrawler.this.scheduler.schedule(task);
 		}
+
+		@Override
+		public CrawlingDecissionPoint crawlingDecissionPoint() {
+			return JenkinsCrawler.this.crawlingStrategy.decissionPoint();
+		}
+
+		@Override
+		public JenkinsInformationPoint jenkinsInformationPoint() {
+			return JenkinsCrawler.this.cip.jenkinsInformationPoint();
+		}
+
+		@Override
+		public CrawlingSession currentSession() {
+			return JenkinsCrawler.this.cip.currentCrawlingSession();
+		}
+
 	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsCrawler.class);
@@ -163,15 +205,26 @@ public final class JenkinsCrawler {
 	private final FileBasedStorage storage;
 	private final ModelMappingService mappingService;
 
-	private JenkinsCrawler(URI instance, FileBasedStorage storage, ModelMappingService mappingService) {
-		this.jenkinsEventListeners=ListenerManager.newInstance();
-		this.crawlerEventListeners=ListenerManager.newInstance();
+	private final CrawlerInformationPoint cip;
+
+	private final OperationStrategy operationStrategy;
+	private final CrawlingStrategy crawlingStrategy;
+
+	private JenkinsCrawler(URI instance, FileBasedStorage storage, ModelMappingService mappingService, OperationStrategy operationStrategy, CrawlingStrategy crawlingStrategy, int numberOfWorkers) {
+		this.operationStrategy = operationStrategy;
+		this.crawlingStrategy = crawlingStrategy;
 		this.instance=instance;
 		this.storage=storage;
 		this.mappingService=mappingService;
+		this.cip=new CrawlerInformationPoint();
+		this.jenkinsEventListeners=ListenerManager.newInstance();
+		this.crawlerEventListeners=ListenerManager.newInstance();
+		this.jenkinsEventListeners.registerListener(this.cip);
+		this.crawlerEventListeners.registerListener(this.cip);
 		this.scheduler=
 			MultiThreadedTaskScheduler.
 				builder().
+					withNumberOfThreads(numberOfWorkers).
 					withContext(new LocalContext()).
 					build();
 		this.controller=
@@ -183,6 +236,9 @@ public final class JenkinsCrawler {
 							this.crawlerEventListeners)).
 					withJenkinsInstance(this.instance).
 					withTaskScheduler(this.scheduler).
+					withCrawlerInformationPoint(this.cip).
+					withOperationDecissionPoint(this.operationStrategy.decissionPoint()).
+					withCrawlingDecissionPoint(this.crawlingStrategy.decissionPoint()).
 					build();
 	}
 
@@ -201,14 +257,15 @@ public final class JenkinsCrawler {
 	public void start() {
 		LOGGER.info("Starting Jenkins Crawler ({})...",this.instance);
 		this.scheduler.start();
-		this.controller.start();
+		this.controller.startAsync();
 		LOGGER.info("Jenkins Crawler ({}) started.",this.instance);
 		fireCrawlerEvent(CrawlerEventFactory.newCrawlerStartedEvent(new Date()));
 	}
 
 	public void stop() throws IOException {
 		LOGGER.info("Stopping Jenkins Crawler ({})...",this.instance);
-		this.controller.stop();
+		this.controller.stopAsync();
+		this.controller.awaitTerminated();
 		this.scheduler.stop();
 		this.storage.save();
 		LOGGER.info("Jenkins Crawler ({}) stopped.",this.instance);

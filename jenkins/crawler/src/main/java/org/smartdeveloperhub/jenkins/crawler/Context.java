@@ -41,10 +41,19 @@ interface Context {
 
 	void schedule(Task task);
 
+	CrawlingDecissionPoint crawlingDecissionPoint();
+
+	JenkinsInformationPoint jenkinsInformationPoint();
+
+	CrawlingSession currentSession();
+
+	@Deprecated
 	ModelMappingService modelMapper();
 
+	@Deprecated
 	EntityRepository entityRepository();
 
+	@Deprecated
 	ResourceRepository resourceRepository();
 
 }

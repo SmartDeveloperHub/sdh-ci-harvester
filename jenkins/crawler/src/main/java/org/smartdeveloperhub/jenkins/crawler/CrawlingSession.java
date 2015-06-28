@@ -20,32 +20,64 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-jenkins-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:1.0.0-SNAPSHOT
+ *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins;
+package org.smartdeveloperhub.jenkins.crawler;
 
-import org.junit.Test;
+import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+final class CrawlingSession {
 
-public class JenkinsEntityTypeTest {
+	private final long number;
+	private final JenkinsInformationPoint jip;
 
-	@Test
-	public void testIsCompatible() throws Exception {
-		for(JenkinsEntityType type:JenkinsEntityType.values()) {
-			JenkinsEntityType base=null;
-			if(type.isInstance()) {
-				base=JenkinsEntityType.INSTANCE;
-			} else if(type.isJob()) {
-				base=JenkinsEntityType.JOB;
-			} else if(type.isRun()) {
-				base=JenkinsEntityType.RUN;
-			}
-			assertThat(String.format("%s should be compatible with %s",type,base),base.isCompatible(type),equalTo(true));
-		}
+	private Date startedOn;
+	private Date finishedOn;
+	private boolean aborted;
+
+	CrawlingSession(long number) {
+		this.number=number;
+		this.jip=new JenkinsInformationPoint();
+	}
+
+	void start(Date date) {
+		this.startedOn=date;
+	}
+
+	void complete(Date date) {
+		this.finishedOn=date;
+		this.aborted=false;
+	}
+
+	void abort(Date date) {
+		this.finishedOn=date;
+		this.aborted=true;
+	}
+
+	long sessionNumber() {
+		return this.number;
+	}
+
+	boolean isIdle() {
+		return this.startedOn==null;
+	}
+
+	boolean isActive() {
+		return this.startedOn!=null && this.finishedOn==null;
+	}
+
+	boolean isFinished() {
+		return this.startedOn!=null && this.finishedOn!=null;
+	}
+
+	boolean finishedSuccesfully() {
+		return !this.aborted;
+	}
+
+	JenkinsInformationPoint jenkinsInformationPoint() {
+		return this.jip;
 	}
 
 }

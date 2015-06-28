@@ -34,11 +34,11 @@ import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
 
-abstract class AbstractCrawlingSubTask<T extends Entity> extends AbstractCrawlingTask {
+abstract class AbstractArtifactCrawlingTask<T extends Entity> extends AbstractCrawlingTask<T> {
 
 	private T parent;
 
-	AbstractCrawlingSubTask(URI location, JenkinsEntityType entity, JenkinsArtifactType artifact, T parent) {
+	AbstractArtifactCrawlingTask(URI location, JenkinsEntityType entity, JenkinsArtifactType artifact, T parent) {
 		super(location,entity, artifact);
 		this.parent = parent;
 	}

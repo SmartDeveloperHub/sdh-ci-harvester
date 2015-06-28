@@ -35,12 +35,12 @@ import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 
-final class RefreshRunTask extends AbstractCrawlingTask {
+final class RefreshRunTask extends AbstractEntityCrawlingTask<Run> {
 
 	private final Run run;
 
 	RefreshRunTask(Run run) {
-		super(run.getUrl(),JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
+		super(run.getUrl(),Run.class,JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
 		this.run = run;
 	}
 
@@ -50,12 +50,8 @@ final class RefreshRunTask extends AbstractCrawlingTask {
 	}
 
 	@Override
-	protected void processResource(JenkinsResource resource) throws IOException {
-		Run currentRun = super.loadRun(resource);
-
+	protected void processEntity(Run currentRun,JenkinsResource resource) throws IOException {
 		if(!this.run.getStatus().equals(currentRun.getStatus())) {
-
-			persistEntity(currentRun,resource.entity());
 			if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && currentRun.getResult().equals(RunResult.SUCCESS)) {
 				scheduleTask(new LoadRunArtifactsTask(super.location(),currentRun));
 			}
@@ -66,7 +62,6 @@ final class RefreshRunTask extends AbstractCrawlingTask {
 						super.jenkinsInstance(),
 						currentRun));
 		}
-
 	}
 
 }
