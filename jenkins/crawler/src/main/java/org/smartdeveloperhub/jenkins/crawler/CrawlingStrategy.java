@@ -37,6 +37,7 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.SubJob;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -57,6 +58,12 @@ public final class CrawlingStrategy {
 
 		@Override
 		public boolean canProcessJob(Job job, JenkinsInformationPoint jip, CrawlingSession session) {
+			if(job instanceof SubJob) {
+				// For the time being assume that if we are processing a
+				// subjob is because the parent was included in the crawling
+				return true;
+			}
+
 			if(includedJobs.contains(job.getId())) {
 				return true;
 			} else if(excludedJobs.contains(job.getId())) {
