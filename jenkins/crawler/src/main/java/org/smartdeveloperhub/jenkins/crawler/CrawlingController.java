@@ -206,8 +206,8 @@ final class CrawlingController extends AbstractExecutionThreadService {
 
 	@Override
 	protected void run() throws Exception {
-		boolean completed=false;
-		while(!this.terminate.get() && !completed) {
+		boolean continueCrawling=true;
+		while(!this.terminate.get() && continueCrawling) {
 			CrawlingSession session=
 				new CrawlingSession(this.sessionCounter.incrementAndGet());
 			session.start();
@@ -216,14 +216,14 @@ final class CrawlingController extends AbstractExecutionThreadService {
 				persistCrawlerState();
 				session.terminate();
 			}
-			completed = this.odp.canContinueCrawling(this.cip);
-			if(!completed) {
+			continueCrawling = this.odp.canContinueCrawling(this.cip);
+			if(continueCrawling) {
 				suspendCrawling();
 			}
 		}
 		if(LOGGER.isInfoEnabled()) {
 			String message =
-				completed?
+				continueCrawling?
 					"Completed crawling of {}":
 					"Aborted crawling {}: termination requested";
 			LOGGER.info(message,this.instance);
@@ -234,6 +234,9 @@ final class CrawlingController extends AbstractExecutionThreadService {
 	protected void triggerShutdown() {
 		LOGGER.info("Requested crawler termination {}",this.instance);
 		this.terminate.set(true);
+		synchronized(this.instance) {
+			this.instance.notify();
+		}
 	}
 
 	private boolean bootstrapCrawling() {
@@ -260,12 +263,15 @@ final class CrawlingController extends AbstractExecutionThreadService {
 	}
 
 	private void suspendCrawling() {
+		if(this.terminate.get()) {
+			return;
+		}
 		try {
 			Delayed crawlingDelay = this.odp.getCrawlingDelay(this.cip);
 			LOGGER.info("Suspend crawling of {} for {}",this.instance,crawlingDelay);
-			TimeUnit.MILLISECONDS.sleep(
-				crawlingDelay.
-					getDelay(TimeUnit.MILLISECONDS));
+			synchronized(this.instance) {
+				this.instance.wait(crawlingDelay.getDelay(TimeUnit.MILLISECONDS));
+			}
 			LOGGER.info("Resuming crawling of {}",this.instance);
 		} catch (InterruptedException e) {
 			LOGGER.info("Interrupted while suspended crawling of {}",this.instance);
@@ -276,7 +282,9 @@ final class CrawlingController extends AbstractExecutionThreadService {
 	private void awaitCrawlingCompletion() {
 		while(this.scheduler.hasPendingTasks() && !this.terminate.get()) {
 			try {
-				this.unit.sleep(this.timeOut);
+				synchronized(this.instance) {
+					this.instance.wait(TimeUnit.MILLISECONDS.convert(this.timeOut,this.unit));
+				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}

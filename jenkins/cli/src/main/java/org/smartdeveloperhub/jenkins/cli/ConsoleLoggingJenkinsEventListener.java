@@ -84,7 +84,7 @@ final class ConsoleLoggingJenkinsEventListener implements JenkinsEventListener {
 	public void onJobUpdate(JobUpdatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Updated job %s%n",event.date(),event.jobId());
+				printf("[%s] Updated job %s {%s}%n",event.date(),event.jobId(),event.codebase());
 	}
 
 }

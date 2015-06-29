@@ -107,7 +107,7 @@ public final class JenkinsCrawler {
 						ModelMappingService.
 							newInstance(TransformationManager.newInstance()),
 						Optional.fromNullable(this.operationStrategy).or(new OperationStrategy()),
-						Optional.fromNullable(this.crawlingStrategy).or(new CrawlingStrategy()),
+						Optional.fromNullable(this.crawlingStrategy).or(CrawlingStrategy.builder().build()),
 						this.numberOfWorkers);
 			} catch (IOException e) {
 				String errorMessage = "Could not setup persistency layer";

@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawler;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawlerException;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
@@ -59,6 +60,15 @@ public final class JenkinsCrawlerExec {
 					builder().
 						withDirectory(tmpDirectory).
 						withLocation(location).
+						withCrawlingStrategy(
+							CrawlingStrategy.
+								builder().
+									includeJob("jenkins_main_trunk").
+									includeJob("jenkins_pom").
+									includeJob("maven-interceptors").
+									includeJob("tools_maven-hpi-plugin").
+									includeJob("infra_extension-indexer").
+									build()).
 						build();
 			JenkinsEventListener jenkinsEventListener = new ConsoleLoggingJenkinsEventListener();
 			CrawlerEventListener crawlerEventListener = new ConsoleLoggingCrawlerEventListener();
