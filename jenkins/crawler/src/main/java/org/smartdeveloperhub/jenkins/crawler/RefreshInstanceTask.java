@@ -34,11 +34,13 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.JenkinsURI;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils.ReferenceDifference;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 
 final class RefreshInstanceTask extends AbstractEntityCrawlingTask<Instance> {
 
@@ -65,19 +67,23 @@ final class RefreshInstanceTask extends AbstractEntityCrawlingTask<Instance> {
 					currentService.getJobs().getJobs());
 
 		for(URI createdBuild:difference.created()) {
-			scheduleTask(new LoadJobTask(createdBuild));
+			if(super.crawlingDecissionPoint().canProcessReference(currentService,toReference(createdBuild), super.jenkinsInformationPoint(), super.currentCrawlingSession())) {
+				scheduleTask(new LoadJobTask(createdBuild));
+			}
 		}
 
 		for(URI maintainedBuild:difference.maintained()) {
-			try {
-				Job build=super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Job.class);
-				if(build==null) {
-					scheduleTask(new LoadJobTask(maintainedBuild));
-				} else {
-					scheduleTask(new RefreshJobTask(build));
+			if(super.crawlingDecissionPoint().canProcessReference(currentService,toReference(maintainedBuild), super.jenkinsInformationPoint(), super.currentCrawlingSession())) {
+				try {
+					Job build=super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Job.class);
+					if(build==null) {
+						scheduleTask(new LoadJobTask(maintainedBuild));
+					} else {
+						scheduleTask(new RefreshJobTask(build));
+					}
+				} catch (Exception e) {
+					LOGGER.warn("Could not load persisted build '"+maintainedBuild+"'",e);
 				}
-			} catch (Exception e) {
-				LOGGER.warn("Could not load persisted build '"+maintainedBuild+"'",e);
 			}
 		}
 
@@ -91,4 +97,8 @@ final class RefreshInstanceTask extends AbstractEntityCrawlingTask<Instance> {
 
 	}
 
+	private Reference toReference(URI createdBuild) {
+		return new Reference(createdBuild, JenkinsURI.create(createdBuild).job());
+	}
 }
+

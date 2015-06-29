@@ -53,7 +53,9 @@ final class LoadInstanceTask extends AbstractEntityCrawlingTask<Instance> {
 			JenkinsEventFactory.
 				newInstanceFoundEvent(super.location()));
 		for(Reference ref:instance.getJobs().getJobs()) {
-			scheduleTask(new LoadJobTask(ref.getValue()));
+			if(super.crawlingDecissionPoint().canProcessReference(instance, ref, super.jenkinsInformationPoint(), super.currentCrawlingSession())) {
+				scheduleTask(new LoadJobTask(ref.getValue()));
+			}
 		}
 	}
 

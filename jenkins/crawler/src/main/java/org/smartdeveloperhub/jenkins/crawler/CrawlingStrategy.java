@@ -34,6 +34,7 @@ import java.util.Set;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
@@ -46,14 +47,13 @@ public final class CrawlingStrategy {
 
 	private final class DefaultCrawlingDecissionPoint implements CrawlingDecissionPoint {
 
-		@Override
-		public boolean canProcessRun(Run run, JenkinsInformationPoint jip, CrawlingSession session) {
-			return true;
-		}
-
-		@Override
-		public boolean canProcessReference(Entity entity, Reference reference, JenkinsInformationPoint jip, CrawlingSession session) {
-			return true;
+		private boolean canProcessJob(String jobName) {
+			if(includedJobs.contains(jobName)) {
+				return true;
+			} else if(excludedJobs.contains(jobName)) {
+				return false;
+			}
+			return includedJobs.size()==0;
 		}
 
 		@Override
@@ -63,13 +63,20 @@ public final class CrawlingStrategy {
 				// subjob is because the parent was included in the crawling
 				return true;
 			}
+			return canProcessJob(job.getId());
+		}
 
-			if(includedJobs.contains(job.getId())) {
-				return true;
-			} else if(excludedJobs.contains(job.getId())) {
-				return false;
+		@Override
+		public boolean canProcessRun(Run run, JenkinsInformationPoint jip, CrawlingSession session) {
+			return true;
+		}
+
+		@Override
+		public boolean canProcessReference(Entity entity, Reference reference, JenkinsInformationPoint jip, CrawlingSession session) {
+			if(entity instanceof Instance) {
+				return canProcessJob(reference.getId());
 			}
-			return includedJobs.size()==0;
+			return true;
 		}
 
 		@Override

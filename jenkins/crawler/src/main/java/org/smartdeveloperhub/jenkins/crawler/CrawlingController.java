@@ -227,8 +227,8 @@ final class CrawlingController extends AbstractExecutionThreadService {
 		if(LOGGER.isInfoEnabled()) {
 			String message =
 				continueCrawling?
-					"Completed crawling of {}":
-					"Aborted crawling {}: termination requested";
+					"Aborted crawling {}: termination requested":
+					"Completed crawling of {}";
 			LOGGER.info(message,this.instance);
 		}
 		fireEvent(CrawlerEventFactory.newCrawlerStoppedEvent(new Date()));
