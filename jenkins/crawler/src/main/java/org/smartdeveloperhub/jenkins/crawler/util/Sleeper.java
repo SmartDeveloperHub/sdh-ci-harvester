@@ -24,25 +24,41 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.util;
 
-import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventDispatcher;
-import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
-import org.smartdeveloperhub.jenkins.crawler.util.Notification;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-final class CrawlerEventNotification implements Notification<CrawlerEventListener> {
+import java.util.concurrent.TimeUnit;
 
-	private final CrawlerEvent event;
+public final class Sleeper {
 
-	CrawlerEventNotification(CrawlerEvent event) {
-		this.event = event;
+	private final Object witness;
+
+	public Sleeper() {
+		this.witness=new Object();
 	}
 
-	@Override
-	public void propagate(CrawlerEventListener listener) {
-		CrawlerEventDispatcher.
-			create(listener).
-				fireEvent(this.event);
+	private void doSleep(long millis) throws InterruptedException {
+		synchronized(this.witness) {
+			this.witness.wait(millis);
+		}
 	}
+
+	public void sleep(Delay delay) throws InterruptedException {
+		checkNotNull(delay,"Delay cannot be null");
+		doSleep(delay.getTime(TimeUnit.MILLISECONDS));
+	}
+
+	public void sleep(long timeout, TimeUnit unit) throws InterruptedException {
+		checkNotNull(timeout,"Time out cannot be null");
+		checkNotNull(unit,"Time unit cannot be null");
+		doSleep(TimeUnit.MILLISECONDS.convert(timeout, unit));
+	}
+
+	public void wakeUp() {
+		synchronized(this.witness) {
+			this.witness.notify();
+		}
+	}
+
 }

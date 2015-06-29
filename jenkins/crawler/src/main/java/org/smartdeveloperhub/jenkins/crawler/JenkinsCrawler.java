@@ -26,19 +26,17 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.ResourceRepository;
 import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
-import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventDispatcher;
@@ -106,7 +104,7 @@ public final class JenkinsCrawler {
 						createFileBasedStorage(),
 						ModelMappingService.
 							newInstance(TransformationManager.newInstance()),
-						Optional.fromNullable(this.operationStrategy).or(new OperationStrategy()),
+						Optional.fromNullable(this.operationStrategy).or(OperationStrategy.builder().build()),
 						Optional.fromNullable(this.crawlingStrategy).or(CrawlingStrategy.builder().build()),
 						this.numberOfWorkers);
 			} catch (IOException e) {
@@ -232,7 +230,7 @@ public final class JenkinsCrawler {
 				builder().
 					withStorage(this.storage).
 					withCrawlingEventDispatcher(
-						new DefaultCrawlingEventDispatcher(
+						new DefaultCrawlerEventManager(
 							this.crawlerEventListeners)).
 					withJenkinsInstance(this.instance).
 					withTaskScheduler(this.scheduler).
@@ -240,10 +238,6 @@ public final class JenkinsCrawler {
 					withOperationDecissionPoint(this.operationStrategy.decissionPoint()).
 					withCrawlingDecissionPoint(this.crawlingStrategy.decissionPoint()).
 					build();
-	}
-
-	private void fireCrawlerEvent(CrawlerEvent event) {
-		this.crawlerEventListeners.notify(new CrawlerEventNotification(event));
 	}
 
 	public URI instance() {
@@ -259,7 +253,10 @@ public final class JenkinsCrawler {
 		this.scheduler.start();
 		this.controller.startAsync();
 		LOGGER.info("Jenkins Crawler ({}) started.",this.instance);
-		fireCrawlerEvent(CrawlerEventFactory.newCrawlerStartedEvent(new Date()));
+	}
+
+	public void awaitCompletion() {
+		this.controller.awaitTerminated();
 	}
 
 	public void stop() throws IOException {
@@ -269,7 +266,6 @@ public final class JenkinsCrawler {
 		this.scheduler.stop();
 		this.storage.save();
 		LOGGER.info("Jenkins Crawler ({}) stopped.",this.instance);
-		fireCrawlerEvent(CrawlerEventFactory.newCrawlerStoppedEvent(new Date()));
 	}
 
 	public JenkinsCrawler registerListener(JenkinsEventListener listener) {

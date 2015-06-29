@@ -26,10 +26,39 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventDispatcher;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
+import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
+import org.smartdeveloperhub.jenkins.crawler.util.Notification;
 
-interface CrawlingEventDispatcher {
+final class DefaultCrawlerEventManager implements CrawlerEventManager {
 
-	void fireEvent(CrawlingEvent event);
+	private static final class CrawlerEventNotification implements Notification<CrawlerEventListener> {
+
+		private final CrawlerEvent event;
+
+		private CrawlerEventNotification(CrawlerEvent event) {
+			this.event = event;
+		}
+
+		@Override
+		public void propagate(CrawlerEventListener listener) {
+			CrawlerEventDispatcher.
+				create(listener).
+					fireEvent(this.event);
+		}
+	}
+
+	private final ListenerManager<CrawlerEventListener> listeners;
+
+	DefaultCrawlerEventManager(ListenerManager<CrawlerEventListener> listeners) {
+		this.listeners = listeners;
+	}
+
+	@Override
+	public void fireEvent(CrawlerEvent event) {
+		this.listeners.notify(new CrawlerEventNotification(event));
+	}
 
 }

@@ -26,13 +26,10 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import org.smartdeveloperhub.jenkins.crawler.util.Delay;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEvent;
 
+interface CrawlerEventManager {
 
-interface OperationDecissionPoint {
-
-	boolean canContinueCrawling(CrawlerInformationPoint cip);
-
-	Delay getCrawlingDelay(CrawlerInformationPoint cip);
+	void fireEvent(CrawlerEvent event);
 
 }

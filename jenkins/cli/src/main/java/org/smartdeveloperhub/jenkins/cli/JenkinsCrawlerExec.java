@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawler;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawlerException;
+import org.smartdeveloperhub.jenkins.crawler.OperationStrategy;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
@@ -64,11 +66,18 @@ public final class JenkinsCrawlerExec {
 							CrawlingStrategy.
 								builder().
 									includeJob("jenkins_main_trunk").
-									includeJob("jenkins_pom").
-									includeJob("maven-interceptors").
-									includeJob("tools_maven-hpi-plugin").
-									includeJob("infra_extension-indexer").
+//									includeJob("jenkins_pom").
+//									includeJob("maven-interceptors").
+//									includeJob("tools_maven-hpi-plugin").
+//									includeJob("infra_extension-indexer").
 									build()).
+						withOperationStrategy(
+							OperationStrategy.
+								builder().
+									run().
+										times(2).
+											withDelay(15,TimeUnit.SECONDS).
+										build()).
 						build();
 			JenkinsEventListener jenkinsEventListener = new ConsoleLoggingJenkinsEventListener();
 			CrawlerEventListener crawlerEventListener = new ConsoleLoggingCrawlerEventListener();
@@ -76,8 +85,7 @@ public final class JenkinsCrawlerExec {
 				registerListener(jenkinsEventListener).
 				registerListener(crawlerEventListener);
 			crawler.start();
-			Consoles.defaultConsole().printf("<<HIT ENTER TO STOP THE CRAWLER>>%n");
-			Consoles.defaultConsole().readLine();
+			crawler.awaitCompletion();
 			crawler.stop();
 			crawler.
 				deregisterListener(crawlerEventListener).

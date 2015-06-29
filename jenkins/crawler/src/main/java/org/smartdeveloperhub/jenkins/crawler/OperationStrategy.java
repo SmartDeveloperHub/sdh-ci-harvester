@@ -26,44 +26,125 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
+
+import org.smartdeveloperhub.jenkins.crawler.util.Delay;
+
+import static com.google.common.base.Preconditions.*;
 
 public final class OperationStrategy {
 
-	private static final class DefaultOperationDecissionPoint implements OperationDecissionPoint {
+	public static final class Builder {
 
-		private static final class DefaultCrawlingDelay implements Delayed {
+		public static final class MultiRunMode {
 
-			private static final long DELAY_TIME = 60L;
+			private final Builder builder;
+			private final long iterations;
 
-			private static final TimeUnit DELAY_UNIT = TimeUnit.SECONDS;
-
-			@Override
-			public int compareTo(Delayed o) {
-				return (int)(o.getDelay(DELAY_UNIT)-DELAY_TIME);
+			private MultiRunMode(Builder builder, long iterations) {
+				this.builder = builder;
+				this.iterations = iterations;
 			}
 
-			@Override
-			public long getDelay(TimeUnit unit) {
-				return unit.convert(DELAY_TIME, DELAY_UNIT);
+			public Builder withDelay(Delay delay) {
+				this.builder.setDelay(delay);
+				this.builder.setIterations(this.iterations);
+				return this.builder;
+			}
+
+			public Builder withDelay(long time, TimeUnit unit) {
+				return withDelay(Delay.create(time, unit));
 			}
 
 		}
 
+		public static final class RunMode {
+
+			private final Builder builder;
+
+			private RunMode(Builder builder) {
+				this.builder = builder;
+			}
+
+			public Builder once() {
+				this.builder.setIterations(1);
+				this.builder.setDelay(null);
+				return this.builder;
+			}
+
+			public MultiRunMode times(long nIterations) {
+				checkArgument(nIterations>1,"Number of iterations must be greatern than 1 (%s)",nIterations);
+				return new MultiRunMode(this.builder,nIterations);
+			}
+
+			public MultiRunMode continuously() {
+				return new MultiRunMode(this.builder,-1);
+			}
+
+		}
+
+		private long iterations;
+		private Delay delay;
+
+		private Builder() {
+			this.iterations=-1;
+			this.delay=Delay.create(DELAY_TIME, DELAY_UNIT);
+		}
+
+		private void setIterations(long iterations) {
+			this.iterations=iterations;
+		}
+
+		private void setDelay(Delay delay) {
+			this.delay=delay;
+		}
+
+		public RunMode run() {
+			return new RunMode(this);
+		}
+
+		public OperationStrategy build() {
+			return new OperationStrategy(iterations,delay);
+		}
+
+	}
+	private final class DefaultOperationDecissionPoint implements OperationDecissionPoint {
+
 		@Override
-		public Delayed getCrawlingDelay(CrawlerInformationPoint cip) {
-			return new DefaultCrawlingDelay();
+		public Delay getCrawlingDelay(CrawlerInformationPoint cip) {
+			return delay;
 		}
 
 		@Override
 		public boolean canContinueCrawling(CrawlerInformationPoint cip) {
-			return true;
+			if(iterations<0) {
+				return true;
+			} else {
+				return iterations>cip.totalCrawlingSessions();
+			}
 		}
+
+	}
+
+	private static final long DELAY_TIME = 60L;
+
+	private static final TimeUnit DELAY_UNIT = TimeUnit.SECONDS;
+
+	private final long iterations;
+
+	private final Delay delay;
+
+	private OperationStrategy(long iterations, Delay delay) {
+		this.iterations = iterations;
+		this.delay = delay;
 	}
 
 	OperationDecissionPoint decissionPoint() {
 		return new DefaultOperationDecissionPoint();
+	}
+
+	public static Builder builder() {
+		return new Builder();
 	}
 
 }

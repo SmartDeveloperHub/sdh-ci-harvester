@@ -24,24 +24,42 @@
  *   Bundle      : ci-jenkins-crawler-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler;
+package org.smartdeveloperhub.jenkins.crawler.util;
 
-import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
-import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
-import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-final class DefaultCrawlingEventDispatcher implements CrawlingEventDispatcher {
+import java.util.concurrent.TimeUnit;
 
-	private final ListenerManager<CrawlerEventListener> listeners;
+import com.google.common.base.MoreObjects;
 
-	DefaultCrawlingEventDispatcher(ListenerManager<CrawlerEventListener> listeners) {
-		this.listeners = listeners;
+public final class Delay {
+
+	private final long time;
+	private final TimeUnit unit;
+
+	private Delay(long time, TimeUnit unit) {
+		this.time = time;
+		this.unit = unit;
+	}
+
+	public long getTime(TimeUnit unit) {
+		return unit.convert(this.time,this.unit);
 	}
 
 	@Override
-	public void fireEvent(CrawlingEvent event) {
-		this.listeners.notify(new CrawlerEventNotification(event));
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("time",this.time).
+					add("unit",this.unit).
+					toString();
 	}
 
+	public static  Delay create(long time, TimeUnit unit) {
+		checkNotNull(time,"Time cannot be null");
+		checkNotNull(unit,"Time unit cannot be null");
+		return new Delay(time,unit);
+	}
 
 }

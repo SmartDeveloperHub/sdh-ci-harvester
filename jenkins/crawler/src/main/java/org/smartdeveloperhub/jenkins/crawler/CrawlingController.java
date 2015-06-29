@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.Delayed;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,9 +38,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
+import org.smartdeveloperhub.jenkins.crawler.util.Delay;
+import org.smartdeveloperhub.jenkins.crawler.util.Sleeper;
 import org.smartdeveloperhub.jenkins.crawler.util.Timer;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
@@ -53,7 +56,7 @@ final class CrawlingController extends AbstractExecutionThreadService {
 		private TaskScheduler scheduler;
 		private URI instance;
 		private FileBasedStorage storage;
-		private CrawlingEventDispatcher dispatcher;
+		private CrawlerEventManager dispatcher;
 		private OperationDecissionPoint odp;
 		private CrawlerInformationPoint cip;
 		private CrawlingDecissionPoint cdp;
@@ -71,7 +74,7 @@ final class CrawlingController extends AbstractExecutionThreadService {
 			return this;
 		}
 
-		Builder withCrawlingEventDispatcher(CrawlingEventDispatcher dispatcher) {
+		Builder withCrawlingEventDispatcher(CrawlerEventManager dispatcher) {
 			this.dispatcher = dispatcher;
 			return this;
 		}
@@ -154,10 +157,6 @@ final class CrawlingController extends AbstractExecutionThreadService {
 			return event;
 		}
 
-		private void fireEvent(CrawlingEvent event) {
-			CrawlingController.this.dispatcher.fireEvent(event);
-		}
-
 		private boolean isAborted() {
 			return CrawlingController.this.terminate.get();
 		}
@@ -170,7 +169,7 @@ final class CrawlingController extends AbstractExecutionThreadService {
 	private final TaskScheduler scheduler;
 	private final FileBasedStorage storage;
 
-	private final CrawlingEventDispatcher dispatcher;
+	private final CrawlerEventManager dispatcher;
 
 	private final CrawlerInformationPoint cip;
 	private final OperationDecissionPoint odp;
@@ -183,6 +182,8 @@ final class CrawlingController extends AbstractExecutionThreadService {
 	private final long timeOut;
 	private final TimeUnit unit;
 
+	private final Sleeper sleeper;
+
 	private CrawlingController(
 			CrawlerInformationPoint cip,
 			OperationDecissionPoint odp,
@@ -190,7 +191,7 @@ final class CrawlingController extends AbstractExecutionThreadService {
 			URI instance,
 			FileBasedStorage storage,
 			TaskScheduler scheduler,
-			CrawlingEventDispatcher dispatcher) {
+			CrawlerEventManager dispatcher) {
 		this.instance = instance;
 		this.storage = storage;
 		this.scheduler = scheduler;
@@ -202,10 +203,12 @@ final class CrawlingController extends AbstractExecutionThreadService {
 		this.cdp = cdp;
 		this.sessionCounter=new AtomicLong(0);
 		this.terminate=new AtomicBoolean(false);
+		this.sleeper=new Sleeper();
 	}
 
 	@Override
 	protected void run() throws Exception {
+		fireEvent(CrawlerEventFactory.newCrawlerStartedEvent(new Date()));
 		boolean continueCrawling=true;
 		while(!this.terminate.get() && continueCrawling) {
 			CrawlingSession session=
@@ -228,15 +231,18 @@ final class CrawlingController extends AbstractExecutionThreadService {
 					"Aborted crawling {}: termination requested";
 			LOGGER.info(message,this.instance);
 		}
+		fireEvent(CrawlerEventFactory.newCrawlerStoppedEvent(new Date()));
 	}
 
 	@Override
 	protected void triggerShutdown() {
 		LOGGER.info("Requested crawler termination {}",this.instance);
 		this.terminate.set(true);
-		synchronized(this.instance) {
-			this.instance.notify();
-		}
+		this.sleeper.wakeUp();
+	}
+
+	private void fireEvent(CrawlerEvent event) {
+		this.dispatcher.fireEvent(event);
 	}
 
 	private boolean bootstrapCrawling() {
@@ -267,14 +273,12 @@ final class CrawlingController extends AbstractExecutionThreadService {
 			return;
 		}
 		try {
-			Delayed crawlingDelay = this.odp.getCrawlingDelay(this.cip);
-			LOGGER.info("Suspend crawling of {} for {}",this.instance,crawlingDelay);
-			synchronized(this.instance) {
-				this.instance.wait(crawlingDelay.getDelay(TimeUnit.MILLISECONDS));
-			}
+			Delay crawlingDelay = this.odp.getCrawlingDelay(this.cip);
+			LOGGER.info("Suspending crawling of {} for {}",this.instance,crawlingDelay);
+			this.sleeper.sleep(crawlingDelay);
 			LOGGER.info("Resuming crawling of {}",this.instance);
 		} catch (InterruptedException e) {
-			LOGGER.info("Interrupted while suspended crawling of {}",this.instance);
+			LOGGER.info("Interrupted while crawling of {} is suspended",this.instance);
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -282,9 +286,7 @@ final class CrawlingController extends AbstractExecutionThreadService {
 	private void awaitCrawlingCompletion() {
 		while(this.scheduler.hasPendingTasks() && !this.terminate.get()) {
 			try {
-				synchronized(this.instance) {
-					this.instance.wait(TimeUnit.MILLISECONDS.convert(this.timeOut,this.unit));
-				}
+				this.sleeper.sleep(this.timeOut,this.unit);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}

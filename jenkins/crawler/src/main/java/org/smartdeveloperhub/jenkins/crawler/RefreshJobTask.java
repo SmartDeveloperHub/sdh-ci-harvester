@@ -65,7 +65,7 @@ final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 					this.job.getRuns().getRuns(),
 					currentJob.getRuns().getRuns());
 
-		scheduleTask(new LoadJobConfigurationTask(super.location(),currentJob,resource.entity()));
+		scheduleTask(new RefreshJobConfigurationTask(super.location(),this.job,currentJob,resource.entity()));
 		scheduleTask(new LoadJobSCMTask(super.location(),currentJob));
 
 		if(currentJob instanceof CompositeJob) {
