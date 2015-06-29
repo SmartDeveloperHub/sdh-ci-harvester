@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ApplicationRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins.JenkinsIntegrationService;
+import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
+import org.smartdeveloperhub.jenkins.crawler.OperationStrategy;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
@@ -64,13 +66,12 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 	@Override
 	protected void triggerShutdown() {
 		LOGGER.info("Requested population termination...");
-		this.phaser.arrive();
 	}
 
 	private void execute() throws IOException {
 		LOGGER.info("Starting population...");
 		this.jis.connect(URI.create("http://ci.jenkins-ci.org/"));
-		this.phaser.arriveAndAwaitAdvance();
+		this.jis.awaitCrawlingCompletion();
 	}
 
 	private void tearDown() {
@@ -95,7 +96,23 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 			new JenkinsIntegrationService(
 				cis,
 				this.registry.getTransactionManager());
-		this.jis.setWorkingDirectory(tmpDirectory);
+		this.jis.
+			setWorkingDirectory(tmpDirectory).
+			setCrawlingStrategy(
+				CrawlingStrategy.
+					builder().
+						includeJob("jenkins_main_trunk").
+						includeJob("jenkins_pom").
+						includeJob("maven-interceptors").
+						includeJob("tools_maven-hpi-plugin").
+						includeJob("infra_extension-indexer").
+						build()).
+			setOperationStrategy(
+				OperationStrategy.
+					builder().
+						run().
+							once().
+						build());
 		LOGGER.info("Backend ready.");
 	}
 

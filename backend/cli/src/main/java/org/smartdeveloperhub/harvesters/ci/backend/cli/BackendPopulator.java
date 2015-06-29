@@ -60,8 +60,6 @@ public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 	public static void main(String[] args) throws Exception {
 		BackendPopulator bs = new BackendPopulator();
 		bs.run(args);
-		Consoles.defaultConsole().printf("<<HIT ENTER TO TERMINATE THE POPULATION PROCESS>>%n");
-		Consoles.defaultConsole().readLine();
 		bs.terminate();
 	}
 
