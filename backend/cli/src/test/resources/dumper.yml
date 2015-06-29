@@ -27,5 +27,7 @@
 
 ---
 database:
-  location: target/populator/db/population
-  pack: true
+  provider: org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb.HSQLDBDatabaseProvider
+  deployment: PACKED
+  mode: MUST_EXIST
+  location: target/populator/db/population.zip

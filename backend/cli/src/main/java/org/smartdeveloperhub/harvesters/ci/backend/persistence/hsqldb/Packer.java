@@ -24,7 +24,7 @@
  *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.cli;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,8 +43,6 @@ import org.slf4j.LoggerFactory;
 final class Packer {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(Packer.class);
-
-	private static final String ZIP = ".zip";
 
 	private static final Packer SINGLETON=new Packer();
 
@@ -65,18 +63,20 @@ final class Packer {
 				);
 	}
 
-	public static File pack(String targetLocation, List<File> resources) throws IOException {
+	static File pack(String targetLocation, List<File> resources) throws IOException {
 		for(File source:resources) {
 			SINGLETON.addToPack(targetLocation,source);
 		}
-		return new File(targetLocation+ZIP);
+		return new File(targetLocation);
 	}
 
-	public static File unpack(String sourceLocation, String targetLocation) throws IOException {
+	static File unpack(String sourceLocation, String targetLocation) throws IOException {
 		File target=new File(targetLocation);
-		TFile source=new TFile(sourceLocation+ZIP);
-		for(TFile sourceFile:source.listFiles()) {
-			SINGLETON.extractFromPack(sourceFile, new File(target,sourceFile.getName()));
+		TFile source=new TFile(sourceLocation);
+		if(source.canRead()) {
+			for(TFile sourceFile:source.listFiles()) {
+				SINGLETON.extractFromPack(sourceFile, new File(target,sourceFile.getName()));
+			}
 		}
 		return new File(targetLocation,new File(sourceLocation).getName());
 	}
@@ -98,7 +98,7 @@ final class Packer {
 		}
 
 		LOGGER.debug("Packing {}...",source);
-		TFile target=new TFile(targetLocation+ZIP+File.separator+source.getName());
+		TFile target=new TFile(targetLocation+File.separator+source.getName());
 		try {
 			OutputStream writer=new TFileOutputStream(target);
 			try {

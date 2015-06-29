@@ -33,20 +33,20 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.Result;
 import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryBuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 final class TestingBackendController implements BackendController {

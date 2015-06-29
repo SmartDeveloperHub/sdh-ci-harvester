@@ -20,59 +20,50 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.smartdeveloperhub.harvesters.ci.backend.command;
 
 import java.net.URI;
-import java.util.Date;
 
-import com.google.common.base.MoreObjects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 
-public final class UpdateBuildCommand extends BuildCommand {
+import static com.google.common.base.Preconditions.*;
 
-	public static final class Builder extends BuildCommandBuilder<UpdateBuildCommand,Builder> {
+public final class RegisterServiceCommand implements Command {
 
-		private Builder() {
-			super(Builder.class);
-		}
+	private final URI serviceId;
 
-		@Override
-		public UpdateBuildCommand build() {
-			return
-				new UpdateBuildCommand(
-					checkNotNull(super.buildId(),"Build identifier cannot be null"),
-					checkNotNull(super.title(),"Title cannot be null"),
-					super.description(),
-					super.createdOn(),
-					super.codebase()
-				);
-		}
-
-	}
-
-	private UpdateBuildCommand(URI buildId, String title, String description, Date creationDate, URI codebase) {
-		super(buildId,title,description,creationDate,codebase);
+	private RegisterServiceCommand(URI serviceId) {
+		this.serviceId = serviceId;
 	}
 
 	@Override
 	public void accept(CommandVisitor visitor) {
 		if(visitor!=null) {
-			visitor.visitUpdateBuildCommand(this);
+			visitor.visitRegisterServiceCommand(this);
 		}
 	}
 
-	@Override
-	protected void toString(ToStringHelper helper) {
-		// Nothing to add
+	public URI serviceId() {
+		return this.serviceId;
 	}
 
-	public static Builder builder() {
-		return new Builder();
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("serviceId",this.serviceId).
+					toString();
+	}
+
+	public static RegisterServiceCommand create(URI serviceId) {
+		return
+			new RegisterServiceCommand(
+				checkNotNull(serviceId,"Service identifier cannot be null"));
 	}
 
 }

@@ -30,7 +30,7 @@ import org.ldp4j.application.ext.ApplicationRuntimeException;
 import org.ldp4j.application.ext.UnknownResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 
 
 public abstract class Serviceable {

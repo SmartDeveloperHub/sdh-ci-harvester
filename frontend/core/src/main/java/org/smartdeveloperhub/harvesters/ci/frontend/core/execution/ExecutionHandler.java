@@ -33,8 +33,8 @@ import org.ldp4j.application.ext.ResourceHandler;
 import org.ldp4j.application.ext.UnknownResourceException;
 import org.ldp4j.application.ext.annotations.Resource;
 import org.ldp4j.application.session.ResourceSnapshot;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
 

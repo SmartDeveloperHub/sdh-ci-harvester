@@ -20,49 +20,31 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb;
 
-import java.net.URI;
+import org.junit.Test;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb.Utils;
 
-import javax.persistence.EntityManager;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
+public class UtilsTest {
 
-public class JPABuildRepository implements BuildRepository {
-
-	private EntityManagerProvider provider;
-
-	public JPABuildRepository(EntityManagerProvider provider) {
-		this.provider = provider;
+	@Test
+	public void testMustExistMem() {
+		String result = Utils.urlBuilder().mustExist().build();
+		assertThat(result,endsWith("ifexists=true"));
 	}
 
-	private EntityManager entityManager() {
-		return this.provider.entityManager();
+	@Test
+	public void testMustExistPersistent() {
+		String result = Utils.urlBuilder().mustExist().persistent("test").build();
+		assertThat(result,endsWith("ifexists=true"));
 	}
 
-	@Override
-	public void add(Build build) {
-		entityManager().persist(build);
-	}
-
-	@Override
-	public void remove(Build build) {
-		entityManager().remove(build);
-	}
-
-	@Override
-	public Build buildOfId(URI id) {
-		return buildOfId(id,Build.class);
-	}
-
-	@Override
-	public <T extends Build> T buildOfId(URI id, Class<? extends T> clazz) {
-		return entityManager().find(clazz,id);
-	}
 
 }

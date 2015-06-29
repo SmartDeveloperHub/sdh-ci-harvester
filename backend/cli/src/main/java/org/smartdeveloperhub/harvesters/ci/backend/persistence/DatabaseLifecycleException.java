@@ -20,51 +20,25 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+public class DatabaseLifecycleException extends RuntimeException {
 
-import java.net.URI;
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 2245076727493368970L;
 
-import com.google.common.base.MoreObjects;
-
-
-public final class DeleteBuildCommand implements Command {
-
-	private final URI buildId;
-
-	private DeleteBuildCommand(URI buildId) {
-		this.buildId = buildId;
+	public DatabaseLifecycleException(String message) {
+		super(message);
 	}
 
-	@Override
-	public void accept(CommandVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitDeleteBuildCommand(this);
-		}
-	}
-
-	public URI buildId() {
-		return this.buildId;
-	}
-
-	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					add("buildId",this.buildId).
-					toString();
-	}
-
-	public static DeleteBuildCommand create(URI buildId) {
-		return
-			new DeleteBuildCommand(
-				checkNotNull(buildId,"Build identifier cannot be null"));
+	public DatabaseLifecycleException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
 }

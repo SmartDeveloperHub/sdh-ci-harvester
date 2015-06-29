@@ -28,5 +28,7 @@
 ---
 workingDirectory: target/populator/
 database:
-  location: db/population
-  pack: true
+  provider: org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb.HSQLDBDatabaseProvider
+  deployment: PACKED
+  mode: DROP_CREATE
+  location: target/populator/db/population.zip

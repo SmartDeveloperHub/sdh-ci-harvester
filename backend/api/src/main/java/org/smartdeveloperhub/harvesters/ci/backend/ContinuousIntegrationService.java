@@ -20,11 +20,11 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core;
+package org.smartdeveloperhub.harvesters.ci.backend;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,26 +34,18 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.BuildVisitor;
-import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.Result;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.CreateBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.CreateExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.DeleteExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.FinishExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.RegisterServiceCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.core.commands.UpdateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.command.CreateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.command.CreateExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.command.FinishExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.command.UpdateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 
-public class ContinuousIntegrationService {
+public final class ContinuousIntegrationService {
 
 	private final class BuildDeleter extends BuildVisitor {
 

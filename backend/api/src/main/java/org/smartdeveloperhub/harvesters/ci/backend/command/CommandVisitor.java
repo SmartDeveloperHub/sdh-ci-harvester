@@ -24,16 +24,22 @@
  *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.command;
 
-import java.net.URI;
+public interface CommandVisitor {
 
-public interface ExecutionRepository {
+	void visitRegisterServiceCommand(RegisterServiceCommand command);
 
-	void add(Execution execution);
+	void visitCreateBuildCommand(CreateBuildCommand command);
 
-	void remove(Execution execution);
+	void visitUpdateBuildCommand(UpdateBuildCommand command);
 
-	Execution executionOfId(URI executionId);
+	void visitDeleteBuildCommand(DeleteBuildCommand command);
+
+	void visitCreateExecutionCommand(CreateExecutionCommand command);
+
+	void visitFinishExecutionCommand(FinishExecutionCommand command);
+
+	void visitDeleteExecutionCommand(DeleteExecutionCommand command);
 
 }

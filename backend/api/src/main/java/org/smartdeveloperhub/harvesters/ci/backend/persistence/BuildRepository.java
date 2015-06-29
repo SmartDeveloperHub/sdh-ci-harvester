@@ -20,50 +20,24 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence;
 
 import java.net.URI;
 
-import com.google.common.base.MoreObjects;
+import org.smartdeveloperhub.harvesters.ci.backend.Build;
 
-import static com.google.common.base.Preconditions.*;
+public interface BuildRepository {
 
-public final class RegisterServiceCommand implements Command {
+	void add(Build build);
 
-	private final URI serviceId;
+	void remove(Build build);
 
-	private RegisterServiceCommand(URI serviceId) {
-		this.serviceId = serviceId;
-	}
+	Build buildOfId(URI id);
 
-	@Override
-	public void accept(CommandVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitRegisterServiceCommand(this);
-		}
-	}
-
-	public URI serviceId() {
-		return this.serviceId;
-	}
-
-	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					add("serviceId",this.serviceId).
-					toString();
-	}
-
-	public static RegisterServiceCommand create(URI serviceId) {
-		return
-			new RegisterServiceCommand(
-				checkNotNull(serviceId,"Service identifier cannot be null"));
-	}
+	<T extends Build> T buildOfId(URI parentId, Class<? extends T> clazz);
 
 }

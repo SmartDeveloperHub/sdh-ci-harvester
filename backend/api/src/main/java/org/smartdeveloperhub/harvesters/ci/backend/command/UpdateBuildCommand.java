@@ -24,18 +24,55 @@
  *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.command;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
+import java.util.Date;
 
-public interface BuildRepository {
+import com.google.common.base.MoreObjects.ToStringHelper;
 
-	void add(Build build);
+public final class UpdateBuildCommand extends BuildCommand {
 
-	void remove(Build build);
+	public static final class Builder extends BuildCommandBuilder<UpdateBuildCommand,Builder> {
 
-	Build buildOfId(URI id);
+		private Builder() {
+			super(Builder.class);
+		}
 
-	<T extends Build> T buildOfId(URI parentId, Class<? extends T> clazz);
+		@Override
+		public UpdateBuildCommand build() {
+			return
+				new UpdateBuildCommand(
+					checkNotNull(super.buildId(),"Build identifier cannot be null"),
+					checkNotNull(super.title(),"Title cannot be null"),
+					super.description(),
+					super.createdOn(),
+					super.codebase()
+				);
+		}
+
+	}
+
+	private UpdateBuildCommand(URI buildId, String title, String description, Date creationDate, URI codebase) {
+		super(buildId,title,description,creationDate,codebase);
+	}
+
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitUpdateBuildCommand(this);
+		}
+	}
+
+	@Override
+	protected void toString(ToStringHelper helper) {
+		// Nothing to add
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
 
 }

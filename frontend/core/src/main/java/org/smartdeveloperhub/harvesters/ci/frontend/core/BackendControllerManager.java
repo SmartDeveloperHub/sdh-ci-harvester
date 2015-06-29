@@ -31,7 +31,7 @@ import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
 

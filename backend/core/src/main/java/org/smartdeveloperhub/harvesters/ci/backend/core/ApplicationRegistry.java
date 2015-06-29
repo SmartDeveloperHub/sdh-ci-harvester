@@ -26,11 +26,11 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.core;
 
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescriptorRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 
 public interface ApplicationRegistry {
 

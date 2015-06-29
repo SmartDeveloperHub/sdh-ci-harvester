@@ -33,7 +33,7 @@ import java.net.URI;
 import java.util.concurrent.ConcurrentMap;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
 
 import com.google.common.collect.Maps;
 

@@ -20,31 +20,51 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.cli.hsqldb;
+package org.smartdeveloperhub.harvesters.ci.backend.command;
 
-import org.junit.Test;
-import org.smartdeveloperhub.harvesters.ci.backend.cli.hsqldb.Utils;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import java.net.URI;
 
-public class UtilsTest {
+import com.google.common.base.MoreObjects;
 
-	@Test
-	public void testMustExistMem() {
-		String result = Utils.urlBuilder().mustExist().build();
-		assertThat(result,endsWith("ifexists=true"));
+
+public final class DeleteBuildCommand implements Command {
+
+	private final URI buildId;
+
+	private DeleteBuildCommand(URI buildId) {
+		this.buildId = buildId;
 	}
 
-	@Test
-	public void testMustExistPersistent() {
-		String result = Utils.urlBuilder().mustExist().persistent("test").build();
-		assertThat(result,endsWith("ifexists=true"));
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitDeleteBuildCommand(this);
+		}
 	}
 
+	public URI buildId() {
+		return this.buildId;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("buildId",this.buildId).
+					toString();
+	}
+
+	public static DeleteBuildCommand create(URI buildId) {
+		return
+			new DeleteBuildCommand(
+				checkNotNull(buildId,"Build identifier cannot be null"));
+	}
 
 }

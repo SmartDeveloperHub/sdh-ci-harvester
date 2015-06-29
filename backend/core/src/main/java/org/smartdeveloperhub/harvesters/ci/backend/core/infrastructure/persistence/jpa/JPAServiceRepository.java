@@ -34,7 +34,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 
 public class JPAServiceRepository implements ServiceRepository {
 

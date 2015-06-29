@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.TransactionManager;
 import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawler;

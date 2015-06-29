@@ -36,7 +36,7 @@ import org.ldp4j.application.setup.Bootstrap;
 import org.ldp4j.application.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainerHandler;

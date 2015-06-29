@@ -36,7 +36,7 @@ import org.ldp4j.application.ext.annotations.DirectContainer;
 import org.ldp4j.application.session.ContainerSnapshot;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.ldp4j.application.session.WriteSession;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
 
 @DirectContainer(

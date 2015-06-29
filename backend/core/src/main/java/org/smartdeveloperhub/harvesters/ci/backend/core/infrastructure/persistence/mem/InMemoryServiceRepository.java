@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;

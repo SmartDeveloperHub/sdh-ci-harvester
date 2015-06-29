@@ -31,7 +31,7 @@ import java.net.URI;
 import javax.persistence.EntityManager;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
 
 public class JPAExecutionRepository implements ExecutionRepository {
 

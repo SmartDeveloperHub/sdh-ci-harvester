@@ -20,49 +20,33 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence;
 
-import java.net.URI;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.spi.DatabaseProvider;
 
-import javax.persistence.EntityManager;
+public final class DatabaseManager {
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-
-public class JPABuildRepository implements BuildRepository {
-
-	private EntityManagerProvider provider;
-
-	public JPABuildRepository(EntityManagerProvider provider) {
-		this.provider = provider;
+	private DatabaseManager() {
 	}
 
-	private EntityManager entityManager() {
-		return this.provider.entityManager();
-	}
-
-	@Override
-	public void add(Build build) {
-		entityManager().persist(build);
-	}
-
-	@Override
-	public void remove(Build build) {
-		entityManager().remove(build);
-	}
-
-	@Override
-	public Build buildOfId(URI id) {
-		return buildOfId(id,Build.class);
-	}
-
-	@Override
-	public <T extends Build> T buildOfId(URI id, Class<? extends T> clazz) {
-		return entityManager().find(clazz,id);
+	public static Database load(DatabaseConfig config) throws DatabaseLifecycleException {
+		try {
+			Class<?> clazz = Class.forName(config.getProvider());
+			if(!DatabaseProvider.class.isAssignableFrom(clazz)) {
+				throw new DatabaseLifecycleException("Invalid provider class: "+config.getProvider()+" is not a valid "+DatabaseProvider.class.getCanonicalName());
+			}
+			Class<? extends DatabaseProvider> providerClass = clazz.asSubclass(DatabaseProvider.class);
+			DatabaseProvider provider=providerClass.newInstance();
+			return provider.create(config);
+		} catch (InstantiationException | IllegalAccessException e) {
+		throw new DatabaseLifecycleException("Could not instantiate provider",e);
+		} catch (ClassNotFoundException e) {
+			throw new DatabaseLifecycleException("Could not load provider",e);
+		}
 	}
 
 }

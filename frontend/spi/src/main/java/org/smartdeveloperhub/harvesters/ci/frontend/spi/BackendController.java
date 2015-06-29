@@ -26,7 +26,7 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
-import org.smartdeveloperhub.harvesters.ci.backend.core.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 
 public interface BackendController {
 

@@ -20,43 +20,26 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.cli;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence;
 
-import com.google.common.base.MoreObjects;
+import java.net.URI;
+import java.util.List;
 
-public final class DatabaseConfig {
+import org.smartdeveloperhub.harvesters.ci.backend.Service;
 
-	private String location;
-	private boolean pack;
 
-	public String getLocation() {
-		return this.location;
-	}
+public interface ServiceRepository {
 
-	public void setLocation(String location) {
-		this.location = location;
-	}
+	List<URI> serviceIds();
 
-	public boolean isPack() {
-		return pack;
-	}
+	void add(Service service);
 
-	public void setPack(boolean pack) {
-		this.pack = pack;
-	}
+	void remove(Service service);
 
-	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					add("location",this.location).
-					add("pack",this.pack).
-					toString();
-	}
+	Service serviceOfId(URI serviceId);
 
 }

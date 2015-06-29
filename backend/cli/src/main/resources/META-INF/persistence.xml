@@ -33,7 +33,7 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
 	version="2.1">
 	<persistence-unit
-		name="populator"
+		name="dropCreate"
 		transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		<mapping-file>backend.core.orm.xml</mapping-file>
@@ -68,7 +68,7 @@
 		</properties>
 	</persistence-unit>
 	<persistence-unit
-		name="dumper"
+		name="mustExist"
 		transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 		<mapping-file>backend.core.orm.xml</mapping-file>

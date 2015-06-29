@@ -28,6 +28,8 @@ package org.smartdeveloperhub.harvesters.ci.backend.cli;
 
 import java.io.File;
 
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.DatabaseConfig;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
@@ -61,10 +63,6 @@ public final class BackendConfig {
 			base+=File.separator;
 		}
 		return base+this.database.getLocation();
-	}
-
-	public boolean pack() {
-		return this.database.isPack();
 	}
 
 	@Override

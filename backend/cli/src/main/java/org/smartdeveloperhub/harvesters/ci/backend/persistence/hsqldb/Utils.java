@@ -24,7 +24,7 @@
  *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.cli.hsqldb;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,16 +32,22 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public abstract class Utils {
+abstract class Utils {
 
 	public static final class URLBuilder {
 
 		private boolean mustExist;
 		private String file;
 		private boolean close;
+		private String remote;
 
 		public URLBuilder mustExist() {
 			this.mustExist=true;
+			return this;
+		}
+
+		public URLBuilder close() {
+			this.close=true;
 			return this;
 		}
 
@@ -50,13 +56,18 @@ public abstract class Utils {
 			return this;
 		}
 
+		public URLBuilder remote(String location) {
+			this.remote = location;
+			return this;
+		}
+
 		public String build() {
 			StringBuilder builder=new StringBuilder();
 			builder.append("jdbc:hsqldb:");
 			if(this.file!=null) {
 				builder.append("file:").append(this.file);
-			} else {
-				builder.append("hsql://localhost/xdb");
+			} else if(this.remote!=null) {
+				builder.append(this.remote);
 			}
 			if(this.close) {
 				builder.append(";shutdown=true");
@@ -68,20 +79,15 @@ public abstract class Utils {
 			return builder.toString();
 		}
 
-		public URLBuilder close() {
-			this.close=true;
-			return this;
-		}
-
 	}
 
 	private static final String[] DATABASE_FILES={".properties",".script",".data",".backup",".log",".lck"};
 
-	public static URLBuilder urlBuilder() {
+	static URLBuilder urlBuilder() {
 		return new URLBuilder();
 	}
 
-	public static List<File> dbResources(String location) throws IOException {
+	static List<File> dbResources(String location) throws IOException {
 		List<File> result=Lists.newArrayList();
 		for(String dbFile:DATABASE_FILES) {
 			String targetFile = location+dbFile;

@@ -20,50 +20,18 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.io.Closeable;
 
-import java.net.URI;
+import javax.persistence.EntityManagerFactory;
 
-import com.google.common.base.MoreObjects;
+public interface Database extends Closeable {
 
-public final class DeleteExecutionCommand implements Command {
-
-	private final URI executionId;
-
-	private DeleteExecutionCommand(URI executionId) {
-		this.executionId = executionId;
-	}
-
-	@Override
-	public void accept(CommandVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitDeleteExecutionCommand(this);
-		}
-	}
-
-	public URI executionId() {
-		return this.executionId;
-	}
-
-	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					add("executionId",this.executionId).
-					toString();
-	}
-
-	public static DeleteExecutionCommand create(URI executionId) {
-		return
-			new DeleteExecutionCommand(
-				checkNotNull(executionId,"Execution identifier cannot be null"));
-	}
+	EntityManagerFactory getEntityManagerFactory();
 
 }

@@ -20,26 +20,22 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.core.commands;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence;
 
-public interface CommandVisitor {
+import java.net.URI;
 
-	void visitRegisterServiceCommand(RegisterServiceCommand command);
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 
-	void visitCreateBuildCommand(CreateBuildCommand command);
+public interface ExecutionRepository {
 
-	void visitUpdateBuildCommand(UpdateBuildCommand command);
+	void add(Execution execution);
 
-	void visitDeleteBuildCommand(DeleteBuildCommand command);
+	void remove(Execution execution);
 
-	void visitCreateExecutionCommand(CreateExecutionCommand command);
-
-	void visitFinishExecutionCommand(FinishExecutionCommand command);
-
-	void visitDeleteExecutionCommand(DeleteExecutionCommand command);
+	Execution executionOfId(URI executionId);
 
 }

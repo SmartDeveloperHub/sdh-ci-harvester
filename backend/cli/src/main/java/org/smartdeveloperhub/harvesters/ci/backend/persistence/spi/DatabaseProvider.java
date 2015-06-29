@@ -20,24 +20,18 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:1.0.0-SNAPSHOT
- *   Bundle      : ci-backend-api-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:1.0.0-SNAPSHOT
+ *   Bundle      : ci-backend-cli-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence.spi;
 
-import java.net.URI;
-import java.util.List;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.Database;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.DatabaseLifecycleException;
 
+public interface DatabaseProvider {
 
-public interface ServiceRepository {
-
-	List<URI> serviceIds();
-
-	void add(Service service);
-
-	void remove(Service service);
-
-	Service serviceOfId(URI serviceId);
+	Database create(DatabaseConfig config) throws DatabaseLifecycleException;
 
 }
