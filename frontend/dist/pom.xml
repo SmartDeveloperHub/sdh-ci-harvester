@@ -89,6 +89,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
+			<artifactId>ci-frontend-integration</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
 			<artifactId>ci-frontend-test</artifactId>
 		</dependency>
 		<dependency>
@@ -155,9 +159,12 @@
 					 -->
 					<!-- optional system propoerties you want to add -->
 					<systemProperties>
+<!--
 						<appserver.base>${basedir}${file.separator}.container${file.separator}base</appserver.base>
 						<appserver.home>${basedir}${file.separator}.container${file.separator}home</appserver.home>
 						<java.io.tmpdir>${basedir}${file.separator}.container${file.separator}base${file.separator}tmp</java.io.tmpdir>
+ -->
+						<ci.harvester.config>${basedir}${file.separator}src${file.separator}test${file.separator}resources${file.separator}config.yml</ci.harvester.config>
 					</systemProperties>
 					<!-- if you want to use test dependencies rather than only runtime -->
 					<useTestClasspath>false</useTestClasspath>

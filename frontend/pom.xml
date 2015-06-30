@@ -64,6 +64,7 @@
 		<module>spi</module>
 		<module>core</module>
 		<module>test</module>
+		<module>integration</module>
 		<module>dist</module>
 	</modules>
 

@@ -49,7 +49,7 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(HarvesterApplication.class);
 
-	private static final URI SERVICE_ID=URI.create("http://ci.travis-ci.org/");
+	private static final URI SERVICE_ID=URI.create("http://ci.jenkins-ci.org/");
 
 	private static final String SERVICE_PATH="service/";
 
