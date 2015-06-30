@@ -63,6 +63,7 @@
 		<module>jenkins</module>
 		<module>backend</module>
 		<module>frontend</module>
+		<module>container</module>
 	</modules>
 
 </project>

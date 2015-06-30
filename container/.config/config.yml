@@ -20,26 +20,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 # #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-#   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-dist:1.0.0-SNAPSHOT
-#   Bundle      : ci-frontend-dist-1.0.0-SNAPSHOT.war
+#   Artifact    : org.smartdeveloperhub.harvesters.ci:ci-havester-container:1.0.0-SNAPSHOT
+#   Bundle      : ci-harvester-container-1.0.0-SNAPSHOT.war
 # #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 #
 
-log4j.rootLogger=OFF
-log4j.logger.org.smartdeveloperhub=TRACE, file
-log4j.logger.org.ldp4j=TRACE, file
-
-log4j.logger.org.smartdeveloperhub.harvesters.ci.frontend=INFO, console
-log4j.additivity.org.smartdeveloperhub.harvesters.ci.frontend=true
-
-log4j.logger.org.apache.cxf.interceptor=INFO, file
-
-log4j.appender.console=org.apache.log4j.ConsoleAppender
-log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=[%d][%-5.5p ][%-25.25t] %m%n
-
-log4j.appender.file=org.apache.log4j.FileAppender
-log4j.appender.file.File=${catalina.home}/logs/sdh-ci-harvester.log
-log4j.appender.file.layout=org.apache.log4j.PatternLayout
-log4j.appender.file.layout=org.apache.log4j.PatternLayout
-log4j.appender.file.layout.ConversionPattern=[%d][%-5.5p ][%-25.25t][%-80.80c] %m%n
+provider: org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb.HSQLDBDatabaseProvider
+deployment: PACKED
+mode: MUST_EXIST
+location: .config/population.zip
