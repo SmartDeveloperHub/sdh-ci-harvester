@@ -41,12 +41,12 @@ import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryBuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 final class TestingBackendController implements BackendController {

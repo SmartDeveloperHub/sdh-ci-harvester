@@ -33,23 +33,23 @@ import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ApplicationRegistry;
-import org.smartdeveloperhub.harvesters.ci.backend.core.transaction.Transaction;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.spi.ComponentRegistry;
+import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
 import org.smartdeveloperhub.util.console.Consoles;
 
 import com.google.common.util.concurrent.AbstractIdleService;
 
 final class BackendDumpService extends AbstractIdleService {
 
-	private ApplicationRegistry registry;
+	private ComponentRegistry registry;
 	private ServiceRepository serviceRepository;
 	private BuildRepository buildRepository;
 	private ExecutionRepository executionRepository;
 
-	BackendDumpService(ApplicationRegistry registry) {
+	BackendDumpService(ComponentRegistry registry) {
 		this.registry = registry;
 	}
 

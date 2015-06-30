@@ -57,10 +57,6 @@
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
 
-	<properties>
-		<truevfs.version>0.11.0</truevfs.version>
-	</properties>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -82,58 +78,27 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
-			<artifactId>ci-backend-core</artifactId>
+			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
+			<artifactId>ci-util-console</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
-			<artifactId>ci-util-console</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
 			<artifactId>ci-util-xml</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
 			<artifactId>ci-util-bootstrap</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-<!--
-			<exclusions>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-			</exclusions>
- -->
-		</dependency>
-
-		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>net.java.truevfs</groupId>
-			<artifactId>truevfs-profile-default</artifactId>
-			<version>${truevfs.version}</version>
-			<type>pom</type>
-		</dependency>
-
-		<!-- Default unit testing frameworks-->
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-integration</artifactId>
-			<scope>test</scope>
+			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
+			<artifactId>ci-backend-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
+			<artifactId>ci-backend-hsqldb</artifactId>
 		</dependency>
 
 	</dependencies>

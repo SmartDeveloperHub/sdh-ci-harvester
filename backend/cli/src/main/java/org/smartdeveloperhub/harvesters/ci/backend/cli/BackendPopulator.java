@@ -28,13 +28,9 @@ package org.smartdeveloperhub.harvesters.ci.backend.cli;
 
 import java.util.Collections;
 
-import javax.persistence.EntityManagerFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.Database;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.DatabaseManager;
+import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
 import org.smartdeveloperhub.util.bootstrap.AbstractBootstrap;
 import org.smartdeveloperhub.util.console.Consoles;
 
@@ -48,11 +44,9 @@ public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 
 	private BackendPopulatorService service;
 
-	private EntityManagerFactory factory;
-
 	private BackendConfig config;
 
-	private Database database;
+	private BackendFacade facade;
 
 	public BackendPopulator() {
 		super(NAME,BackendConfig.class);
@@ -68,7 +62,7 @@ public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 	protected void shutdown() {
 		LOGGER.info("Shutting down application...");
 		try {
-			this.database.close();
+			this.facade.close();
 			Consoles.defaultConsole().printf("Retrieved data available at %s.",this.config.getDatabase().getLocation());
 		} catch (Exception e) {
 			Consoles.defaultConsole().printf("Failed to shutdown the populator");
@@ -83,10 +77,8 @@ public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 				printf("Using '%s' as working directory%n",config.getWorkingDirectory()).
 				printf("Persisting retrieved data in '%s'%n",config.getDatabase().getLocation());
 		this.config=config;
-		this.database = DatabaseManager.load(config.getDatabase());
-		this.factory= this.database.getEntityManagerFactory();
-		JPAApplicationRegistry applicationRegistry = new JPAApplicationRegistry(factory);
-		this.service=new BackendPopulatorService(config,applicationRegistry);
+		this.facade=BackendFacade.create(config.getDatabase());
+		this.service=new BackendPopulatorService(config,this.facade);
 		return Collections.<Service>singleton(this.service);
 	}
 

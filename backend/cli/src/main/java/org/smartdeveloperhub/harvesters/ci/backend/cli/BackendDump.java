@@ -28,13 +28,10 @@ package org.smartdeveloperhub.harvesters.ci.backend.cli;
 
 import java.util.Collections;
 
-import javax.persistence.EntityManagerFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.JPAApplicationRegistry;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.Database;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.DatabaseManager;
+import org.smartdeveloperhub.harvesters.ci.backend.spi.ComponentRegistry;
+import org.smartdeveloperhub.harvesters.ci.backend.spi.RuntimeDelegate;
 import org.smartdeveloperhub.util.bootstrap.AbstractBootstrap;
 import org.smartdeveloperhub.util.console.Consoles;
 
@@ -44,11 +41,9 @@ public class BackendDump extends AbstractBootstrap<BackendConfig> {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendDump.class);
 
-	static final String NAME = "BackendDump";;
+	private static final String NAME = "BackendDump";;
 
-	private EntityManagerFactory factory;
-
-	private Database database;
+	private ComponentRegistry registry;
 
 	public BackendDump() {
 		super(NAME,BackendConfig.class);
@@ -64,7 +59,7 @@ public class BackendDump extends AbstractBootstrap<BackendConfig> {
 	protected void shutdown() {
 		LOGGER.info("Shutting down application...");
 		try {
-			this.database.close();
+			this.registry.close();
 		} catch (Exception e) {
 			LOGGER.warn("Failed to shutdown the application. Full stacktrace follows",e);
 		}
@@ -75,10 +70,8 @@ public class BackendDump extends AbstractBootstrap<BackendConfig> {
 		Consoles.
 			defaultConsole().
 				printf("Dumping data stored in '%s'%n",config.getDatabase().getLocation());
-		this.database = DatabaseManager.load(config.getDatabase());
-		this.factory= this.database.getEntityManagerFactory();
-		JPAApplicationRegistry applicationRegistry = new JPAApplicationRegistry(factory);
-		return Collections.<Service>singleton(new BackendDumpService(applicationRegistry));
+		this.registry = RuntimeDelegate.getInstance().getComponentRegistry(config.getDatabase());
+		return Collections.<Service>singleton(new BackendDumpService(registry));
 	}
 
 }

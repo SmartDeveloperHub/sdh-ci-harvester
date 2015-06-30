@@ -62,7 +62,9 @@
 	<modules>
 		<module>bom</module>
 		<module>api</module>
+		<module>spi</module>
 		<module>core</module>
+		<module>hsqldb</module>
 		<module>cli</module>
 		<module>depchain</module>
 	</modules>

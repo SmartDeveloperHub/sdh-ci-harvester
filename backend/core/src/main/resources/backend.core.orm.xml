@@ -65,7 +65,7 @@
 				<orm:column length="8192"/>
 			</orm:basic>
 			<orm:basic name="createdOn">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.DateUtils"/>
 			</orm:basic>
 			<orm:element-collection name="executions" target-class="java.net.URI">
 				<orm:column name="executionId"/>
@@ -105,13 +105,13 @@
 		<orm:attributes>
 			<orm:id name="executionId"/>
 			<orm:basic name="createdOn">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.DateUtils"/>
 			</orm:basic>
 			<orm:basic name="buildId" optional="false"/>
 			<orm:embedded name="result"/>
 		</orm:attributes>
 	</orm:entity>
-	<orm:entity class="org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.LifecycleDescriptor">
+	<orm:entity class="org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.LifecycleDescriptor">
 		<orm:table>
 			<orm:unique-constraint name="Unique_Entity_ID">
 				<orm:column-name>nativeId</orm:column-name>
@@ -124,22 +124,22 @@
 				<orm:sequence-generator name="lifecycleIndexGenerator" sequence-name="indexSeq"/>
 			</orm:id>
 			<orm:basic name="registeredOn">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.DateUtils"/>
 			</orm:basic>
 			<orm:basic name="deletedOn">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.DateUtils"/>
 			</orm:basic>
 			<orm:embedded name="entityId"/>
 		</orm:attributes>
 	</orm:entity>
-	<orm:embeddable class="org.smartdeveloperhub.harvesters.ci.backend.core.lifecycle.EntityId">
+	<orm:embeddable class="org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.EntityId">
 		<orm:attributes>
 			<orm:basic name="nativeId" optional="false"/>
 			<orm:basic name="type" optional="false">
 				<orm:enumerated>STRING</orm:enumerated>
 			</orm:basic>
 			<orm:basic name="finishedOn">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.DateUtils"/>
 			</orm:basic>
 		</orm:attributes>
 	</orm:embeddable>
@@ -149,7 +149,7 @@
 				<orm:enumerated>STRING</orm:enumerated>
 			</orm:basic>
 			<orm:basic name="finishedOn">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.core.infrastructure.persistence.jpa.DateUtils"/>
+				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.DateUtils"/>
 			</orm:basic>
 		</orm:attributes>
 	</orm:embeddable>

@@ -28,7 +28,7 @@ package org.smartdeveloperhub.harvesters.ci.backend.cli;
 
 import java.io.File;
 
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;

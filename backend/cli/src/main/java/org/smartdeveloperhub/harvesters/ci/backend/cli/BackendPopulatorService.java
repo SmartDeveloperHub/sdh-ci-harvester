@@ -32,9 +32,8 @@ import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.core.ApplicationRegistry;
-import org.smartdeveloperhub.harvesters.ci.backend.core.port.jenkins.JenkinsIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
+import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
 import org.smartdeveloperhub.jenkins.crawler.OperationStrategy;
 
@@ -45,12 +44,12 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendPopulatorService.class);
 
 	private final BackendConfig config;
-	private final ApplicationRegistry registry;
+	private final BackendFacade facade;
 	private JenkinsIntegrationService jis;
 
-	BackendPopulatorService(BackendConfig config, ApplicationRegistry applicationRegistry) {
+	BackendPopulatorService(BackendConfig config, BackendFacade facade) {
 		this.config = config;
-		this.registry = applicationRegistry;
+		this.facade = facade;
 	}
 
 	@Override
@@ -84,25 +83,17 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 	private void setUp() {
 		LOGGER.info("Preparing backend...");
 		File tmpDirectory=new File(this.config.getWorkingDirectory());
-		ContinuousIntegrationService cis =
-			new ContinuousIntegrationService(
-				this.registry.getServiceRepository(),
-				this.registry.getBuildRepository(),
-				this.registry.getExecutionRepository());
-		this.jis=
-			new JenkinsIntegrationService(
-				cis,
-				this.registry.getTransactionManager());
+		this.jis=this.facade.integrationService();
 		this.jis.
 			setWorkingDirectory(tmpDirectory).
 			setCrawlingStrategy(
 				CrawlingStrategy.
 					builder().
 						includeJob("jenkins_main_trunk").
-//						includeJob("jenkins_pom").
-//						includeJob("maven-interceptors").
-//						includeJob("tools_maven-hpi-plugin").
-//						includeJob("infra_extension-indexer").
+						includeJob("jenkins_pom").
+						includeJob("maven-interceptors").
+						includeJob("tools_maven-hpi-plugin").
+						includeJob("infra_extension-indexer").
 						build()).
 			setOperationStrategy(
 				OperationStrategy.
