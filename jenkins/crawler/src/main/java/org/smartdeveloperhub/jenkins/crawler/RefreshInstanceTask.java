@@ -74,16 +74,7 @@ final class RefreshInstanceTask extends AbstractEntityCrawlingTask<Instance> {
 
 		for(URI maintainedBuild:difference.maintained()) {
 			if(super.crawlingDecissionPoint().canProcessReference(currentService,toReference(maintainedBuild), super.jenkinsInformationPoint(), super.currentCrawlingSession())) {
-				try {
-					Job build=super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Job.class);
-					if(build==null) {
-						scheduleTask(new LoadJobTask(maintainedBuild));
-					} else {
-						scheduleTask(new RefreshJobTask(build));
-					}
-				} catch (Exception e) {
-					LOGGER.warn("Could not load persisted build '"+maintainedBuild+"'",e);
-				}
+				processMaintainedBuild(maintainedBuild);
 			}
 		}
 
@@ -95,6 +86,19 @@ final class RefreshInstanceTask extends AbstractEntityCrawlingTask<Instance> {
 						deletedBuild));
 		}
 
+	}
+
+	private void processMaintainedBuild(URI maintainedBuild) {
+		try {
+			Job build=super.entityOfId(maintainedBuild,JenkinsEntityType.JOB,Job.class);
+			if(build==null) {
+				scheduleTask(new LoadJobTask(maintainedBuild));
+			} else {
+				scheduleTask(new RefreshJobTask(build));
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Could not load persisted build '{}'",maintainedBuild,e);
+		}
 	}
 
 	private Reference toReference(URI createdBuild) {

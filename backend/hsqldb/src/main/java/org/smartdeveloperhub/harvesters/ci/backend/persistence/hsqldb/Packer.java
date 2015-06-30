@@ -101,17 +101,21 @@ final class Packer {
 		TFile target=new TFile(targetLocation+File.separator+source.getName());
 		try {
 			OutputStream writer=new TFileOutputStream(target);
-			try {
-				FileUtils.copyFile(source,writer);
-			} catch (IOException e) {
-				LOGGER.error("Could not pack {}. Full stacktrace follows",source);
-				throw e;
-			} finally {
-				IOUtils.closeQuietly(writer);
-			}
+			copyFile(source, writer);
 		} catch(IOException e) {
 			LOGGER.error("Could not create pack entry for {}. Full stacktrace follows",source);
 			throw e;
+		}
+	}
+
+	private void copyFile(File source, OutputStream writer) throws IOException {
+		try {
+			FileUtils.copyFile(source,writer);
+		} catch (IOException e) {
+			LOGGER.error("Could not pack {}. Full stacktrace follows",source);
+			throw e;
+		} finally {
+			IOUtils.closeQuietly(writer);
 		}
 	}
 

@@ -52,9 +52,11 @@ abstract class ServiceVocabulary {
 	static final String CI_DOMAIN_TYPE     = "http://www.smartdeveloperhub.org/vocabulary/ci#CIDomain";
 	static final String CI_VOCABULARY_TYPE = "http://www.smartdeveloperhub.org/vocabulary/ci#CIVocabulary";
 
-
 	static final String CI_HAS_BUILD         = "http://www.smartdeveloperhub.org/vocabulary/ci#hasBuild";
 
 	static final String CI_V1_TTL         = "http://www.smartdeveloperhub.org/vocabulary/v1/ci.ttl";
+
+	ServiceVocabulary() {
+	}
 
 }

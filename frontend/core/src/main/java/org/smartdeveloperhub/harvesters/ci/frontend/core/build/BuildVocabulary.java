@@ -47,4 +47,7 @@ abstract class BuildVocabulary {
 	static final String CI_INCLUDES_BUILD       = "http://www.smartdeveloperhub.org/vocabulary/ci#includesBuild";
 	static final String CI_IS_PART_OF           = "http://www.smartdeveloperhub.org/vocabulary/ci#isPartOf";
 
+	BuildVocabulary() {
+	}
+
 }

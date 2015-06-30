@@ -62,4 +62,7 @@ abstract class ExecutionVocabulary {
 	static final String CI_FINISHED                     = "http://www.smartdeveloperhub.org/vocabulary/ci#finished";
 	static final String CI_HAS_RESULT                   = "http://www.smartdeveloperhub.org/vocabulary/ci#hasResult";
 
+	ExecutionVocabulary() {
+	}
+
 }

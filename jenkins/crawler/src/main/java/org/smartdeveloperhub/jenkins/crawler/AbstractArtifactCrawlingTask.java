@@ -34,7 +34,7 @@ import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
 
-abstract class AbstractArtifactCrawlingTask<T extends Entity> extends AbstractCrawlingTask<T> {
+abstract class AbstractArtifactCrawlingTask<T extends Entity> extends AbstractCrawlingTask {
 
 	private T parent;
 

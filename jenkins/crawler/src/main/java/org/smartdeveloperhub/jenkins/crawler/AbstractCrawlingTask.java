@@ -47,7 +47,7 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
-abstract class AbstractCrawlingTask<T extends Entity> implements Task {
+abstract class AbstractCrawlingTask implements Task {
 
 	private static final int RETRY_THRESHOLD = 5;
 

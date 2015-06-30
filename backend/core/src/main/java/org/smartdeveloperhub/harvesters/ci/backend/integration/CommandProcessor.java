@@ -144,13 +144,11 @@ final class CommandProcessor {
 	}
 
 	private void rollbackQuietly(Transaction tx) {
-		if(tx!=null) {
-			if(tx.isActive()) {
-				try {
-					tx.rollback();
-				} catch (Exception e) {
-					LOGGER.error("Could not rollback transaction for command",e);
-				}
+		if(tx!=null && tx.isActive()) {
+			try {
+				tx.rollback();
+			} catch (Exception e) {
+				LOGGER.error("Could not rollback transaction for command",e);
 			}
 		}
 	}

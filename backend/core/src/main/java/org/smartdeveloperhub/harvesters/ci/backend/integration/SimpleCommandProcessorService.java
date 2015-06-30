@@ -76,16 +76,20 @@ final class SimpleCommandProcessorService extends AbstractExecutionThreadService
 		Command command=null;
 		try {
 			while((command=this.monitor.take())!=Poison.SINGLETON) {
-				try {
-					if(!this.processor.processCommand(command)) {
-						this.monitor.retryLater(command);
-					}
-				} catch (CommandProcessingException e) {
-					LOGGER.debug("Failed to consume command",e);
-				}
+				processCommand(command);
 			}
 		} catch (InterruptedException e) {
 			LOGGER.info("Interrupted while waiting for command",e);
+		}
+	}
+
+	private void processCommand(Command command) {
+		try {
+			if(!this.processor.processCommand(command)) {
+				this.monitor.retryLater(command);
+			}
+		} catch (CommandProcessingException e) {
+			LOGGER.debug("Failed to consume command",e);
 		}
 	}
 

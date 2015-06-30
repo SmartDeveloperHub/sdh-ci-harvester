@@ -37,7 +37,7 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
-abstract class AbstractEntityCrawlingTask<T extends Entity> extends AbstractCrawlingTask<T> {
+abstract class AbstractEntityCrawlingTask<T extends Entity> extends AbstractCrawlingTask {
 
 	private final Class<? extends T> clazz;
 
