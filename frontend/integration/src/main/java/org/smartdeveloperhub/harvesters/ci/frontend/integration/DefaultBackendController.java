@@ -28,7 +28,6 @@ package org.smartdeveloperhub.harvesters.ci.frontend.integration;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +47,6 @@ final class DefaultBackendController implements BackendController {
 		this.jenkinsInstance = jenkinsInstance;
 		this.backendFacade = backendFacade;
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
-		ContinuousIntegrationService cis = backendFacade.applicationService();
-		List<URI> availableServices = cis.getRegisteredServices();
-		if(!availableServices.contains(jenkinsInstance)) {
-			throw new RuntimeException("Could not find instance "+jenkinsInstance+" ("+availableServices+")");
-		}
 		LOGGER.info("Connected.",this.jenkinsInstance);
 	}
 

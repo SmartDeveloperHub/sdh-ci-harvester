@@ -33,7 +33,6 @@ import org.ldp4j.application.data.Name;
 import org.ldp4j.application.data.NamingScheme;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
@@ -63,47 +62,51 @@ public final class IdentityUtil {
 		return (URI)executionId;
 	}
 
-	public static Name<URI> name(Service service) {
-		return NamingScheme.getDefault().name(service.serviceId());
+	private static Name<URI> defaultName(URI resourceId) {
+		return NamingScheme.getDefault().name(resourceId);
 	}
 
-	public static Name<URI> name(Service service, URI buildId) {
-		return NamingScheme.getDefault().name(buildId);
+	public static Name<URI> serviceName(Service service) {
+		return defaultName(service.serviceId());
 	}
 
-	public static Name<URI> name(Build build) {
-		return NamingScheme.getDefault().name(build.buildId());
+	public static Name<URI> buildName(URI buildId) {
+		return defaultName(buildId);
 	}
 
-	public static Name<URI> name(Build build, URI executionId) {
-		return NamingScheme.getDefault().name(executionId);
-	}
-
-	public static Name<URI> name(Execution execution) {
-		return NamingScheme.getDefault().name(execution.executionId());
+	public static Name<URI> buildName(Build build) {
+		return buildName(build.buildId());
 	}
 
 	public static Name<URI> buildName(Execution execution) {
-		return NamingScheme.getDefault().name(execution.buildId());
+		return buildName(execution.buildId());
 	}
 
-	public static Name<URI> parentBuild(SubBuild subBuild) {
-		return NamingScheme.getDefault().name(subBuild.parentId());
+	public static Name<URI> executionName(URI executionId) {
+		return defaultName(executionId);
 	}
 
-	public static Name<URI> subBuild(CompositeBuild compositeBuild, URI subBuild) {
-		return NamingScheme.getDefault().name(subBuild);
+	public static Name<URI> executionName(Execution execution) {
+		return executionName(execution.executionId());
 	}
 
-	public static Name<URI> buildContainer(Build build) {
-		return NamingScheme.getDefault().name(build.serviceId());
+	public static Name<URI> parentBuildName(SubBuild subBuild) {
+		return defaultName(subBuild.parentId());
 	}
 
-	public static Name<URI> executionContainer(Execution execution) {
-		return NamingScheme.getDefault().name(execution.buildId());
+	public static Name<URI> subBuildName(URI subBuild) {
+		return defaultName(subBuild);
 	}
 
-	public static Name<URI> parentBuildContainer(SubBuild build) {
+	public static Name<URI> buildContainerName(Build build) {
+		return defaultName(build.serviceId());
+	}
+
+	public static Name<URI> executionContainerName(Execution execution) {
+		return defaultName(execution.buildId());
+	}
+
+	public static Name<URI> parentBuildContainerName(SubBuild build) {
 		return NamingScheme.getDefault().name(build.parentId());
 	}
 

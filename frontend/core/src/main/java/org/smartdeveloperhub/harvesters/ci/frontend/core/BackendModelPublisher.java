@@ -86,14 +86,14 @@ final class BackendModelPublisher {
 				session.
 					find(
 						ContainerSnapshot.class,
-						IdentityUtil.parentBuildContainer((SubBuild)build),
+						IdentityUtil.parentBuildContainerName((SubBuild)build),
 						SubBuildContainerHandler.class);
 		} else {
 			buildContainerSnapshot=
 				session.
 					find(
 						ContainerSnapshot.class,
-						IdentityUtil.buildContainer(build),
+						IdentityUtil.buildContainerName(build),
 						BuildContainerHandler.class);
 		}
 		return buildContainerSnapshot;
@@ -104,13 +104,13 @@ final class BackendModelPublisher {
 			session.
 				find(
 					ResourceSnapshot.class,
-					IdentityUtil.name(service),
+					IdentityUtil.serviceName(service),
 					ServiceHandler.class);
 		serviceSnapshot.
 			createAttachedResource(
 				ContainerSnapshot.class,
 				ServiceHandler.SERVICE_BUILDS,
-				IdentityUtil.name(service),
+				IdentityUtil.serviceName(service),
 				BuildContainerHandler.class);
 		LOGGER.debug("Published build container for service {}",service.serviceId());
 	}
@@ -119,13 +119,13 @@ final class BackendModelPublisher {
 		ContainerSnapshot buildContainerSnapshot=findBuildContainer(session,build);
 		ResourceSnapshot buildSnapshot=
 			buildContainerSnapshot.
-				addMember(IdentityUtil.name(build));
+				addMember(IdentityUtil.buildName(build));
 		LOGGER.debug("Published resource for build {} @ {} ({})",build.buildId(),buildContainerSnapshot.name(),buildContainerSnapshot.templateId());
 		buildSnapshot.
 			createAttachedResource(
 				ContainerSnapshot.class,
 				BuildHandler.BUILD_EXECUTIONS,
-				IdentityUtil.name(build),
+				IdentityUtil.buildName(build),
 				ExecutionContainerHandler.class);
 		LOGGER.debug("Published execution container for build {}",build.buildId());
 		if(build instanceof CompositeBuild) {
@@ -133,7 +133,7 @@ final class BackendModelPublisher {
 				createAttachedResource(
 					ContainerSnapshot.class,
 					BuildHandler.BUILD_SUB_BUILDS,
-					IdentityUtil.name(build),
+					IdentityUtil.buildName(build),
 					SubBuildContainerHandler.class);
 			LOGGER.debug("Published sub-build container for composite build {}",build.buildId());
 		}
@@ -144,9 +144,9 @@ final class BackendModelPublisher {
 			session.
 				find(
 					ContainerSnapshot.class,
-					IdentityUtil.executionContainer(execution),
+					IdentityUtil.executionContainerName(execution),
 					ExecutionContainerHandler.class);
-		executionContainerSnapshot.addMember(IdentityUtil.name(execution));
+		executionContainerSnapshot.addMember(IdentityUtil.executionName(execution));
 		LOGGER.debug("Published resource for execution {} ({})",execution.executionId(),execution);
 	}
 

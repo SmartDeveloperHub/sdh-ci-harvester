@@ -236,7 +236,6 @@ public final class JenkinsCrawler {
 					withTaskScheduler(this.scheduler).
 					withCrawlerInformationPoint(this.cip).
 					withOperationDecissionPoint(this.operationStrategy.decissionPoint()).
-					withCrawlingDecissionPoint(this.crawlingStrategy.decissionPoint()).
 					build();
 	}
 

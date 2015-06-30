@@ -47,7 +47,7 @@ final class ExecutionMapper extends ExecutionVocabulary {
 	}
 
 	static DataSet toDataSet(Execution execution) {
-		Name<URI> executionName=IdentityUtil.name(execution);
+		Name<URI> executionName=IdentityUtil.executionName(execution);
 
 		ResultMapping resultMapping=
 			ResultMapping.newInstance(execution.result());

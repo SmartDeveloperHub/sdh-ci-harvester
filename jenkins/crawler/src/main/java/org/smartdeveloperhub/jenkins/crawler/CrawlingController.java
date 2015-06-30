@@ -59,7 +59,6 @@ final class CrawlingController extends AbstractExecutionThreadService {
 		private CrawlerEventManager dispatcher;
 		private OperationDecissionPoint odp;
 		private CrawlerInformationPoint cip;
-		private CrawlingDecissionPoint cdp;
 
 		private Builder() {
 		}
@@ -94,11 +93,6 @@ final class CrawlingController extends AbstractExecutionThreadService {
 			return this;
 		}
 
-		Builder withCrawlingDecissionPoint(CrawlingDecissionPoint cdp) {
-			this.cdp=cdp;
-			return this;
-		}
-
 		CrawlingController build() {
 			checkNotNull(this.instance);
 			checkNotNull(this.storage);
@@ -106,12 +100,10 @@ final class CrawlingController extends AbstractExecutionThreadService {
 			checkNotNull(this.dispatcher);
 			checkNotNull(this.cip);
 			checkNotNull(this.odp);
-			checkNotNull(this.cdp);
 			return
 				new CrawlingController(
 					this.cip,
 					this.odp,
-					this.cdp,
 					this.instance,
 					this.storage,
 					this.scheduler,
@@ -174,9 +166,6 @@ final class CrawlingController extends AbstractExecutionThreadService {
 	private final CrawlerInformationPoint cip;
 	private final OperationDecissionPoint odp;
 
-	@SuppressWarnings("unused")
-	private final CrawlingDecissionPoint cdp;
-
 	private final AtomicBoolean terminate;
 	private final AtomicLong sessionCounter;
 	private final long timeOut;
@@ -187,7 +176,6 @@ final class CrawlingController extends AbstractExecutionThreadService {
 	private CrawlingController(
 			CrawlerInformationPoint cip,
 			OperationDecissionPoint odp,
-			CrawlingDecissionPoint cdp,
 			URI instance,
 			FileBasedStorage storage,
 			TaskScheduler scheduler,
@@ -200,7 +188,6 @@ final class CrawlingController extends AbstractExecutionThreadService {
 		this.unit = TimeUnit.SECONDS;
 		this.cip = cip;
 		this.odp = odp;
-		this.cdp = cdp;
 		this.sessionCounter=new AtomicLong(0);
 		this.terminate=new AtomicBoolean(false);
 		this.sleeper=new Sleeper();

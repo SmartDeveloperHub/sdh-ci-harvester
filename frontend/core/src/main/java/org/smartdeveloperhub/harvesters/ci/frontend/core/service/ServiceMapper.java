@@ -46,7 +46,7 @@ final class ServiceMapper extends ServiceVocabulary {
 	}
 
 	static DataSet toDataSet(Service service) {
-		Name<URI> serviceName=IdentityUtil.name(service);
+		Name<URI> serviceName=IdentityUtil.serviceName(service);
 
 		DataSet dataSet=DataSetFactory.createDataSet(serviceName);
 
@@ -71,7 +71,7 @@ final class ServiceMapper extends ServiceVocabulary {
 						withIndividual(serviceName,ServiceHandler.ID,VOCABULARY_PATH);
 
 		for(URI buildId:service.builds()) {
-			Name<URI> buildName=IdentityUtil.name(service,buildId);
+			Name<URI> buildName=IdentityUtil.buildName(buildId);
 			serviceHelper.
 				property(HAS_RESOURCE).
 					withIndividual(buildName,BuildHandler.ID);

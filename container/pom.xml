@@ -84,7 +84,7 @@
 								<artifactId>ci-frontend-dist</artifactId>
 								<version>${project.version}</version>
 								<type>war</type>
-								<overWrite>false</overWrite>
+								<overWrite>true</overWrite>
 								<outputDirectory>${deployment.dir}</outputDirectory>
 							</artifactItem>
 						</artifactItems>

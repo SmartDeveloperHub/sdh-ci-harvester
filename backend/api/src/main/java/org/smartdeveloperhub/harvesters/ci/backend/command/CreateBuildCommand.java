@@ -90,7 +90,7 @@ public final class CreateBuildCommand extends BuildCommand {
 	private final boolean simple;
 	private final URI parent;
 
-	private CreateBuildCommand(URI serviceId, URI buildId, boolean simple, URI parent, String title, String description, Date creationDate, URI codebase) {
+	private CreateBuildCommand(URI serviceId, URI buildId, boolean simple, URI parent, String title, String description, Date creationDate, URI codebase) { // NOSONAR
 		super(buildId,title,description,creationDate,codebase);
 		this.serviceId = serviceId;
 		this.simple = simple;

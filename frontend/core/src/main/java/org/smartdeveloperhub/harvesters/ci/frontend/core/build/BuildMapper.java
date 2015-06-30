@@ -46,7 +46,7 @@ final class BuildMapper extends BuildVocabulary {
 	}
 
 	static DataSet toDataSet(Build build) {
-		Name<URI> buildName=IdentityUtil.name(build);
+		Name<URI> buildName=IdentityUtil.buildName(build);
 
 		DataSet dataSet=DataSetFactory.createDataSet(buildName);
 
@@ -86,7 +86,7 @@ final class BuildMapper extends BuildVocabulary {
 		for(URI subBuild:compositeBuild.subBuilds()) {
 			buildHeper.
 				property(CI_INCLUDES_BUILD).
-					withIndividual(IdentityUtil.subBuild(compositeBuild,subBuild),BuildHandler.ID);
+					withIndividual(IdentityUtil.subBuildName(subBuild),BuildHandler.ID);
 		}
 	}
 
@@ -95,7 +95,7 @@ final class BuildMapper extends BuildVocabulary {
 			property(TYPE).
 				withIndividual(CI_SUB_BUILD_TYPE).
 			property(CI_IS_PART_OF).
-				withIndividual(IdentityUtil.parentBuild(subBuild),BuildHandler.ID);
+				withIndividual(IdentityUtil.parentBuildName(subBuild),BuildHandler.ID);
 	}
 
 }
