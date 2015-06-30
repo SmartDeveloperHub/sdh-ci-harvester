@@ -41,7 +41,7 @@ public class BackendDump extends AbstractBootstrap<BackendConfig> {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendDump.class);
 
-	private static final String NAME = "BackendDump";;
+	private static final String NAME = "BackendDump";
 
 	private ComponentRegistry registry;
 

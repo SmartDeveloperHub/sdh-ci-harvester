@@ -167,9 +167,9 @@ final class BackendModelPublisher {
 	}
 
 	void publish(WriteSession session) {
-		Service service=this.service.getService(this.serviceId);
-		publish(session,service);
-		for(URI buildId:service.builds()) {
+		Service targetService=this.service.getService(this.serviceId);
+		publish(session,targetService);
+		for(URI buildId:targetService.builds()) {
 			Build build=publishBuild(session, buildId);
 			if(build instanceof CompositeBuild) {
 				publishSubBuilds(session, (CompositeBuild)build);

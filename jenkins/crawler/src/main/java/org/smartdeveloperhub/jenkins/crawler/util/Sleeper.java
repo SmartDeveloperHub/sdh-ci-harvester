@@ -40,7 +40,7 @@ public final class Sleeper {
 
 	private void doSleep(long millis) throws InterruptedException {
 		synchronized(this.witness) {
-			this.witness.wait(millis);
+			this.witness.wait(millis); // NOSONAR
 		}
 	}
 

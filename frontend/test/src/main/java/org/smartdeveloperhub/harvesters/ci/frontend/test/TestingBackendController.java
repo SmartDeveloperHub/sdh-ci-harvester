@@ -51,9 +51,15 @@ import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 final class TestingBackendController implements BackendController {
 
-	private final static Logger LOGGER=LoggerFactory.getLogger(TestingBackendController.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(TestingBackendController.class);
 
 	private final URI jenkinsInstance;
+
+	TestingBackendController(URI jenkinsInstance) {
+		this.jenkinsInstance = jenkinsInstance;
+		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
+		LOGGER.info("Connected.",this.jenkinsInstance);
+	}
 
 	private static Date after(Date date) {
 		Random random=new Random(System.nanoTime());
@@ -132,12 +138,6 @@ final class TestingBackendController implements BackendController {
 				serviceRepository,
 				buildRepository,
 				executionRepository);
-	}
-
-	TestingBackendController(URI jenkinsInstance) {
-		this.jenkinsInstance = jenkinsInstance;
-		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
-		LOGGER.info("Connected.",this.jenkinsInstance);
 	}
 
 	/**

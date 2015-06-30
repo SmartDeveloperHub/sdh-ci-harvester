@@ -80,7 +80,7 @@ public final class Mapper {
 	public static XMLGregorianCalendar toLiteral(Date date) {
 		try {
 			GregorianCalendar gc=new GregorianCalendar();
-			gc.setTime(new Date());
+			gc.setTime(date);
 			return DatatypeFactory.newInstance().newXMLGregorianCalendar(gc);
 		} catch (Exception e) {
 			throw new RuntimeException("Could not create literal",e);

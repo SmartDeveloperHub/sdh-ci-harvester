@@ -40,7 +40,7 @@ public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendPopulator.class);
 
- 	private static final String NAME = "BackendPopulator";;
+ 	private static final String NAME = "BackendPopulator";
 
 	private BackendPopulatorService service;
 

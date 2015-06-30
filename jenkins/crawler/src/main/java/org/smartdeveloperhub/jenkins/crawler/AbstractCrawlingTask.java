@@ -197,7 +197,7 @@ abstract class AbstractCrawlingTask<T extends Entity> implements Task {
 		this.context.fireEvent(event);
 	}
 
-	protected final <T extends Entity> T entityOfId(URI id, JenkinsEntityType entityType, Class<? extends T> entityClass) throws IOException {
+	protected final <S extends Entity> S entityOfId(URI id, JenkinsEntityType entityType, Class<? extends S> entityClass) throws IOException {
 		checkState(this.context!=null);
 		return this.context.entityRepository().entityOfId(id,entityType,entityClass);
 	}

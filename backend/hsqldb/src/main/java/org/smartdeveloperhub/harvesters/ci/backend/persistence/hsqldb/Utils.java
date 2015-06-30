@@ -83,6 +83,9 @@ abstract class Utils {
 
 	private static final String[] DATABASE_FILES={".properties",".script",".data",".backup",".log",".lck"};
 
+	private Utils() {
+	}
+
 	static URLBuilder urlBuilder() {
 		return new URLBuilder();
 	}

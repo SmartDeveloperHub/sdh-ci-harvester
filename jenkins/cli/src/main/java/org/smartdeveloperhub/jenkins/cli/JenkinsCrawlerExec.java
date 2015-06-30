@@ -43,7 +43,6 @@ import org.smartdeveloperhub.jenkins.crawler.OperationStrategy;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventListener;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
-import org.smartdeveloperhub.util.console.Consoles;
 
 public final class JenkinsCrawlerExec {
 
@@ -66,10 +65,10 @@ public final class JenkinsCrawlerExec {
 							CrawlingStrategy.
 								builder().
 									includeJob("jenkins_main_trunk").
-//									includeJob("jenkins_pom").
-//									includeJob("maven-interceptors").
-//									includeJob("tools_maven-hpi-plugin").
-//									includeJob("infra_extension-indexer").
+									includeJob("jenkins_pom").
+									includeJob("maven-interceptors").
+									includeJob("tools_maven-hpi-plugin").
+									includeJob("infra_extension-indexer").
 									build()).
 						withOperationStrategy(
 							OperationStrategy.

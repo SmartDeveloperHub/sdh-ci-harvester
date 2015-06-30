@@ -40,7 +40,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Mapper;
 
-final class BuildMapper implements BuildVocabulary {
+final class BuildMapper extends BuildVocabulary {
 
 	private BuildMapper() {
 	}

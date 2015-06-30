@@ -39,7 +39,7 @@ import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Mapper;
 
-final class ExecutionMapper implements ExecutionVocabulary {
+final class ExecutionMapper extends ExecutionVocabulary {
 
 	private static final URI RESULT_PATH = URI.create("#result");
 

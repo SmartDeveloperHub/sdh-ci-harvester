@@ -39,6 +39,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
 import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseLifecycleException;
 import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig.Deployment;
 import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig.Mode;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb.Utils.URLBuilder;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
@@ -83,34 +84,23 @@ final class HSQLDBDatabase implements Database {
 	}
 
 	private ImmutableMap<String, String> configure(DatabaseConfig config) {
-		String connectionURL=null;
-		String location = config.getLocation();
+		String location=config.getLocation();
+		URLBuilder builder=Utils.urlBuilder();
 		switch(config.getDeployment()) {
 			case LOCAL:
-				connectionURL=
-					Utils.
-						urlBuilder().
-							persistent(location).
-							build();
+				builder.persistent(location);
 				break;
 			case PACKED:
 				this.unpackedLocation = unpack(location);
-				connectionURL=
-					Utils.
-						urlBuilder().
-							persistent(this.unpackedLocation).
-							build();
+				builder.persistent(this.unpackedLocation);
 				break;
 			case REMOTE:
-				connectionURL=
-					Utils.
-						urlBuilder().
-							remote(location).
-							build();
+				builder.remote(location);
 				break;
 			default:
 				break;
 		}
+		String connectionURL=builder.build();
 		LOGGER.debug("Connecting to DB: {}%n",connectionURL);
 		return
 			ImmutableMap.

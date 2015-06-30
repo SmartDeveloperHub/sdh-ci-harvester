@@ -32,7 +32,7 @@ import com.google.common.util.concurrent.Service;
 
 final class CustomBootstrap extends AbstractBootstrap<CustomConfig> {
 
-	static final String NAME = "CustomApplication";;
+	static final String NAME = "CustomApplication";
 
 	private CustomApplicationService service;
 

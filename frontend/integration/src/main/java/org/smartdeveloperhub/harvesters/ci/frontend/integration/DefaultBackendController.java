@@ -38,7 +38,7 @@ import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 final class DefaultBackendController implements BackendController {
 
-	private final static Logger LOGGER=LoggerFactory.getLogger(DefaultBackendController.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(DefaultBackendController.class);
 
 	private final URI jenkinsInstance;
 

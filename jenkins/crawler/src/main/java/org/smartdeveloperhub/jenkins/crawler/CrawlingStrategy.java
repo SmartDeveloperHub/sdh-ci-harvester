@@ -53,7 +53,7 @@ public final class CrawlingStrategy {
 			} else if(excludedJobs.contains(jobName)) {
 				return false;
 			}
-			return includedJobs.size()==0;
+			return includedJobs.isEmpty();
 		}
 
 		@Override
@@ -86,7 +86,7 @@ public final class CrawlingStrategy {
 			} else if(excludedEntityTypes.contains(entityType)) {
 				return false;
 			}
-			return includedEntityTypes.size()==0;
+			return includedEntityTypes.isEmpty();
 		}
 
 		@Override
@@ -96,7 +96,7 @@ public final class CrawlingStrategy {
 			} else if(excludedArtifactTypes.contains(artifactType)) {
 				return false;
 			}
-			return includedArtifactTypes.size()==0;
+			return includedArtifactTypes.isEmpty();
 		}
 	}
 

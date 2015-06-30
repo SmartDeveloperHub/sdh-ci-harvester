@@ -33,6 +33,15 @@ import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseLifecycleExc
 
 public interface DatabaseProvider {
 
-	Database create(DatabaseConfig config) throws DatabaseLifecycleException;
+	/**
+	 * Create a database using the specified configuration
+	 *
+	 * @param config
+	 * @return Null if the provider cannot create the database because it does
+	 *         not understand the configuration
+	 * @throws DatabaseLifecycleException
+	 *             if a failure prevents the creation of the database
+	 */
+	Database create(DatabaseConfig config);
 
 }

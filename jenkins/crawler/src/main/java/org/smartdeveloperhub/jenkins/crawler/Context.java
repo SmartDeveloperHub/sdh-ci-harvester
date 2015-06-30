@@ -47,13 +47,10 @@ interface Context {
 
 	CrawlingSession currentSession();
 
-	@Deprecated
 	ModelMappingService modelMapper();
 
-	@Deprecated
 	EntityRepository entityRepository();
 
-	@Deprecated
 	ResourceRepository resourceRepository();
 
 }

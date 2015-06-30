@@ -81,36 +81,50 @@ final class BackendDumpService extends AbstractIdleService {
 		try {
 			Consoles.defaultConsole().printf("Starting dump...%n");
 			for(URI serviceId:serviceRepository().serviceIds()) {
-				Service service=serviceRepository().serviceOfId(serviceId);
-				Consoles.defaultConsole().printf("- Service %s : %s%n",serviceId,service);
-				for(URI buildId:service.builds()) {
-					Build build=buildRepository().buildOfId(buildId);
-					if(build instanceof SimpleBuild) {
-						Consoles.defaultConsole().printf("  + Simple build %s : %s%n",buildId,build);
-						for(URI executionId:build.executions()) {
-							Execution execution=executionRepository().executionOfId(executionId);
-							Consoles.defaultConsole().printf("    * Execution %s : %s%n",executionId,execution);
-						}
-					} else {
-						Consoles.defaultConsole().printf("  + Composite build %s : %s%n",buildId,build);
-						for(URI executionId:build.executions()) {
-							Execution execution=executionRepository().executionOfId(executionId);
-							Consoles.defaultConsole().printf("    * Execution %s : %s%n",executionId,execution);
-						}
-						for(URI subBuildId:((CompositeBuild)build).subBuilds()) {
-							Build subBuild=buildRepository().buildOfId(subBuildId);
-							Consoles.defaultConsole().printf("    * Sub-build %s : %s%n",subBuildId,subBuild);
-							for(URI executionId:subBuild.executions()) {
-								Execution execution=executionRepository().executionOfId(executionId);
-								Consoles.defaultConsole().printf("      + Execution %s : %s%n",executionId,execution);
-							}
-						}
-					}
-				}
+				dumpService(serviceRepository().serviceOfId(serviceId));
 			}
 			Consoles.defaultConsole().printf("Dump completed.%n");
 		} finally {
 			tx.rollback();
+		}
+	}
+
+	private void dumpService(Service service) {
+		Consoles.defaultConsole().printf("- Service %s : %s%n",service.serviceId(),service);
+		for(URI buildId:service.builds()) {
+			Build build=buildRepository().buildOfId(buildId);
+			if(build instanceof SimpleBuild) {
+				dumpSimpleBuild(build);
+			} else {
+				dumpCompositeBuild(build);
+			}
+		}
+	}
+
+	private void dumpCompositeBuild(Build build) {
+		Consoles.defaultConsole().printf("  + Composite build %s : %s%n",build.buildId(),build);
+		for(URI executionId:build.executions()) {
+			Execution execution=executionRepository().executionOfId(executionId);
+			Consoles.defaultConsole().printf("    * Execution %s : %s%n",executionId,execution);
+		}
+		for(URI subBuildId:((CompositeBuild)build).subBuilds()) {
+			dumpSubBuild(buildRepository().buildOfId(subBuildId));
+		}
+	}
+
+	private void dumpSubBuild(Build subBuild) {
+		Consoles.defaultConsole().printf("    * Sub-build %s : %s%n",subBuild.buildId(),subBuild);
+		for(URI executionId:subBuild.executions()) {
+			Execution execution=executionRepository().executionOfId(executionId);
+			Consoles.defaultConsole().printf("      + Execution %s : %s%n",executionId,execution);
+		}
+	}
+
+	private void dumpSimpleBuild(Build build) {
+		Consoles.defaultConsole().printf("  + Simple build %s : %s%n",build.buildId(),build);
+		for(URI executionId:build.executions()) {
+			Execution execution=executionRepository().executionOfId(executionId);
+			Consoles.defaultConsole().printf("    * Execution %s : %s%n",executionId,execution);
 		}
 	}
 

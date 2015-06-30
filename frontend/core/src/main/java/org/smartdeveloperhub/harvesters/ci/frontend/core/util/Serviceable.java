@@ -35,7 +35,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 
 public abstract class Serviceable {
 
-	private final Logger logger;
+	private final Logger logger; // NOSONAR
 
 	private final ContinuousIntegrationService service;
 

@@ -31,4 +31,7 @@ final class JPAProperties {
 
 	static final String JDBC_URL="javax.persistence.jdbc.url";
 
+	private JPAProperties() {
+	}
+
 }

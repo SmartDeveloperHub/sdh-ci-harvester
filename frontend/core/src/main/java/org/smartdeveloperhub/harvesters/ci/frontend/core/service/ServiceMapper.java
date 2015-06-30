@@ -38,7 +38,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 
-final class ServiceMapper implements ServiceVocabulary {
+final class ServiceMapper extends ServiceVocabulary {
 
 	private static final URI VOCABULARY_PATH = URI.create("#vocabulary");
 

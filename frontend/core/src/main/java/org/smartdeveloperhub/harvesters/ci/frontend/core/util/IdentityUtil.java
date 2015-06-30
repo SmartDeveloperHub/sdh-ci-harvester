@@ -44,64 +44,6 @@ public final class IdentityUtil {
 
 	private IdentityUtil() {
 	}
-/*
-	public static Individual<?, ?> personIndividual(DataSet content, Person person) {
-		Individual<?,?> result=null;
-		if(person!=null) {
-			ManagedIndividualId id=
-				ManagedIndividualId.
-					createId(
-						name(person),
-						PersonHandler.ID);
-			result=content.individual(id,ManagedIndividual.class);
-		} else {
-			result=DataSetUtils.newHelper(content).self();
-		}
-		return result;
-	}
-
-	public static Individual<?, ?> contactIndividual(DataSet content, Contact contact) {
-		Individual<?,?> result=null;
-		if(contact!=null) {
-			ManagedIndividualId id=
-				ManagedIndividualId.
-					createId(
-						name(contact),
-						ContactHandler.ID);
-			result=content.individual(id,ManagedIndividual.class);
-		} else {
-			result=DataSetUtils.newHelper(content).self();
-		}
-		return result;
-	}
-
-	public static String personId(ResourceSnapshot resource) {
-		Serializable id = resource.name().id();
-		checkState(id instanceof String,"Person identifier should be a string not a %s",id.getClass().getCanonicalName());
-		return (String)id;
-	}
-
-	public static ContactId contactId(ResourceSnapshot resource) {
-		Serializable contactId = resource.name().id();
-		checkState(contactId instanceof String,"Contact identifier should be a string not a %s",contactId.getClass().getCanonicalName());
-		ResourceSnapshot contactsResource = resource.parent();
-		checkState(contactsResource!=null,"Could not find contact's parent resource");
-		ResourceSnapshot personResource = contactsResource.parent();
-		checkState(personResource!=null,"Could not find contact's related person resource");
-		Serializable personId = personResource.name().id();
-		checkState(personId instanceof String,"Person identifier should be a string not a %s",personId.getClass().getCanonicalName());
-		return ContactId.create((String)personId,(String)contactId);
-	}
-
-	public static Name<String> name(Contact contact, String... subKeys) {
-		return NamingScheme.getDefault().name(contact.getEmail(),subKeys);
-	}
-
-	public static Name<String> name(Person person, String... subKeys) {
-		return NamingScheme.getDefault().name(person.getEmail(),subKeys);
-	}
-
- */
 
 	public static URI serviceId(ResourceSnapshot resource) {
 		Serializable serviceId=resource.name().id();
@@ -149,7 +91,7 @@ public final class IdentityUtil {
 		return NamingScheme.getDefault().name(subBuild.parentId());
 	}
 
-	public static Name<?> subBuild(CompositeBuild compositeBuild, URI subBuild) {
+	public static Name<URI> subBuild(CompositeBuild compositeBuild, URI subBuild) {
 		return NamingScheme.getDefault().name(subBuild);
 	}
 
@@ -157,11 +99,11 @@ public final class IdentityUtil {
 		return NamingScheme.getDefault().name(build.serviceId());
 	}
 
-	public static Name<?> executionContainer(Execution execution) {
+	public static Name<URI> executionContainer(Execution execution) {
 		return NamingScheme.getDefault().name(execution.buildId());
 	}
 
-	public static Name<?> parentBuildContainer(SubBuild build) {
+	public static Name<URI> parentBuildContainer(SubBuild build) {
 		return NamingScheme.getDefault().name(build.parentId());
 	}
 

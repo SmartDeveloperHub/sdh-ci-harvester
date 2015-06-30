@@ -33,7 +33,16 @@ public final class DatabaseManager {
 	private DatabaseManager() {
 	}
 
-	public static Database load(DatabaseConfig config) throws DatabaseLifecycleException {
+	/**
+	 * Load a database instance for the given configuration
+	 *
+	 * @param config
+	 *            The configuration to use for loading the database
+	 * @return A database or null if database cannot be loaded
+	 * @throws DatabaseLifecycleException
+	 *             if a failure prevents the creation of a database
+	 */
+	public static Database load(DatabaseConfig config) {
 		try {
 			Class<?> clazz = Class.forName(config.getProvider());
 			if(!DatabaseProvider.class.isAssignableFrom(clazz)) {
@@ -43,7 +52,7 @@ public final class DatabaseManager {
 			DatabaseProvider provider=providerClass.newInstance();
 			return provider.create(config);
 		} catch (InstantiationException | IllegalAccessException e) {
-		throw new DatabaseLifecycleException("Could not instantiate provider",e);
+			throw new DatabaseLifecycleException("Could not instantiate provider",e);
 		} catch (ClassNotFoundException e) {
 			throw new DatabaseLifecycleException("Could not load provider",e);
 		}

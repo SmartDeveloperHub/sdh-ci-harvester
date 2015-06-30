@@ -44,7 +44,7 @@ public final class DefaultBackendControllerFactory implements BackendControllerF
 
 	private static final String CI_HARVESTER_DATABASE_CONFIG_PATH = "ci.harvester.config";
 
-	private static final Logger logger=LoggerFactory.getLogger(DefaultBackendControllerFactory.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(DefaultBackendControllerFactory.class);
 
 	/**
 	 * {@inheritDoc}
@@ -56,21 +56,21 @@ public final class DefaultBackendControllerFactory implements BackendControllerF
 			DatabaseConfig config=loadConfiguration(property);
 			return new DefaultBackendController(jenkinsInstance,BackendFacade.create(config));
 		} catch (Exception e) {
-			logger.error("Could not initialize backend",e);
+			LOGGER.error("Could not initialize backend",e);
 			return null;
 		}
 	}
 
 	private static DatabaseConfig loadConfiguration(String pathname) throws IOException {
 		try {
-			logger.info("Loading configuration from {}...",pathname);
+			LOGGER.info("Loading configuration from {}...",pathname);
 			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 			DatabaseConfig configuration = mapper.readValue(new File(pathname), DatabaseConfig.class);
-			logger.info("Configuration loaded: {}",configuration);
+			LOGGER.info("Configuration loaded: {}",configuration);
 			return configuration;
 		} catch (Exception e) {
 			String errorMessage = String.format("Could not load configuration from %s",pathname);
-			logger.warn(errorMessage+". Full stacktrace follows: ",e);
+			LOGGER.warn(errorMessage+". Full stacktrace follows: ",e);
 			throw new IOException(errorMessage,e);
 		}
 	}
