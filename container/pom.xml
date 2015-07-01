@@ -5,7 +5,6 @@
         http://www.smartdeveloperhub.org/
 
       Center for Open Middleware
-        http://www.centeropenmiddleware.com/
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
       Copyright (C) 2015 Center for Open Middleware.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
@@ -64,6 +63,15 @@
 		<harvester.http.port>80</harvester.http.port>
 		<harvester.config>${basedir}${file.separator}.config${file.separator}config.yml</harvester.config>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>sonatype-oss-public-snapshots</id>
+			<url>https://oss.sonatype.org/content/groups/public/</url>
+			<snapshots><enabled>true</enabled></snapshots>
+			<releases><enabled>false</enabled></releases>
+		</repository>
+	</repositories>
 
 	<pluginRepositories>
 		<pluginRepository>
