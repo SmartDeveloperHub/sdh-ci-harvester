@@ -37,6 +37,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
@@ -58,6 +59,12 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 public class SmokeTest {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(SmokeTest.class);
+
+	@BeforeClass
+	public static void setUpBefore() {
+		File logFile = new File("target"+File.separator+"derby.log");
+		System.setProperty("derby.stream.error.file", logFile.getAbsolutePath());
+	}
 
 	@Rule
 	public TemporaryFolder testFolder = new TemporaryFolder();

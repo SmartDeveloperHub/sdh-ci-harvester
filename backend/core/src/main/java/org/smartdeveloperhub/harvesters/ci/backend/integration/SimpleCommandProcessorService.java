@@ -31,7 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.command.Command;
 import org.smartdeveloperhub.harvesters.ci.backend.command.CommandVisitor;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
+import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
@@ -55,11 +57,13 @@ final class SimpleCommandProcessorService extends AbstractExecutionThreadService
 
 	private final CommandProcessingMonitor monitor;
 	private final CommandProcessor processor;
+	private final ListenerManager<EntityLifecycleEventListener> listeners;
 
 	private volatile boolean shuttingDown;
 
-	SimpleCommandProcessorService(CommandProcessingMonitor monitor, TransactionManager manager, ContinuousIntegrationService service) {
+	SimpleCommandProcessorService(CommandProcessingMonitor monitor, TransactionManager manager, ContinuousIntegrationService service, ListenerManager<EntityLifecycleEventListener> listeners) {
 		this.monitor = monitor;
+		this.listeners = listeners;
 		this.processor=CommandProcessor.newInstance(manager,service);
 		this.shuttingDown=false;
 	}
@@ -87,6 +91,10 @@ final class SimpleCommandProcessorService extends AbstractExecutionThreadService
 		try {
 			if(!this.processor.processCommand(command)) {
 				this.monitor.retryLater(command);
+			} else {
+				EntityLifecycleEventCreator creator = new EntityLifecycleEventCreator();
+				command.accept(creator);
+				this.listeners.notify(new EntityLifecycleEventNotification(creator.getEvent()));
 			}
 		} catch (CommandProcessingException e) {
 			LOGGER.debug("Failed to consume command",e);

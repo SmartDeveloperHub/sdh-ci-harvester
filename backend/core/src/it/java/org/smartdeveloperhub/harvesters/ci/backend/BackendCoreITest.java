@@ -31,23 +31,22 @@ import java.io.IOException;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPAComponentRegistry;
 
 public class BackendCoreITest extends SmokeTest {
 
-	private static EntityManagerFactory factory;
-	private static JPAComponentRegistry persistencyFacade;
+	private EntityManagerFactory factory;
+	private JPAComponentRegistry persistencyFacade;
 
-	@BeforeClass
-	public static void startUp() throws IOException {
-		BackendCoreITest.factory = Persistence.createEntityManagerFactory("itTestsDerby");
-		BackendCoreITest.persistencyFacade =
+	@Before
+	public void startUp() throws IOException {
+		this.factory = Persistence.createEntityManagerFactory("itTestsDerby");
+		this.persistencyFacade =
 			new JPAComponentRegistry(
 				new Database(){
 					@Override
@@ -64,20 +63,20 @@ public class BackendCoreITest extends SmokeTest {
 			);
 	}
 
-	@AfterClass
-	public static void shutDown() throws Exception {
-		if(BackendCoreITest.persistencyFacade!=null) {
-			BackendCoreITest.persistencyFacade.close();
+	@After
+	public void shutDown() throws Exception {
+		if(this.persistencyFacade!=null) {
+			this.persistencyFacade.close();
 		}
 	}
 
 	@Test
 	public void smokeTest() throws Exception {
 		ContinuousIntegrationService cis =
-				new ContinuousIntegrationService(
-					BackendCoreITest.persistencyFacade.getServiceRepository(),
-					BackendCoreITest.persistencyFacade.getBuildRepository(),
-					BackendCoreITest.persistencyFacade.getExecutionRepository());
+			new ContinuousIntegrationService(
+				this.persistencyFacade.getServiceRepository(),
+				this.persistencyFacade.getBuildRepository(),
+				this.persistencyFacade.getExecutionRepository());
 		JenkinsIntegrationService jis=
 			new JenkinsIntegrationService(
 				cis,

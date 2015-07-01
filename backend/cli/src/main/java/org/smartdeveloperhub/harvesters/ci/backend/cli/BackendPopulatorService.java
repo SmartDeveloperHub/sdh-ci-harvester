@@ -33,13 +33,31 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
 import org.smartdeveloperhub.jenkins.crawler.OperationStrategy;
+import org.smartdeveloperhub.util.console.Consoles;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
 final class BackendPopulatorService extends AbstractExecutionThreadService {
+
+	private final class EventDumper implements
+			EntityLifecycleEventListener {
+		@Override
+		public void onEvent(EntityLifecycleEvent event) {
+			Consoles.
+				defaultConsole().
+					printf(
+						"[%s] %s %s %s%n",
+						event.ocurredOn(),
+						event.state(),
+						event.entityType(),
+						event.entityId());
+		}
+	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendPopulatorService.class);
 
@@ -66,6 +84,7 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 
 	private void execute() throws IOException {
 		LOGGER.info("Starting population...");
+		this.jis.registerListener(new EventDumper());
 		this.jis.connect(URI.create("http://ci.jenkins-ci.org/"));
 		this.jis.awaitCrawlingCompletion();
 	}

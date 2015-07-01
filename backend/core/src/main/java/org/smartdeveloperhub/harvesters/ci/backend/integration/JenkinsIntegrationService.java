@@ -36,6 +36,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
 import org.smartdeveloperhub.jenkins.crawler.JenkinsCrawler;
@@ -47,6 +48,7 @@ import org.smartdeveloperhub.jenkins.crawler.event.CrawlerStoppedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingAbortedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingCompletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingStartedEvent;
+import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
 
 import com.google.common.util.concurrent.Service;
 
@@ -226,6 +228,8 @@ public final class JenkinsIntegrationService {
 	private final Lock read;
 	private final Lock write;
 
+	private final ListenerManager<EntityLifecycleEventListener> listeners;
+
 	private JenkinsCrawler crawler;
 	private Service worker;
 	private ServiceState state;
@@ -239,6 +243,7 @@ public final class JenkinsIntegrationService {
 		this.read=lock.readLock();
 		this.write=lock.writeLock();
 		this.state=new ServiceDisconnected();
+		this.listeners=ListenerManager.newInstance();
 	}
 
 	private void doConnect(
@@ -249,7 +254,7 @@ public final class JenkinsIntegrationService {
 		try {
 			LOGGER.info("Connecting to {}...",jenkinsInstance);
 			this.monitor.startAsync();
-			this.worker=new SimpleCommandProcessorService(this.monitor,this.transactionManager,this.service);
+			this.worker=new SimpleCommandProcessorService(this.monitor,this.transactionManager,this.service,this.listeners);
 			this.worker.startAsync();
 			this.crawler =
 				JenkinsCrawler.
@@ -366,6 +371,16 @@ public final class JenkinsIntegrationService {
 		} finally {
 			this.write.unlock();
 		}
+	}
+
+	public JenkinsIntegrationService registerListener(EntityLifecycleEventListener listener) {
+		this.listeners.registerListener(listener);
+		return this;
+	}
+
+	public JenkinsIntegrationService deregisterListener(EntityLifecycleEventListener listener) {
+		this.listeners.deregisterListener(listener);
+		return this;
 	}
 
 }
