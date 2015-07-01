@@ -33,10 +33,10 @@ import org.ldp4j.application.ext.ResourceHandler;
 import org.ldp4j.application.ext.UnknownResourceException;
 import org.ldp4j.application.ext.annotations.Resource;
 import org.ldp4j.application.session.ResourceSnapshot;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 @Resource(
 	id=ExecutionHandler.ID
@@ -45,8 +45,8 @@ public class ExecutionHandler extends Serviceable implements ResourceHandler {
 
 	public static final String ID="ExecutionHandler";
 
-	public ExecutionHandler(ContinuousIntegrationService service) {
-		super(service);
+	public ExecutionHandler(BackendController controller) {
+		super(controller);
 	}
 
 	private Execution findExecution(URI id) throws UnknownResourceException {

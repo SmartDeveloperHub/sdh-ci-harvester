@@ -36,7 +36,8 @@ import org.ldp4j.application.setup.Bootstrap;
 import org.ldp4j.application.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainerHandler;
@@ -47,13 +48,19 @@ import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 public final class HarvesterApplication extends Application<HarvesterConfiguration> {
 
+	private final class LoggingLifecycleEventListener implements
+			EntityLifecycleEventListener {
+		@Override
+		public void onEvent(EntityLifecycleEvent event) {
+			LOGGER.debug("Received {}",event);
+		}
+	}
+
 	private static final Logger LOGGER=LoggerFactory.getLogger(HarvesterApplication.class);
 
 	private static final URI SERVICE_ID=URI.create("http://ci.jenkins-ci.org/");
 
 	private static final String SERVICE_PATH="service/";
-
-	private ContinuousIntegrationService backendService;
 
 	private BackendController controller;
 
@@ -61,16 +68,14 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	public void setup(Environment environment, Bootstrap<HarvesterConfiguration> bootstrap) {
 		LOGGER.info("Starting CI Harvester Application configuration...");
 
-		this.controller=BackendControllerManager.connect(SERVICE_ID);
+		this.controller=BackendControllerManager.create("MyProvider");
 
-		this.backendService=this.controller.continuousIntegrationService();
-
-		bootstrap.addHandler(new ServiceHandler(this.backendService));
-		bootstrap.addHandler(new BuildContainerHandler(this.backendService));
-		bootstrap.addHandler(new SubBuildContainerHandler(this.backendService));
-		bootstrap.addHandler(new BuildHandler(this.backendService));
-		bootstrap.addHandler(new ExecutionContainerHandler(this.backendService));
-		bootstrap.addHandler(new ExecutionHandler(this.backendService));
+		bootstrap.addHandler(new ServiceHandler(this.controller));
+		bootstrap.addHandler(new BuildContainerHandler(this.controller));
+		bootstrap.addHandler(new SubBuildContainerHandler(this.controller));
+		bootstrap.addHandler(new BuildHandler(this.controller));
+		bootstrap.addHandler(new ExecutionContainerHandler(this.controller));
+		bootstrap.addHandler(new ExecutionHandler(this.controller));
 
 		environment.
 			publishResource(
@@ -87,10 +92,11 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	public void initialize(WriteSession session) throws ApplicationInitializationException {
 		LOGGER.info("Initializing CI Harvester Application...");
 		try {
+			this.controller.connect(SERVICE_ID,new LoggingLifecycleEventListener());
 			BackendModelPublisher publisher=
 				BackendModelPublisher.
 					builder().
-						withBackendService(this.backendService).
+						withBackendService(this.controller.continuousIntegrationService()).
 						withMainService(SERVICE_ID).
 						build();
 			publisher.publish(session);

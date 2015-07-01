@@ -26,10 +26,9 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
-import java.net.URI;
 
 public interface BackendControllerFactory {
 
-	BackendController create(URI jenkinsInstance);
+	BackendController create(String providerId);
 
 }

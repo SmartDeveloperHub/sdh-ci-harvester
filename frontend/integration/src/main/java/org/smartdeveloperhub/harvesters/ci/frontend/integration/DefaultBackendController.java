@@ -26,28 +26,29 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.integration;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 final class DefaultBackendController implements BackendController {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(DefaultBackendController.class);
 
-	private final URI jenkinsInstance;
-
 	private final BackendFacade backendFacade;
 
-	DefaultBackendController(URI jenkinsInstance, BackendFacade backendFacade) {
-		this.jenkinsInstance = jenkinsInstance;
+	private URI jenkinsInstance;
+
+	DefaultBackendController(BackendFacade backendFacade) {
 		this.backendFacade = backendFacade;
-		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
-		LOGGER.info("Connected.",this.jenkinsInstance);
 	}
 
 	/**
@@ -55,6 +56,7 @@ final class DefaultBackendController implements BackendController {
 	 */
 	@Override
 	public ContinuousIntegrationService continuousIntegrationService() {
+		checkState(this.jenkinsInstance!=null,"Not connected");
 		return backendFacade.applicationService();
 	}
 
@@ -62,7 +64,20 @@ final class DefaultBackendController implements BackendController {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void connect(URI instance, EntityLifecycleEventListener listener) {
+		checkState(this.jenkinsInstance==null,"Already connected");
+		this.jenkinsInstance=instance;
+		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
+		checkState(hasInstance(instance,this.backendFacade),"Could not connect to %s",instance);
+		LOGGER.info("Connected.",this.jenkinsInstance);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void disconnect() {
+		checkState(this.jenkinsInstance!=null,"Not connected");
 		LOGGER.info("Disconnecting from {}...",this.jenkinsInstance);
 		try {
 			this.backendFacade.close();
@@ -71,6 +86,18 @@ final class DefaultBackendController implements BackendController {
 		} finally {
 			LOGGER.info("Disconnected.",this.jenkinsInstance);
 		}
+	}
+
+	private static boolean hasInstance(URI jenkinsInstance, BackendFacade backend) {
+		List<URI> availableServices=
+			backend.
+				applicationService().
+					getRegisteredServices();
+		boolean contains = availableServices.contains(jenkinsInstance);
+		if(!contains) {
+			LOGGER.warn("Could not find instance "+jenkinsInstance+" ("+availableServices+")");
+		}
+		return contains;
 	}
 
 }

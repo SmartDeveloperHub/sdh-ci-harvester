@@ -36,8 +36,8 @@ import org.ldp4j.application.ext.annotations.DirectContainer;
 import org.ldp4j.application.session.ContainerSnapshot;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.ldp4j.application.session.WriteSession;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 @DirectContainer(
 	id = SubBuildContainerHandler.ID,
@@ -48,8 +48,8 @@ public class SubBuildContainerHandler extends Serviceable implements ContainerHa
 
 	public static final String ID="SubBuildContainerHandler";
 
-	public SubBuildContainerHandler(ContinuousIntegrationService service) {
-		super(service);
+	public SubBuildContainerHandler(BackendController controller) {
+		super(controller);
 	}
 
 	@Override

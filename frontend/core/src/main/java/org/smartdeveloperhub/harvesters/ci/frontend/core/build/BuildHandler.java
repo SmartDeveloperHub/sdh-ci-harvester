@@ -35,10 +35,10 @@ import org.ldp4j.application.ext.annotations.Attachment;
 import org.ldp4j.application.ext.annotations.Resource;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 @Resource(
 	id=BuildHandler.ID,
@@ -62,8 +62,8 @@ public class BuildHandler extends Serviceable implements ResourceHandler {
 	public static final String BUILD_EXECUTIONS="BuildExecutions";
 	public static final String BUILD_SUB_BUILDS="BuildSubBuilds";
 
-	public BuildHandler(ContinuousIntegrationService service) {
-		super(service);
+	public BuildHandler(BackendController controller) {
+		super(controller);
 	}
 
 	private Build findBuild(URI id) throws UnknownResourceException {

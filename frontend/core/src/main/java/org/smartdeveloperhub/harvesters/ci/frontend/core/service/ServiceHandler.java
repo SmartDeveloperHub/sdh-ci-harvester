@@ -34,11 +34,11 @@ import org.ldp4j.application.ext.UnknownResourceException;
 import org.ldp4j.application.ext.annotations.Attachment;
 import org.ldp4j.application.ext.annotations.Resource;
 import org.ldp4j.application.session.ResourceSnapshot;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 @Resource(
 	id=ServiceHandler.ID,
@@ -56,8 +56,8 @@ public class ServiceHandler extends Serviceable implements ResourceHandler {
 
 	public static final String SERVICE_BUILDS="ServiceBuilds";
 
-	public ServiceHandler(ContinuousIntegrationService service) {
-		super(service);
+	public ServiceHandler(BackendController controller) {
+		super(controller);
 	}
 
 	private Service findService(URI id) throws UnknownResourceException {

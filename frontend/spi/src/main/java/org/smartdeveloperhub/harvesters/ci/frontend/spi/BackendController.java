@@ -26,11 +26,16 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
+import java.net.URI;
+
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 
 public interface BackendController {
 
 	ContinuousIntegrationService continuousIntegrationService();
+
+	void connect(URI instance, EntityLifecycleEventListener listener);
 
 	void disconnect();
 

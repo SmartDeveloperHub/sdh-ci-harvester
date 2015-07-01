@@ -31,21 +31,22 @@ import org.ldp4j.application.ext.UnknownResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 
 public abstract class Serviceable {
 
 	private final Logger logger; // NOSONAR
 
-	private final ContinuousIntegrationService service;
+	private final BackendController controller;
 
-	public Serviceable(ContinuousIntegrationService service) {
-		this.service = service;
+	public Serviceable(BackendController controller) {
+		this.controller = controller;
 		this.logger=LoggerFactory.getLogger(getClass());
 	}
 
 	protected final ContinuousIntegrationService continuousIntegrationService() {
-		return this.service;
+		return this.controller.continuousIntegrationService();
 	}
 
 	protected final String trace(String message, Object... arguments) {

@@ -26,8 +26,6 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.test;
 
-import java.net.URI;
-
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
 
@@ -37,8 +35,8 @@ public final class TestingBackendControllerFactory implements BackendControllerF
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BackendController create(URI jenkinsInstance) {
-		return new TestingBackendController(jenkinsInstance);
+	public BackendController create(String providerId) {
+		return new TestingBackendController();
 	}
 
 }

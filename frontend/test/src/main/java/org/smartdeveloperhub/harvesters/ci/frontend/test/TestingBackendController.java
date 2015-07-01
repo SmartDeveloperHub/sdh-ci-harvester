@@ -41,6 +41,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
@@ -49,16 +50,20 @@ import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecu
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
+import static com.google.common.base.Preconditions.*;
+
 final class TestingBackendController implements BackendController {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(TestingBackendController.class);
 
-	private final URI jenkinsInstance;
+	private URI jenkinsInstance;
 
-	TestingBackendController(URI jenkinsInstance) {
+	TestingBackendController() {
+	}
+
+	void setInstance(URI jenkinsInstance) {
+		checkState(this.jenkinsInstance==null,"Already connected (%s)",this.jenkinsInstance);
 		this.jenkinsInstance = jenkinsInstance;
-		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
-		LOGGER.info("Connected.",this.jenkinsInstance);
 	}
 
 	private static Date after(Date date) {
@@ -145,7 +150,15 @@ final class TestingBackendController implements BackendController {
 	 */
 	@Override
 	public ContinuousIntegrationService continuousIntegrationService() {
+		checkState(this.jenkinsInstance!=null,"Not connected (%s)",this.jenkinsInstance);
 		return inititializeBackend(jenkinsInstance);
+	}
+
+	@Override
+	public void connect(URI instance, EntityLifecycleEventListener listener) {
+		setInstance(instance);
+		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
+		LOGGER.info("Connected.",this.jenkinsInstance);
 	}
 
 	/**

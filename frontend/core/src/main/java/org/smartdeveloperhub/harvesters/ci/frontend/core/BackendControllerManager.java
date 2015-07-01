@@ -32,12 +32,18 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
 
 final class BackendControllerManager {
 
 	private static final class NullBackendController implements BackendController {
+
+		@Override
+		public void connect(URI instance, EntityLifecycleEventListener listener) {
+			throw new UnsupportedOperationException("Method not implemented yet");
+		}
 
 		@Override
 		public void disconnect() {
@@ -48,6 +54,7 @@ final class BackendControllerManager {
 		public ContinuousIntegrationService continuousIntegrationService() {
 			throw new UnsupportedOperationException("Method not implemented yet");
 		}
+
 	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendControllerManager.class);
@@ -55,19 +62,19 @@ final class BackendControllerManager {
 	private BackendControllerManager() {
 	}
 
-	public static BackendController connect(URI jenkinsInstance) {
+	public static BackendController create(String providerId) {
 		ServiceLoader<BackendControllerFactory> providers=ServiceLoader.load(BackendControllerFactory.class);
 		for(BackendControllerFactory provider:providers) {
-			LOGGER.debug("Trying to create backend controller for {} using provider {}...",jenkinsInstance,provider.getClass().getCanonicalName());
+			LOGGER.debug("Trying to create backend controller {} using provider {}...",providerId,provider.getClass().getCanonicalName());
 			try {
-				BackendController controller = provider.create(jenkinsInstance);
+				BackendController controller = provider.create(providerId);
 				if(controller!=null) {
-					LOGGER.debug("Backend controller for {} created via {}",jenkinsInstance,provider.getClass().getCanonicalName());
+					LOGGER.debug("Backend controller {} via {}",providerId,provider.getClass().getCanonicalName());
 					return controller;
 				}
-				LOGGER.debug("Could not create backend controller for {} using provider {}",jenkinsInstance,provider.getClass().getCanonicalName());
+				LOGGER.debug("Could not create backend controller {} using provider {}",providerId,provider.getClass().getCanonicalName());
 			} catch (Exception e) {
-				LOGGER.warn("Provider {} failed while creating a backend controller for {}. Full stacktrace follows",provider.getClass().getCanonicalName(),jenkinsInstance,e);
+				LOGGER.warn("Provider {} failed while creating a backend controller {}. Full stacktrace follows",provider.getClass().getCanonicalName(),providerId,e);
 			}
 		}
 		return new NullBackendController();
