@@ -26,8 +26,8 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.io.IOException;
 import java.net.URI;
@@ -36,7 +36,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
+import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
+import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.client.JenkinsResourceProxy;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 
 public class FileBasedStorageTest {
@@ -63,6 +66,26 @@ public class FileBasedStorageTest {
 		Instance out=read.entityOfId(instanceId,JenkinsEntityType.INSTANCE,Instance.class);
 
 		assertThat(out,equalTo(in));
+	}
+
+	@Test
+	public void testBadEncoding() throws Exception {
+		String location="http://ci.jenkins-ci.org/job/infra_changelog_refresh/27821/";
+		JenkinsResourceProxy sut =
+			JenkinsResourceProxy.
+				create(URI.create(location)).
+					withUseHttps(true).
+					withEntity(JenkinsEntityType.RUN);
+
+		try {
+			JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			System.out.println("Resource from '"+location+"':");
+			System.out.println(representation);
+			storage().saveResource(representation);
+		} catch (IOException e) {
+			System.err.println("Could not retrieve service: "+e.getMessage());
+			e.printStackTrace(System.err);
+		}
 	}
 
 	private FileBasedStorage storage() throws IOException {

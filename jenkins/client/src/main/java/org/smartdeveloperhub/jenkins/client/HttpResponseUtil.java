@@ -26,13 +26,19 @@
  */
 package org.smartdeveloperhub.jenkins.client;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Date;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.jenkins.ResponseBody;
+import org.smartdeveloperhub.jenkins.ResponseBodyBuilder;
 
 final class HttpResponseUtil {
 
@@ -40,6 +46,29 @@ final class HttpResponseUtil {
 
 	private HttpResponseUtil() {
 	}
+
+	private static String extractContent(InputStream rawContent, Charset charset) throws IOException {
+		try {
+			byte[] binaryContent = IOUtils.toByteArray(rawContent);
+			return new String(binaryContent,charset);
+		} catch (Exception e) {
+			throw new IOException("Could not extract content",e);
+		}
+	}
+
+	static ResponseBody toResponseBody(InputStream rawContent, String mimeType, Charset charset) throws IOException {
+			String content = extractContent(rawContent, charset);
+
+			ResponseBody body =
+				new ResponseBodyBuilder().
+	//				withContent(EntityUtils.toString(httpEntity)).
+					withContent(content).
+					withContentType(mimeType).
+					withEncoding(charset.name()).
+					build();
+
+			return body;
+		}
 
 	static String getInvalidResponseFailureMessage(HttpResponse response) {
 		StatusLine statusLine = response.getStatusLine();

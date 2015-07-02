@@ -30,6 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
@@ -40,12 +42,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
-import org.smartdeveloperhub.jenkins.ResponseBody;
-import org.smartdeveloperhub.jenkins.ResponseBodyBuilder;
 import org.smartdeveloperhub.jenkins.Status;
 import org.smartdeveloperhub.util.xml.XmlUtils;
 import org.w3c.dom.Document;
@@ -53,6 +54,8 @@ import org.w3c.dom.Document;
 import com.google.common.base.MoreObjects;
 
 public final class JenkinsResourceProxy {
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsResourceProxy.class);
 
 	private final URI location;
 
@@ -119,6 +122,7 @@ public final class JenkinsResourceProxy {
 					contentType);
 			}
 		} catch (Exception cause) {
+			LOGGER.error("Communication with the server failed",cause);
 			throw new IOException("Communication with the server failed",cause);
 		} finally {
 			IOUtils.closeQuietly(httpResponse);
@@ -139,25 +143,25 @@ public final class JenkinsResourceProxy {
 					toString();
 	}
 
-	private ContentType processResponseBody(InMemoryJenkinsResource resource, HttpEntity entity) throws IOException {
-		if(entity==null) {
+	private ContentType processResponseBody(InMemoryJenkinsResource resource, HttpEntity httpEntity) throws IOException {
+		if(httpEntity==null) {
 			return null;
 		}
 
 		ContentType contentType =
 			ContentType.
-				parse(entity.getContentType().getValue());
+				parse(httpEntity.getContentType().getValue());
 
-		ResponseBody body =
-			new ResponseBodyBuilder().
-				withContent(EntityUtils.toString(entity)).
-				withContentType(contentType.getMimeType()).
-				build();
+		Charset charset = contentType.getCharset();
+		if(charset==null) {
+			LOGGER.debug("No encoding specified for {} ({}). Resorting to UTF-8",resource.location(),contentType);
+			charset=StandardCharsets.UTF_8;
+		}
 
 		resource.
 			metadata().
 				response().
-					withBody(body);
+					withBody(HttpResponseUtil.toResponseBody(httpEntity.getContent(), contentType.getMimeType(),charset));
 
 		return contentType;
 	}
@@ -185,8 +189,9 @@ public final class JenkinsResourceProxy {
 	}
 
 	private void updateRepresentationContent(InMemoryJenkinsResource resource) {
+		String body = resource.metadata().response().body().get().content();
 		try {
-			Document content = XmlUtils.toDocument(resource.metadata().response().body().get().content());
+			Document content = XmlUtils.toDocument(body);
 			String localName=content.getFirstChild().getNodeName();
 			if(JenkinsArtifactType.RESOURCE.equals(resource.artifact())) {
 				JenkinsEntityType receivedEntity=JenkinsEntityType.fromNode(localName);
@@ -209,6 +214,7 @@ public final class JenkinsResourceProxy {
 			}
 			resource.withContent(content);
 		} catch (Exception cause) {
+			LOGGER.debug("Could not process response body {}",body,cause);
 			resource.withStatus(Status.UNPROCESSABLE_RESOURCE,cause,"Could not process response body");
 		}
 	}

@@ -108,10 +108,12 @@ public final class TransformationManager implements TransformationService {
 	private URL findResource(String entity) throws TransformationException {
 		LOGGER.trace("Looking for a stylesheet for entity '{}'",entity);
 		URL styleSheetResource=
-			ClassLoader.
-				getSystemResource("xslt/"+entity+".xslt");
+			Thread.
+				currentThread().
+					getContextClassLoader().
+						getResource("xslt/"+entity+".xslt");
 		if(styleSheetResource==null) {
-			LOGGER.error("Could not find a stylesheet for entity '{}'",entity);
+			LOGGER.error("Could not find a stylesheet for entity '{}' (xslt/{}.xslt)",entity,entity);
 			throw new TransformationException("Could not find a stylesheet for entity '"+entity+"'");
 		}
 		LOGGER.trace("Found stylesheet for entity '{}' at '{}'",entity,styleSheetResource);

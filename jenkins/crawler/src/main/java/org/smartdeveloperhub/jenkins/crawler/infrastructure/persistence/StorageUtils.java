@@ -36,6 +36,8 @@ import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.Digest;
 import org.smartdeveloperhub.jenkins.DigestService;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
@@ -220,6 +222,8 @@ final class StorageUtils {
 
 	}
 
+	private static final Logger LOGGER=LoggerFactory.getLogger(StorageUtils.class);
+
 	private StorageUtils() {
 	}
 
@@ -258,6 +262,7 @@ final class StorageUtils {
 					withContent(rawBody).
 					withDigest(toDigest(body.getDigest())).
 					withContentType(body.getContentType()).
+					withEncoding(body.getEncoding()).
 					build()
 			);
 			if("application/xml".equals(body.getContentType())) {
@@ -303,6 +308,7 @@ final class StorageUtils {
 				new BodyType().
 					withDigest(digest).
 					withContentType(rBody.contentType()).
+					withEncoding(rBody.encoding()).
 					withExternal(external.toURI());
 
 			responseDescriptor.setBody(body);
@@ -315,8 +321,12 @@ final class StorageUtils {
 				withResponse(responseDescriptor);
 
 		if(resource.failure().isPresent()) {
-			representationDescriptor.
-				withFailure(SerializationUtils.serialize(resource.failure().get()));
+			try {
+				representationDescriptor.
+					withFailure(SerializationUtils.serialize(resource.failure().get()));
+			} catch (IOException e) {
+				LOGGER.error("Could not serialize failure ({}):",e.getMessage(),resource.failure().get());
+			}
 		}
 
 		return

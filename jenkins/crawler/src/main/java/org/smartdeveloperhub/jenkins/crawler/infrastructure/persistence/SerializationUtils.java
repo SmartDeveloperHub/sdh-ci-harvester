@@ -32,24 +32,34 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class SerializationUtils {
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(SerializationUtils.class);
 
 	private SerializationUtils() {
 	}
 
-	static <T extends Serializable> T deserialize(byte[] binaryFailure, Class<? extends T> clazz) {
+	static <T extends Serializable> T deserialize(byte[] binaryFailure, Class<? extends T> clazz) throws IOException {
 		try {
 			ByteArrayInputStream is = new ByteArrayInputStream(binaryFailure);
 			ObjectInputStream in = new ObjectInputStream(is);
 			Object readObject = in.readObject();
 			return clazz.cast(readObject);
-		} catch (Exception e) {
-			throw new IllegalStateException("Could not deserialize failure", e);
+		} catch (ClassNotFoundException e) {
+			LOGGER.error("Could not deserialize {} from {}. Fullstacktrace follows",clazz.getName(),Arrays.asList(binaryFailure),e);
+			throw new IOException("Deserialization failure",e);
+		} catch (IOException e) {
+			LOGGER.error("Could not deserialize {} from {}. Fullstacktrace follows",clazz.getName(),Arrays.asList(binaryFailure),e);
+			throw e;
 		}
 	}
 
-	static byte[] serialize(Serializable failure) {
+	static byte[] serialize(Serializable failure) throws IOException {
 		try {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			ObjectOutputStream out = new ObjectOutputStream(os);
@@ -57,7 +67,8 @@ final class SerializationUtils {
 			out.close();
 			return os.toByteArray();
 		} catch (IOException e) {
-			throw new IllegalStateException("Could not serialize failure", e);
+			LOGGER.error("Could not serialize {} ({}). Fullstacktrace follows",failure,failure.getClass().getName(),e);
+			throw e;
 		}
 	}
 

@@ -37,10 +37,12 @@ public final class ResponseBodyBuilder {
 
 		private final String content;
 		private final String contentType;
+		private final String encoding;
 		private final Digest digest;
 
-		private ImmutableResponseBody(String content, String contentType, Digest digest) {
+		private ImmutableResponseBody(String content, String contentType, String encoding, Digest digest) {
 			this.contentType = contentType;
+			this.encoding = encoding;
 			this.digest = digest;
 			this.content = content;
 		}
@@ -53,6 +55,11 @@ public final class ResponseBodyBuilder {
 		@Override
 		public String contentType() {
 			return this.contentType;
+		}
+
+		@Override
+		public String encoding() {
+			return this.encoding;
 		}
 
 		@Override
@@ -82,6 +89,7 @@ public final class ResponseBodyBuilder {
 					toStringHelper(getClass()).
 						add("digest",this.digest).
 						add("contentType",this.contentType).
+						add("encoding",this.encoding).
 						add("content",this.content).
 						toString();
 		}
@@ -89,6 +97,7 @@ public final class ResponseBodyBuilder {
 
 	private String content;
 	private String contentType;
+	private String encoding;
 	private Digest tmpDigest;
 
 	public ResponseBodyBuilder withContent(String content) {
@@ -101,6 +110,11 @@ public final class ResponseBodyBuilder {
 		return this;
 	}
 
+	public ResponseBodyBuilder withEncoding(String encoding) {
+		this.encoding=encoding;
+		return this;
+	}
+
 	public ResponseBodyBuilder withDigest(Digest digest) {
 		this.tmpDigest = digest;
 		return this;
@@ -109,11 +123,12 @@ public final class ResponseBodyBuilder {
 	public ResponseBody build() {
 		checkNotNull(this.content,"Response body content cannot be null");
 		checkNotNull(this.contentType,"Response body content type cannot be null");
+		checkNotNull(this.encoding,"Response body encoding cannot be null");
 		Digest digest=this.tmpDigest;
 		if(digest==null) {
 			digest=DigestService.digestContents(this.content);
 		}
-		return new ImmutableResponseBody(this.content,this.contentType,digest);
+		return new ImmutableResponseBody(this.content,this.contentType,this.encoding,digest);
 	}
 
 }

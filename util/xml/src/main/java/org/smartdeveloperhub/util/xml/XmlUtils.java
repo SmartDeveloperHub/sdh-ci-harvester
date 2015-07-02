@@ -26,7 +26,6 @@
  */
 package org.smartdeveloperhub.util.xml;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -162,7 +161,7 @@ public final class XmlUtils {
 				transform(source, result);
 			return writer.toString();
 		} catch(Exception e) {
-			throw new XmlProcessingException(RESOURCE_STORAGE_FAILURE,e);
+			throw new XmlProcessingException("Could not marshall document",e);
 		}
 	}
 
@@ -174,9 +173,9 @@ public final class XmlUtils {
 						newDocumentBuilder();
 			return
 				builder.
-					parse(new ByteArrayInputStream(body.getBytes()));
+					parse(new InputSource(new StringReader(body)));
 		} catch (Exception e) {
-			throw new XmlProcessingException(RESOURCE_STORAGE_FAILURE,e);
+			throw new XmlProcessingException("Could not unmarshall document",e);
 		}
 	}
 

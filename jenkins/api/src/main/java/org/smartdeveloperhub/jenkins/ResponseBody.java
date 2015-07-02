@@ -32,6 +32,8 @@ public interface ResponseBody {
 
 	String contentType();
 
+	String encoding();
+
 	String content();
 
 }

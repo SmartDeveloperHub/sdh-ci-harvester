@@ -54,4 +54,25 @@ public class JenkinsResourceProxyTest {
 		}
 	}
 
+	@Test
+	public void testBadEncoding() throws Exception {
+		String location="http://ci.jenkins-ci.org/job/infra_changelog_refresh/27821/";
+		JenkinsResourceProxy sut =
+			JenkinsResourceProxy.
+				create(URI.create(location)).
+					withUseHttps(true).
+					withEntity(JenkinsEntityType.RUN);
+		try {
+			JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			System.out.println("Resource from '"+location+"':");
+			System.out.println(representation);
+			if(representation.failure().isPresent()) {
+				representation.failure().get().printStackTrace();
+			}
+		} catch (IOException e) {
+			System.err.println("Could not retrieve service: "+e.getMessage());
+			e.printStackTrace(System.err);
+		}
+	}
+
 }
