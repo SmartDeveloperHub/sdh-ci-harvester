@@ -22,7 +22,7 @@
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
       Artifact    : org.smartdeveloperhub.harvesters.ci:ci-harvester-container:1.0.0-SNAPSHOT
-      Bundle      : ci-harvester-container-1.0.0-SNAPSHOT.war
+      Bundle      : ci-harvester-container-1.0.0-SNAPSHOT.pom
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -36,15 +36,9 @@
 	<!--   MODULE COORDINATES                                                -->
 	<!-- =================================================================== -->
 
-	<parent>
-		<groupId>org.smartdeveloperhub.harvesters.ci</groupId>
-		<artifactId>ci-harvester-aggregator</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
-
 	<groupId>org.smartdeveloperhub.harvesters.ci</groupId>
 	<artifactId>ci-harvester-container</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<!-- =================================================================== -->
@@ -65,63 +59,105 @@
 		<harvester.config>${basedir}${file.separator}.config${file.separator}config.yml</harvester.config>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>sonatype-oss-public-snapshots</id>
-			<url>https://oss.sonatype.org/content/groups/public/</url>
-			<snapshots><enabled>true</enabled></snapshots>
-			<releases><enabled>false</enabled></releases>
-		</repository>
-	</repositories>
+	<profiles>
+		<profile>
+			<id>execute</id>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>apache.snapshots</id>
-			<url>http://repository.apache.org/snapshots/</url>
-		</pluginRepository>
-	</pluginRepositories>
+			<repositories>
+				<repository>
+					<id>sonatype-oss-public-snapshots</id>
+					<url>https://oss.sonatype.org/content/groups/public/</url>
+					<snapshots><enabled>true</enabled></snapshots>
+					<releases><enabled>false</enabled></releases>
+				</repository>
+			</repositories>
+
+			<pluginRepositories>
+				<pluginRepository>
+					<id>apache.snapshots</id>
+					<url>http://repository.apache.org/snapshots/</url>
+				</pluginRepository>
+			</pluginRepositories>
+
+			<build>
+				<defaultGoal>initialize</defaultGoal>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>2.10</version>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
+									<artifactId>ci-frontend-dist</artifactId>
+									<version>${project.version}</version>
+									<type>war</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${deployment.dir}</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+						<executions>
+							<execution>
+								<id>execute</id>
+								<phase>initialize</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.tomcat.maven</groupId>
+						<artifactId>tomcat7-maven-plugin</artifactId>
+						<version>2.3-SNAPSHOT</version>
+						<configuration>
+							<!-- The place where the exploder war is available -->
+							<warDirectory>${deployment.dir}</warDirectory>
+							<!-- http port -->
+							<port>${harvester.http.port}</port>
+							<configurationDir>${basedir}${file.separator}.container</configurationDir>
+							<!-- application path always starts with / -->
+							<path>/harvester</path>
+							<!-- optional system propoerties you want to add -->
+							<systemProperties>
+								<ci.harvester.config>${harvester.config}</ci.harvester.config>
+							</systemProperties>
+							<!-- if you want to use test dependencies rather than only runtime -->
+							<useTestClasspath>false</useTestClasspath>
+						</configuration>
+						<executions>
+							<execution>
+								<id>execute</id>
+								<phase>initialize</phase>
+								<goals>
+									<goal>run-war-only</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+
+		</profile>
+
+	</profiles>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-					<configuration>
-						<artifactItems>
-							<artifactItem>
-								<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
-								<artifactId>ci-frontend-dist</artifactId>
-								<version>${project.version}</version>
-								<type>war</type>
-								<overWrite>true</overWrite>
-								<outputDirectory>${deployment.dir}</outputDirectory>
-							</artifactItem>
-						</artifactItems>
-					</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.3-SNAPSHOT</version>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
 				<configuration>
-					<!-- The place where the exploder war is available -->
-					<warDirectory>${deployment.dir}</warDirectory>
-					<!-- http port -->
-					<port>${harvester.http.port}</port>
-					<configurationDir>${basedir}${file.separator}.container</configurationDir>
-					<!-- application path always starts with / -->
-					<path>/harvester</path>
-					<!-- optional system propoerties you want to add -->
-					<systemProperties>
-						<ci.harvester.config>${harvester.config}</ci.harvester.config>
-					</systemProperties>
-					<!-- if you want to use test dependencies rather than only runtime -->
-					<useTestClasspath>false</useTestClasspath>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
@@ -129,6 +165,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.2</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
