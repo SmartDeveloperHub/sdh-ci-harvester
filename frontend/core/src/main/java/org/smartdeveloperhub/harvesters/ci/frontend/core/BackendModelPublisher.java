@@ -99,7 +99,7 @@ final class BackendModelPublisher {
 		return buildContainerSnapshot;
 	}
 
-	private void publish(WriteSession session, Service service) {
+	void publish(WriteSession session, Service service) {
 		ResourceSnapshot serviceSnapshot=
 			session.
 				find(
@@ -115,7 +115,7 @@ final class BackendModelPublisher {
 		LOGGER.debug("Published build container for service {}",service.serviceId());
 	}
 
-	private void publish(WriteSession session, Build build) {
+	void publish(WriteSession session, Build build) {
 		ContainerSnapshot buildContainerSnapshot=findBuildContainer(session,build);
 		ResourceSnapshot buildSnapshot=
 			buildContainerSnapshot.
@@ -139,7 +139,7 @@ final class BackendModelPublisher {
 		}
 	}
 
-	private void publish(WriteSession session, Execution execution) {
+	void publish(WriteSession session, Execution execution) {
 		ContainerSnapshot executionContainerSnapshot=
 			session.
 				find(

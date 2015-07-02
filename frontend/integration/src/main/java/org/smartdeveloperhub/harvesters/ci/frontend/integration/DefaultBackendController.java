@@ -61,8 +61,7 @@ final class DefaultBackendController implements BackendController {
 	 */
 	@Override
 	public ContinuousIntegrationService continuousIntegrationService() {
-		checkState(this.jenkinsInstance!=null,"Not connected");
-		return backendFacade.applicationService();
+		return this.backendFacade.applicationService();
 	}
 
 	/**
