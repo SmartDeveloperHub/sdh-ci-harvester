@@ -26,6 +26,7 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
@@ -35,7 +36,7 @@ public interface BackendController {
 
 	ContinuousIntegrationService continuousIntegrationService();
 
-	void connect(URI instance, EntityLifecycleEventListener listener);
+	void connect(URI instance, EntityLifecycleEventListener listener) throws IOException;
 
 	void disconnect();
 

@@ -284,7 +284,7 @@ public final class JenkinsIntegrationService {
 			this.crawler.stop();
 			LOGGER.info("Disconnected from {}",this.crawler.instance());
 		} finally {
-			this.crawler.deregisterListener(listener);
+			this.crawler.deregisterListener(this.listener);
 			this.crawler=null;
 			this.worker.stopAsync();
 			this.worker.awaitTerminated();

@@ -48,11 +48,10 @@ import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 public final class HarvesterApplication extends Application<HarvesterConfiguration> {
 
-	private final class LoggingLifecycleEventListener implements
-			EntityLifecycleEventListener {
+	private static final class LoggingLifecycleEventListener implements EntityLifecycleEventListener {
 		@Override
 		public void onEvent(EntityLifecycleEvent event) {
-			LOGGER.debug("Received {}",event);
+			LOGGER.info("Received {}",event);
 		}
 	}
 

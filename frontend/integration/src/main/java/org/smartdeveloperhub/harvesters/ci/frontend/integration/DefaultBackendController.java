@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
+import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 
 final class DefaultBackendController implements BackendController {
@@ -49,6 +50,10 @@ final class DefaultBackendController implements BackendController {
 
 	DefaultBackendController(BackendFacade backendFacade) {
 		this.backendFacade = backendFacade;
+	}
+
+	private JenkinsIntegrationService integrationService() {
+		return this.backendFacade.integrationService();
 	}
 
 	/**
@@ -64,12 +69,20 @@ final class DefaultBackendController implements BackendController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void connect(URI instance, EntityLifecycleEventListener listener) {
+	public void connect(URI instance, EntityLifecycleEventListener listener) throws IOException {
 		checkState(this.jenkinsInstance==null,"Already connected");
 		this.jenkinsInstance=instance;
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
 		checkState(hasInstance(instance,this.backendFacade),"Could not connect to %s",instance);
-		LOGGER.info("Connected.",this.jenkinsInstance);
+		try {
+			integrationService().registerListener(listener);
+			integrationService().connect(instance);
+		} catch (IOException e) {
+			LOGGER.info("Could not connect to {}. Full stacktrace follows",this.jenkinsInstance,e);
+			this.jenkinsInstance=null;
+			throw e;
+		}
+		LOGGER.info("Connected to {}.",this.jenkinsInstance);
 	}
 
 	/**
@@ -77,14 +90,15 @@ final class DefaultBackendController implements BackendController {
 	 */
 	@Override
 	public void disconnect() {
-		checkState(this.jenkinsInstance!=null,"Not connected");
-		LOGGER.info("Disconnecting from {}...",this.jenkinsInstance);
 		try {
+			if(integrationService().isConnected()) {
+				LOGGER.info("Disconnecting from {}...",this.jenkinsInstance);
+				integrationService().disconnect();
+				LOGGER.info("Disconnected from {}.",this.jenkinsInstance);
+			}
 			this.backendFacade.close();
 		} catch (IOException e) {
 			LOGGER.error("Could not close backend properly",e);
-		} finally {
-			LOGGER.info("Disconnected.",this.jenkinsInstance);
 		}
 	}
 
