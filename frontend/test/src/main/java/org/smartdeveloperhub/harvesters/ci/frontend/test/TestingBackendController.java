@@ -58,7 +58,24 @@ final class TestingBackendController implements BackendController {
 
 	private URI jenkinsInstance;
 
+	private final ServiceRepository serviceRepository;
+
+	private final BuildRepository buildRepository;
+
+	private final ExecutionRepository executionRepository;
+
+	private final ContinuousIntegrationService service;
+
 	TestingBackendController() {
+		this.serviceRepository = new InMemoryServiceRepository();
+		this.buildRepository = new InMemoryBuildRepository();
+		this.executionRepository = new InMemoryExecutionRepository();
+		this.service=
+			new ContinuousIntegrationService(
+				this.serviceRepository,
+				this.buildRepository,
+				this.executionRepository);
+		populateBackend(URI.create("http://ci.jenkins-ci.org/"));
 	}
 
 	void setInstance(URI jenkinsInstance) {
@@ -116,33 +133,23 @@ final class TestingBackendController implements BackendController {
 		repository.add(build);
 	}
 
-	private static ContinuousIntegrationService inititializeBackend(URI jenkinsInstance) {
-		ServiceRepository serviceRepository=new InMemoryServiceRepository();
-		BuildRepository buildRepository=new InMemoryBuildRepository();
-		ExecutionRepository executionRepository=new InMemoryExecutionRepository();
-
+	private void populateBackend(URI jenkinsInstance) {
 		Date initTime = new Date();
 
 		Service defaultService = Service.newInstance(jenkinsInstance);
-		serviceRepository.add(defaultService);
+		this.serviceRepository.add(defaultService);
 
 		SimpleBuild simpleBuild=defaultService.addSimpleBuild(buildId(defaultService, "simple-job"),"Example simple build");
-		createBuild(buildRepository, simpleBuild, initTime, "An example simple build for testing");
-		createExecutions(executionRepository,simpleBuild);
+		createBuild(this.buildRepository, simpleBuild, initTime, "An example simple build for testing");
+		createExecutions(this.executionRepository,simpleBuild);
 
 		CompositeBuild compositeBuild=defaultService.addCompositeBuild(buildId(defaultService, "composite-job"),"Example composite build");
-		createBuild(buildRepository, compositeBuild, initTime, "An example composite build for testing");
-		createExecutions(executionRepository, compositeBuild);
+		createBuild(this.buildRepository, compositeBuild, initTime, "An example composite build for testing");
+		createExecutions(this.executionRepository, compositeBuild);
 
 		SubBuild subBuild=compositeBuild.addSubBuild(buildId(compositeBuild, "sub-job"),"Example sub build");
-		createBuild(buildRepository, subBuild, initTime, "An example sub build for testing");
-		createExecutions(executionRepository, subBuild);
-
-		return
-			new ContinuousIntegrationService(
-				serviceRepository,
-				buildRepository,
-				executionRepository);
+		createBuild(this.buildRepository, subBuild, initTime, "An example sub build for testing");
+		createExecutions(this.executionRepository, subBuild);
 	}
 
 	/**
@@ -150,15 +157,14 @@ final class TestingBackendController implements BackendController {
 	 */
 	@Override
 	public ContinuousIntegrationService continuousIntegrationService() {
-		checkState(this.jenkinsInstance!=null,"Not connected (%s)",this.jenkinsInstance);
-		return inititializeBackend(jenkinsInstance);
+		return this.service;
 	}
 
 	@Override
 	public void connect(URI instance, EntityLifecycleEventListener listener) {
 		setInstance(instance);
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
-		LOGGER.info("Connected.",this.jenkinsInstance);
+		LOGGER.info("Connected to {}.",this.jenkinsInstance);
 	}
 
 	/**
@@ -167,7 +173,7 @@ final class TestingBackendController implements BackendController {
 	@Override
 	public void disconnect() {
 		LOGGER.info("Disconnecting from {}...",this.jenkinsInstance);
-		LOGGER.info("Disconnected.",this.jenkinsInstance);
+		LOGGER.info("Disconnected from {}.",this.jenkinsInstance);
 	}
 
 }

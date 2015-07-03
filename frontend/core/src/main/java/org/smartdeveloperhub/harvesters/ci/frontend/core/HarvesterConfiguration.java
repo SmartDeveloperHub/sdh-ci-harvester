@@ -26,11 +26,16 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
 
+import java.net.URI;
+
 import org.ldp4j.application.ext.Configuration;
 import org.ldp4j.application.ext.Namespaces;
 import org.ldp4j.application.util.ImmutableNamespaces;
 
-public class HarvesterConfiguration extends Configuration {
+public final class HarvesterConfiguration extends Configuration {
+
+	private static final String CI_HARVESTER_PROVIDER = "ci.harvester.provider";
+	private static final String CI_HARVESTER_TARGET = "ci.harvester.target";
 
 	@Override
 	public Namespaces namespaces() {
@@ -41,6 +46,18 @@ public class HarvesterConfiguration extends Configuration {
 				withPrefix("oslc_auto", "http://open-services.net/ns/auto#").
 				withPrefix("dctype", "http://purl.org/dc/dcmitype/").
 				withPrefix("dcterms", "http://purl.org/dc/terms/");
+	}
+
+	public String provider() {
+		return System.getProperty(CI_HARVESTER_PROVIDER);
+	}
+
+	public URI target() {
+		String target = System.getProperty(CI_HARVESTER_TARGET);
+		if(target==null) {
+			target="http://ci.jenkins-ci.org/";
+		}
+		return URI.create(target);
 	}
 
 }

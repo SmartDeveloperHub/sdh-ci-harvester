@@ -99,6 +99,30 @@ final class BackendModelPublisher {
 		return buildContainerSnapshot;
 	}
 
+	private void publishSubBuilds(WriteSession session, CompositeBuild compositeBuild) {
+		for(URI subBuildId:compositeBuild.subBuilds()) {
+			publishBuild(session,subBuildId);
+		}
+	}
+
+	private Build publishBuild(WriteSession session, URI buildId) {
+		Build build = this.service.getBuild(buildId);
+		if(build!=null) {
+			publish(session,build);
+			for(URI executionId:build.executions()) {
+				publishExecution(session, executionId);
+			}
+		}
+		return build;
+	}
+
+	private void publishExecution(WriteSession session, URI executionId) {
+		Execution execution = this.service.getExecution(executionId);
+		if(execution!=null) {
+			publish(session,execution);
+		}
+	}
+
 	void publish(WriteSession session, Service service) {
 		ResourceSnapshot serviceSnapshot=
 			session.
@@ -117,6 +141,10 @@ final class BackendModelPublisher {
 
 	void publish(WriteSession session, Build build) {
 		ContainerSnapshot buildContainerSnapshot=findBuildContainer(session,build);
+		if(buildContainerSnapshot==null) {
+			LOGGER.warn("Cannot publish orphan execution build {} ({})",build.buildId(),build instanceof SubBuild?((SubBuild)build).parentId():build.serviceId());
+			return;
+		}
 		ResourceSnapshot buildSnapshot=
 			buildContainerSnapshot.
 				addMember(IdentityUtil.buildName(build));
@@ -146,28 +174,20 @@ final class BackendModelPublisher {
 					ContainerSnapshot.class,
 					IdentityUtil.executionContainerName(execution),
 					ExecutionContainerHandler.class);
+		if(executionContainerSnapshot==null) {
+			LOGGER.warn("Cannot publish orphan execution execution {} ({})",execution.executionId(),execution.buildId());
+			return;
+		}
 		executionContainerSnapshot.addMember(IdentityUtil.executionName(execution));
 		LOGGER.debug("Published resource for execution {} ({})",execution.executionId(),execution);
 	}
 
-	private void publishSubBuilds(WriteSession session, CompositeBuild compositeBuild) {
-		for(URI subBuildId:compositeBuild.subBuilds()) {
-			publishBuild(session,subBuildId);
-		}
-	}
-
-	private Build publishBuild(WriteSession session, URI buildId) {
-		Build build = this.service.getBuild(buildId);
-		publish(session,build);
-		for(URI executionId:build.executions()) {
-			Execution execution = this.service.getExecution(executionId);
-			publish(session,execution);
-		}
-		return build;
-	}
-
 	void publish(WriteSession session) {
 		Service targetService=this.service.getService(this.serviceId);
+		if(service==null) {
+			LOGGER.warn("Nothing to publish. Service {} not found.",this.serviceId);
+			return;
+		}
 		publish(session,targetService);
 		for(URI buildId:targetService.builds()) {
 			Build build=publishBuild(session, buildId);

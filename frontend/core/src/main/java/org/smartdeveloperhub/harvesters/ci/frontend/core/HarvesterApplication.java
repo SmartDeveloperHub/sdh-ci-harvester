@@ -49,9 +49,9 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(HarvesterApplication.class);
 
-	private static final URI SERVICE_ID=URI.create("http://ci.jenkins-ci.org/");
-
 	private static final String SERVICE_PATH="service/";
+
+	private URI target;
 
 	private BackendController controller;
 
@@ -59,7 +59,13 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	public void setup(Environment environment, Bootstrap<HarvesterConfiguration> bootstrap) {
 		LOGGER.info("Starting CI Harvester Application configuration...");
 
-		this.controller=BackendControllerManager.create("MyProvider");
+		HarvesterConfiguration configuration = bootstrap.configuration();
+
+		LOGGER.info("- Provider: {}",configuration.provider());
+		LOGGER.info("- Target..: {}",configuration.target());
+
+		this.target=configuration.target();
+		this.controller=BackendControllerManager.create(configuration.provider());
 
 		bootstrap.addHandler(new ServiceHandler(this.controller));
 		bootstrap.addHandler(new BuildContainerHandler(this.controller));
@@ -72,7 +78,7 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 			publishResource(
 				NamingScheme.
 					getDefault().
-						name(HarvesterApplication.SERVICE_ID),
+						name(target),
 				ServiceHandler.class,
 				SERVICE_PATH);
 
@@ -88,11 +94,11 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 				BackendModelPublisher.
 					builder().
 						withBackendService(cis).
-						withMainService(SERVICE_ID).
+						withMainService(target).
 						build();
 			publisher.publish(session);
 			session.saveChanges();
-			this.controller.connect(SERVICE_ID,new FrontendSynchronizer(cis,publisher));
+			this.controller.connect(target,new FrontendSynchronizer(cis,publisher));
 			LOGGER.info("CI Harvester Application initialization completed.");
 		} catch (Exception e) {
 			String errorMessage = "CI Harvester Application initialization failed";

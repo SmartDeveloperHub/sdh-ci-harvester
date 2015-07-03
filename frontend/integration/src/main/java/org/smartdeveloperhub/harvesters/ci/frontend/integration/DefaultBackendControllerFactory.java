@@ -41,15 +41,20 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public final class DefaultBackendControllerFactory implements BackendControllerFactory {
 
+	private static final Logger LOGGER=LoggerFactory.getLogger(DefaultBackendControllerFactory.class);
+
 	private static final String CI_HARVESTER_DATABASE_CONFIG_PATH = "ci.harvester.config";
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(DefaultBackendControllerFactory.class);
+	private static final String PROVIDER_ID = "DefaultBackendController";
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public BackendController create(String providerId) {
+		if(!PROVIDER_ID.equals(providerId)) {
+			return null;
+		}
 		String property=System.getProperty(CI_HARVESTER_DATABASE_CONFIG_PATH);
 		try {
 			DatabaseConfig config = loadConfiguration(property);

@@ -26,6 +26,7 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ServiceLoader;
 
@@ -33,12 +34,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
 
 final class BackendControllerManager {
 
-	private static final class NullBackendController implements BackendController {
+	private static final class UnknownBackendController implements BackendController {
 
 		@Override
 		public void connect(URI instance, EntityLifecycleEventListener listener) {
@@ -57,19 +61,46 @@ final class BackendControllerManager {
 
 	}
 
+	private static final class NullBackendController implements BackendController {
+
+		private ContinuousIntegrationService service;
+
+		private NullBackendController() {
+			this.service = new ContinuousIntegrationService(new InMemoryServiceRepository(), new InMemoryBuildRepository(), new InMemoryExecutionRepository());
+		}
+
+		@Override
+		public void disconnect() {
+			// NOTHING TO DO
+		}
+
+		@Override
+		public ContinuousIntegrationService continuousIntegrationService() {
+			return service;
+		}
+
+		@Override
+		public void connect(URI instance, EntityLifecycleEventListener listener) throws IOException {
+			// NOTHING TO DO
+		}
+	}
+
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendControllerManager.class);
 
 	private BackendControllerManager() {
 	}
 
 	public static BackendController create(String providerId) {
+		if(providerId==null) {
+			return new NullBackendController();
+		}
 		ServiceLoader<BackendControllerFactory> providers=ServiceLoader.load(BackendControllerFactory.class);
 		for(BackendControllerFactory provider:providers) {
 			LOGGER.debug("Trying to create backend controller {} using provider {}...",providerId,provider.getClass().getCanonicalName());
 			try {
 				BackendController controller = provider.create(providerId);
 				if(controller!=null) {
-					LOGGER.debug("Backend controller {} via {}",providerId,provider.getClass().getCanonicalName());
+					LOGGER.debug("Created backend controller {} via {}",providerId,provider.getClass().getCanonicalName());
 					return controller;
 				}
 				LOGGER.debug("Could not create backend controller {} using provider {}",providerId,provider.getClass().getCanonicalName());
@@ -77,7 +108,7 @@ final class BackendControllerManager {
 				LOGGER.warn("Provider {} failed while creating a backend controller {}. Full stacktrace follows",provider.getClass().getCanonicalName(),providerId,e);
 			}
 		}
-		return new NullBackendController();
+		return new UnknownBackendController();
 	}
 
 }
