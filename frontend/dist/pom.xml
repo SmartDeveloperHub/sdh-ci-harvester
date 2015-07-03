@@ -256,16 +256,12 @@
 				<artifactId>tomcat7-maven-plugin</artifactId>
 				<version>2.3-SNAPSHOT</version>
 				<configuration>
-					<!-- http port -->
 					<port>${frontend.http.port}</port>
-					<!-- application path always starts with / -->
 					<path>/harvester</path>
-					<!-- optional system propoerties you want to add -->
 					<systemProperties>
 						<ci.harvester.provider>DefaultBackendController</ci.harvester.provider>
 						<ci.harvester.config>${basedir}${file.separator}src${file.separator}test${file.separator}resources${file.separator}config.yml</ci.harvester.config>
 					</systemProperties>
-					<!-- if you want to use test dependencies rather than only runtime -->
 					<useTestClasspath>false</useTestClasspath>
 				</configuration>
 			</plugin>

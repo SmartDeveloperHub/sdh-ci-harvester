@@ -39,7 +39,7 @@ import org.junit.rules.TemporaryFolder;
 public class FileBasedStorageBuilderTest {
 
 	private static final String DEFAULT_CONFIG_FILENAME = "repository.xml";
-	private static final File DEFAULT_WORKING_DIRECTORY = new File(".");
+	private static final File DEFAULT_WORKING_DIRECTORY = new File(".crawler");
 	@Rule
 	public TemporaryFolder testFolder = new TemporaryFolder();
 

@@ -269,7 +269,7 @@ public final class FileBasedStorage implements EntityRepository, ResourceReposit
 
 		private static final StorageAllocationStrategy DEFAULT_STORAGE_ALLOCATION_STRATEGY = new DefaultStorageAllocationStrategy();
 
-		private static final File DEFAULT_WORKING_DIR = new File(".");
+		private static final File DEFAULT_WORKING_DIR = new File(".crawler");
 
 		private static final String DEFAULT_CONFIG_FILENAME = "repository.xml";
 
