@@ -55,7 +55,7 @@ public class HarvesterApplicationITest {
 			File[] files =
 				Maven.
 					configureResolver().
-						workOffline().
+//						workOffline().
 						loadPomFromFile("src/test/resources/pom.xml").
 						importCompileAndRuntimeDependencies().
 						resolve().
