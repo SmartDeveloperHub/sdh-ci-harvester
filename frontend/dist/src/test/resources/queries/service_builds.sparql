@@ -25,27 +25,11 @@
 # #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 #
 
-log4j.rootLogger=OFF
-log4j.logger.org.smartdeveloperhub=INFO, file
-log4j.logger.org.ldp4j=INFO, file
+PREFIX ci: <http://www.smartdeveloperhub.org/vocabulary/ci#>
 
-log4j.logger.org.apache.catalina=INFO, console
-
-#log4j.logger.org.jboss.shrinkwrap.resolver.impl.maven.logging.LogTransferListener=DEBUG, console
-#log4j.logger.org.jboss.shrinkwrap.resolver.impl.maven.logging.LogRepositoryListener=DEBUG, console
-#log4j.logger.org.jboss.shrinkwrap.resolver.impl.maven.logging.LogModelProblemCollector=DEBUG, console
-
-log4j.logger.org.smartdeveloperhub.harvesters.ci.frontend=INFO, console
-log4j.additivity.org.smartdeveloperhub.harvesters.ci.frontend=true
-
-log4j.logger.org.apache.cxf.interceptor=INFO, file
-
-log4j.appender.console=org.apache.log4j.ConsoleAppender
-log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=[%d][%-25.25t] %m%n
-
-log4j.appender.file=org.apache.log4j.FileAppender
-log4j.appender.file.File=${catalina.home}/logs/sdh-ci-harvester.log
-log4j.appender.file.layout=org.apache.log4j.PatternLayout
-log4j.appender.file.layout=org.apache.log4j.PatternLayout
-log4j.appender.file.layout.ConversionPattern=[%d][%-5.5p ][%-25.25t][%-80.80c] %m%n
+SELECT DISTINCT ?build
+WHERE {
+	${service}
+		a ci:CIHarvester ;
+		ci:hasBuild ?build .
+}

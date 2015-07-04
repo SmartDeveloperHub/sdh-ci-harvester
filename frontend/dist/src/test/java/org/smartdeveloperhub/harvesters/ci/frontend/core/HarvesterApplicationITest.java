@@ -26,11 +26,15 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
+import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 
-import org.apache.commons.io.IOUtils;
+import java.io.File;
+import java.net.URL;
+import java.util.List;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
@@ -42,12 +46,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.QueryHelper.ResultProcessor;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.jayway.restassured.response.Response;
 
 @RunWith(Arquillian.class)
 @RunAsClient
 public class HarvesterApplicationITest {
 
-	private final static Logger LOGGER=LoggerFactory.getLogger(HarvesterApplicationITest.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(HarvesterApplicationITest.class);
+
+	private static final String TEXT_TURTLE = "text/turtle";
+	private static final int    OK          = 200;
+
+	private static final String SERVICE         = "service/";
+	private static final String SIMPLE_BUILD    = "service/builds/1/";
+	private static final String COMPOSITE_BUILD = "service/builds/2/";
+	private static final String SUB_BUILD       = "service/builds/2/child/1/";
 
 	@Deployment(testable=false)
 	public static WebArchive createDeployment() {
@@ -60,7 +77,6 @@ public class HarvesterApplicationITest {
 						resolve().
 						withTransitivity().
 						asFile();
-
 			return
 				ShrinkWrap.
 					create(WebArchive.class,"harvester.war").
@@ -73,10 +89,100 @@ public class HarvesterApplicationITest {
 			throw e;
 		}
 	}
+
 	@Test
-	public void testGet(@ArquillianResource URL contextURL) throws Exception {
-		InputStream is = new URL(contextURL.toString()+"service/").openStream();
-		System.out.println(IOUtils.toString(is));
+	public void testService(@ArquillianResource URL contextURL) throws Exception {
+		Response response=
+			given().
+				accept(TEXT_TURTLE).
+				baseUri(contextURL.toString()).
+			expect().
+				statusCode(OK).
+				contentType(TEXT_TURTLE).
+			when().
+				get(SERVICE);
+
+		List<String> builds=
+			QueryHelper.
+				newInstance().
+					withModel(
+						TestingUtil.
+							asModel(response,contextURL,SERVICE)).
+					withQuery().
+						fromResource("queries/service_builds.sparql").
+						withURIRefParam("service",TestingUtil.resolve(contextURL,SERVICE)).
+					select(
+						new ResultProcessor<List<String>>() {
+							private List<String> builds=Lists.newArrayList();
+							@Override
+							protected void processSolution() {
+								this.builds.add(resource("build").getURI());
+							}
+							@Override
+							public List<String> getResult() {
+								return ImmutableList.copyOf(this.builds);
+							}
+						}
+					);
+
+		assertThat(builds,hasSize(2));
+		assertThat(builds,
+			hasItems(
+				TestingUtil.resolve(contextURL,SIMPLE_BUILD),
+				TestingUtil.resolve(contextURL,COMPOSITE_BUILD)));
+	}
+
+	@Test
+	public void testSimpleBuild(@ArquillianResource URL contextURL) throws Exception {
+		given().
+			accept(TEXT_TURTLE).
+			baseUri(contextURL.toString()).
+		expect().
+			statusCode(OK).
+			contentType(TEXT_TURTLE).
+		when().
+			get(SIMPLE_BUILD);
+		testExecutions(TestingUtil.resolve(contextURL,SIMPLE_BUILD));
+	}
+
+	@Test
+	public void testCompositeBuild(@ArquillianResource URL contextURL) throws Exception {
+		given().
+			accept(TEXT_TURTLE).
+			baseUri(contextURL.toString()).
+		expect().
+			statusCode(OK).
+			contentType(TEXT_TURTLE).
+		when().
+			get(COMPOSITE_BUILD);
+		testExecutions(TestingUtil.resolve(contextURL,COMPOSITE_BUILD));
+	}
+
+	@Test
+	public void testSubBuild(@ArquillianResource URL contextURL) throws Exception {
+		given().
+			accept(TEXT_TURTLE).
+			baseUri(contextURL.toString()).
+		expect().
+			statusCode(OK).
+			contentType(TEXT_TURTLE).
+		when().
+			get(SUB_BUILD);
+		testExecutions(TestingUtil.resolve(contextURL,SUB_BUILD));
+	}
+
+	public void testExecutions(String base) throws Exception {
+		for(int i=1;i<7;i++) {
+			LOGGER.info("Trying {}executions/{}/",base,i);
+			given().
+				accept(TEXT_TURTLE).
+				baseUri(base).
+			expect().
+				statusCode(OK).
+				contentType(TEXT_TURTLE).
+			when().
+				get("executions/"+i+"/");
+		}
 	}
 
 }
