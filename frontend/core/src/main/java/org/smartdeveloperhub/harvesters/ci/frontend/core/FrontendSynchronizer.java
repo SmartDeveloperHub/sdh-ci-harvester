@@ -26,8 +26,11 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
 
+import java.net.URI;
+
 import org.ldp4j.application.ApplicationContext;
 import org.ldp4j.application.ApplicationContextException;
+import org.ldp4j.application.data.Name;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.ldp4j.application.session.WriteSession;
 import org.ldp4j.application.session.WriteSessionException;
@@ -100,23 +103,31 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 		boolean result=false;
 		switch(event.entityType()) {
 			case BUILD:
-				Build build=this.cis.getBuild(event.entityId());
-				if(build!=null) {
-					this.publisher.publish(session, build);
-					result=true;
-				}
+				result=updateBuild(event, session);
 				break;
 			case EXECUTION:
-				Execution execution=this.cis.getExecution(event.entityId());
-				if(execution!=null) {
-					this.publisher.publish(session, execution);
-					result=true;
-				}
+				result=updateExecution(event, session);
 				break;
 			default:
 				break;
 		}
 		return result;
+	}
+
+	private boolean updateExecution(EntityLifecycleEvent event, WriteSession session) {
+		Execution execution=this.cis.getExecution(event.entityId());
+		if(execution!=null) {
+			this.publisher.publish(session, execution);
+		}
+		return execution!=null;
+	}
+
+	private boolean updateBuild(EntityLifecycleEvent event, WriteSession session) {
+		Build build=this.cis.getBuild(event.entityId());
+		if(build!=null) {
+			this.publisher.publish(session, build);
+		}
+		return build!=null;
 	}
 
 	private boolean modify(EntityLifecycleEvent event, WriteSession session) {
@@ -136,28 +147,18 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 	}
 
 	private ResourceSnapshot findResource(EntityLifecycleEvent event, WriteSession session) {
-		ResourceSnapshot resource=null;
+		Name<URI> name=null;
 		switch(event.entityType()) {
 			case BUILD:
-				resource=
-					session.
-						find(
-							ResourceSnapshot.class,
-							IdentityUtil.buildName(event.entityId()),
-							BuildHandler.class);
+				name=IdentityUtil.buildName(event.entityId());
 				break;
 			case EXECUTION:
-				resource=
-					session.
-						find(
-							ResourceSnapshot.class,
-							IdentityUtil.executionName(event.entityId()),
-							BuildHandler.class);
+				name=IdentityUtil.executionName(event.entityId());
 				break;
 			default:
 				break;
 		}
-		return resource;
+		return session.find(ResourceSnapshot.class,name,BuildHandler.class);
 	}
 
 }

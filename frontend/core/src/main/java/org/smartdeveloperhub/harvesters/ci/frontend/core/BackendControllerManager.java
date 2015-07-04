@@ -44,19 +44,23 @@ final class BackendControllerManager {
 
 	private static final class UnknownBackendController implements BackendController {
 
+		private UnsupportedOperationException getFailure() {
+			return new UnsupportedOperationException("Method not implemented yet");
+		}
+
 		@Override
 		public void connect(URI instance, EntityLifecycleEventListener listener) {
-			throw new UnsupportedOperationException("Method not implemented yet");
+			throw getFailure();
 		}
 
 		@Override
 		public void disconnect() {
-			throw new UnsupportedOperationException("Method not implemented yet");
+			throw getFailure();
 		}
 
 		@Override
 		public ContinuousIntegrationService continuousIntegrationService() {
-			throw new UnsupportedOperationException("Method not implemented yet");
+			throw getFailure();
 		}
 
 	}

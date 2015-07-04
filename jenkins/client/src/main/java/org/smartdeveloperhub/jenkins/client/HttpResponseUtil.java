@@ -57,17 +57,12 @@ final class HttpResponseUtil {
 	}
 
 	static ResponseBody toResponseBody(InputStream rawContent, String mimeType, Charset charset) throws IOException {
-			String content = extractContent(rawContent, charset);
-
-			ResponseBody body =
+			return
 				new ResponseBodyBuilder().
-	//				withContent(EntityUtils.toString(httpEntity)).
-					withContent(content).
+					withContent(extractContent(rawContent, charset)).
 					withContentType(mimeType).
 					withEncoding(charset.name()).
 					build();
-
-			return body;
 		}
 
 	static String getInvalidResponseFailureMessage(HttpResponse response) {

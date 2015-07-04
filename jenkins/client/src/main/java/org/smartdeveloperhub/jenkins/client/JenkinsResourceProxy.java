@@ -154,14 +154,22 @@ public final class JenkinsResourceProxy {
 
 		Charset charset = contentType.getCharset();
 		if(charset==null) {
-			LOGGER.debug("No encoding specified for {} ({}). Resorting to UTF-8",resource.location(),contentType);
+			LOGGER.debug(
+				"No encoding specified for {} ({}). Resorting to UTF-8",
+				resource.location(),
+				contentType);
 			charset=StandardCharsets.UTF_8;
 		}
 
 		resource.
 			metadata().
 				response().
-					withBody(HttpResponseUtil.toResponseBody(httpEntity.getContent(), contentType.getMimeType(),charset));
+					withBody(
+						HttpResponseUtil.
+							toResponseBody(
+								httpEntity.getContent(),
+								contentType.getMimeType(),
+								charset));
 
 		return contentType;
 	}

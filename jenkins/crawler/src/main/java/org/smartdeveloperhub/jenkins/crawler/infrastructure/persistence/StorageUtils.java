@@ -325,7 +325,7 @@ final class StorageUtils {
 				representationDescriptor.
 					withFailure(SerializationUtils.serialize(resource.failure().get()));
 			} catch (IOException e) {
-				LOGGER.error("Could not serialize failure ({}):",e.getMessage(),resource.failure().get());
+				logAndDiscard(resource, e);
 			}
 		}
 
@@ -335,6 +335,10 @@ final class StorageUtils {
 				withEntity(resource.entity()).
 				withArtifact(resource.artifact()).
 				withRepresentation(representationDescriptor);
+	}
+
+	private static void logAndDiscard(JenkinsResource resource, Throwable e) {
+		LOGGER.error("Could not serialize failure ({}):",e.getMessage(),resource.failure().get());
 	}
 
 	static JenkinsResource toJenkinsResource(ResourceDescriptorDocument descriptor) {
