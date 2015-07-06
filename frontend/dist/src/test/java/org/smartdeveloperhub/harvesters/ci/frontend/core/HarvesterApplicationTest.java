@@ -26,12 +26,13 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
 
+import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
@@ -39,32 +40,91 @@ import org.jboss.arquillian.container.test.api.TargetsContainer;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(Arquillian.class)
-public class HarvesterApplicationITest extends SmokeTest {
+public class HarvesterApplicationTest extends SmokeTest {
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(HarvesterApplicationTest.class);
 
 	private static final String SIMPLE_BUILD    = "service/builds/1/";
 	private static final String COMPOSITE_BUILD = "service/builds/2/";
+	private static final String SUB_BUILD       = "service/builds/2/child/1/";
 
-	@Deployment(name="default",testable=false)
+	@Deployment(name="testing",testable=false)
 	@TargetsContainer("tomcat")
 	public static WebArchive createDeployment() throws Exception {
-		return SmokeTest.createWebArchive("default-harvester.war");
+		return SmokeTest.createWebArchive("testing-harvester.war");
 	}
 
 	@Test
-	@OperateOnDeployment("default")
+	@OperateOnDeployment("testing")
 	public void testService(@ArquillianResource URL contextURL) throws Exception {
-		TimeUnit.MINUTES.sleep(1);
 		List<String> builds = getServiceBuilds(contextURL);
-		assertThat(builds,hasSize(greaterThan(5)));
+		assertThat(builds,hasSize(2));
 		assertThat(builds,
 			hasItems(
 				TestingUtil.resolve(contextURL,SIMPLE_BUILD),
 				TestingUtil.resolve(contextURL,COMPOSITE_BUILD)));
+	}
+
+	@Test
+	@OperateOnDeployment("testing")
+	public void testSimpleBuild(@ArquillianResource URL contextURL) throws Exception {
+		given().
+			accept(TEXT_TURTLE).
+			baseUri(contextURL.toString()).
+		expect().
+			statusCode(OK).
+			contentType(TEXT_TURTLE).
+		when().
+			get(SIMPLE_BUILD);
+		testExecutions(TestingUtil.resolve(contextURL,SIMPLE_BUILD));
+	}
+
+	@Test
+	@OperateOnDeployment("testing")
+	public void testCompositeBuild(@ArquillianResource URL contextURL) throws Exception {
+		given().
+			accept(TEXT_TURTLE).
+			baseUri(contextURL.toString()).
+		expect().
+			statusCode(OK).
+			contentType(TEXT_TURTLE).
+		when().
+			get(COMPOSITE_BUILD);
+		testExecutions(TestingUtil.resolve(contextURL,COMPOSITE_BUILD));
+	}
+
+	@Test
+	@OperateOnDeployment("testing")
+	public void testSubBuild(@ArquillianResource URL contextURL) throws Exception {
+		given().
+			accept(TEXT_TURTLE).
+			baseUri(contextURL.toString()).
+		expect().
+			statusCode(OK).
+			contentType(TEXT_TURTLE).
+		when().
+			get(SUB_BUILD);
+		testExecutions(TestingUtil.resolve(contextURL,SUB_BUILD));
+	}
+
+	public void testExecutions(String base) throws Exception {
+		for(int i=1;i<7;i++) {
+			LOGGER.info("Trying {}executions/{}/",base,i);
+			given().
+				accept(TEXT_TURTLE).
+				baseUri(base).
+			expect().
+				statusCode(OK).
+				contentType(TEXT_TURTLE).
+			when().
+				get("executions/"+i+"/");
+		}
 	}
 
 }
