@@ -47,38 +47,40 @@ final class Packer {
 	private static final Packer SINGLETON=new Packer();
 
 	private Packer() {
-		Runtime.
-			getRuntime().
-				addShutdownHook(
-						new Thread("TVFSCleaner") {
-							@Override
-							public void run() {
-								try {
-									TVFS.umount();
-								} catch (Exception e) {
-									LOGGER.error("Could not unmount the packed resources. Full stacktrace follows",e);
-								}
-							}
-						}
-				);
 	}
 
 	static File pack(String targetLocation, List<File> resources) throws IOException {
-		for(File source:resources) {
-			SINGLETON.addToPack(targetLocation,source);
+		try {
+			for(File source:resources) {
+				SINGLETON.addToPack(targetLocation,source);
+			}
+			return new File(targetLocation);
+		} finally {
+			unmount();
 		}
-		return new File(targetLocation);
 	}
 
 	static File unpack(String sourceLocation, String targetLocation) throws IOException {
-		File target=new File(targetLocation);
-		TFile source=new TFile(sourceLocation);
-		if(source.canRead()) {
-			for(TFile sourceFile:source.listFiles()) {
-				SINGLETON.extractFromPack(sourceFile, new File(target,sourceFile.getName()));
+		try {
+			File target=new File(targetLocation);
+			TFile source=new TFile(sourceLocation);
+			if(source.canRead()) {
+				for(TFile sourceFile:source.listFiles()) {
+					SINGLETON.extractFromPack(sourceFile, new File(target,sourceFile.getName()));
+				}
 			}
+			return new File(targetLocation,new File(sourceLocation).getName());
+		} finally {
+			unmount();
 		}
-		return new File(targetLocation,new File(sourceLocation).getName());
+	}
+
+	private static void unmount() {
+		try {
+			TVFS.umount();
+		} catch (Exception e) {
+			LOGGER.error("Could not unmount the packed resources. Full stacktrace follows",e);
+		}
 	}
 
 	private void extractFromPack(TFile sourceFile, File targetFile) throws IOException {

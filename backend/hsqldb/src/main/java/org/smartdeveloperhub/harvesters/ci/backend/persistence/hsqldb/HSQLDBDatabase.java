@@ -28,6 +28,10 @@ package org.smartdeveloperhub.harvesters.ci.backend.persistence.hsqldb;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Enumeration;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -60,25 +64,52 @@ final class HSQLDBDatabase implements Database {
 	@Override
 	public EntityManagerFactory getEntityManagerFactory() {
 		String persistenceUnit="dropCreate";
-		if(Mode.MUST_EXIST.equals(config.getMode())) {
+		if(Mode.MUST_EXIST.equals(this.config.getMode())) {
 			persistenceUnit="mustExist";
 		}
 		this.emf =
 			Persistence.
 				createEntityManagerFactory(
 					persistenceUnit,
-					configure(config));
+					configure(this.config));
 		return this.emf;
 	}
 
 	@Override
 	public void close() {
 		this.emf.close();
-		if(Deployment.PACKED.equals(config.getDeployment())) {
+		unloadDriver();
+		postProcess();
+	}
+
+	private void postProcess() {
+		if(Deployment.PACKED.equals(this.config.getDeployment())) {
 			try {
-				Packer.pack(config.getLocation(),Utils.dbResources(this.unpackedLocation));
+				Packer.pack(this.config.getLocation(),Utils.dbResources(this.unpackedLocation));
 			} catch (IOException e) {
 				throw new DatabaseLifecycleException("Could not pack database",e);
+			}
+		}
+	}
+
+	private void unloadDriver() {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		Enumeration<Driver> drivers = DriverManager.getDrivers();
+		while (drivers.hasMoreElements()) {
+			Driver driver = drivers.nextElement();
+			if(driver.getClass().getName().equals("org.hsqldb.jdbc.JDBCDriver")) {
+				if(driver.getClass().getClassLoader()==cl) {
+					try {
+						LOGGER.info("Deregistering JDBC driver {}", driver);
+						DriverManager.deregisterDriver(driver);
+					} catch (SQLException ex) {
+						LOGGER.error("Error deregistering JDBC driver {}", driver,ex);
+					}
+				} else {
+					LOGGER.trace("Not deregistering JDBC driver {} as it does not belong to this application ClassLoader",driver);
+				}
+			} else {
+				LOGGER.trace("Not deregistering JDBC driver {} as it not the target one",driver);
 			}
 		}
 	}

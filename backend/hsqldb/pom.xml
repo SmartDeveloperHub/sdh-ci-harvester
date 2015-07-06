@@ -100,6 +100,32 @@
 			<artifactId>truevfs-profile-default</artifactId>
 			<version>${truevfs.version}</version>
 			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>net.java.truevfs</groupId>
+					<artifactId>truevfs-access-swing</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.java.truevfs</groupId>
+					<artifactId>truevfs-driver-odf</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.java.truevfs</groupId>
+					<artifactId>truevfs-driver-tar</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.java.truevfs</groupId>
+					<artifactId>truevfs-driver-tar-bzip2</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.java.truevfs</groupId>
+					<artifactId>truevfs-driver-tar-gzip</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.java.truevfs</groupId>
+					<artifactId>truevfs-driver-tar-xz</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
