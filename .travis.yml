@@ -15,8 +15,8 @@ before_script:
   -out local.pubring.gpg -d
 script:
 - if [ ${TRAVIS_BRANCH} == 'master' ] && [ ${TRAVIS_PULL_REQUEST} = 'false' ];
-  then mvn clean deploy -B -Dcodebase.directory=`pwd` -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;
-  else mvn clean verify -B --settings target/config/ci/settings.xml;
+  then mvn clean deploy -B -U -Dcodebase.directory=`pwd` -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;
+  else mvn clean verify -B -U --settings target/config/ci/settings.xml;
   fi
 - if [ ${TRAVIS_PULL_REQUEST} = 'false' ];
   then mvn sonar:sonar -B -Dsonar.branch=$TRAVIS_BRANCH -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;

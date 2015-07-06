@@ -117,7 +117,7 @@ final class HSQLDBDatabase implements Database {
 	}
 
 	private String fileConnectionPath(File file) {
-		return file.toURI().getSchemeSpecificPart().substring(1);
+		return file.toURI().getSchemeSpecificPart();//.substring(1);
 	}
 
 	private ImmutableMap<String, String> configure(DatabaseConfig config) {
@@ -138,7 +138,7 @@ final class HSQLDBDatabase implements Database {
 				break;
 		}
 		String connectionURL=builder.build();
-		LOGGER.debug("Connecting to DB: {}%n",connectionURL);
+		LOGGER.debug("Connecting to DB: {}",connectionURL);
 		return
 			ImmutableMap.
 				<String,String>builder().
