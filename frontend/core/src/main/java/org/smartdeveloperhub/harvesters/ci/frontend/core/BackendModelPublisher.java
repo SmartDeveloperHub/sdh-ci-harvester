@@ -184,7 +184,7 @@ final class BackendModelPublisher {
 
 	void publish(WriteSession session) {
 		Service targetService=this.service.getService(this.serviceId);
-		if(service==null) {
+		if(targetService==null) {
 			LOGGER.warn("Nothing to publish. Service {} not found.",this.serviceId);
 			return;
 		}
