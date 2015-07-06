@@ -30,8 +30,8 @@ import org.ldp4j.application.ext.ApplicationRuntimeException;
 import org.ldp4j.application.ext.UnknownResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
 
 public abstract class Serviceable {
@@ -45,8 +45,8 @@ public abstract class Serviceable {
 		this.logger=LoggerFactory.getLogger(getClass());
 	}
 
-	protected final ContinuousIntegrationService continuousIntegrationService() {
-		return this.controller.continuousIntegrationService();
+	protected final EntityIndex entityIndex() {
+		return this.controller.entityIndex();
 	}
 
 	protected final String trace(String message, Object... arguments) {

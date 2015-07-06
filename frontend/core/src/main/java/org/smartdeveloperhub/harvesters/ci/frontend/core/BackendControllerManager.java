@@ -32,13 +32,17 @@ import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
 final class BackendControllerManager {
 
@@ -59,13 +63,30 @@ final class BackendControllerManager {
 		}
 
 		@Override
-		public ContinuousIntegrationService continuousIntegrationService() {
+		public EntityIndex entityIndex() {
 			throw getFailure();
 		}
 
 	}
 
 	private static final class NullBackendController implements BackendController {
+
+		private final class NullEntityIndex implements EntityIndex {
+			@Override
+			public Service findService(URI serviceId) {
+				return service.getService(serviceId);
+			}
+
+			@Override
+			public Execution findExecution(URI executionId) {
+				return service.getExecution(executionId);
+			}
+
+			@Override
+			public Build findBuild(URI buildId) {
+				return service.getBuild(buildId);
+			}
+		}
 
 		private ContinuousIntegrationService service;
 
@@ -79,13 +100,13 @@ final class BackendControllerManager {
 		}
 
 		@Override
-		public ContinuousIntegrationService continuousIntegrationService() {
-			return service;
+		public void connect(URI instance, EntityLifecycleEventListener listener) throws IOException {
+			// NOTHING TO DO
 		}
 
 		@Override
-		public void connect(URI instance, EntityLifecycleEventListener listener) throws IOException {
-			// NOTHING TO DO
+		public EntityIndex entityIndex() {
+			return new NullEntityIndex();
 		}
 	}
 

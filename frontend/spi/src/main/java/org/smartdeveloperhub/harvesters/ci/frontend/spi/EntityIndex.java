@@ -26,17 +26,17 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
-import java.io.IOException;
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
+import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.Service;
 
-public interface BackendController {
+public interface EntityIndex {
 
-	EntityIndex entityIndex();
+	Service findService(URI serviceId);
 
-	void connect(URI instance, EntityLifecycleEventListener listener) throws IOException;
+	Build findBuild(URI buildId);
 
-	void disconnect();
-
+	Execution findExecution(URI executionId);
 }

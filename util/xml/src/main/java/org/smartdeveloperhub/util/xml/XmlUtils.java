@@ -26,6 +26,7 @@
  */
 package org.smartdeveloperhub.util.xml;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -128,6 +129,27 @@ public final class XmlUtils {
 		return transformer;
 	}
 
+	private static void closeQuietly(File source, FileInputStream is) {
+		if(is!=null) {
+			try {
+				is.close();
+			} catch (IOException e) {
+				LOGGER.warn("Could not close output file '"+source.getAbsolutePath()+"'",e);
+			}
+		}
+	}
+
+	private static void tryClose(Unmarshaller unmarshaller) {
+		if(unmarshaller instanceof Closeable) {
+			Closeable closeable=(Closeable)unmarshaller;
+			try {
+				closeable.close();
+			} catch (Exception e) {
+				LOGGER.warn("Could not close unmarshaller file "+unmarshaller,e);
+			}
+		}
+	}
+
 	public static JAXBContext context() {
 		return XmlUtils.CONTEXT;
 	}
@@ -180,9 +202,10 @@ public final class XmlUtils {
 	}
 
 	public static <T, E extends Throwable> T unmarshall(File source, Class<? extends T> clazz, E throwable) throws E {
-		FileInputStream is = null;
+		FileInputStream is=null;
+		Unmarshaller unmarshaller=null;
 		try {
-			Unmarshaller unmarshaller=CONTEXT.createUnmarshaller();
+			unmarshaller=CONTEXT.createUnmarshaller();
 			is=new FileInputStream(source);
 			Object unmarshal = unmarshaller.unmarshal(is);
 			return clazz.cast(unmarshal);
@@ -190,13 +213,8 @@ public final class XmlUtils {
 			throwable.initCause(e);
 			throw throwable;
 		} finally {
-			if(is!=null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					LOGGER.warn("Could not close file output file",e);
-				}
-			}
+			closeQuietly(source,is);
+			tryClose(unmarshaller);
 		}
 	}
 
@@ -213,13 +231,16 @@ public final class XmlUtils {
 	}
 
 	public static <T, E extends Throwable> T unmarshall(String content, Class<? extends T> clazz, E throwable) throws E {
+		Unmarshaller unmarshaller=null;
 		try {
-			Unmarshaller unmarshaller=CONTEXT.createUnmarshaller();
-			Object unmarshal = unmarshaller.unmarshal(new StringReader(content));
+			unmarshaller=CONTEXT.createUnmarshaller();
+			Object unmarshal=unmarshaller.unmarshal(new StringReader(content));
 			return clazz.cast(unmarshal);
 		} catch (Exception e) {
 			throwable.initCause(e);
 			throw throwable;
+		} finally {
+			tryClose(unmarshaller);
 		}
 	}
 

@@ -20,23 +20,39 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-spi:1.0.0-SNAPSHOT
- *   Bundle      : ci-frontend-spi-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:1.0.0-SNAPSHOT
+ *   Bundle      : ci-frontend-test-1.0.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.spi;
+package org.smartdeveloperhub.harvesters.ci.frontend.test;
 
-import java.io.IOException;
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
+import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
-public interface BackendController {
+final class TestingEntityIndex implements EntityIndex {
+	private final ContinuousIntegrationService cis;
 
-	EntityIndex entityIndex();
+	TestingEntityIndex(ContinuousIntegrationService cis) {
+		this.cis = cis;
+	}
 
-	void connect(URI instance, EntityLifecycleEventListener listener) throws IOException;
+	@Override
+	public Service findService(URI serviceId) {
+		return cis.getService(serviceId);
+	}
 
-	void disconnect();
+	@Override
+	public Build findBuild(URI buildId) {
+		return cis.getBuild(buildId);
+	}
 
+	@Override
+	public Execution findExecution(URI executionId) {
+		return cis.getExecution(executionId);
+	}
 }

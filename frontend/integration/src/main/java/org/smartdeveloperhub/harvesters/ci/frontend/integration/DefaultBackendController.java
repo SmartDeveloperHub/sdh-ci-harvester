@@ -35,11 +35,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
 final class DefaultBackendController implements BackendController {
 
@@ -49,8 +49,15 @@ final class DefaultBackendController implements BackendController {
 
 	private URI jenkinsInstance;
 
+	private DefaultEntityIndex index;
+
 	DefaultBackendController(BackendFacade backendFacade) {
 		this.backendFacade = backendFacade;
+		this.index=
+			new DefaultEntityIndex(
+				this.backendFacade.transactionManager(),
+				this.backendFacade.applicationService());
+
 	}
 
 	private JenkinsIntegrationService integrationService() {
@@ -61,8 +68,8 @@ final class DefaultBackendController implements BackendController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ContinuousIntegrationService continuousIntegrationService() {
-		return this.backendFacade.applicationService();
+	public EntityIndex entityIndex() {
+		return index;
 	}
 
 	/**

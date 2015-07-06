@@ -37,33 +37,32 @@ import org.ldp4j.application.session.WriteSessionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
 final class FrontendSynchronizer implements EntityLifecycleEventListener {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(FrontendSynchronizer.class);
 
-	private final ContinuousIntegrationService cis;
+	private final EntityIndex index;
 	private final BackendModelPublisher publisher;
 
-	FrontendSynchronizer(ContinuousIntegrationService cis, BackendModelPublisher publisher) {
-		this.cis = cis;
+	FrontendSynchronizer(EntityIndex index, BackendModelPublisher publisher) {
+		this.index = index;
 		this.publisher = publisher;
 	}
 
 	@Override
 	public void onEvent(EntityLifecycleEvent event) {
-		LOGGER.info("Received {}",event);
 		try {
 			WriteSession session = ApplicationContext.getInstance().createSession();
 			actOnSession(event, session);
 		} catch (ApplicationContextException e) {
-			LOGGER.warn("Could not create session for processing the event {}",event,e);
+			LOGGER.warn("Could not create session for processing event {}",event,e);
 		}
 	}
 
@@ -74,7 +73,7 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 				LOGGER.info("Updated frontend: {}",event);
 			} else {
 				session.discardChanges();
-				LOGGER.info("Nothing to do ({})",event);
+				LOGGER.debug("Nothing to do ({})",event);
 			}
 		} catch (WriteSessionException e) {
 			LOGGER.warn("Could not process event {}",event,e);
@@ -115,7 +114,7 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 	}
 
 	private boolean updateExecution(EntityLifecycleEvent event, WriteSession session) {
-		Execution execution=this.cis.getExecution(event.entityId());
+		Execution execution=this.index.findExecution(event.entityId());
 		if(execution!=null) {
 			this.publisher.publish(session, execution);
 		}
@@ -123,7 +122,7 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 	}
 
 	private boolean updateBuild(EntityLifecycleEvent event, WriteSession session) {
-		Build build=this.cis.getBuild(event.entityId());
+		Build build=this.index.findBuild(event.entityId());
 		if(build!=null) {
 			this.publisher.publish(session, build);
 		}

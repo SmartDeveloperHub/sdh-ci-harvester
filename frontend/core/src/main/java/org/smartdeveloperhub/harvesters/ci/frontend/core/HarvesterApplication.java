@@ -36,7 +36,6 @@ import org.ldp4j.application.setup.Bootstrap;
 import org.ldp4j.application.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainerHandler;
@@ -44,6 +43,7 @@ import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionCont
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.service.ServiceHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
 public final class HarvesterApplication extends Application<HarvesterConfiguration> {
 
@@ -89,16 +89,16 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	public void initialize(WriteSession session) throws ApplicationInitializationException {
 		LOGGER.info("Initializing CI Harvester Application...");
 		try {
-			ContinuousIntegrationService cis=this.controller.continuousIntegrationService();
+			EntityIndex index=this.controller.entityIndex();
 			BackendModelPublisher publisher=
 				BackendModelPublisher.
 					builder().
-						withBackendService(cis).
+						withBackendService(index).
 						withMainService(target).
 						build();
 			publisher.publish(session);
 			session.saveChanges();
-			this.controller.connect(target,new FrontendSynchronizer(cis,publisher));
+			this.controller.connect(target,new FrontendSynchronizer(index,publisher));
 			LOGGER.info("CI Harvester Application initialization completed.");
 		} catch (Exception e) {
 			String errorMessage = "CI Harvester Application initialization failed";

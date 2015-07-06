@@ -67,8 +67,7 @@ public class BuildHandler extends Serviceable implements ResourceHandler {
 	}
 
 	private Build findBuild(URI id) throws UnknownResourceException {
-		Build build=
-			continuousIntegrationService().getBuild(id);
+		Build build=entityIndex().findBuild(id);
 		if(build==null) {
 			super.unknownResource(id,"Build");
 		}

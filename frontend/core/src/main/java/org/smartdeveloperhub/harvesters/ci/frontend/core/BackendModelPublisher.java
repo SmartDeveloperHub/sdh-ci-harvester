@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
@@ -45,6 +44,7 @@ import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainer
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.service.ServiceHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
 final class BackendModelPublisher {
 
@@ -52,11 +52,11 @@ final class BackendModelPublisher {
 
 	static final class Builder {
 
-		private ContinuousIntegrationService service;
+		private EntityIndex index;
 		private URI serviceId;
 
-		Builder withBackendService(ContinuousIntegrationService service) {
-			this.service = service;
+		Builder withBackendService(EntityIndex index) {
+			this.index = index;
 			return this;
 		}
 
@@ -66,16 +66,16 @@ final class BackendModelPublisher {
 		}
 
 		BackendModelPublisher build() {
-			return new BackendModelPublisher(this.service,this.serviceId);
+			return new BackendModelPublisher(this.index,this.serviceId);
 		}
 	}
 
-	private final ContinuousIntegrationService service;
+	private final EntityIndex index;
 
 	private final URI serviceId;
 
-	private BackendModelPublisher(ContinuousIntegrationService service, URI serviceId) {
-		this.service = service;
+	private BackendModelPublisher(EntityIndex index, URI serviceId) {
+		this.index = index;
 		this.serviceId = serviceId;
 	}
 
@@ -106,7 +106,7 @@ final class BackendModelPublisher {
 	}
 
 	private Build publishBuild(WriteSession session, URI buildId) {
-		Build build = this.service.getBuild(buildId);
+		Build build = this.index.findBuild(buildId);
 		if(build!=null) {
 			publish(session,build);
 			for(URI executionId:build.executions()) {
@@ -117,7 +117,7 @@ final class BackendModelPublisher {
 	}
 
 	private void publishExecution(WriteSession session, URI executionId) {
-		Execution execution = this.service.getExecution(executionId);
+		Execution execution = this.index.findExecution(executionId);
 		if(execution!=null) {
 			publish(session,execution);
 		}
@@ -183,7 +183,7 @@ final class BackendModelPublisher {
 	}
 
 	void publish(WriteSession session) {
-		Service targetService=this.service.getService(this.serviceId);
+		Service targetService=this.index.findService(this.serviceId);
 		if(targetService==null) {
 			LOGGER.warn("Nothing to publish. Service {} not found.",this.serviceId);
 			return;

@@ -320,7 +320,7 @@
 						<java.util.logging.config.file>${basedir}${file.separator}src${file.separator}test${file.separator}resources${file.separator}logging.properties</java.util.logging.config.file>
 						<maven.repo.local>${settings.localRepository}</maven.repo.local>
 						<ci.harvester.provider>DefaultBackendController</ci.harvester.provider>
-						<ci.harvester.config>${basedir}${file.separator}src${file.separator}test${file.separator}resources${file.separator}config.yml</ci.harvester.config>
+						<ci.harvester.config>${basedir}${file.separator}src${file.separator}test${file.separator}resources${file.separator}integration.yml</ci.harvester.config>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>

@@ -61,8 +61,7 @@ public class ServiceHandler extends Serviceable implements ResourceHandler {
 	}
 
 	private Service findService(URI id) throws UnknownResourceException {
-		Service service=
-			continuousIntegrationService().getService(id);
+		Service service=entityIndex().findService(id);
 		if(service==null) {
 			super.unknownResource(id,"Service");
 		}

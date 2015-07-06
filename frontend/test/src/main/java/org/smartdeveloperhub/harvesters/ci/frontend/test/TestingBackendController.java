@@ -49,6 +49,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBuild
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -66,6 +67,8 @@ final class TestingBackendController implements BackendController {
 
 	private final ContinuousIntegrationService service;
 
+	private TestingEntityIndex index;
+
 	TestingBackendController() {
 		this.serviceRepository = new InMemoryServiceRepository();
 		this.buildRepository = new InMemoryBuildRepository();
@@ -75,6 +78,7 @@ final class TestingBackendController implements BackendController {
 				this.serviceRepository,
 				this.buildRepository,
 				this.executionRepository);
+		this.index = new TestingEntityIndex(this.service);
 		populateBackend(URI.create("http://ci.jenkins-ci.org/"));
 	}
 
@@ -156,8 +160,8 @@ final class TestingBackendController implements BackendController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ContinuousIntegrationService continuousIntegrationService() {
-		return this.service;
+	public EntityIndex entityIndex() {
+		return index;
 	}
 
 	@Override
