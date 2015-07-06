@@ -55,7 +55,7 @@ final class HSQLDBDatabase implements Database {
 	private final DatabaseConfig config;
 
 	private EntityManagerFactory emf;
-	private String unpackedLocation;
+	private File unpackedLocation;
 
 	HSQLDBDatabase(DatabaseConfig config) {
 		this.config = config;
@@ -85,8 +85,10 @@ final class HSQLDBDatabase implements Database {
 	private void postProcess() {
 		if(Deployment.PACKED.equals(this.config.getDeployment())) {
 			try {
-				Packer.pack(this.config.getLocation(),Utils.dbResources(this.unpackedLocation));
+				File packedLocation = Packer.pack(this.config.getLocation(),Utils.dbResources(fileConnectionPath(this.unpackedLocation)));
+				LOGGER.debug("Packed data from {} to {}.",this.unpackedLocation.getAbsolutePath(),packedLocation.getAbsolutePath());
 			} catch (IOException e) {
+				LOGGER.error("Could not pack data. Full stacktrace follows",e);
 				throw new DatabaseLifecycleException("Could not pack database",e);
 			}
 		}
@@ -114,6 +116,10 @@ final class HSQLDBDatabase implements Database {
 		}
 	}
 
+	private String fileConnectionPath(File file) {
+		return file.toURI().getSchemeSpecificPart().substring(1);
+	}
+
 	private ImmutableMap<String, String> configure(DatabaseConfig config) {
 		String location=config.getLocation();
 		URLBuilder builder=Utils.urlBuilder();
@@ -123,7 +129,7 @@ final class HSQLDBDatabase implements Database {
 				break;
 			case PACKED:
 				this.unpackedLocation = unpack(location);
-				builder.persistent(this.unpackedLocation);
+				builder.persistent(fileConnectionPath(this.unpackedLocation));
 				break;
 			case REMOTE:
 				builder.remote(location);
@@ -140,7 +146,7 @@ final class HSQLDBDatabase implements Database {
 					build();
 	}
 
-	private String unpack(String sourceFile) {
+	private File unpack(String sourceFile) {
 		try {
 			File source=new File(sourceFile);
 			if(!source.exists()) {
@@ -148,10 +154,10 @@ final class HSQLDBDatabase implements Database {
 			}
 			File targetDirectory=Files.createTempDir();
 			File dbFile=Packer.unpack(sourceFile, targetDirectory.getAbsolutePath());
-			LOGGER.debug("Unpacked data to {}...",dbFile);
-			return dbFile.toURI().getSchemeSpecificPart().substring(1);
+			LOGGER.debug("Unpacked data from {} to {}.",source.getAbsolutePath(),dbFile.getAbsolutePath());
+			return dbFile;
 		} catch (IOException e) {
-			LOGGER.error("Could not unpack database. Full stacktrace follows",e);
+			LOGGER.error("Could not unpack data. Full stacktrace follows",e);
 			throw new DatabaseLifecycleException("Could not unpack database",e);
 		}
 	}

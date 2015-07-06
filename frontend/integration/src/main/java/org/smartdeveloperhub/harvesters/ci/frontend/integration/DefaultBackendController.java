@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
@@ -101,14 +102,25 @@ final class DefaultBackendController implements BackendController {
 		}
 	}
 
-	private static boolean hasInstance(URI jenkinsInstance, BackendFacade backend) {
+	private static boolean hasInstance(URI instance, BackendFacade backend) {
+		return hasInstance(instance, backend, true);
+	}
+
+	private static boolean hasInstance(URI jenkinsInstance, BackendFacade backend, boolean create) {
 		List<URI> availableServices=
 			backend.
 				applicationService().
 					getRegisteredServices();
 		boolean contains = availableServices.contains(jenkinsInstance);
 		if(!contains) {
-			LOGGER.warn("Could not find instance "+jenkinsInstance+" ("+availableServices+")");
+			if(create) {
+				backend.
+					applicationService().
+						registerService(RegisterServiceCommand.create(jenkinsInstance));
+				contains=hasInstance(jenkinsInstance,backend,false);
+			} else {
+				LOGGER.warn("Could not find instance {} ({})",jenkinsInstance,availableServices);
+			}
 		}
 		return contains;
 	}
