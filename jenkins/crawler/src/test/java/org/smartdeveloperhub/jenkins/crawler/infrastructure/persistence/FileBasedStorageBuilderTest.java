@@ -49,7 +49,7 @@ public class FileBasedStorageBuilderTest {
 			FileBasedStorage.
 				builder().
 					build();
-		assertThat(storage.configFile().getCanonicalFile().getParentFile(),equalTo(DEFAULT_WORKING_DIRECTORY.getCanonicalFile()));
+		assertThat(storage.configFile().getParentFile().getAbsoluteFile(),equalTo(DEFAULT_WORKING_DIRECTORY.getAbsoluteFile()));
 		assertThat(storage.configFile().getName(),equalTo(DEFAULT_CONFIG_FILENAME));
 	}
 
@@ -60,7 +60,7 @@ public class FileBasedStorageBuilderTest {
 				builder().
 					withWorkingDirectory(testFolder.getRoot()).
 					build();
-		assertThat(storage.configFile().getCanonicalFile().getParentFile(),equalTo(testFolder.getRoot().getCanonicalFile()));
+		assertThat(storage.configFile().getParentFile().getAbsoluteFile(),equalTo(testFolder.getRoot().getAbsoluteFile()));
 		assertThat(storage.configFile().getName(),equalTo(DEFAULT_CONFIG_FILENAME));
 	}
 
@@ -81,7 +81,7 @@ public class FileBasedStorageBuilderTest {
 				builder().
 					withWorkingDirectory(null).
 					build();
-		assertThat(storage.configFile().getCanonicalFile().getParentFile(),equalTo(DEFAULT_WORKING_DIRECTORY.getCanonicalFile()));
+		assertThat(storage.configFile().getParentFile().getAbsoluteFile(),equalTo(DEFAULT_WORKING_DIRECTORY.getAbsoluteFile()));
 		assertThat(storage.configFile().getName(),equalTo(DEFAULT_CONFIG_FILENAME));
 	}
 

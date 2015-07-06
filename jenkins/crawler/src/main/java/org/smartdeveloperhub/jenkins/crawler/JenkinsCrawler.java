@@ -120,7 +120,9 @@ public final class JenkinsCrawler {
 					builder().
 						withWorkingDirectory(this.directory).
 						withConfigFile(
-							new File(this.directory,"repository.xml")).
+							this.directory==null?
+								null:
+								new File(this.directory,"repository.xml")).
 						build();
 		}
 
