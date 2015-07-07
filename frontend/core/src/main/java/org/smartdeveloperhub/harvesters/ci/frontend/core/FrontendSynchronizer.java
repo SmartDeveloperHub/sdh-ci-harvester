@@ -70,10 +70,10 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 		try {
 			if(processEvent(event, session)) {
 				session.saveChanges();
-				LOGGER.info("Updated frontend: {}",event);
+				LOGGER.info("Updated frontend: {} {} {}",event.state(),event.entityType(),event.entityId());
 			} else {
 				session.discardChanges();
-				LOGGER.debug("Nothing to do ({})",event);
+				LOGGER.debug("Nothing to do ({} {} {})",event.state(),event.entityType(),event.entityId());
 			}
 		} catch (WriteSessionException e) {
 			LOGGER.warn("Could not process event {}",event,e);
