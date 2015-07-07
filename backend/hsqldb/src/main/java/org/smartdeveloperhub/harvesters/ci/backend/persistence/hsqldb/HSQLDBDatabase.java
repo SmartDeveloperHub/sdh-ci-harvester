@@ -98,26 +98,33 @@ final class HSQLDBDatabase implements Database {
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		Enumeration<Driver> drivers = DriverManager.getDrivers();
 		while (drivers.hasMoreElements()) {
-			Driver driver = drivers.nextElement();
-			if(driver.getClass().getName().equals("org.hsqldb.jdbc.JDBCDriver")) {
-				if(driver.getClass().getClassLoader()==cl) {
-					try {
-						LOGGER.info("Deregistering JDBC driver {}", driver);
-						DriverManager.deregisterDriver(driver);
-					} catch (SQLException ex) {
-						LOGGER.error("Error deregistering JDBC driver {}", driver,ex);
-					}
-				} else {
-					LOGGER.trace("Not deregistering JDBC driver {} as it does not belong to this application ClassLoader",driver);
-				}
-			} else {
-				LOGGER.trace("Not deregistering JDBC driver {} as it not the target one",driver);
+			processDriver(cl, drivers.nextElement());
+		}
+	}
+
+	private void processDriver(ClassLoader cl, Driver driver) {
+		if(driver instanceof org.hsqldb.jdbc.JDBCDriver) {
+			processTargetDriver(cl, driver);
+		} else {
+			LOGGER.trace("Not deregistering JDBC driver {} as it not the target one ({})",driver,org.hsqldb.jdbc.JDBCDriver.class.getName());
+		}
+	}
+
+	private void processTargetDriver(ClassLoader cl, Driver driver) {
+		if(driver.getClass().getClassLoader()==cl) {
+			try {
+				LOGGER.info("Deregistering JDBC driver {}", driver);
+				DriverManager.deregisterDriver(driver);
+			} catch (SQLException ex) {
+				LOGGER.error("Error deregistering JDBC driver {}", driver,ex);
 			}
+		} else {
+			LOGGER.trace("Not deregistering JDBC driver {} as it does not belong to this application ClassLoader",driver);
 		}
 	}
 
 	private String fileConnectionPath(File file) {
-		return file.toURI().getSchemeSpecificPart();//.substring(1);
+		return file.toURI().getSchemeSpecificPart();
 	}
 
 	private ImmutableMap<String, String> configure(DatabaseConfig config) {
