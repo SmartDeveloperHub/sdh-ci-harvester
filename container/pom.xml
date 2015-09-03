@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci:ci-harvester-container:1.0.0-SNAPSHOT
-      Bundle      : ci-harvester-container-1.0.0-SNAPSHOT.pom
+      Artifact    : org.smartdeveloperhub.harvesters.ci:ci-harvester-container:0.1.0
+      Bundle      : ci-harvester-container-0.1.0.pom
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -39,7 +39,7 @@
 	<parent>
 		<groupId>org.smartdeveloperhub.harvesters.ci</groupId>
 		<artifactId>ci-harvester-aggregator</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>0.1.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -72,6 +72,9 @@
 							<descriptors>
 								<descriptor>src${file.separator}main${file.separator}assembly${file.separator}assembly.xml</descriptor>
 							</descriptors>
+							<delimiters>
+								<delimiter>@</delimiter>
+							</delimiters>
 						</configuration>
 						<phase>package</phase>
 						<goals>

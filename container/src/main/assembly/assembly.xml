@@ -22,8 +22,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci:ci-harvester-container:1.0.0-SNAPSHOT
-      Bundle      : ci-harvester-container-1.0.0-SNAPSHOT.pom
+      Artifact    : org.smartdeveloperhub.harvesters.ci:ci-harvester-container:0.1.0
+      Bundle      : ci-harvester-container-0.1.0.pom
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -49,6 +49,17 @@
 			<outputDirectory></outputDirectory>
 			<includes>
 				<include>**/*</include>
+			</includes>
+			<excludes>
+				<exclude>.config${file.separator}population.zip</exclude>
+			</excludes>
+			<directory>src${file.separator}main${file.separator}resources</directory>
+			<filtered>true</filtered>
+		</fileSet>
+		<fileSet>
+			<outputDirectory></outputDirectory>
+			<includes>
+				<include>.config${file.separator}population.zip</include>
 			</includes>
 			<directory>src${file.separator}main${file.separator}resources</directory>
 			<filtered>false</filtered>

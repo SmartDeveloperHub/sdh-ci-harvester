@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-frontend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
+ *   Bundle      : ci-frontend-core-0.1.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.build;
@@ -29,16 +29,15 @@ package org.smartdeveloperhub.harvesters.ci.frontend.core.build;
 import java.net.URI;
 
 import org.ldp4j.application.data.DataSet;
-import org.ldp4j.application.data.DataSetFactory;
 import org.ldp4j.application.data.DataSetHelper;
 import org.ldp4j.application.data.DataSetUtils;
+import org.ldp4j.application.data.DataSets;
 import org.ldp4j.application.data.IndividualPropertyHelper;
 import org.ldp4j.application.data.Name;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
-import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Mapper;
 
 final class BuildMapper extends BuildVocabulary {
 
@@ -48,7 +47,7 @@ final class BuildMapper extends BuildVocabulary {
 	static DataSet toDataSet(Build build) {
 		Name<URI> buildName=IdentityUtil.buildName(build);
 
-		DataSet dataSet=DataSetFactory.createDataSet(buildName);
+		DataSet dataSet=DataSets.createDataSet(buildName);
 
 		DataSetHelper helper=DataSetUtils.newHelper(dataSet);
 
@@ -61,7 +60,7 @@ final class BuildMapper extends BuildVocabulary {
 					property(DC_TERMS_IDENTIFIER).
 						withLiteral(build.buildId()).
 					property(DC_TERMS_CREATED).
-						withLiteral(Mapper.toLiteral(build.createdOn())).
+						withLiteral(build.createdOn()).
 					property(DC_TERMS_TITLE).
 						withLiteral(build.title()).
 					property(DC_TERMS_DESCRIPTION).

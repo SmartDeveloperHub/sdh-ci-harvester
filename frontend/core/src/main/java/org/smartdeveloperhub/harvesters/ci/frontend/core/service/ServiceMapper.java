@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-frontend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
+ *   Bundle      : ci-frontend-core-0.1.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.service;
@@ -29,7 +29,7 @@ package org.smartdeveloperhub.harvesters.ci.frontend.core.service;
 import java.net.URI;
 
 import org.ldp4j.application.data.DataSet;
-import org.ldp4j.application.data.DataSetFactory;
+import org.ldp4j.application.data.DataSets;
 import org.ldp4j.application.data.DataSetHelper;
 import org.ldp4j.application.data.DataSetUtils;
 import org.ldp4j.application.data.IndividualPropertyHelper;
@@ -48,7 +48,7 @@ final class ServiceMapper extends ServiceVocabulary {
 	static DataSet toDataSet(Service service) {
 		Name<URI> serviceName=IdentityUtil.serviceName(service);
 
-		DataSet dataSet=DataSetFactory.createDataSet(serviceName);
+		DataSet dataSet=DataSets.createDataSet(serviceName);
 
 		DataSetHelper helper=DataSetUtils.newHelper(dataSet);
 

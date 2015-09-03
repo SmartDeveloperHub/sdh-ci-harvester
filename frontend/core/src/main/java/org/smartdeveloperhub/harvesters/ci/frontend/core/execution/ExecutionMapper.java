@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:1.0.0-SNAPSHOT
- *   Bundle      : ci-frontend-core-1.0.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
+ *   Bundle      : ci-frontend-core-0.1.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.execution;
@@ -29,15 +29,14 @@ package org.smartdeveloperhub.harvesters.ci.frontend.core.execution;
 import java.net.URI;
 
 import org.ldp4j.application.data.DataSet;
-import org.ldp4j.application.data.DataSetFactory;
 import org.ldp4j.application.data.DataSetHelper;
 import org.ldp4j.application.data.DataSetUtils;
+import org.ldp4j.application.data.DataSets;
 import org.ldp4j.application.data.IndividualPropertyHelper;
 import org.ldp4j.application.data.Name;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
-import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Mapper;
 
 final class ExecutionMapper extends ExecutionVocabulary {
 
@@ -52,7 +51,7 @@ final class ExecutionMapper extends ExecutionVocabulary {
 		ResultMapping resultMapping=
 			ResultMapping.newInstance(execution.result());
 
-		DataSet dataSet=DataSetFactory.createDataSet(executionName);
+		DataSet dataSet=DataSets.createDataSet(executionName);
 
 		DataSetHelper helper=DataSetUtils.newHelper(dataSet);
 
@@ -66,7 +65,7 @@ final class ExecutionMapper extends ExecutionVocabulary {
 					property(DC_TERMS_IDENTIFIER).
 						withLiteral(execution.executionId()).
 					property(DC_TERMS_CREATED).
-						withLiteral(Mapper.toLiteral(execution.createdOn())).
+						withLiteral(execution.createdOn()).
 					property(DC_TERMS_TITLE).
 						withLiteral("TODO: Add execution title").
 					property(DC_TERMS_DESCRIPTION).
@@ -85,7 +84,7 @@ final class ExecutionMapper extends ExecutionVocabulary {
 				property(TYPE).
 					withIndividual(CI_FINISHED_EXECUTION).
 				property(CI_FINISHED).
-					withLiteral(Mapper.toLiteral(execution.result().finishedOn()));
+					withLiteral(execution.result().finishedOn());
 		} else {
 			executionHelper.
 				property(TYPE).

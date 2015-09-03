@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci:ci-harvester-container:1.0.0-SNAPSHOT
-      Bundle      : ci-harvester-container-1.0.0-SNAPSHOT.pom
+      Artifact    : org.smartdeveloperhub.harvesters.ci:ci-harvester-container:0.1.0
+      Bundle      : ci-harvester-container-0.1.0.pom
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -38,7 +38,7 @@
 
 	<groupId>org.smartdeveloperhub.harvesters.ci</groupId>
 	<artifactId>ci-harvester-container</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>@project.version@</version>
 	<packaging>war</packaging>
 
 	<!-- =================================================================== -->
@@ -54,6 +54,7 @@
 	<!-- =================================================================== -->
 
 	<properties>
+		<ci.harvester.version>@project.version@</ci.harvester.version>
 		<deployment.dir>${basedir}${file.separator}.webapp</deployment.dir>
 		<harvester.http.port>80</harvester.http.port>
 		<harvester.config>${basedir}${file.separator}.config${file.separator}config.yml</harvester.config>
@@ -83,7 +84,7 @@
 				<artifactId>maven-clean-plugin</artifactId>
 				<version>2.6.1</version>
 				<configuration>
-					<excludeDefaultDirectories>true</excludeDefaultDirectories>
+					<excludeDefaultDirectories>false</excludeDefaultDirectories>
 					<failOnError>false</failOnError>
 					<filesets>
 						<fileset>
@@ -128,7 +129,7 @@
 								<artifactItem>
 									<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
 									<artifactId>ci-frontend-dist</artifactId>
-									<version>${project.version}</version>
+									<version>${ci.harvester.version}</version>
 									<type>war</type>
 									<overWrite>true</overWrite>
 									<outputDirectory>${deployment.dir}</outputDirectory>
