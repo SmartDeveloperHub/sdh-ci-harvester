@@ -20,8 +20,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 # #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-#   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-dist:0.1.0
-#   Bundle      : ci-frontend-dist-0.1.0.war
+#   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-dist:0.2.0-SNAPSHOT
+#   Bundle      : ci-frontend-dist-0.2.0-SNAPSHOT.war
 # #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 #
 
