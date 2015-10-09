@@ -57,6 +57,11 @@
 				<result><xsl:value-of select="result"/></result>
 				<duration><xsl:value-of select="duration"/></duration>
 			</xsl:if>
+			<xsl:if test="exists(//action/lastBuiltRevision)">
+				<codebase><xsl:value-of select="//action/lastBuiltRevision/../remoteUrl"/></codebase>
+				<branch><xsl:value-of select="//action/lastBuiltRevision/branch/name"/></branch>
+				<commit><xsl:value-of select="//action/lastBuiltRevision/SHA1"/></commit>
+			</xsl:if>
 		</ci:run>
 	</xsl:template>
 </xsl:stylesheet>

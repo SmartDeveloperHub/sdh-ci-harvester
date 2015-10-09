@@ -63,7 +63,7 @@ final class ConsoleLoggingJenkinsEventListener implements JenkinsEventListener {
 	public void onRunCreation(RunCreatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Created run %s%n",event.date(),event.runId());
+				printf("[%s] Created run %s {%s -> %s :: %s }%n",event.date(),event.runId(),event.codebase(),event.branchName(),event.commitId());
 	}
 
 	@Override
@@ -84,7 +84,7 @@ final class ConsoleLoggingJenkinsEventListener implements JenkinsEventListener {
 	public void onJobUpdate(JobUpdatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Updated job %s {%s}%n",event.date(),event.jobId(),event.codebase());
+				printf("[%s] Updated job %s {%s -> %s}%n",event.date(),event.jobId(),event.codebase(),event.branchName());
 	}
 
 }

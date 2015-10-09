@@ -24,48 +24,27 @@
  *   Bundle      : ci-jenkins-crawler-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler.util;
 
-import java.net.URI;
-import java.util.Date;
+public final class GitUtil {
 
-import com.google.common.base.MoreObjects.ToStringHelper;
+	private static final String ORIGIN = "origin/";
+	private static final String REFS_REMOTES = "refs/remotes/";
 
-public final class RunCreatedEvent extends RunEvent<RunCreatedEvent> {
-
-	private RunCreatedEvent(URI serviceId, Date date) {
-		super(serviceId,date,RunCreatedEvent.class);
+	private GitUtil() {
 	}
 
-	@Override
-	void accept(JenkinsEventVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitRunCreatedEvent(this);
+	public static String normalizeBranchName(String branchName) {
+		String normalized=branchName;
+		if(normalized!=null) {
+			if(normalized.startsWith(REFS_REMOTES)) {
+				normalized=normalized.substring(REFS_REMOTES.length());
+				normalized=normalized.substring(normalized.indexOf('/')+1);
+			} else if(normalized.startsWith(ORIGIN)) {
+				normalized=normalized.substring(ORIGIN.length());
+			}
 		}
-	}
-
-	public final URI jobId() {
-		return run().getJob();
-	}
-
-	public final Date createdOn() {
-		return new Date(run().getTimestamp());
-	}
-
-	@Override
-	protected void toString(ToStringHelper helper) {
-		helper.
-			add("jobId", jobId()).
-			add("runId", runId()).
-			add("createdOn",createdOn()).
-			add("codebase",codebase()).
-			add("branchName",branchName()).
-			add("commitId",commitId()).
-			add("finishedOn",finishedOn()).
-			add("result",result());
-	}
-	static RunCreatedEvent create(URI location) {
-		return new RunCreatedEvent(location, new Date());
+		return normalized;
 	}
 
 }

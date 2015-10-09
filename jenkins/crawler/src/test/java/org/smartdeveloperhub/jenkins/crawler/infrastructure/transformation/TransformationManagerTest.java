@@ -26,6 +26,12 @@
  */
 package org.smartdeveloperhub.jenkins.crawler.infrastructure.transformation;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.nullValue;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
@@ -39,6 +45,10 @@ import org.junit.Test;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeJob;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.JobType;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunType;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.SimpleJob;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.SubJob;
 import org.smartdeveloperhub.util.xml.XmlProcessingException;
@@ -48,9 +58,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.google.common.collect.ImmutableMap;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
 
 public class TransformationManagerTest {
 
@@ -79,6 +86,29 @@ public class TransformationManagerTest {
 		assertThat(job.getCodebase(),nullValue());
 		assertThat(job.getId(),equalTo(jobName));
 		assertThat(job.getRuns().getRuns(),hasSize(19));
+	}
+
+	@Test
+	public void testFreeStyleRun() throws Exception {
+		String jobName = "infra_backend_crawler";
+		String runName = "10";
+		String url = runURL(jobName,runName);
+		Run result =
+			doTransform(
+				"responses/freeStyleProject/run.xml",
+				url,
+				Run.class);
+		Run job = verifyType(result,Run.class);
+		assertThat(job.getUrl(),equalTo(URI.create(url)));
+		assertThat(job.getType(),equalTo(RunType.FREE_STYLE_BUILD));
+		assertThat(job.getId(),equalTo(runName));
+		assertThat(job.getJob(),equalTo(URI.create(jobURL(jobName))));
+		assertThat(job.getCodebase(),equalTo(URI.create("git://github.com/jenkinsci/backend-crawler.git")));
+		assertThat(job.getBranch(),equalTo("refs/remotes/origin/master"));
+		assertThat(job.getCommit(),equalTo("537854615082e00fc444ea29caf49d9bf9fb4135"));
+		assertThat(job.getDuration(),equalTo(482341L));
+		assertThat(job.getStatus(),equalTo(RunStatus.FINISHED));
+		assertThat(job.getResult(),equalTo(RunResult.SUCCESS));
 	}
 
 	@Test
@@ -170,6 +200,10 @@ public class TransformationManagerTest {
 
 	private String jobURL(String jobName) {
 		return INSTANCE_BASE+"job/"+jobName+"/";
+	}
+
+	private String runURL(String jobName, String runName) {
+		return jobURL(jobName)+runName+"/";
 	}
 
 	private <T> T doTransform(String localResource, String resourceLocation, Class<? extends T> clazz) throws Exception {

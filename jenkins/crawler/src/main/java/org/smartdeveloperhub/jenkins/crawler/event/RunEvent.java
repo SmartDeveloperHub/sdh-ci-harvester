@@ -73,4 +73,16 @@ abstract class RunEvent<T extends RunEvent<T>> extends JenkinsEvent {
 		return this.run.getResult();
 	}
 
+	public final URI codebase() {
+		return this.run.getCodebase();
+	}
+
+	public final String branchName() {
+		return this.run.getBranch();
+	}
+
+	public final String commitId() {
+		return this.run.getCommit();
+	}
+
 }

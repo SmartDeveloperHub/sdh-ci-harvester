@@ -69,6 +69,10 @@ public final class JobUpdatedEvent extends JenkinsEvent {
 		return this.job.getCodebase();
 	}
 
+	public String branchName() {
+		return this.job.getBranch();
+	}
+
 	public URI jobId() {
 		return this.job.getUrl();
 	}
@@ -79,7 +83,8 @@ public final class JobUpdatedEvent extends JenkinsEvent {
 			add("jobId", jobId()).
 			add("title", title()).
 			add("description", description()).
-			add("codebase", codebase());
+			add("codebase", codebase()).
+			add("branchName", branchName());
 	}
 
 	static JobUpdatedEvent create(URI instanceId) {

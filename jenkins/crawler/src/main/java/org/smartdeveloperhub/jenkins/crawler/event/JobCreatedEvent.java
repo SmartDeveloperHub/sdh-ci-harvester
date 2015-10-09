@@ -74,11 +74,15 @@ public final class JobCreatedEvent extends JenkinsEvent {
 	}
 
 	public String description() {
-		return job.getDescription();
+		return this.job.getDescription();
 	}
 
 	public URI codebase() {
-		return job.getCodebase();
+		return this.job.getCodebase();
+	}
+
+	public String branchName() {
+		return this.job.getBranch();
 	}
 
 	public Type type() {
@@ -121,6 +125,7 @@ public final class JobCreatedEvent extends JenkinsEvent {
 			add("title",title()).
 			add("description",description()).
 			add("codebase", codebase()).
+			add("branchName", branchName()).
 			add("type",type()).
 			add("parent",parent());
 	}

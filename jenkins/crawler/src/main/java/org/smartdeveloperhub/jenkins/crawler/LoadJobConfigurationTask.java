@@ -34,6 +34,7 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.util.GitUtil;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.util.xml.XmlUtils;
 
@@ -53,14 +54,29 @@ final class LoadJobConfigurationTask extends AbstractArtifactCrawlingTask<Job> {
 	@Override
 	protected void processSubresource(Job parent, JenkinsResource resource) {
 		try {
+			boolean updated=false;
 			String rawURI=
 				XmlUtils.
 					evaluateXPath(
 						"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
 						resource.content().get());
-			parent.withCodebase(URI.create(rawURI));
-			persistEntity(parent, entityType());
-			super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
+			if(rawURI!=null && !rawURI.isEmpty()) {
+				updated=true;
+				parent.withCodebase(URI.create(rawURI));
+			}
+			String branchName=
+				XmlUtils.
+					evaluateXPath(
+						"//scm[@class='hudson.plugins.git.GitSCM']/branches//name",
+						resource.content().get());
+			if(branchName!=null && !branchName.isEmpty()) {
+				updated=true;
+				parent.setBranch(GitUtil.normalizeBranchName(branchName));
+			}
+			if(updated) {
+				persistEntity(parent, entityType());
+				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
+			}
 		} catch (Exception e) {
 			LOGGER.error("Could not recover SCM information",e);
 		}

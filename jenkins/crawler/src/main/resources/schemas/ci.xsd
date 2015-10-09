@@ -26,11 +26,7 @@
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
-<xsd:schema
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:ci="http://www.smartdeveloperhub.org/harvester/ci/model/v1"
-	xmlns:rest="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1"
-	targetNamespace="http://www.smartdeveloperhub.org/harvester/ci/model/v1">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ci="http://www.smartdeveloperhub.org/harvester/ci/model/v1" xmlns:rest="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1" targetNamespace="http://www.smartdeveloperhub.org/harvester/ci/model/v1">
 	<xsd:import namespace="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1" schemaLocation="rest.xsd"/>
 	<xsd:element name="entity" type="ci:Entity"/>
 	<xsd:element name="instance" type="ci:Instance"/>
@@ -67,6 +63,7 @@
 				<xsd:sequence>
 					<xsd:element name="type" type="ci:JobType"/>
 					<xsd:element name="codebase" type="xsd:anyURI" minOccurs="0"/>
+					<xsd:element name="branch" type="xsd:string" minOccurs="0"/>
 					<xsd:element name="runnable" type="xsd:boolean"/>
 					<xsd:element name="runs">
 						<xsd:complexType>
@@ -123,6 +120,14 @@
 						</xsd:annotation>
 						<xsd:element name="result" type="ci:RunResult"/>
 						<xsd:element name="duration" type="xsd:long"/>
+					</xsd:sequence>
+					<xsd:sequence minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>May not be found if the repository is not GIT-based</xsd:documentation>
+						</xsd:annotation>
+						<xsd:element name="codebase" type="xsd:anyURI"/>
+						<xsd:element name="branch" type="xsd:string"/>
+						<xsd:element name="commit" type="xsd:string"/>
 					</xsd:sequence>
 				</xsd:sequence>
 				<xsd:attribute name="job" type="xsd:anyURI" use="required"/>

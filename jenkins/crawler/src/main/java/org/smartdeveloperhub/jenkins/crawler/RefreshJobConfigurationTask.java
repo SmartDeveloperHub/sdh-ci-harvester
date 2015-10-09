@@ -34,6 +34,7 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.util.GitUtil;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.util.xml.XmlUtils;
 
@@ -61,9 +62,26 @@ final class RefreshJobConfigurationTask extends AbstractArtifactCrawlingTask<Job
 					evaluateXPath(
 						"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
 						resource.content().get());
-			parent.withCodebase(URI.create(rawURI));
-			persistEntity(parent, entityType());
-			if(!parent.getCodebase().equals(this.previousJob.getCodebase())) {
+			boolean updatedCodebase=false;
+			if(rawURI!=null && !rawURI.isEmpty()) {
+				updatedCodebase=true;
+				parent.withCodebase(URI.create(rawURI));
+			}
+			String branchName=
+				XmlUtils.
+					evaluateXPath(
+						"//scm[@class='hudson.plugins.git.GitSCM']/branches//name",
+						resource.content().get());
+			boolean updatedBranchName=false;
+			if(branchName!=null && !branchName.isEmpty()) {
+				updatedBranchName=true;
+				parent.setBranch(GitUtil.normalizeBranchName(branchName));
+			}
+			if(updatedCodebase && !parent.getCodebase().equals(this.previousJob.getCodebase())) {
+				persistEntity(parent, entityType());
+				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
+			} else if(updatedBranchName && !parent.getBranch().equals(this.previousJob.getBranch())) {
+				persistEntity(parent, entityType());
 				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
 			}
 		} catch (Exception e) {

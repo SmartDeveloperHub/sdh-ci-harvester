@@ -24,48 +24,34 @@
  *   Bundle      : ci-jenkins-crawler-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.event;
+package org.smartdeveloperhub.jenkins.crawler.util;
 
-import java.net.URI;
-import java.util.Date;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import com.google.common.base.MoreObjects.ToStringHelper;
+import org.junit.Test;
 
-public final class RunCreatedEvent extends RunEvent<RunCreatedEvent> {
+public class GitUtilTest {
 
-	private RunCreatedEvent(URI serviceId, Date date) {
-		super(serviceId,date,RunCreatedEvent.class);
+	@Test
+	public void testNormalizeBranchName$remoteRefPlusBranch() throws Exception {
+		assertThat(GitUtil.normalizeBranchName("refs/remotes/origin/master"),equalTo("master"));
 	}
 
-	@Override
-	void accept(JenkinsEventVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitRunCreatedEvent(this);
-		}
+	@Test
+	public void testNormalizeBranchName$remoteRefPlusBranch$ither() throws Exception {
+		assertThat(GitUtil.normalizeBranchName("refs/remotes/mine/master"),equalTo("master"));
 	}
 
-	public final URI jobId() {
-		return run().getJob();
+	@Test
+	public void testNormalizeBranchName$shortRemotePlusBranch() throws Exception {
+		assertThat(GitUtil.normalizeBranchName("origin/master"),equalTo("master"));
 	}
 
-	public final Date createdOn() {
-		return new Date(run().getTimestamp());
+	@Test
+	public void testNormalizeBranchName$branch() throws Exception {
+		assertThat(GitUtil.normalizeBranchName("feature/my-feature"),equalTo("feature/my-feature"));
 	}
 
-	@Override
-	protected void toString(ToStringHelper helper) {
-		helper.
-			add("jobId", jobId()).
-			add("runId", runId()).
-			add("createdOn",createdOn()).
-			add("codebase",codebase()).
-			add("branchName",branchName()).
-			add("commitId",commitId()).
-			add("finishedOn",finishedOn()).
-			add("result",result());
-	}
-	static RunCreatedEvent create(URI location) {
-		return new RunCreatedEvent(location, new Date());
-	}
 
 }

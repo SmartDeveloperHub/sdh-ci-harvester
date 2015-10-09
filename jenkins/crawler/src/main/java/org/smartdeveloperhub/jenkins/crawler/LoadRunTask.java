@@ -32,11 +32,18 @@ import java.net.URI;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.JenkinsURI;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.util.GitUtil;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 
+import com.google.common.base.Optional;
+
 final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
+
+	private static final String SEPARATOR = "/";
 
 	LoadRunTask(URI location) {
 		super(location,Run.class,JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
@@ -49,16 +56,49 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 
 	@Override
 	protected void processEntity(Run run, JenkinsResource resource) throws IOException {
+		if(run.getCodebase()!=null && run.getCodebase().toString().isEmpty()) {
+			run.setCodebase(null);
+		}
+		run.setBranch(GitUtil.normalizeBranchName(run.getBranch()));
+
+		if(JenkinsEntityType.MAVEN_MODULE_RUN.isCompatible(resource.entity())) {
+			Run parent = super.entityOfId(parentURI(resource), JenkinsEntityType.MAVEN_MULTIMODULE_RUN,Run.class);
+			if(parent!=null) {
+				run.setCodebase(parent.getCodebase());
+				run.setBranch(parent.getBranch());
+				run.setCommit(parent.getCommit());
+				super.persistEntity(run, JenkinsEntityType.MAVEN_MODULE_RUN);
+			}
+		}
+		if(run.getCodebase()==null || run.getBranch()==null) {
+			Job job = super.entityOfId(jobURI(resource), JenkinsEntityType.MAVEN_MULTIMODULE_BUILD,Job.class);
+			if(job!=null) {
+				run.setCodebase(Optional.fromNullable(run.getCodebase()).or(job.getCodebase()));
+				run.setBranch(Optional.fromNullable(run.getBranch()).or(job.getBranch()));
+				super.persistEntity(run, JenkinsEntityType.MAVEN_MODULE_RUN);
+			}
+		}
+
 		super.fireEvent(
-			JenkinsEventFactory.
-				newRunCreatedEvent(
-					super.jenkinsInstance(),
-					run));
+				JenkinsEventFactory.
+					newRunCreatedEvent(
+						super.jenkinsInstance(),
+						run));
 
 		if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && run.getResult().equals(RunResult.SUCCESS)) {
 			scheduleTask(new LoadRunArtifactsTask(super.location(),run));
 		}
 
+	}
+
+	private URI parentURI(JenkinsResource resource) {
+		JenkinsURI breakdown = JenkinsURI.create(resource.location());
+		return URI.create(breakdown.instance()+"job/"+breakdown.job()+SEPARATOR+breakdown.run()+SEPARATOR);
+	}
+
+	private URI jobURI(JenkinsResource resource) {
+		JenkinsURI breakdown = JenkinsURI.create(resource.location());
+		return URI.create(breakdown.instance()+"job/"+breakdown.job()+SEPARATOR);
 	}
 
 }
