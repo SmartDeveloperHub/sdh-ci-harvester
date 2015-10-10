@@ -61,6 +61,9 @@ abstract class ExecutionVocabulary {
 	static final String CI_LOCATION                     = "http://www.smartdeveloperhub.org/vocabulary/ci#location";
 	static final String CI_FINISHED                     = "http://www.smartdeveloperhub.org/vocabulary/ci#finished";
 	static final String CI_HAS_RESULT                   = "http://www.smartdeveloperhub.org/vocabulary/ci#hasResult";
+	static final String CI_BRANCH_ID                    = "http://www.smartdeveloperhub.org/vocabulary/ci#branchId";
+	static final String CI_COMMIT_ID                    = "http://www.smartdeveloperhub.org/vocabulary/ci#commitId";
+	static final String SCM_LOCATION                    = "http://www.smartdeveloperhub.org/vocabulary/scm#location";
 
 	ExecutionVocabulary() {
 	}

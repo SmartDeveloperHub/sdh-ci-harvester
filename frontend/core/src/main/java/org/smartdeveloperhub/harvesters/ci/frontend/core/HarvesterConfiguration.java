@@ -42,6 +42,7 @@ public final class HarvesterConfiguration extends Configuration {
 		return
 			new ImmutableNamespaces().
 				withPrefix("ci", "http://www.smartdeveloperhub.org/vocabulary/ci#").
+				withPrefix("scm", "http://www.smartdeveloperhub.org/vocabulary/scm#").
 				withPrefix("platform", "http://www.smartdeveloperhub.org/vocabulary/platform#").
 				withPrefix("oslc_auto", "http://open-services.net/ns/auto#").
 				withPrefix("dctype", "http://purl.org/dc/dcmitype/").

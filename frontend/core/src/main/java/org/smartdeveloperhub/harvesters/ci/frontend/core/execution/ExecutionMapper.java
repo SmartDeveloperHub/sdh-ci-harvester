@@ -74,6 +74,12 @@ final class ExecutionMapper extends ExecutionVocabulary {
 						withIndividual(buildName,BuildHandler.ID).
 					property(CI_LOCATION).
 						withLiteral(execution.executionId()).
+					property(SCM_LOCATION).
+						withLiteral(execution.codebase()).
+					property(CI_BRANCH_ID).
+						withLiteral(execution.branchName()).
+					property(CI_COMMIT_ID).
+						withLiteral(execution.commitId()).
 					property(STATE).
 						withIndividual(resultMapping.state()).
 					property(CI_HAS_RESULT).
@@ -98,7 +104,7 @@ final class ExecutionMapper extends ExecutionVocabulary {
 					withIndividual(CI_EXECUTION_RESULT).
 					withIndividual(resultMapping.resultType()).
 				property(CI_LOCATION).
-					withLiteral(execution.buildId()).
+					withLiteral(execution.executionId()).
 				property(STATE).
 					withIndividual(resultMapping.state()).
 				property(VERDICT).

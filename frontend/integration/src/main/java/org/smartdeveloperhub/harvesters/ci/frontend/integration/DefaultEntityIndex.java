@@ -51,12 +51,12 @@ final class DefaultEntityIndex implements EntityIndex {
 		this.cis = cis;
 	}
 
-	private void commitQuietly(URI id, Transaction transaction) {
+	private void rollbackQuietly(URI id, Transaction transaction) {
 		if(transaction!=null) {
 			try {
-				transaction.commit();
+				transaction.rollback();
 			} catch (TransactionException e) {
-				LOGGER.error("Could not commit transaction for the retrieval of {}",id,e);
+				LOGGER.error("Could not rollback transaction for the retrieval of {}",id,e);
 			}
 		}
 	}
@@ -68,14 +68,14 @@ final class DefaultEntityIndex implements EntityIndex {
 	@Override
 	public Service findService(URI serviceId) {
 		Service result=null;
-		Transaction transaction = txManager.currentTransaction();
+		Transaction transaction=this.txManager.currentTransaction();
 		try {
 			transaction.begin();
-			result=cis.getService(serviceId);
+			result=this.cis.getService(serviceId);
 		} catch(TransactionException e) {
 			logFailure(serviceId,e);
 		} finally {
-			commitQuietly(serviceId,transaction);
+			rollbackQuietly(serviceId,transaction);
 		}
 		return result;
 	}
@@ -83,14 +83,14 @@ final class DefaultEntityIndex implements EntityIndex {
 	@Override
 	public Execution findExecution(URI executionId) {
 		Execution result=null;
-		Transaction transaction = txManager.currentTransaction();
+		Transaction transaction=this.txManager.currentTransaction();
 		try {
 			transaction.begin();
-			result=cis.getExecution(executionId);
+			result=this.cis.getExecution(executionId);
 		} catch(TransactionException e) {
 			logFailure(executionId,e);
 		} finally {
-			commitQuietly(executionId,transaction);
+			rollbackQuietly(executionId,transaction);
 		}
 		return result;
 	}
@@ -98,14 +98,14 @@ final class DefaultEntityIndex implements EntityIndex {
 	@Override
 	public Build findBuild(URI buildId) {
 		Build result=null;
-		Transaction transaction = txManager.currentTransaction();
+		Transaction transaction=this.txManager.currentTransaction();
 		try {
 			transaction.begin();
-			result=cis.getBuild(buildId);
+			result=this.cis.getBuild(buildId);
 		} catch(TransactionException e) {
 			logFailure(buildId,e);
 		} finally {
-			commitQuietly(buildId,transaction);
+			rollbackQuietly(buildId,transaction);
 		}
 		return result;
 	}
