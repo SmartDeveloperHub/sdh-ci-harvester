@@ -26,12 +26,14 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.command;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.net.URI;
 import java.util.Date;
 
-import com.google.common.base.MoreObjects;
+import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 
-import static com.google.common.base.Preconditions.*;
+import com.google.common.base.MoreObjects;
 
 public final class CreateExecutionCommand implements Command {
 
@@ -40,6 +42,11 @@ public final class CreateExecutionCommand implements Command {
 		private URI buildId;
 		private Date createdOn;
 		private URI executionId;
+		private String branchName;
+		private URI codebase;
+		private String commitId;
+		private Status status;
+		private Date finishedOn;
 
 		private Builder() {
 		}
@@ -59,12 +66,42 @@ public final class CreateExecutionCommand implements Command {
 			return this;
 		}
 
+		public Builder withCodebase(URI codebase) {
+			this.codebase = codebase;
+			return this;
+		}
+
+		public Builder withBranchName(String branchName) {
+			this.branchName = branchName;
+			return this;
+		}
+
+		public Builder withCommitId(String commitId) {
+			this.commitId = commitId;
+			return this;
+		}
+
+		public Builder withStatus(Status status) {
+			this.status = status;
+			return this;
+		}
+
+		public Builder withFinishedOn(Date finishedOn) {
+			this.finishedOn = finishedOn;
+			return this;
+		}
+
 		public CreateExecutionCommand build() {
 			return
 				new CreateExecutionCommand(
 					checkNotNull(this.buildId,"Build identifier cannot be null"),
 					checkNotNull(this.executionId,"Execution identifier cannot be null"),
-					checkNotNull(this.createdOn,"Creation date cannot be null")
+					checkNotNull(this.createdOn,"Creation date cannot be null"),
+					this.codebase,
+					this.branchName,
+					this.commitId,
+					this.status,
+					this.finishedOn
 				);
 		}
 
@@ -73,11 +110,21 @@ public final class CreateExecutionCommand implements Command {
 	private final URI executionId;
 	private final URI buildId;
 	private final Date createdOn;
+	private final URI codebase;
+	private final String branchName;
+	private final String commitId;
+	private final Status status;
+	private final Date finishedOn;
 
-	private CreateExecutionCommand(URI buildId, URI executionId, Date createdOn) {
+	private CreateExecutionCommand(URI buildId, URI executionId, Date createdOn, URI codebase, String branchName, String commitId, Status status, Date finishedOn) {
 		this.executionId = executionId;
 		this.buildId = buildId;
 		this.createdOn = createdOn;
+		this.codebase = codebase;
+		this.branchName = branchName;
+		this.commitId = commitId;
+		this.status=status;
+		this.finishedOn=finishedOn;
 	}
 
 	@Override
@@ -99,6 +146,26 @@ public final class CreateExecutionCommand implements Command {
 		return this.createdOn;
 	}
 
+	public URI codebase() {
+		return this.codebase;
+	}
+
+	public String branchName() {
+		return this.branchName;
+	}
+
+	public String commitId() {
+		return this.commitId;
+	}
+
+	public Status status() {
+		return this.status;
+	}
+
+	public Date finishedOn() {
+		return this.finishedOn;
+	}
+
 	@Override
 	public String toString() {
 		return
@@ -107,6 +174,11 @@ public final class CreateExecutionCommand implements Command {
 					add("buildId",this.buildId).
 					add("executionId",this.executionId).
 					add("createdOn",this.createdOn).
+					add("codebase",this.codebase).
+					add("branchName",this.branchName).
+					add("commitId",this.commitId).
+					add("status",this.status).
+					add("finishedOn",this.finishedOn).
 					toString();
 	}
 

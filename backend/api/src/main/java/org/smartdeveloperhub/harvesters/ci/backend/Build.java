@@ -42,6 +42,7 @@ public abstract class Build {
 	private URI serviceId;
 	private URI buildId;
 	private URI codebase;
+	private String branchName;
 	private List<URI> executions;
 	private String title;
 	private String description;
@@ -80,6 +81,10 @@ public abstract class Build {
 		this.codebase=codebase;
 	}
 
+	public final void setBranchName(String branchName) {
+		this.branchName = branchName;
+	}
+
 	public final void setDescription(String description) {
 		this.description = description;
 	}
@@ -108,6 +113,10 @@ public abstract class Build {
 
 	public final URI codebase() {
 		return this.codebase;
+	}
+
+	public final String branchName() {
+		return this.branchName;
 	}
 
 	public final String title() {
@@ -162,6 +171,7 @@ public abstract class Build {
 						add("serviceId",this.serviceId).
 						add("buildId",this.buildId).
 						add("codebase",this.codebase).
+						add("branchName",this.branchName).
 						add("title",this.title).
 						add("description",this.serviceId).
 						add("createdOn",this.createdOn).
@@ -178,6 +188,7 @@ public abstract class Build {
 		}
 		Build clone = build.makeClone();
 		clone.setCodebase(build.codebase);
+		clone.setBranchName(build.branchName);
 		clone.setCreatedOn(build.createdOn);
 		clone.setDescription(build.description);
 		clone.setExecutions(Lists.newArrayList(build.executions));

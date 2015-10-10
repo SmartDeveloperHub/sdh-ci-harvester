@@ -80,7 +80,8 @@ public final class CreateBuildCommand extends BuildCommand {
 					checkNotNull(super.title(),"Title cannot be null"),
 					super.description(),
 					super.createdOn(),
-					super.codebase()
+					super.codebase(),
+					super.branchName()
 				);
 		}
 
@@ -90,8 +91,8 @@ public final class CreateBuildCommand extends BuildCommand {
 	private final boolean simple;
 	private final URI parent;
 
-	private CreateBuildCommand(URI serviceId, URI buildId, boolean simple, URI parent, String title, String description, Date creationDate, URI codebase) { // NOSONAR
-		super(buildId,title,description,creationDate,codebase);
+	private CreateBuildCommand(URI serviceId, URI buildId, boolean simple, URI parent, String title, String description, Date creationDate, URI codebase, String branchName) { // NOSONAR
+		super(buildId,title,description,creationDate,codebase,branchName);
 		this.serviceId = serviceId;
 		this.simple = simple;
 		this.parent = parent;

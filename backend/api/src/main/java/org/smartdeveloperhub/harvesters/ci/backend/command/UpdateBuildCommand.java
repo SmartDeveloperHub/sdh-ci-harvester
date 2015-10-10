@@ -49,14 +49,15 @@ public final class UpdateBuildCommand extends BuildCommand {
 					checkNotNull(super.title(),"Title cannot be null"),
 					super.description(),
 					super.createdOn(),
-					super.codebase()
+					super.codebase(),
+					super.branchName()
 				);
 		}
 
 	}
 
-	private UpdateBuildCommand(URI buildId, String title, String description, Date creationDate, URI codebase) {
-		super(buildId,title,description,creationDate,codebase);
+	private UpdateBuildCommand(URI buildId, String title, String description, Date creationDate, URI codebase, String branchName) {
+		super(buildId,title,description,creationDate,codebase,branchName);
 	}
 
 	@Override

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 import org.smartdeveloperhub.harvesters.ci.backend.command.CreateBuildCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.command.CreateExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.command.CreateExecutionCommand.Builder;
 import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteBuildCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteExecutionCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.command.FinishExecutionCommand;
@@ -106,7 +107,8 @@ final class CommandProducerListener implements JenkinsEventListener {
 				withBuildId(event.jobId()).
 				withTitle(event.title()).
 				withDescription(event.description()).
-				withCodebase(event.codebase());
+				withCodebase(event.codebase()).
+				withBranchName(event.branchName());
 		switch(event.type()) {
 			case SIMPLE:
 				builder.simple();
@@ -133,6 +135,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 					withTitle(event.title()).
 					withDescription(event.description()).
 					withCodebase(event.codebase()).
+					withBranchName(event.branchName()).
 					build()
 		);
 	}
@@ -148,24 +151,21 @@ final class CommandProducerListener implements JenkinsEventListener {
 	@Override
 	public void onRunCreation(RunCreatedEvent event) {
 		logEvent(event);
-		this.monitor.offer(
+		final Builder builder =
 			CreateExecutionCommand.
 				builder().
 					withBuildId(event.jobId()).
 					withExecutionId(event.runId()).
 					withCreatedOn(event.createdOn()).
-					build()
-		);
+					withCodebase(event.codebase()).
+					withBranchName(event.branchName()).
+					withCommitId(event.commitId());
 		if(event.isFinished()) {
-			this.monitor.offer(
-				FinishExecutionCommand.
-					builder().
-						withExecutionId(event.runId()).
-						withStatus(toStatus(event.result())).
-						withFinishedOn(event.finishedOn()).
-						build()
-			);
+			builder.
+				withStatus(toStatus(event.result())).
+				withFinishedOn(event.finishedOn());
 		}
+		this.monitor.offer(builder.build());
 	}
 
 	@Override

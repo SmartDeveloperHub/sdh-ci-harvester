@@ -44,9 +44,16 @@ public final class Execution {
 	private Date createdOn;
 	private Result result;
 
+	private URI    codebase;
+	private String branchName;
+	private String commitId;
+
 	private Execution(Execution execution) {
 		this(execution.buildId(),execution.executionId(),execution.createdOn());
 		this.result=execution.result;
+		this.codebase=execution.codebase;
+		this.branchName=execution.branchName;
+		this.commitId=execution.commitId;
 	}
 
 	Execution() {
@@ -75,6 +82,18 @@ public final class Execution {
 		this.buildId = buildId;
 	}
 
+	protected void setCodebase(URI codebase) {
+		this.codebase = codebase;
+	}
+
+	protected void setBranchName(String branchName) {
+		this.branchName = branchName;
+	}
+
+	protected void setCommitId(String commitId) {
+		this.commitId = commitId;
+	}
+
 	public URI buildId() {
 		return this.buildId;
 	}
@@ -85,6 +104,18 @@ public final class Execution {
 
 	public Date createdOn() {
 		return this.createdOn;
+	}
+
+	public URI codebase() {
+		return this.codebase;
+	}
+
+	public String branchName() {
+		return this.branchName;
+	}
+
+	public String commitId() {
+		return this.commitId;
 	}
 
 	public Result result() {
@@ -126,6 +157,9 @@ public final class Execution {
 					add("buildId",this.buildId).
 					add("executionId",this.executionId).
 					add("createdOn",this.createdOn).
+					add("codebase",this.codebase).
+					add("branchName",this.branchName).
+					add("commitId",this.commitId).
 					add("result",this.result).
 					toString();
 	}

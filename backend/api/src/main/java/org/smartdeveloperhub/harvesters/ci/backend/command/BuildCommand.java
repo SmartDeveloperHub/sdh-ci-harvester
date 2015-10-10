@@ -44,6 +44,8 @@ abstract class BuildCommand implements Command {
 		private Date creationDate;
 		private URI codebase;
 
+		private String branchName;
+
 		BuildCommandBuilder(Class<? extends B> clazz) {
 			this.clazz = clazz;
 		}
@@ -74,6 +76,11 @@ abstract class BuildCommand implements Command {
 			return this.clazz.cast(this);
 		}
 
+		public final B withBranchName(String branchName) {
+			this.branchName = branchName;
+			return this.clazz.cast(this);
+		}
+
 		final URI buildId() {
 			return this.buildId;
 		}
@@ -94,6 +101,10 @@ abstract class BuildCommand implements Command {
 			return this.codebase;
 		}
 
+		final String branchName() {
+			return this.branchName;
+		}
+
 		public abstract T build();
 
 	}
@@ -103,13 +114,15 @@ abstract class BuildCommand implements Command {
 	private final String description;
 	private final Date createdOn;
 	private final URI codebase;
+	private final String branchName;
 
-	BuildCommand(URI buildId, String title, String description, Date createdOn, URI codebase) {
+	BuildCommand(URI buildId, String title, String description, Date createdOn, URI codebase, String branchName) {
 		this.buildId = buildId;
 		this.title = title;
 		this.description = description;
 		this.createdOn = createdOn;
 		this.codebase = codebase;
+		this.branchName = branchName;
 	}
 
 	public final URI buildId() {
@@ -132,6 +145,10 @@ abstract class BuildCommand implements Command {
 		return this.codebase;
 	}
 
+	public final String branchName() {
+		return this.branchName;
+	}
+
 	@Override
 	public final String toString() {
 		ToStringHelper helper = MoreObjects.
@@ -141,7 +158,8 @@ abstract class BuildCommand implements Command {
 				add("title", this.title).
 				add("description", this.description).
 				add("createdOn", this.createdOn).
-				add("codebase", this.codebase);
+				add("codebase", this.codebase).
+				add("branchName", this.branchName);
 		toString(helper);
 		return helper.toString();
 	}
