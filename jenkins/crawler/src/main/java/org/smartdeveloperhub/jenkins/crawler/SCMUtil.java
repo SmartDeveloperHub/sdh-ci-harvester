@@ -27,6 +27,7 @@
 package org.smartdeveloperhub.jenkins.crawler;
 
 import java.net.URI;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,22 @@ final class SCMUtil {
 				withLocation(getLocation(document)).
 				withBranch(getBranch(document));
 	}
+
+	static Codebase mergeCodebases(List<Codebase> codebases) {
+		Codebase result=new Codebase();
+		for(Codebase codebase:codebases) {
+			if(codebase!=null) {
+				result.setLocation(firstNonNull(result.getLocation(),codebase.getLocation()));
+				result.setBranch(firstNonNull(result.getBranch(),codebase.getBranch()));
+			}
+		}
+		return result;
+	}
+
+	private static <V> V firstNonNull(V v1, V v2) {
+		return v1!=null?v1:v2;
+	}
+
 
 	private static URI getLocation(final Document document) {
 		URI location=null;

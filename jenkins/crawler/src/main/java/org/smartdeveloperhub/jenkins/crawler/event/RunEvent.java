@@ -70,11 +70,11 @@ abstract class RunEvent<T extends RunEvent<T>> extends JenkinsEvent {
 	}
 
 	public final Date finishedOn() {
-		Date result=null;
+		Date finishedOn=null;
 		if(isFinished()) {
-			result=new Date(this.run.getTimestamp()+this.run.getResult().getDuration());
+			finishedOn=new Date(this.run.getTimestamp()+this.run.getResult().getDuration());
 		}
-		return result;
+		return finishedOn;
 	}
 
 	public final RunResult result() {

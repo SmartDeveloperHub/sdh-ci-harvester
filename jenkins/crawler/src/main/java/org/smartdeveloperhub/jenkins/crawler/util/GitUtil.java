@@ -56,19 +56,24 @@ public final class GitUtil {
 	private static String selectBranchName(String[] parts) {
 		String result=parts[0];
 		if(parts.length>1) {
-			int preferred=Integer.MAX_VALUE;
-			for(int i=0;i<parts.length;i++) {
-				for(int j=0;j<parts.length;j++) {
-					if(parts[i].equalsIgnoreCase(PREFERRED[j])) {
-						preferred=Math.min(preferred, j);
-					}
-				}
-			}
+			int preferred = findPreferred(parts);
 			if(preferred<PREFERRED.length) {
 				result=PREFERRED[preferred];
 			}
 		}
 		return result;
+	}
+
+	private static int findPreferred(String[] parts) {
+		int preferred=Integer.MAX_VALUE;
+		for(int i=0;i<parts.length;i++) {
+			for(int j=0;j<PREFERRED.length;j++) {
+				if(parts[i].equalsIgnoreCase(PREFERRED[j])) {
+					preferred=Math.min(preferred, j);
+				}
+			}
+		}
+		return preferred;
 	}
 
 	private static String normalize(String normalized) {
