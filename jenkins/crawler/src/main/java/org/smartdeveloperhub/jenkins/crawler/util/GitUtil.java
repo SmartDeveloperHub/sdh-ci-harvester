@@ -28,6 +28,8 @@ package org.smartdeveloperhub.jenkins.crawler.util;
 
 public final class GitUtil {
 
+	private static String[] PREFERRED={"master","develop"};
+
 	private static final String ORIGIN = "origin/";
 	private static final String REFS_REMOTES = "refs/remotes/";
 
@@ -37,14 +39,47 @@ public final class GitUtil {
 	public static String normalizeBranchName(String branchName) {
 		String normalized=branchName;
 		if(normalized!=null) {
-			if(normalized.startsWith(REFS_REMOTES)) {
-				normalized=normalized.substring(REFS_REMOTES.length());
-				normalized=normalized.substring(normalized.indexOf('/')+1);
-			} else if(normalized.startsWith(ORIGIN)) {
-				normalized=normalized.substring(ORIGIN.length());
-			}
+			String[] parts = normalizeBranchNames(normalized);
+			normalized=selectBranchName(parts);
 		}
 		return normalized;
+	}
+
+	private static String[] normalizeBranchNames(String normalized) {
+		String[] parts=normalized.split("\\s");
+		for(int i=0;i<parts.length;i++) {
+			parts[i]=normalize(parts[i]);
+		}
+		return parts;
+	}
+
+	private static String selectBranchName(String[] parts) {
+		String result=parts[0];
+		if(parts.length>1) {
+			int preferred=Integer.MAX_VALUE;
+			for(int i=0;i<parts.length;i++) {
+				for(int j=0;j<parts.length;j++) {
+					if(parts[i].equalsIgnoreCase(PREFERRED[j])) {
+						preferred=Math.min(preferred, j);
+					}
+				}
+			}
+			if(preferred<PREFERRED.length) {
+				result=PREFERRED[preferred];
+			}
+		}
+		return result;
+	}
+
+	private static String normalize(String normalized) {
+		String tmp=normalized;
+		if(tmp.startsWith(REFS_REMOTES)) {
+			tmp=tmp.substring(REFS_REMOTES.length());
+			tmp=tmp.substring(tmp.indexOf('/')+1);
+		} else if(tmp.startsWith(ORIGIN)) {
+			tmp=tmp.substring(ORIGIN.length());
+		}
+		return tmp;
 	}
 
 }

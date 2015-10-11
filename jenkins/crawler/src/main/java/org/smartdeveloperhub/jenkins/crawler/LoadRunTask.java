@@ -37,13 +37,14 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.JenkinsURI;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.util.GitUtil;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 
 final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 
-	private final static Logger LOGGER=LoggerFactory.getLogger(LoadRunTask.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(LoadRunTask.class);
 
 	private static final String SEPARATOR = "/";
 
@@ -65,9 +66,9 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 			addSCMInformationFromAggregatorBuild(run, resource);
 		}
 
-		if(run.getCodebase()==null || run.getBranch()==null) {
+		if(!SCMUtil.isDefined(run.getCodebase())) {
 			// If no SCM information is available yet, grab it from the job
-			addSCMInformationFromJob(run, resource);
+			addSCMInformationFromJob(run);
 		}
 
 		super.persistEntity(run,resource.entity());
@@ -83,12 +84,11 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 
 	}
 
-	private void addSCMInformationFromJob(Run run, JenkinsResource resource) {
+	private void addSCMInformationFromJob(Run run) {
 		try {
 			Job job = super.entityOfId(run.getJob(), JenkinsEntityType.JOB,Job.class);
 			if(job!=null) {
 				run.setCodebase(firstNonNull(run.getCodebase(),job.getCodebase()));
-				run.setBranch(firstNonNull(run.getBranch(),job.getBranch()));
 			}
 		} catch (IOException e) {
 			LOGGER.warn("Could not retrieve job "+run.getJob()+" for run "+run.getUrl(),e);
@@ -102,7 +102,6 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 			Run parent = super.entityOfId(parentURI,JenkinsEntityType.MAVEN_MULTIMODULE_RUN,Run.class);
 			if(parent!=null) {
 				run.setCodebase(parent.getCodebase());
-				run.setBranch(parent.getBranch());
 				run.setCommit(parent.getCommit());
 			}
 		} catch (IOException e) {
@@ -111,10 +110,13 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 	}
 
 	private void normalizeSCMInformation(Run run) {
-		if(run.getCodebase()!=null && run.getCodebase().toString().isEmpty()) {
-			run.setCodebase(null);
+		final Codebase codebase = run.getCodebase();
+		if(codebase!=null) {
+			if(codebase.getLocation()!=null && codebase.getLocation().toString().isEmpty()) {
+				codebase.setLocation(null);
+			}
+			codebase.setBranch(GitUtil.normalizeBranchName(codebase.getBranch()));
 		}
-		run.setBranch(GitUtil.normalizeBranchName(run.getBranch()));
 	}
 
 	private <V> V firstNonNull(V v1, V v2) {

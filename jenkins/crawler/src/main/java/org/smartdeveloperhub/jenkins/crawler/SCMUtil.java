@@ -30,40 +30,64 @@ import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
-import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.util.GitUtil;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.util.xml.XmlProcessingException;
+import org.smartdeveloperhub.util.xml.XmlUtils;
+import org.w3c.dom.Document;
 
-final class RefreshJobConfigurationTask extends AbstractArtifactCrawlingTask<Job> {
+final class SCMUtil {
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshJobConfigurationTask.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(SCMUtil.class);
 
-	private final Job previousJob;
-
-	RefreshJobConfigurationTask(URI location, Job previousJob, Job job, JenkinsEntityType type) {
-		super(location,type,JenkinsArtifactType.CONFIGURATION,job);
-		this.previousJob= previousJob;
+	private SCMUtil() {
 	}
 
-	@Override
-	protected String taskPrefix() {
-		return "rjct";
+	static boolean isDefined(Codebase codebase) {
+		return codebase!=null && (codebase.isSetBranch() || codebase.isSetLocation());
 	}
 
-	@Override
-	protected void processSubresource(Job parent, JenkinsResource resource) {
-		Codebase codebase=SCMUtil.createCodebase(resource);
+	static Codebase createCodebase(JenkinsResource resource) {
+		final Document document = resource.content().get();
+		return
+			new Codebase().
+				withLocation(getLocation(document)).
+				withBranch(getBranch(document));
+	}
+
+	private static URI getLocation(final Document document) {
+		URI location=null;
 		try {
-			if(!codebase.equals(this.previousJob.getCodebase())) {
-				persistEntity(parent, entityType());
-				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
+			String rawLocation=
+				XmlUtils.
+					evaluateXPath(
+						"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
+						document);
+			if(rawLocation!=null && !rawLocation.isEmpty()) {
+				location = URI.create(rawLocation);
 			}
-		} catch (Exception e) {
-			LOGGER.error("Could not update SCM information {}",codebase,e);
+		} catch (XmlProcessingException e) {
+			LOGGER.error("Could not recover codebase location information",e);
 		}
+		return location;
+	}
+
+	private static String getBranch(final Document document) {
+		String branch=null;
+		try {
+			String rawBranch=
+				XmlUtils.
+					evaluateXPath(
+						"//scm[@class='hudson.plugins.git.GitSCM']/branches//name",
+						document);
+			if(rawBranch!=null && !rawBranch.isEmpty()) {
+				branch=GitUtil.normalizeBranchName(rawBranch);
+			}
+		} catch (XmlProcessingException e) {
+			LOGGER.error("Could not recover codebase branch information",e);
+		}
+		return branch;
 	}
 
 }

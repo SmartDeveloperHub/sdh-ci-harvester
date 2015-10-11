@@ -53,5 +53,14 @@ public class GitUtilTest {
 		assertThat(GitUtil.normalizeBranchName("feature/my-feature"),equalTo("feature/my-feature"));
 	}
 
+	@Test
+	public void testNormalizeBranchName$multipleBranches() throws Exception {
+		assertThat(GitUtil.normalizeBranchName("refs/remotes/mine/one refs/remotes/origin/other"),equalTo("one"));
+	}
+
+	@Test
+	public void testNormalizeBranchName$multipleBranches$preferred() throws Exception {
+		assertThat(GitUtil.normalizeBranchName("develop master"),equalTo("master"));
+	}
 
 }

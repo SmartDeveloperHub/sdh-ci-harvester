@@ -54,13 +54,17 @@
 			</xsl:if>
 			<xsl:if test="exists(result)">
 				<status>FINISHED</status>
-				<result><xsl:value-of select="result"/></result>
-				<duration><xsl:value-of select="duration"/></duration>
+				<result>
+					<status><xsl:value-of select="result"/></status>
+					<duration><xsl:value-of select="duration"/></duration>
+				</result>
 			</xsl:if>
 			<xsl:if test="exists(//action/lastBuiltRevision)">
-				<codebase><xsl:value-of select="//action/lastBuiltRevision/../remoteUrl"/></codebase>
-				<branch><xsl:value-of select="//action/lastBuiltRevision/branch/name"/></branch>
-				<commit><xsl:value-of select="//action/lastBuiltRevision/SHA1"/></commit>
+				<codebase>
+					<location><xsl:value-of select="//action/lastBuiltRevision/../remoteUrl"/></location>
+					<branch><xsl:value-of select="//action/lastBuiltRevision/branch/name"/></branch>
+					<commit><xsl:value-of select="//action/lastBuiltRevision/SHA1"/></commit>
+				</codebase>
 			</xsl:if>
 		</ci:run>
 	</xsl:template>

@@ -103,12 +103,12 @@ public class TransformationManagerTest {
 		assertThat(job.getType(),equalTo(RunType.FREE_STYLE_BUILD));
 		assertThat(job.getId(),equalTo(runName));
 		assertThat(job.getJob(),equalTo(URI.create(jobURL(jobName))));
-		assertThat(job.getCodebase(),equalTo(URI.create("git://github.com/jenkinsci/backend-crawler.git")));
-		assertThat(job.getBranch(),equalTo("refs/remotes/origin/master"));
-		assertThat(job.getCommit(),equalTo("537854615082e00fc444ea29caf49d9bf9fb4135"));
-		assertThat(job.getDuration(),equalTo(482341L));
 		assertThat(job.getStatus(),equalTo(RunStatus.FINISHED));
-		assertThat(job.getResult(),equalTo(RunResult.SUCCESS));
+		assertThat(job.getResult().getDuration(),equalTo(482341L));
+		assertThat(job.getResult().getStatus(),equalTo(RunResult.SUCCESS));
+		assertThat(job.getCodebase().getLocation(),equalTo(URI.create("git://github.com/jenkinsci/backend-crawler.git")));
+		assertThat(job.getCodebase().getBranch(),equalTo("refs/remotes/origin/master"));
+		assertThat(job.getCommit(),equalTo("537854615082e00fc444ea29caf49d9bf9fb4135"));
 	}
 
 	@Test

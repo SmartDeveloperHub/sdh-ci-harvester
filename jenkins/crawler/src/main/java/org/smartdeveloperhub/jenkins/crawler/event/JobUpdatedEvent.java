@@ -29,20 +29,24 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 
+import com.google.common.base.Optional;
 import com.google.common.base.MoreObjects.ToStringHelper;
 
 public final class JobUpdatedEvent extends JenkinsEvent {
 
 	private Job job;
+	private Codebase codebase;
 
 	private JobUpdatedEvent(URI instanceId, Date date) {
 		super(instanceId,date);
 	}
 
 	JobUpdatedEvent withJob(Job job) {
-		this.job = job;
+		this.job=job;
+		this.codebase=Optional.fromNullable(this.job.getCodebase()).or(new Codebase());
 		return this;
 	}
 
@@ -66,11 +70,11 @@ public final class JobUpdatedEvent extends JenkinsEvent {
 	}
 
 	public URI codebase() {
-		return this.job.getCodebase();
+		return this.codebase.getLocation();
 	}
 
 	public String branchName() {
-		return this.job.getBranch();
+		return this.codebase.getBranch();
 	}
 
 	public URI jobId() {
