@@ -41,8 +41,7 @@ public abstract class Build {
 
 	private URI serviceId;
 	private URI buildId;
-	private URI codebase;
-	private String branchName;
+	private Codebase codebase;
 	private List<URI> executions;
 	private String title;
 	private String description;
@@ -56,33 +55,27 @@ public abstract class Build {
 		setBuildId(buildId);
 		setTitle(title);
 		setExecutions(Lists.<URI>newArrayList());
+		setCodebase(new Codebase(null,null));
 	}
 
 	protected final void setServiceId(URI serviceId) {
-		checkNotNull(serviceId,"Service identifier cannot be null");
-		this.serviceId = serviceId;
+		this.serviceId=checkNotNull(serviceId,"Service identifier cannot be null");
 	}
 
 	protected final void setBuildId(URI buildId) {
-		checkNotNull(buildId,"Build identifier cannot be null");
-		this.buildId = buildId;
+		this.buildId=checkNotNull(buildId,"Build identifier cannot be null");
 	}
 
 	protected final void setExecutions(List<URI> executions) {
-		checkNotNull(executions,"Executions cannot be null");
-		this.executions=executions;
+		this.executions=checkNotNull(executions,"Executions cannot be null");
 	}
 
 	public final void setTitle(String title) {
-		this.title = checkNotNull(title,"Title cannot be null");
+		this.title=checkNotNull(title,"Title cannot be null");
 	}
 
-	public final void setCodebase(URI codebase) {
-		this.codebase=codebase;
-	}
-
-	public final void setBranchName(String branchName) {
-		this.branchName = branchName;
+	public final void setCodebase(Codebase codebase) {
+		this.codebase=checkNotNull(codebase,"Codebase cannot be null");
 	}
 
 	public final void setDescription(String description) {
@@ -111,12 +104,8 @@ public abstract class Build {
 		return this.buildId;
 	}
 
-	public final URI codebase() {
+	public final Codebase codebase() {
 		return this.codebase;
-	}
-
-	public final String branchName() {
-		return this.branchName;
 	}
 
 	public final String title() {
@@ -131,9 +120,9 @@ public abstract class Build {
 		return this.createdOn;
 	}
 
-	public final Execution addExecution(URI executionId, Date createdOn) {
+	public final Execution addExecution(URI executionId, Date createdOn, Codebase codebase, String commitId) {
 		checkArgument(!executions().contains(executionId),"An execution with id '%s' already exists",executionId);
-		Execution execution=new Execution(buildId(), executionId, createdOn);
+		Execution execution=new Execution(buildId(), executionId, createdOn, codebase, commitId);
 		this.executions().add(execution.executionId());
 		return execution;
 	}
@@ -171,7 +160,6 @@ public abstract class Build {
 						add("serviceId",this.serviceId).
 						add("buildId",this.buildId).
 						add("codebase",this.codebase).
-						add("branchName",this.branchName).
 						add("title",this.title).
 						add("description",this.serviceId).
 						add("createdOn",this.createdOn).
@@ -187,8 +175,7 @@ public abstract class Build {
 			return null;
 		}
 		Build clone = build.makeClone();
-		clone.setCodebase(build.codebase);
-		clone.setBranchName(build.branchName);
+		clone.setCodebase(build.codebase!=null?build.codebase:new Codebase(null,null));
 		clone.setCreatedOn(build.createdOn);
 		clone.setDescription(build.description);
 		clone.setExecutions(Lists.newArrayList(build.executions));

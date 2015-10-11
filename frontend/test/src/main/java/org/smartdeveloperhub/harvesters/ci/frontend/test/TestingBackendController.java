@@ -33,6 +33,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.Codebase;
 import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
@@ -113,7 +114,7 @@ final class TestingBackendController implements BackendController {
 				date=execution.createdOn();
 			}
 		}
-		Execution newExecution=build.addExecution(executionId(build, executionIdi), after(date));
+		Execution newExecution=build.addExecution(executionId(build, executionIdi), after(date), build.codebase(), "12344as343asq343");
 		if(status!=null) {
 			newExecution.finish(new Result(status,after(newExecution.createdOn())));
 		}
@@ -133,7 +134,7 @@ final class TestingBackendController implements BackendController {
 	private static void createBuild(BuildRepository repository, Build build, Date createdOn, String description) {
 		build.setCreatedOn(after(createdOn));
 		build.setDescription(description);
-		build.setCodebase(build.buildId().resolve("repository.git"));
+		build.setCodebase(new Codebase(build.buildId().resolve("repository.git"),"master"));
 		repository.add(build);
 	}
 

@@ -44,27 +44,25 @@ public final class Execution {
 	private Date createdOn;
 	private Result result;
 
-	private URI    codebase;
-	private String branchName;
+	private Codebase codebase;
 	private String commitId;
 
 	private Execution(Execution execution) {
-		this(execution.buildId(),execution.executionId(),execution.createdOn());
+		this(execution.buildId(),execution.executionId(),execution.createdOn(),execution.codebase(),execution.commitId());
 		this.result=execution.result;
-		this.codebase=execution.codebase;
-		this.branchName=execution.branchName;
-		this.commitId=execution.commitId;
 	}
 
 	Execution() {
 		this.result=UNAVAILABLE_RESULT;
 	}
 
-	Execution(URI buildId, URI executionId, Date createdOn) {
+	Execution(URI buildId, URI executionId, Date createdOn, Codebase codebase, String commitId) {
 		this();
 		setBuildId(buildId);
 		setExecutionId(executionId);
 		setCreatedOn(createdOn);
+		setCodebase(codebase);
+		setCommitId(commitId);
 	}
 
 	protected void setCreatedOn(Date createdOn) {
@@ -82,12 +80,8 @@ public final class Execution {
 		this.buildId = buildId;
 	}
 
-	protected void setCodebase(URI codebase) {
+	protected void setCodebase(Codebase codebase) {
 		this.codebase = codebase;
-	}
-
-	protected void setBranchName(String branchName) {
-		this.branchName = branchName;
 	}
 
 	protected void setCommitId(String commitId) {
@@ -106,12 +100,8 @@ public final class Execution {
 		return this.createdOn;
 	}
 
-	public URI codebase() {
+	public Codebase codebase() {
 		return this.codebase;
-	}
-
-	public String branchName() {
-		return this.branchName;
 	}
 
 	public String commitId() {
@@ -158,7 +148,6 @@ public final class Execution {
 					add("executionId",this.executionId).
 					add("createdOn",this.createdOn).
 					add("codebase",this.codebase).
-					add("branchName",this.branchName).
 					add("commitId",this.commitId).
 					add("result",this.result).
 					toString();

@@ -186,8 +186,6 @@ public final class ContinuousIntegrationService {
 			CompositeBuild cb=(CompositeBuild)parent;
 			build=cb.addSubBuild(buildId, aCommand.title());
 		}
-		build.setCodebase(aCommand.codebase());
-		build.setBranchName(aCommand.branchName());
 		build.setDescription(aCommand.description());
 		build.setCreatedOn(aCommand.createdOn());
 		buildRepository().add(build);
@@ -199,8 +197,7 @@ public final class ContinuousIntegrationService {
 		Build build = buildRepository().buildOfId(buildId);
 		checkArgument(build!=null,BUILD_IS_NOT_REGISTERED,buildId);
 		build.setTitle(aCommand.title());
-		build.setCodebase(aCommand.codebase());
-		build.setBranchName(aCommand.branchName());
+		build.setCodebase(new Codebase(aCommand.codebase(),aCommand.branchName()));
 		build.setDescription(aCommand.description());
 		build.setCreatedOn(aCommand.createdOn());
 	}
@@ -221,10 +218,9 @@ public final class ContinuousIntegrationService {
 		Build build = buildRepository().buildOfId(buildId);
 		checkArgument(build!=null,BUILD_IS_NOT_REGISTERED,buildId);
 		checkState(!build.executions().contains(executionId),"Execution '%s' is already registered in build '%s'",executionId,buildId);
-		Execution execution = build.addExecution(executionId, createdOn);
-		execution.setCodebase(aCommand.codebase());
-		execution.setBranchName(aCommand.branchName());
-		execution.setCommitId(aCommand.commitId());
+		String commitId = aCommand.commitId();
+		Codebase codebase = new Codebase(aCommand.codebase(),aCommand.branchName());
+		Execution execution=build.addExecution(executionId, createdOn,codebase,commitId);
 		if(aCommand.status()!=null && aCommand.finishedOn()!=null) {
 			Result result=new Result(aCommand.status(),aCommand.finishedOn());
 			execution.finish(result);

@@ -75,9 +75,9 @@ final class ExecutionMapper extends ExecutionVocabulary {
 					property(CI_LOCATION).
 						withLiteral(execution.executionId()).
 					property(SCM_LOCATION).
-						withLiteral(execution.codebase()).
+						withLiteral(execution.codebase().location()).
 					property(CI_BRANCH_ID).
-						withLiteral(execution.branchName()).
+						withLiteral(execution.codebase().branchName()).
 					property(CI_COMMIT_ID).
 						withLiteral(execution.commitId()).
 					property(STATE).

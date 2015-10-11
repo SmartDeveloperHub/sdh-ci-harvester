@@ -57,8 +57,6 @@
 		<orm:attributes>
 			<orm:id name="buildId"/>
 			<orm:basic name="serviceId" optional="false"/>
-			<orm:basic name="codebase"/>
-			<orm:basic name="branchName"/>
 			<orm:basic name="title" optional="false">
 				<orm:column length="1024"/>
 			</orm:basic>
@@ -77,6 +75,7 @@
 					</orm:unique-constraint>
 				</orm:collection-table>
 			</orm:element-collection>
+			<orm:embedded name="codebase"/>
 		</orm:attributes>
 	</orm:entity>
 	<orm:entity class="SimpleBuild">
@@ -109,10 +108,9 @@
 				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.DateUtils"/>
 			</orm:basic>
 			<orm:basic name="buildId" optional="false"/>
-			<orm:basic name="codebase"/>
-			<orm:basic name="branchName"/>
 			<orm:basic name="commitId"/>
 			<orm:embedded name="result"/>
+			<orm:embedded name="codebase"/>
 		</orm:attributes>
 	</orm:entity>
 	<orm:entity class="org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.LifecycleDescriptor">
@@ -155,6 +153,12 @@
 			<orm:basic name="finishedOn">
 				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.DateUtils"/>
 			</orm:basic>
+		</orm:attributes>
+	</orm:embeddable>
+	<orm:embeddable class="Codebase">
+		<orm:attributes>
+			<orm:basic name="location"/>
+			<orm:basic name="branchName"/>
 		</orm:attributes>
 	</orm:embeddable>
 </orm:entity-mappings>

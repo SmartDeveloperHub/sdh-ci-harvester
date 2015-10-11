@@ -44,8 +44,7 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
 final class BackendPopulatorService extends AbstractExecutionThreadService {
 
-	private final class EventDumper implements
-			EntityLifecycleEventListener {
+	private final class EventDumper implements EntityLifecycleEventListener {
 		@Override
 		public void onEvent(EntityLifecycleEvent event) {
 			Consoles.

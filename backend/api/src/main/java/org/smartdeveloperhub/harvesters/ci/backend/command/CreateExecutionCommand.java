@@ -116,7 +116,7 @@ public final class CreateExecutionCommand implements Command {
 	private final Status status;
 	private final Date finishedOn;
 
-	private CreateExecutionCommand(URI buildId, URI executionId, Date createdOn, URI codebase, String branchName, String commitId, Status status, Date finishedOn) {
+	private CreateExecutionCommand(URI buildId, URI executionId, Date createdOn, URI codebase, String branchName, String commitId, Status status, Date finishedOn) {  // NOSONAR
 		this.executionId = executionId;
 		this.buildId = buildId;
 		this.createdOn = createdOn;

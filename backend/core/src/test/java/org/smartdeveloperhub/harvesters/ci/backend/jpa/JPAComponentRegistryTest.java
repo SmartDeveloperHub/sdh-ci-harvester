@@ -47,6 +47,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.ci.backend.Codebase;
 import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Result;
@@ -66,6 +67,8 @@ import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
 public class JPAComponentRegistryTest {
+
+	private static final Codebase CODEBASE = new Codebase(URI.create("git://github.com/SmartDeveloperHub/sdh-ci-harvester.git"),"develop");
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JPAComponentRegistryTest.class);
 
@@ -126,7 +129,8 @@ public class JPAComponentRegistryTest {
 		try {
 			Service service=Service.newInstance(serviceId);
 			inBuild = service.addSimpleBuild(buildId,BUILD_TITLE);
-			inExecution = inBuild.addExecution(executionId, createdOn);
+			inBuild.setCodebase(CODEBASE);
+			inExecution = inBuild.addExecution(executionId, createdOn,CODEBASE,"123");
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
 			tx1.commit();
@@ -207,7 +211,8 @@ public class JPAComponentRegistryTest {
 		try {
 			Service service=Service.newInstance(serviceId);
 			inBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
-			inExecution = inBuild.addExecution(executionId, createdOn);
+			inBuild.setCodebase(CODEBASE);
+			inExecution = inBuild.addExecution(executionId,createdOn,CODEBASE,"123");
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
 			tx1.commit();
@@ -292,7 +297,8 @@ public class JPAComponentRegistryTest {
 			Service service=Service.newInstance(serviceId);
 			CompositeBuild compositeBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
 			inBuild=compositeBuild.addSubBuild(subBuildId,SUB_BUILD_TITLE);
-			inExecution = inBuild.addExecution(executionId, createdOn);
+			inBuild.setCodebase(CODEBASE);
+			inExecution = inBuild.addExecution(executionId,createdOn,CODEBASE,"123");
 			buildRepository.add(compositeBuild);
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
