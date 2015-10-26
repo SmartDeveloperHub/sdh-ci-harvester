@@ -24,37 +24,32 @@
  *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
-import java.io.IOException;
+import java.net.URI;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.jpa.Accessor;
 
-public class BackendFacadeITest extends SmokeTest {
+final class AccessorImpl extends Accessor {
 
-	private BackendFacade facade;
-
-	@Before
-	public void startUp() throws IOException {
-		final DatabaseConfig config = new DatabaseConfig();
-		config.setProvider(DerbyProvider.class.getCanonicalName());
-		this.facade = BackendFacade.create(config);
+	@Override
+	public Repository createRepository(final URI location, final URI resource) {
+		return Repository.newInstance(location, resource);
 	}
 
-	@After
-	public void shutDown() throws Exception {
-		this.facade.close();
+	@Override
+	public Branch createBranch(final URI location, final String branchName, final URI resource) {
+		return Branch.newInstance(createRepository(location,resource), branchName, resource);
 	}
 
-	@Test
-	public void smokeTest() throws Exception {
-		smokeTest(
-			this.facade.applicationService(),
-			this.facade.integrationService(),
-			this.facade.enrichmentService());
+	@Override
+	public Commit createCommit(final URI location, final String branchName, final String commitId, final URI resource) {
+		return Commit.newInstance(createBranch(location,branchName,resource),commitId,resource);
+	}
+
+	@Override
+	public PendingEnrichment createPendingEnrichment(final URI repositoryLocation, final String branchName, final String commitId) {
+		return PendingEnrichment.newInstance(repositoryLocation,branchName,commitId);
 	}
 
 }

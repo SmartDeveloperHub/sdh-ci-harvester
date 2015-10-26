@@ -24,37 +24,41 @@
  *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.jpa;
 
-import java.io.IOException;
+import java.net.URI;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import javax.persistence.AttributeConverter;
 
-public class BackendFacadeITest extends SmokeTest {
+/**
+ * Utility class to enable persisting
+ * {@code java.net.URI} objects as
+ * {@code java.lang.String} objects.
+ *
+ * @author Miguel Esteban Guti&eacute;rrez
+ */
+public final class URIConverter implements AttributeConverter<URI,String> {
 
-	private BackendFacade facade;
-
-	@Before
-	public void startUp() throws IOException {
-		final DatabaseConfig config = new DatabaseConfig();
-		config.setProvider(DerbyProvider.class.getCanonicalName());
-		this.facade = BackendFacade.create(config);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String convertToDatabaseColumn(final URI attribute) {
+		if(attribute==null) {
+			return null;
+		}
+		return attribute.toString();
 	}
 
-	@After
-	public void shutDown() throws Exception {
-		this.facade.close();
-	}
-
-	@Test
-	public void smokeTest() throws Exception {
-		smokeTest(
-			this.facade.applicationService(),
-			this.facade.integrationService(),
-			this.facade.enrichmentService());
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public URI convertToEntityAttribute(final String dbData) {
+		if(dbData==null) {
+			return null;
+		}
+		return URI.create(dbData);
 	}
 
 }

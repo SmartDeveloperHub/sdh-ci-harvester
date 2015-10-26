@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.command.Command;
 import org.smartdeveloperhub.harvesters.ci.backend.command.CommandVisitor;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
@@ -47,7 +48,7 @@ final class SimpleCommandProcessorService extends AbstractExecutionThreadService
 		}
 
 		@Override
-		public void accept(CommandVisitor visitor) {
+		public void accept(final CommandVisitor visitor) {
 			throw new UnsupportedOperationException("Poison command is not visitable");
 		}
 
@@ -61,10 +62,10 @@ final class SimpleCommandProcessorService extends AbstractExecutionThreadService
 
 	private volatile boolean shuttingDown;
 
-	SimpleCommandProcessorService(CommandProcessingMonitor monitor, TransactionManager manager, ContinuousIntegrationService service, ListenerManager<EntityLifecycleEventListener> listeners) {
+	SimpleCommandProcessorService(final CommandProcessingMonitor monitor, final TransactionManager manager, final ContinuousIntegrationService ciService, final EnrichmentService erService, final ListenerManager<EntityLifecycleEventListener> listeners) {
 		this.monitor = monitor;
 		this.listeners = listeners;
-		this.processor=CommandProcessor.newInstance(manager,service);
+		this.processor=CommandProcessor.newInstance(manager,ciService,erService);
 		this.shuttingDown=false;
 	}
 
@@ -82,21 +83,21 @@ final class SimpleCommandProcessorService extends AbstractExecutionThreadService
 			while((command=this.monitor.take())!=Poison.SINGLETON) {
 				processCommand(command);
 			}
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			LOGGER.info("Interrupted while waiting for command",e);
 		}
 	}
 
-	private void processCommand(Command command) {
+	private void processCommand(final Command command) {
 		try {
 			if(!this.processor.processCommand(command)) {
 				this.monitor.retryLater(command);
 			} else {
-				EntityLifecycleEventCreator creator = new EntityLifecycleEventCreator();
+				final EntityLifecycleEventCreator creator = new EntityLifecycleEventCreator();
 				command.accept(creator);
 				this.listeners.notify(new EntityLifecycleEventNotification(creator.getEvent()));
 			}
-		} catch (CommandProcessingException e) {
+		} catch (final CommandProcessingException e) {
 			LOGGER.debug("Failed to consume command",e);
 		}
 	}

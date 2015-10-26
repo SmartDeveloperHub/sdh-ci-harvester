@@ -20,41 +20,27 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
-import java.io.IOException;
+import java.net.URI;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+public abstract class External {
 
-public class BackendFacadeITest extends SmokeTest {
+	private URI resource;
 
-	private BackendFacade facade;
-
-	@Before
-	public void startUp() throws IOException {
-		final DatabaseConfig config = new DatabaseConfig();
-		config.setProvider(DerbyProvider.class.getCanonicalName());
-		this.facade = BackendFacade.create(config);
+	External() {
 	}
 
-	@After
-	public void shutDown() throws Exception {
-		this.facade.close();
+	protected External(final URI resource) {
+		this.resource = resource;
 	}
 
-	@Test
-	public void smokeTest() throws Exception {
-		smokeTest(
-			this.facade.applicationService(),
-			this.facade.integrationService(),
-			this.facade.enrichmentService());
+	public final URI resource() {
+		return this.resource;
 	}
 
 }

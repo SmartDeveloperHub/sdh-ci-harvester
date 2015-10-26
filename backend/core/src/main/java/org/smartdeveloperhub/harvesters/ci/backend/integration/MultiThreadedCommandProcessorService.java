@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.command.Command;
 import org.smartdeveloperhub.harvesters.ci.backend.command.CommandVisitor;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
@@ -50,7 +51,7 @@ final class MultiThreadedCommandProcessorService extends AbstractExecutionThread
 		}
 
 		@Override
-		public void accept(CommandVisitor visitor) {
+		public void accept(final CommandVisitor visitor) {
 			throw new UnsupportedOperationException("Poison command is not visitable");
 		}
 
@@ -60,17 +61,17 @@ final class MultiThreadedCommandProcessorService extends AbstractExecutionThread
 
 		private final Command command;
 
-		public CommandProcessingTask(Command command) {
+		public CommandProcessingTask(final Command command) {
 			this.command = command;
 		}
 
 		@Override
 		public void run() {
 			try {
-				if(!processor.processCommand(command)) {
-					monitor.retryLater(command);
+				if(!MultiThreadedCommandProcessorService.this.processor.processCommand(this.command)) {
+					MultiThreadedCommandProcessorService.this.monitor.retryLater(this.command);
 				}
-			} catch (CommandProcessingException e) {
+			} catch (final CommandProcessingException e) {
 				LOGGER.debug("Failed to consume command",e);
 			}
 		}
@@ -87,9 +88,9 @@ final class MultiThreadedCommandProcessorService extends AbstractExecutionThread
 
 	private ExecutorService executor;
 
-	MultiThreadedCommandProcessorService(CommandProcessingMonitor monitor, TransactionManager manager, ContinuousIntegrationService service) {
+	MultiThreadedCommandProcessorService(final CommandProcessingMonitor monitor, final TransactionManager manager, final ContinuousIntegrationService ciService, final EnrichmentService erService) {
 		this.monitor = monitor;
-		this.processor=CommandProcessor.newInstance(manager,service);
+		this.processor=CommandProcessor.newInstance(manager,ciService,erService);
 		this.shuttingDown=false;
 	}
 
@@ -112,7 +113,7 @@ final class MultiThreadedCommandProcessorService extends AbstractExecutionThread
 						setUncaughtExceptionHandler(
 							new UncaughtExceptionHandler() {
 								@Override
-								public void uncaughtException(Thread t, Throwable e) {
+								public void uncaughtException(final Thread t, final Throwable e) {
 									LOGGER.error(String.format("Thread %s died",t.getName()),e);
 								}
 							}
@@ -127,7 +128,7 @@ final class MultiThreadedCommandProcessorService extends AbstractExecutionThread
 			while((command=this.monitor.take())!=Poison.SINGLETON) {
 				this.executor.execute(new CommandProcessingTask(command));
 			}
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			LOGGER.info("Interrupted while waiting for command",e);
 		}
 	}

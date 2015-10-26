@@ -26,35 +26,17 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend;
 
-import java.io.IOException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPATestsSuite;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
-
-public class BackendFacadeITest extends SmokeTest {
-
-	private BackendFacade facade;
-
-	@Before
-	public void startUp() throws IOException {
-		final DatabaseConfig config = new DatabaseConfig();
-		config.setProvider(DerbyProvider.class.getCanonicalName());
-		this.facade = BackendFacade.create(config);
-	}
-
-	@After
-	public void shutDown() throws Exception {
-		this.facade.close();
-	}
-
-	@Test
-	public void smokeTest() throws Exception {
-		smokeTest(
-			this.facade.applicationService(),
-			this.facade.integrationService(),
-			this.facade.enrichmentService());
-	}
+@RunWith(Suite.class)
+@SuiteClasses({
+	JPATestsSuite.class,
+	BackendCoreITest.class,
+	BackendFacadeITest.class
+})
+public class AllTests {
 
 }

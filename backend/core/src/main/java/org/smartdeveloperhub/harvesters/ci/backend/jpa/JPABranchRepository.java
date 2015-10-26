@@ -20,39 +20,43 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-spi:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-spi-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.spi;
+package org.smartdeveloperhub.harvesters.ci.backend.jpa;
 
-import java.io.Closeable;
+import javax.persistence.EntityManager;
 
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Branch;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.BranchId;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
-public interface ComponentRegistry extends Closeable {
+public class JPABranchRepository implements BranchRepository {
 
-	ServiceRepository getServiceRepository();
+	private final EntityManagerProvider provider;
 
-	BuildRepository getBuildRepository();
+	public JPABranchRepository(final EntityManagerProvider provider) {
+		this.provider = provider;
+	}
 
-	ExecutionRepository getExecutionRepository();
+	private EntityManager entityManager() {
+		return this.provider.entityManager();
+	}
 
-	RepositoryRepository getRepositoryRepository();
+	@Override
+	public void add(final Branch branch) {
+		entityManager().persist(branch);
+	}
 
-	BranchRepository getBranchRepository();
+	@Override
+	public void remove(final Branch branch) {
+		entityManager().remove(branch);
+	}
 
-	CommitRepository getCommitRepository();
-
-	PendingEnrichmentRepository getPendingEnrichmentRepository();
-
-	TransactionManager getTransactionManager();
+	@Override
+	public Branch branchOfId(final BranchId branchId) {
+		return entityManager().find(Branch.class,branchId);
+	}
 
 }

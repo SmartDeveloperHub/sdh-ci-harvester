@@ -35,6 +35,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPAComponentRegistry;
 
@@ -51,13 +53,13 @@ public class BackendCoreITest extends SmokeTest {
 				new Database(){
 					@Override
 					public void close() throws IOException {
-						if(factory!=null) {
-							factory.close();
+						if(BackendCoreITest.this.factory!=null) {
+							BackendCoreITest.this.factory.close();
 						}
 					}
 					@Override
 					public EntityManagerFactory getEntityManagerFactory() {
-						return factory;
+						return BackendCoreITest.this.factory;
 					}
 				}
 			);
@@ -72,16 +74,24 @@ public class BackendCoreITest extends SmokeTest {
 
 	@Test
 	public void smokeTest() throws Exception {
-		ContinuousIntegrationService cis =
+		final EnrichmentService ers =
+			new EnrichmentService(
+				new SourceCodeManagementService(
+					this.persistencyFacade.getRepositoryRepository(),
+					this.persistencyFacade.getBranchRepository(),
+					this.persistencyFacade.getCommitRepository()),
+				this.persistencyFacade.getPendingEnrichmentRepository());
+		final ContinuousIntegrationService cis =
 			new ContinuousIntegrationService(
 				this.persistencyFacade.getServiceRepository(),
 				this.persistencyFacade.getBuildRepository(),
 				this.persistencyFacade.getExecutionRepository());
-		JenkinsIntegrationService jis=
+		final JenkinsIntegrationService jis=
 			new JenkinsIntegrationService(
 				cis,
-				persistencyFacade.getTransactionManager());
-		smokeTest(cis,jis);
+				ers,
+				this.persistencyFacade.getTransactionManager());
+		smokeTest(cis,jis,ers);
 	}
 
 

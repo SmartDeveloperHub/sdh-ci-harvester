@@ -24,37 +24,43 @@
  *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.jpa;
 
-import java.io.IOException;
+import java.net.URI;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Branch;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Commit;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Factory;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Repository;
 
-public class BackendFacadeITest extends SmokeTest {
+public abstract class Accessor {
 
-	private BackendFacade facade;
+	private static volatile Accessor DEFAULT;
 
-	@Before
-	public void startUp() throws IOException {
-		final DatabaseConfig config = new DatabaseConfig();
-		config.setProvider(DerbyProvider.class.getCanonicalName());
-		this.facade = BackendFacade.create(config);
+	public static void setDefault(final Accessor accessor) {
+		if (DEFAULT != null) {
+			throw new IllegalStateException();
+		}
+		DEFAULT = accessor;
 	}
 
-	@After
-	public void shutDown() throws Exception {
-		this.facade.close();
+	public static Accessor getDefault() {
+		final Accessor a = DEFAULT;
+		if (a != null) {
+			return a;
+		}
+		try {
+			Class.forName(Factory.class.getName(),true, Factory.class.getClassLoader());
+		} catch (final Exception ex) {
+			ex.printStackTrace();
+		}
+		return DEFAULT;
 	}
 
-	@Test
-	public void smokeTest() throws Exception {
-		smokeTest(
-			this.facade.applicationService(),
-			this.facade.integrationService(),
-			this.facade.enrichmentService());
-	}
+	public abstract Repository createRepository(URI location, URI resource);
+	public abstract Branch createBranch(URI location, String branchName, URI resource);
+	public abstract Commit createCommit(URI location, String branchName, String commitId, URI resource);
+	public abstract PendingEnrichment createPendingEnrichment(URI repositoryLocation, String branchName, String commitId);
 
 }

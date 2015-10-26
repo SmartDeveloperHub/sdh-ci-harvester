@@ -20,39 +20,43 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-spi:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-spi-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.spi;
+package org.smartdeveloperhub.harvesters.ci.backend.jpa;
 
-import java.io.Closeable;
+import javax.persistence.EntityManager;
 
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Commit;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.CommitId;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
-public interface ComponentRegistry extends Closeable {
+public class JPACommitRepository implements CommitRepository {
 
-	ServiceRepository getServiceRepository();
+	private final EntityManagerProvider provider;
 
-	BuildRepository getBuildRepository();
+	public JPACommitRepository(final EntityManagerProvider provider) {
+		this.provider = provider;
+	}
 
-	ExecutionRepository getExecutionRepository();
+	private EntityManager entityManager() {
+		return this.provider.entityManager();
+	}
 
-	RepositoryRepository getRepositoryRepository();
+	@Override
+	public void add(final Commit commit) {
+		entityManager().persist(commit);
+	}
 
-	BranchRepository getBranchRepository();
+	@Override
+	public void remove(final Commit commit) {
+		entityManager().remove(commit);
+	}
 
-	CommitRepository getCommitRepository();
-
-	PendingEnrichmentRepository getPendingEnrichmentRepository();
-
-	TransactionManager getTransactionManager();
+	@Override
+	public Commit commitOfId(final CommitId commitId) {
+		return entityManager().find(Commit.class, commitId);
+	}
 
 }

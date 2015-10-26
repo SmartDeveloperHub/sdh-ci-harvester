@@ -36,6 +36,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
@@ -74,27 +75,27 @@ public final class JenkinsIntegrationService {
 
 		private final File workingDirectory;
 
-		private ServiceConnected(File workingDirectory) {
+		private ServiceConnected(final File workingDirectory) {
 			this.workingDirectory = workingDirectory;
 		}
 
 		@Override
-		public void setWorkingDirectory(File directory) {
+		public void setWorkingDirectory(final File directory) {
 			throw new IllegalStateException("Cannot change working directory while connected");
 		}
 
 		@Override
-		public void connectTo(URI instance) {
+		public void connectTo(final URI instance) {
 			throw new IllegalStateException("Already connected");
 		}
 
 		@Override
-		public void setCrawlingStrategy(CrawlingStrategy strategy) {
+		public void setCrawlingStrategy(final CrawlingStrategy strategy) {
 			throw new IllegalStateException("Cannot change crawling strategy while connected");
 		}
 
 		@Override
-		public void setOperationStrategy(OperationStrategy strategy) {
+		public void setOperationStrategy(final OperationStrategy strategy) {
 			throw new IllegalStateException("Cannot change operation strategy while connected");
 		}
 
@@ -102,20 +103,20 @@ public final class JenkinsIntegrationService {
 		public void disconnect() throws IOException {
 			try {
 				doDisconnect();
-			} catch (Exception e) {
-				state=new ServiceDisconnected(this.workingDirectory);
+			} catch (final Exception e) {
+				JenkinsIntegrationService.this.state=new ServiceDisconnected(this.workingDirectory);
 				throw e;
 			}
 		}
 
 		@Override
 		public File workingDirectory() {
-			return crawler.workingDirectory();
+			return JenkinsIntegrationService.this.crawler.workingDirectory();
 		}
 
 		@Override
 		public URI connectedTo() {
-			return crawler.instance();
+			return JenkinsIntegrationService.this.crawler.instance();
 		}
 
 		@Override
@@ -125,7 +126,7 @@ public final class JenkinsIntegrationService {
 
 		@Override
 		public void awaitCrawlingCompletion() {
-			crawler.awaitCompletion();
+			JenkinsIntegrationService.this.crawler.awaitCompletion();
 		}
 
 	}
@@ -139,19 +140,19 @@ public final class JenkinsIntegrationService {
 		private ServiceDisconnected() {
 		}
 
-		private ServiceDisconnected(File workingDirectory) {
+		private ServiceDisconnected(final File workingDirectory) {
 			this.workingDirectory = workingDirectory;
 		}
 
 		@Override
-		public void setWorkingDirectory(File directory) {
+		public void setWorkingDirectory(final File directory) {
 			this.workingDirectory = directory;
 		}
 
 		@Override
-		public void connectTo(URI instance) throws IOException {
+		public void connectTo(final URI instance) throws IOException {
 			doConnect(instance, this.workingDirectory,this.crawlingStrategy,this.operationStrategy);
-			state=new ServiceConnected(this.workingDirectory);
+			JenkinsIntegrationService.this.state=new ServiceConnected(this.workingDirectory);
 		}
 
 		@Override
@@ -175,12 +176,12 @@ public final class JenkinsIntegrationService {
 		}
 
 		@Override
-		public void setCrawlingStrategy(CrawlingStrategy strategy) {
+		public void setCrawlingStrategy(final CrawlingStrategy strategy) {
 			this.crawlingStrategy=strategy;
 		}
 
 		@Override
-		public void setOperationStrategy(OperationStrategy strategy) {
+		public void setOperationStrategy(final OperationStrategy strategy) {
 			this.operationStrategy=strategy;
 		}
 
@@ -193,34 +194,34 @@ public final class JenkinsIntegrationService {
 
 	private final class CrawlerLifecycleLogger implements CrawlerEventListener {
 		@Override
-		public void onCrawlerStartUp(CrawlerStartedEvent event) {
+		public void onCrawlerStartUp(final CrawlerStartedEvent event) {
 			LOGGER.info("Crawler started");
 		}
 
 		@Override
-		public void onCrawlerShutdown(CrawlerStoppedEvent event) {
+		public void onCrawlerShutdown(final CrawlerStoppedEvent event) {
 			LOGGER.info("Crawler completed");
 		}
 
 		@Override
-		public void onCrawlingStartUp(CrawlingStartedEvent event) {
+		public void onCrawlingStartUp(final CrawlingStartedEvent event) {
 			LOGGER.info("Started crawling ({})",event.sessionId());
 		}
 
 		@Override
-		public void onCrawlingCompletion(CrawlingCompletedEvent event) {
+		public void onCrawlingCompletion(final CrawlingCompletedEvent event) {
 			LOGGER.info("Finished crawling ({})",event.sessionId());
 		}
 
 		@Override
-		public void onCrawlingAbortion(CrawlingAbortedEvent event) {
+		public void onCrawlingAbortion(final CrawlingAbortedEvent event) {
 			LOGGER.info("Aborted crawling ({})",event.sessionId());
 		}
 	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsIntegrationService.class);
 
-	private final ContinuousIntegrationService service;
+	private final ContinuousIntegrationService ciService;
 	private final TransactionManager transactionManager;
 	private final CommandProducerListener listener;
 	private final CommandProcessingMonitor monitor;
@@ -234,12 +235,15 @@ public final class JenkinsIntegrationService {
 	private Service worker;
 	private ServiceState state;
 
-	public JenkinsIntegrationService(ContinuousIntegrationService service, TransactionManager manager) {
-		this.service=service;
+	private final EnrichmentService erService;
+
+	public JenkinsIntegrationService(final ContinuousIntegrationService ciService, final EnrichmentService erService, final TransactionManager manager) {
+		this.ciService=ciService;
+		this.erService=erService;
 		this.transactionManager = manager;
 		this.monitor=new CommandProcessingMonitor();
 		this.listener=new CommandProducerListener(this.monitor);
-		ReadWriteLock lock=new ReentrantReadWriteLock();
+		final ReadWriteLock lock=new ReentrantReadWriteLock();
 		this.read=lock.readLock();
 		this.write=lock.writeLock();
 		this.state=new ServiceDisconnected();
@@ -247,14 +251,14 @@ public final class JenkinsIntegrationService {
 	}
 
 	private void doConnect(
-			URI jenkinsInstance,
-			File workingDirectory,
-			CrawlingStrategy crawlingStrategy,
-			OperationStrategy operationStrategy) throws IOException {
+			final URI jenkinsInstance,
+			final File workingDirectory,
+			final CrawlingStrategy crawlingStrategy,
+			final OperationStrategy operationStrategy) throws IOException {
 		try {
 			LOGGER.info("Connecting to {}...",jenkinsInstance);
 			this.monitor.startAsync();
-			this.worker=new SimpleCommandProcessorService(this.monitor,this.transactionManager,this.service,this.listeners);
+			this.worker=new SimpleCommandProcessorService(this.monitor,this.transactionManager,this.ciService,this.erService,this.listeners);
 			this.worker.startAsync();
 			this.crawler =
 				JenkinsCrawler.
@@ -268,7 +272,7 @@ public final class JenkinsIntegrationService {
 			this.crawler.registerListener(new CrawlerLifecycleLogger());
 			this.crawler.start();
 			LOGGER.info("Connected to {}.",jenkinsInstance);
-		} catch (JenkinsCrawlerException e) {
+		} catch (final JenkinsCrawlerException e) {
 			this.worker.stopAsync();
 			this.worker.awaitTerminated();
 			this.worker=null;
@@ -294,7 +298,7 @@ public final class JenkinsIntegrationService {
 		}
 	}
 
-	public JenkinsIntegrationService setCrawlingStrategy(CrawlingStrategy strategy) {
+	public JenkinsIntegrationService setCrawlingStrategy(final CrawlingStrategy strategy) {
 		this.write.lock();
 		try {
 			this.state.setCrawlingStrategy(strategy);
@@ -304,7 +308,7 @@ public final class JenkinsIntegrationService {
 		}
 	}
 
-	public JenkinsIntegrationService setOperationStrategy(OperationStrategy strategy) {
+	public JenkinsIntegrationService setOperationStrategy(final OperationStrategy strategy) {
 		this.write.lock();
 		try {
 			this.state.setOperationStrategy(strategy);
@@ -314,7 +318,7 @@ public final class JenkinsIntegrationService {
 		}
 	}
 
-	public JenkinsIntegrationService setWorkingDirectory(File directory) {
+	public JenkinsIntegrationService setWorkingDirectory(final File directory) {
 		this.write.lock();
 		try {
 			this.state.setWorkingDirectory(directory);
@@ -346,7 +350,7 @@ public final class JenkinsIntegrationService {
 		this.state.awaitCrawlingCompletion();
 	}
 
-	public void connect(URI jenkinsInstance) throws IOException {
+	public void connect(final URI jenkinsInstance) throws IOException {
 		this.write.lock();
 		try {
 			this.state.connectTo(jenkinsInstance);
@@ -373,12 +377,12 @@ public final class JenkinsIntegrationService {
 		}
 	}
 
-	public JenkinsIntegrationService registerListener(EntityLifecycleEventListener listener) {
+	public JenkinsIntegrationService registerListener(final EntityLifecycleEventListener listener) {
 		this.listeners.registerListener(listener);
 		return this;
 	}
 
-	public JenkinsIntegrationService deregisterListener(EntityLifecycleEventListener listener) {
+	public JenkinsIntegrationService deregisterListener(final EntityLifecycleEventListener listener) {
 		this.listeners.deregisterListener(listener);
 		return this;
 	}

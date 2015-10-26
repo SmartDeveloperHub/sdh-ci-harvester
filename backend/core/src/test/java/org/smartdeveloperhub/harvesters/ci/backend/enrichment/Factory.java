@@ -24,37 +24,14 @@
  *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
-import java.io.IOException;
+import org.smartdeveloperhub.harvesters.ci.backend.jpa.Accessor;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+public final class Factory {
 
-public class BackendFacadeITest extends SmokeTest {
-
-	private BackendFacade facade;
-
-	@Before
-	public void startUp() throws IOException {
-		final DatabaseConfig config = new DatabaseConfig();
-		config.setProvider(DerbyProvider.class.getCanonicalName());
-		this.facade = BackendFacade.create(config);
-	}
-
-	@After
-	public void shutDown() throws Exception {
-		this.facade.close();
-	}
-
-	@Test
-	public void smokeTest() throws Exception {
-		smokeTest(
-			this.facade.applicationService(),
-			this.facade.integrationService(),
-			this.facade.enrichmentService());
+	static {
+		Accessor.setDefault(new AccessorImpl());
 	}
 
 }
