@@ -82,7 +82,6 @@ public class SmokeTest {
 		try {
 			TimeUnit.SECONDS.sleep(60);
 		} catch(final InterruptedException e) {
-
 		}
 		jis.disconnect();
 		LOGGER.info("Warm up completed.");

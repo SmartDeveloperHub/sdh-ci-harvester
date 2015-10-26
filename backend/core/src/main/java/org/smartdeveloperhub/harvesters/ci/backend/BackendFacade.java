@@ -91,7 +91,7 @@ public final class BackendFacade implements Closeable {
 		return this.enrichmentService;
 	}
 
-	public SourceCodeManagementService sourceCodeManagemenService() {
+	public SourceCodeManagementService sourceCodeManagementService() {
 		return this.scmService;
 	}
 

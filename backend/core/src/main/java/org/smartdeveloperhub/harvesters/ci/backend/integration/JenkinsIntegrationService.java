@@ -255,6 +255,7 @@ public final class JenkinsIntegrationService {
 			final File workingDirectory,
 			final CrawlingStrategy crawlingStrategy,
 			final OperationStrategy operationStrategy) throws IOException {
+		this.erService.connect();
 		try {
 			LOGGER.info("Connecting to {}...",jenkinsInstance);
 			this.monitor.startAsync();
@@ -278,8 +279,17 @@ public final class JenkinsIntegrationService {
 			this.worker=null;
 			this.monitor.stopAsync();
 			this.monitor.awaitTerminated();
+			disconnectQuietly(this.erService);
 			LOGGER.error("Could not connect to {}. Full stacktrace follows:",jenkinsInstance,e);
 			throw new IOException("Could not connect to "+jenkinsInstance,e);
+		}
+	}
+
+	private void disconnectQuietly(final EnrichmentService service) {
+		try {
+			service.disconnect();
+		} catch (final IOException ignore) {
+			LOGGER.warn("Could not disconnect enrichment service. Full stacktrace follows:",ignore);
 		}
 	}
 
@@ -295,6 +305,7 @@ public final class JenkinsIntegrationService {
 			this.monitor.stopAsync();
 			this.monitor.awaitTerminated();
 			this.worker=null;
+			disconnectQuietly(this.erService);
 		}
 	}
 

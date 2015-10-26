@@ -28,7 +28,11 @@ package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,17 +42,85 @@ import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.Pendin
 
 public class EnrichmentService {
 
+	private interface ServiceState {
+
+		void connect() throws IOException;
+		void disconnect() throws IOException;
+
+		boolean isConnected();
+
+		void enrich(Execution execution) throws IOException;
+
+	}
+
+	private final class ServiceConnected implements ServiceState {
+
+		@Override
+		public void connect() throws IOException {
+			throw new IllegalStateException("Already connected");
+		}
+
+		@Override
+		public void disconnect() throws IOException {
+			EnrichmentService.this.state=new ServiceDisconnected();
+		}
+
+		@Override
+		public boolean isConnected() {
+			return true;
+		}
+
+		@Override
+		public void enrich(final Execution execution) {
+			doEnrich(execution);
+		}
+
+	}
+
+	private class ServiceDisconnected implements ServiceState {
+
+		@Override
+		public void connect() throws IOException {
+			EnrichmentService.this.state=new ServiceConnected();
+		}
+
+		@Override
+		public void disconnect() throws IOException {
+			// Nothing to do
+		}
+
+		@Override
+		public boolean isConnected() {
+			return false;
+		}
+
+		@Override
+		public void enrich(final Execution execution) {
+			throw new IllegalStateException("Not connected");
+		}
+
+	}
+
 	private static final Logger LOGGER=LoggerFactory.getLogger(EnrichmentService.class);
 
 	private final SourceCodeManagementService scmService;
 	private final PendingEnrichmentRepository repository;
 
+	private final Lock read;
+	private final Lock write;
+
+	private ServiceState state;
+
 	public EnrichmentService(final SourceCodeManagementService scmService, final PendingEnrichmentRepository repository) {
 		this.scmService = scmService;
 		this.repository = repository;
+		this.state=new ServiceDisconnected();
+		final ReadWriteLock lock=new ReentrantReadWriteLock();
+		this.read=lock.readLock();
+		this.write=lock.writeLock();
 	}
 
-	public void enrich(final Execution execution) {
+	private void doEnrich(final Execution execution) {
 		final Codebase codebase=checkNotNull(execution.codebase(),"Codebase cannot be null");
 		final EnrichmentContext context=new EnrichmentContext(execution);
 		LOGGER.debug("Requested enrichment for {}",context);
@@ -85,10 +157,6 @@ public class EnrichmentService {
 		processEnrichmentContext(context);
 	}
 
-	public List<PendingEnrichment> pendingEnrichments() {
-		return this.repository.findPendingEnrichments(null,null,null);
-	}
-
 	private void processEnrichmentContext(final EnrichmentContext context) {
 		final PendingEnrichment pending=this.repository.pendingEnrichmentOfExecution(context.target());
 		if(pending!=null) {
@@ -113,6 +181,42 @@ public class EnrichmentService {
 
 	private void fireEnrichmentRequest(final EnrichmentContext context) {
 		LOGGER.warn("{} requires firing an enrichment request",context);
+	}
+
+	public void connect() throws IOException {
+		this.write.lock();
+		try {
+			this.state.connect();
+		} finally {
+			this.write.unlock();
+		}
+	}
+
+	public void disconnect() throws IOException {
+		this.write.lock();
+		try {
+			this.state.disconnect();
+		} finally {
+			this.write.unlock();
+		}
+	}
+
+	public void enrich(final Execution execution) throws IOException {
+		this.read.lock();
+		try {
+			this.state.enrich(execution);
+		} finally {
+			this.read.unlock();
+		}
+	}
+
+	public List<PendingEnrichment> pendingEnrichments() {
+		this.read.lock();
+		try {
+			return this.repository.findPendingEnrichments(null,null,null);
+		} finally {
+			this.read.unlock();
+		}
 	}
 
 }

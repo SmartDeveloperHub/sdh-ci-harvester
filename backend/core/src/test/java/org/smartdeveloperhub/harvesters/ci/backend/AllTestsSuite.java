@@ -37,6 +37,6 @@ import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPATestsSuite;
 	BackendCoreITest.class,
 	BackendFacadeITest.class
 })
-public class AllTests {
+public class AllTestsSuite {
 
 }

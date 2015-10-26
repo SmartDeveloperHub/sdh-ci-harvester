@@ -26,11 +26,13 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.integration;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.command.Command;
 import org.smartdeveloperhub.harvesters.ci.backend.command.CommandVisitor;
 import org.smartdeveloperhub.harvesters.ci.backend.command.CreateBuildCommand;
@@ -93,16 +95,18 @@ final class CommandProcessor {
 		public void visitCreateExecutionCommand(final CreateExecutionCommand command) {
 			if(CommandProcessor.this.ciService.getBuild(command.buildId())!=null) {
 				CommandProcessor.this.ciService.createExecution(command);
-				CommandProcessor.this.erService.enrich(CommandProcessor.this.ciService.getExecution(command.executionId()));
+				final URI executionId = command.executionId();
+				enrich(executionId);
 				this.retry=false;
 			}
 		}
 
 		@Override
 		public void visitFinishExecutionCommand(final FinishExecutionCommand command) {
-			if(CommandProcessor.this.ciService.getExecution(command.executionId())!=null) {
+			final URI executionId = command.executionId();
+			if(CommandProcessor.this.ciService.getExecution(executionId)!=null) {
 				CommandProcessor.this.ciService.finishExecution(command);
-				CommandProcessor.this.erService.enrich(CommandProcessor.this.ciService.getExecution(command.executionId()));
+				enrich(executionId);
 				this.retry=false;
 			}
 		}
@@ -112,6 +116,15 @@ final class CommandProcessor {
 			if(CommandProcessor.this.ciService.getExecution(command.executionId())!=null) {
 				CommandProcessor.this.ciService.deleteExecution(command);
 				this.retry=false;
+			}
+		}
+
+		private void enrich(final URI executionId) {
+			final Execution execution = CommandProcessor.this.ciService.getExecution(executionId);
+			try {
+				CommandProcessor.this.erService.enrich(execution);
+			} catch (final IOException e) {
+				LOGGER.error("Could not enrich execution {}",execution,e);
 			}
 		}
 
