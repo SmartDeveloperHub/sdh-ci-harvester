@@ -99,9 +99,15 @@ public class SmokeTest {
 			for(final URI id:pending.executions()) {
 				final Execution execution = cis.getExecution(id);
 				LOGGER.debug("  + Awaiting execution: {}",execution);
-				assertThat(pending.repositoryLocation(),equalTo(execution.codebase().location()));
-				assertThat(pending.branchName(),equalTo(execution.codebase().branchName()));
-				assertThat(pending.commitId(),equalTo(execution.commitId()));
+				if(execution.codebase().location()!=null) {
+	 				assertThat("Repository location does not match "+pending+" vs. "+execution,pending.repositoryLocation(),equalTo(execution.codebase().location()));
+				}
+				if(execution.codebase().branchName()!=null) {
+					assertThat("Branch name does not match "+pending+" vs. "+execution,pending.branchName(),equalTo(execution.codebase().branchName()));
+				}
+				if(execution.commitId()!=null) {
+					assertThat("Commit id does not match "+pending+" vs. "+execution,pending.commitId(),equalTo(execution.commitId()));
+				}
 				assertThat(executions.add(id),equalTo(true));
 			}
 		}
@@ -122,7 +128,7 @@ public class SmokeTest {
 				verifyBuildMatchesJob(buildId,build,job);
 				for(final URI executionId:build.executions()) {
 					final Execution execution=cis.getExecution(executionId);
-					LOGGER.trace("    * Execution {} : {}",executionId,execution);
+					LOGGER.debug("    * Execution {} : {}",executionId,execution);
 					final Run run=storage().entityOfId(executionId,JenkinsEntityType.RUN,Run.class);
 					verifyExecutionMatchesRun(executionId,execution,run);
 				}
