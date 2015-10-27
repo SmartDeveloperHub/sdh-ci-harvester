@@ -56,10 +56,10 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	private BackendController controller;
 
 	@Override
-	public void setup(Environment environment, Bootstrap<HarvesterConfiguration> bootstrap) {
+	public void setup(final Environment environment, final Bootstrap<HarvesterConfiguration> bootstrap) {
 		LOGGER.info("Starting CI Harvester Application configuration...");
 
-		HarvesterConfiguration configuration = bootstrap.configuration();
+		final HarvesterConfiguration configuration = bootstrap.configuration();
 
 		LOGGER.info("- Provider: {}",configuration.provider());
 		LOGGER.info("- Target..: {}",configuration.target());
@@ -78,7 +78,7 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 			publishResource(
 				NamingScheme.
 					getDefault().
-						name(target),
+						name(this.target),
 				ServiceHandler.class,
 				SERVICE_PATH);
 
@@ -86,23 +86,28 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	}
 
 	@Override
-	public void initialize(WriteSession session) throws ApplicationInitializationException {
+	public void initialize(final WriteSession session) throws ApplicationInitializationException {
 		LOGGER.info("Initializing CI Harvester Application...");
+		if(!this.controller.setTargetService(this.target)) {
+			final String errorMessage = "CI Harvester Application initialization failed: cannot create target service "+this.target;
+			LOGGER.error(errorMessage);
+			throw new ApplicationInitializationException(errorMessage);
+		}
 		try {
-			EntityIndex index=this.controller.entityIndex();
-			BackendModelPublisher publisher=
+			final EntityIndex index=this.controller.entityIndex();
+			final BackendModelPublisher publisher=
 				BackendModelPublisher.
 					builder().
 						withBackendService(index).
-						withMainService(target).
+						withMainService(this.target).
 						build();
 			publisher.publish(session);
 			session.saveChanges();
-			this.controller.connect(target,new FrontendSynchronizer(index,publisher));
+			this.controller.connect(new FrontendSynchronizer(index,publisher));
 			LOGGER.info("CI Harvester Application initialization completed.");
-		} catch (Exception e) {
-			String errorMessage = "CI Harvester Application initialization failed";
-			LOGGER.warn(errorMessage+". Full stacktrace follows: ",e);
+		} catch (final Exception e) {
+			final String errorMessage = "CI Harvester Application initialization failed";
+			LOGGER.error(errorMessage+". Full stacktrace follows: ",e);
 			throw new ApplicationInitializationException(e);
 		}
 	}

@@ -53,7 +53,12 @@ final class BackendControllerManager {
 		}
 
 		@Override
-		public void connect(URI instance, EntityLifecycleEventListener listener) {
+		public boolean setTargetService(final URI instance) {
+			throw getFailure();
+		}
+
+		@Override
+		public void connect(final EntityLifecycleEventListener listener) {
 			throw getFailure();
 		}
 
@@ -73,40 +78,45 @@ final class BackendControllerManager {
 
 		private final class NullEntityIndex implements EntityIndex {
 			@Override
-			public Service findService(URI serviceId) {
-				return service.getService(serviceId);
+			public Service findService(final URI serviceId) {
+				return NullBackendController.this.service.getService(serviceId);
 			}
 
 			@Override
-			public Execution findExecution(URI executionId) {
-				return service.getExecution(executionId);
+			public Execution findExecution(final URI executionId) {
+				return NullBackendController.this.service.getExecution(executionId);
 			}
 
 			@Override
-			public Build findBuild(URI buildId) {
-				return service.getBuild(buildId);
+			public Build findBuild(final URI buildId) {
+				return NullBackendController.this.service.getBuild(buildId);
 			}
 		}
 
-		private ContinuousIntegrationService service;
+		private final ContinuousIntegrationService service;
 
 		private NullBackendController() {
 			this.service = new ContinuousIntegrationService(new InMemoryServiceRepository(), new InMemoryBuildRepository(), new InMemoryExecutionRepository());
 		}
 
 		@Override
-		public void disconnect() {
-			// NOTHING TO DO
+		public boolean setTargetService(final URI instance) {
+			return false;
 		}
 
 		@Override
-		public void connect(URI instance, EntityLifecycleEventListener listener) throws IOException {
+		public void connect(final EntityLifecycleEventListener listener) throws IOException {
 			// NOTHING TO DO
 		}
 
 		@Override
 		public EntityIndex entityIndex() {
 			return new NullEntityIndex();
+		}
+
+		@Override
+		public void disconnect() {
+			// NOTHING TO DO
 		}
 	}
 
@@ -115,21 +125,21 @@ final class BackendControllerManager {
 	private BackendControllerManager() {
 	}
 
-	public static BackendController create(String providerId) {
+	public static BackendController create(final String providerId) {
 		if(providerId==null) {
 			return new NullBackendController();
 		}
-		ServiceLoader<BackendControllerFactory> providers=ServiceLoader.load(BackendControllerFactory.class);
-		for(BackendControllerFactory provider:providers) {
+		final ServiceLoader<BackendControllerFactory> providers=ServiceLoader.load(BackendControllerFactory.class);
+		for(final BackendControllerFactory provider:providers) {
 			LOGGER.debug("Trying to create backend controller {} using provider {}...",providerId,provider.getClass().getCanonicalName());
 			try {
-				BackendController controller = provider.create(providerId);
+				final BackendController controller = provider.create(providerId);
 				if(controller!=null) {
 					LOGGER.debug("Created backend controller {} via {}",providerId,provider.getClass().getCanonicalName());
 					return controller;
 				}
 				LOGGER.debug("Could not create backend controller {} using provider {}",providerId,provider.getClass().getCanonicalName());
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warn("Provider {} failed while creating a backend controller {}. Full stacktrace follows",provider.getClass().getCanonicalName(),providerId,e);
 			}
 		}

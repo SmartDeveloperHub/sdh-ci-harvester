@@ -35,7 +35,9 @@ public interface BackendController {
 
 	EntityIndex entityIndex();
 
-	void connect(URI instance, EntityLifecycleEventListener listener) throws IOException;
+	boolean setTargetService(URI instance);
+
+	void connect(EntityLifecycleEventListener listener) throws IOException;
 
 	void disconnect();
 

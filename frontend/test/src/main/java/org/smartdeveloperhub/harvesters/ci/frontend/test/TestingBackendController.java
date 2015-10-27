@@ -26,6 +26,8 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.test;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.net.URI;
 import java.util.Date;
 import java.util.Random;
@@ -52,8 +54,6 @@ import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServi
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
-import static com.google.common.base.Preconditions.*;
-
 final class TestingBackendController implements BackendController {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(TestingBackendController.class);
@@ -68,7 +68,7 @@ final class TestingBackendController implements BackendController {
 
 	private final ContinuousIntegrationService service;
 
-	private TestingEntityIndex index;
+	private final TestingEntityIndex index;
 
 	TestingBackendController() {
 		this.serviceRepository = new InMemoryServiceRepository();
@@ -83,29 +83,29 @@ final class TestingBackendController implements BackendController {
 		populateBackend(URI.create("http://ci.jenkins-ci.org/"));
 	}
 
-	void setInstance(URI jenkinsInstance) {
+	void setInstance(final URI jenkinsInstance) {
 		checkState(this.jenkinsInstance==null,"Already connected (%s)",this.jenkinsInstance);
 		this.jenkinsInstance = jenkinsInstance;
 	}
 
-	private static Date after(Date date) {
-		Random random=new Random(System.nanoTime());
+	private static Date after(final Date date) {
+		final Random random=new Random(System.nanoTime());
 		return new Date(date.getTime()+(random.nextLong() % 3600000));
 	}
 
-	private static URI buildId(Service service, String id) {
+	private static URI buildId(final Service service, final String id) {
 		return service.serviceId().resolve("jobs/"+id+"/");
 	}
 
-	private static URI buildId(CompositeBuild build, String id) {
+	private static URI buildId(final CompositeBuild build, final String id) {
 		return build.buildId().resolve(id+"/");
 	}
 
-	private static URI executionId(Build build, int executionIdi) {
+	private static URI executionId(final Build build, final int executionIdi) {
 		return build.buildId().resolve(executionIdi+"/");
 	}
 
-	private static Execution createExecution(ExecutionRepository repository, Build build, Execution execution, int executionIdi, Status status) {
+	private static Execution createExecution(final ExecutionRepository repository, final Build build, final Execution execution, final int executionIdi, final Status status) {
 		Date date=build.createdOn();
 		if(execution!=null) {
 			if(execution.isFinished()) {
@@ -114,7 +114,7 @@ final class TestingBackendController implements BackendController {
 				date=execution.createdOn();
 			}
 		}
-		Execution newExecution=build.addExecution(executionId(build, executionIdi), after(date), build.codebase(), "12344as343asq343");
+		final Execution newExecution=build.addExecution(executionId(build, executionIdi), after(date), build.codebase(), "12344as343asq343");
 		if(status!=null) {
 			newExecution.finish(new Result(status,after(newExecution.createdOn())));
 		}
@@ -122,37 +122,37 @@ final class TestingBackendController implements BackendController {
 		return newExecution;
 	}
 
-	private static void createExecutions(ExecutionRepository repository, Build build) {
-		Execution failedExecution  = createExecution(repository,build,null,            1,Status.FAILED);
-		Execution warningExecution = createExecution(repository,build,failedExecution, 2,Status.WARNING);
-		Execution errorExecution   = createExecution(repository,build,warningExecution,3,Status.NOT_BUILT);
-		Execution passedExecution  = createExecution(repository,build,errorExecution,  4,Status.PASSED);
-		Execution abortedExecution = createExecution(repository,build,passedExecution, 5,Status.ABORTED);
+	private static void createExecutions(final ExecutionRepository repository, final Build build) {
+		final Execution failedExecution  = createExecution(repository,build,null,            1,Status.FAILED);
+		final Execution warningExecution = createExecution(repository,build,failedExecution, 2,Status.WARNING);
+		final Execution errorExecution   = createExecution(repository,build,warningExecution,3,Status.NOT_BUILT);
+		final Execution passedExecution  = createExecution(repository,build,errorExecution,  4,Status.PASSED);
+		final Execution abortedExecution = createExecution(repository,build,passedExecution, 5,Status.ABORTED);
 									 createExecution(repository,build,abortedExecution,6,null);
 	}
 
-	private static void createBuild(BuildRepository repository, Build build, Date createdOn, String description) {
+	private static void createBuild(final BuildRepository repository, final Build build, final Date createdOn, final String description) {
 		build.setCreatedOn(after(createdOn));
 		build.setDescription(description);
 		build.setCodebase(new Codebase(build.buildId().resolve("repository.git"),"master"));
 		repository.add(build);
 	}
 
-	private void populateBackend(URI jenkinsInstance) {
-		Date initTime = new Date();
+	private void populateBackend(final URI jenkinsInstance) {
+		final Date initTime = new Date();
 
-		Service defaultService = Service.newInstance(jenkinsInstance);
+		final Service defaultService = Service.newInstance(jenkinsInstance);
 		this.serviceRepository.add(defaultService);
 
-		SimpleBuild simpleBuild=defaultService.addSimpleBuild(buildId(defaultService, "simple-job"),"Example simple build");
+		final SimpleBuild simpleBuild=defaultService.addSimpleBuild(buildId(defaultService, "simple-job"),"Example simple build");
 		createBuild(this.buildRepository, simpleBuild, initTime, "An example simple build for testing");
 		createExecutions(this.executionRepository,simpleBuild);
 
-		CompositeBuild compositeBuild=defaultService.addCompositeBuild(buildId(defaultService, "composite-job"),"Example composite build");
+		final CompositeBuild compositeBuild=defaultService.addCompositeBuild(buildId(defaultService, "composite-job"),"Example composite build");
 		createBuild(this.buildRepository, compositeBuild, initTime, "An example composite build for testing");
 		createExecutions(this.executionRepository, compositeBuild);
 
-		SubBuild subBuild=compositeBuild.addSubBuild(buildId(compositeBuild, "sub-job"),"Example sub build");
+		final SubBuild subBuild=compositeBuild.addSubBuild(buildId(compositeBuild, "sub-job"),"Example sub build");
 		createBuild(this.buildRepository, subBuild, initTime, "An example sub build for testing");
 		createExecutions(this.executionRepository, subBuild);
 	}
@@ -162,12 +162,23 @@ final class TestingBackendController implements BackendController {
 	 */
 	@Override
 	public EntityIndex entityIndex() {
-		return index;
+		return this.index;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public void connect(URI instance, EntityLifecycleEventListener listener) {
+	public boolean setTargetService(final URI instance) {
 		setInstance(instance);
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void connect(final EntityLifecycleEventListener listener) {
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
 		LOGGER.info("Connected to {}.",this.jenkinsInstance);
 	}
