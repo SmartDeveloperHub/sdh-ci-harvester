@@ -58,6 +58,7 @@
 		<deployment.dir>${basedir}${file.separator}.webapp</deployment.dir>
 		<harvester.http.port>80</harvester.http.port>
 		<harvester.config>${basedir}${file.separator}.config${file.separator}config.yml</harvester.config>
+		<harvester.target>http://ci.jenkins-ci.org/</harvester.target>
 	</properties>
 
 	<repositories>
@@ -180,6 +181,7 @@
 							<configurationDir>${basedir}${file.separator}.container</configurationDir>
 							<path>/harvester</path>
 							<systemProperties>
+								<ci.harvester.target>${harvester.target}</ci.harvester.target>
 								<ci.harvester.provider>DefaultBackendController</ci.harvester.provider>
 								<ci.harvester.config>${harvester.config}</ci.harvester.config>
 							</systemProperties>
