@@ -43,6 +43,7 @@ final class EnrichmentContext {
 	private URI repositoryResource;
 	private URI branchResource;
 	private Long pendingEnrichment;
+	private URI commitResource;
 
 	EnrichmentContext(final Execution execution) {
 		this.target=execution.executionId();
@@ -87,6 +88,10 @@ final class EnrichmentContext {
 		return Optional.fromNullable(this.branchResource);
 	}
 
+	Optional<URI> commitResource() {
+		return Optional.fromNullable(this.commitResource);
+	}
+
 	void setRepositoryResource(final URI resource) {
 		this.repositoryResource=resource;
 	}
@@ -95,8 +100,24 @@ final class EnrichmentContext {
 		this.branchResource=resource;
 	}
 
+	void setCommitResource(final URI resource) {
+		this.commitResource = resource;
+
+	}
+
 	void setPendingEnrichment(final long pendingEnrichment) {
 		this.pendingEnrichment=pendingEnrichment;
+	}
+
+	boolean requiresEnrichment() {
+		return
+			!isResolved(requiresCommit(), this.commitResource) ||
+			!isResolved(requiresBranch(), this.branchResource) ||
+			!isResolved(requiresRepository(), this.repositoryResource);
+	}
+
+	private boolean isResolved(final boolean condition, final URI resource) {
+		return !condition || resource!=null;
 	}
 
 	@Override
@@ -111,8 +132,11 @@ final class EnrichmentContext {
 					add("commitId",this.commitId).
 					add("repositoryResource",this.repositoryResource).
 					add("branchResource",this.branchResource).
+					add("commitResource",this.commitResource).
 					add("pendingEnrichment",this.pendingEnrichment).
 					toString();
 	}
+
+
 
 }

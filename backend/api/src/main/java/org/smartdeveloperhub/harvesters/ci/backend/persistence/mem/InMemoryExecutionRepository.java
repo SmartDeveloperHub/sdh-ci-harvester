@@ -30,11 +30,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 public class InMemoryExecutionRepository implements ExecutionRepository {
@@ -46,22 +48,27 @@ public class InMemoryExecutionRepository implements ExecutionRepository {
 	}
 
 	@Override
-	public void add(Execution entity) {
+	public void add(final Execution entity) {
 		checkNotNull(entity,"Execution cannot be null");
-		Execution previous = this.executions.putIfAbsent(entity.executionId(),entity);
+		final Execution previous = this.executions.putIfAbsent(entity.executionId(),entity);
 		checkArgument(previous==null,"An execution identified by '%s' already exists",entity.executionId());
 	}
 
 	@Override
-	public void remove(Execution entity) {
+	public void remove(final Execution entity) {
 		checkNotNull(entity,"Execution cannot be null");
 		this.executions.remove(entity.executionId(),entity);
 	}
 
 	@Override
-	public Execution executionOfId(URI executionId) {
+	public Execution executionOfId(final URI executionId) {
 		checkNotNull(executionId,"Execution identifier cannot be null");
 		return this.executions.get(executionId);
+	}
+
+	@Override
+	public List<URI> executionIds() {
+		return ImmutableList.copyOf(this.executions.keySet());
 	}
 
 }

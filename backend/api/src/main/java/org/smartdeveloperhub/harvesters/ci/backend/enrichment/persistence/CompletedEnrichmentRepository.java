@@ -24,21 +24,25 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.persistence;
+package org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence;
 
 import java.net.URI;
 import java.util.List;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.CompletedEnrichment;
 
-public interface ExecutionRepository {
+public interface CompletedEnrichmentRepository {
 
-	void add(Execution execution);
+	void add(CompletedEnrichment completedEnrichment);
 
-	void remove(Execution execution);
+	void remove(CompletedEnrichment completedEnrichment);
 
-	Execution executionOfId(URI executionId);
+	void removeAll();
 
-	List<URI> executionIds();
+	CompletedEnrichment completedEnrichmentOfId(long id);
+
+	CompletedEnrichment completedEnrichmentOfExecution(URI target);
+
+	List<CompletedEnrichment> findCompletedEnrichments(URI repositoryResource, URI branchResource, URI commitResource);
 
 }

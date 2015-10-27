@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.LifecycleDescriptorRepository;
@@ -178,6 +179,14 @@ public final class JPAComponentRegistry implements ComponentRegistry {
 	@Override
 	public PendingEnrichmentRepository getPendingEnrichmentRepository() {
 		return new JPAPendingEnrichmentRepository(this.provider);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public CompletedEnrichmentRepository getCompletedEnrichmentRepository() {
+		return new JPACompletedEnrichmentRepository(this.provider);
 	}
 
 	/**

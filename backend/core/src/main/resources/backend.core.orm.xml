@@ -84,7 +84,7 @@
 	<orm:entity class="org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment">
 		<!-- Beware: the following constraint causes a failure on HSQLDB 2.3.3 -->
 		<orm:table name="ENRICHMENT_PENDING">
-			<orm:unique-constraint name="Enrichments_Are_Unique">
+			<orm:unique-constraint name="Pending_Enrichments_Are_Unique">
 				<orm:column-name>repositoryLocation</orm:column-name>
 				<orm:column-name>branchName</orm:column-name>
 				<orm:column-name>commitId</orm:column-name>
@@ -95,9 +95,7 @@
 				<orm:generated-value/>
 				<orm:sequence-generator name="pendingEnrichmentPrimaryKeyGenerator" sequence-name="peSeq"/>
 			</orm:id>
-			<orm:basic name="repositoryLocation">
-				<orm:convert converter="org.smartdeveloperhub.harvesters.ci.backend.jpa.URIConverter"/>
-			</orm:basic>
+			<orm:basic name="repositoryLocation"/>
 			<orm:basic name="branchName"/>
 			<orm:basic name="commitId"/>
 			<orm:element-collection name="executions" target-class="java.net.URI">
@@ -105,6 +103,34 @@
 				<orm:collection-table name="PendingEnrichmentExecutions">
 					<orm:foreign-key name="id"/>
 					<orm:unique-constraint name="Executions_are_attached_to_a_single_enrichment_request">
+						<orm:column-name>execution</orm:column-name>
+					</orm:unique-constraint>
+				</orm:collection-table>
+			</orm:element-collection>
+		</orm:attributes>
+	</orm:entity>
+	<orm:entity class="org.smartdeveloperhub.harvesters.ci.backend.enrichment.CompletedEnrichment">
+		<!-- Beware: the following constraint causes a failure on HSQLDB 2.3.3 -->
+		<orm:table name="ENRICHMENT_COMPLETED">
+			<orm:unique-constraint name="Completed_Enrichments_Are_Unique">
+				<orm:column-name>repositoryResource</orm:column-name>
+				<orm:column-name>branchResource</orm:column-name>
+				<orm:column-name>commitResource</orm:column-name>
+			</orm:unique-constraint>
+		</orm:table>
+		<orm:attributes>
+			<orm:id name="id">
+				<orm:generated-value/>
+				<orm:sequence-generator name="completedEnrichmentPrimaryKeyGenerator" sequence-name="ceSeq"/>
+			</orm:id>
+			<orm:basic name="repositoryResource"/>
+			<orm:basic name="branchResource"/>
+			<orm:basic name="commitResource"/>
+			<orm:element-collection name="executions" target-class="java.net.URI">
+				<orm:column name="execution"/>
+				<orm:collection-table name="CompletedEnrichmentExecutions">
+					<orm:foreign-key name="id"/>
+					<orm:unique-constraint name="Executions_are_attached_to_a_single_completed_enrichment">
 						<orm:column-name>execution</orm:column-name>
 					</orm:unique-constraint>
 				</orm:collection-table>

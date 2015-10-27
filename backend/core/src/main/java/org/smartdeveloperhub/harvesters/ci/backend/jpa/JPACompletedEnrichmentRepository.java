@@ -34,16 +34,16 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.CompletedEnrichment;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
 
 import com.google.common.collect.Iterables;
 
-public class JPAPendingEnrichmentRepository implements PendingEnrichmentRepository {
+public class JPACompletedEnrichmentRepository implements CompletedEnrichmentRepository {
 
 	private final EntityManagerProvider provider;
 
-	public JPAPendingEnrichmentRepository(final EntityManagerProvider provider) {
+	public JPACompletedEnrichmentRepository(final EntityManagerProvider provider) {
 		this.provider = provider;
 	}
 
@@ -52,35 +52,35 @@ public class JPAPendingEnrichmentRepository implements PendingEnrichmentReposito
 	}
 
 	@Override
-	public void add(final PendingEnrichment pendingEnrichment) {
-		entityManager().persist(pendingEnrichment);
+	public void add(final CompletedEnrichment completedEnrichment) {
+		entityManager().persist(completedEnrichment);
 	}
 
 	@Override
-	public void remove(final PendingEnrichment pendingEnrichment) {
-		entityManager().remove(pendingEnrichment);
+	public void remove(final CompletedEnrichment completedEnrichment) {
+		entityManager().remove(completedEnrichment);
 	}
 
 	@Override
 	public void removeAll() {
-		final List<PendingEnrichment> pendingEnrichments = findPendingEnrichments(null, null, null);
+		final List<CompletedEnrichment> completedEnrichments = findCompletedEnrichments(null, null, null);
 		final EntityManager entityManager = entityManager();
-		for(final PendingEnrichment pending:pendingEnrichments) {
+		for(final CompletedEnrichment pending:completedEnrichments) {
 			entityManager.remove(pending);
 		}
 	}
 
 	@Override
-	public PendingEnrichment pendingEnrichmentOfId(final long id) {
-		return entityManager().find(PendingEnrichment.class,id);
+	public CompletedEnrichment completedEnrichmentOfId(final long id) {
+		return entityManager().find(CompletedEnrichment.class,id);
 	}
 
 	@Override
-	public PendingEnrichment pendingEnrichmentOfExecution(final URI target) {
+	public CompletedEnrichment completedEnrichmentOfExecution(final URI target) {
 		final CriteriaBuilder cb = entityManager().getCriteriaBuilder();
 
-		final CriteriaQuery<PendingEnrichment> cq = cb.createQuery(PendingEnrichment.class);
-		final Root<PendingEnrichment> entity = cq.from(PendingEnrichment.class);
+		final CriteriaQuery<CompletedEnrichment> cq = cb.createQuery(CompletedEnrichment.class);
+		final Root<CompletedEnrichment> entity = cq.from(CompletedEnrichment.class);
 
 		cq.
 			select(entity).
@@ -89,25 +89,25 @@ public class JPAPendingEnrichmentRepository implements PendingEnrichmentReposito
 					join("executions").
 						in(target));
 
-		final List<PendingEnrichment> results =  entityManager().createQuery(cq).getResultList();
+		final List<CompletedEnrichment> results =  entityManager().createQuery(cq).getResultList();
 		return Iterables.getFirst(results,null);
 	}
 
 	@Override
-	public List<PendingEnrichment> findPendingEnrichments(final URI repositoryLocation, final String branchName, final String commitId) {
+	public List<CompletedEnrichment> findCompletedEnrichments(final URI repositoryResource, final URI branchResource, final URI commitResource) {
 		final EntityManager em = entityManager();
-		final CriteriaQuery<PendingEnrichment> cq =
+		final CriteriaQuery<CompletedEnrichment> cq =
 				em.
 					getCriteriaBuilder().
-						createQuery(PendingEnrichment.class).
+						createQuery(CompletedEnrichment.class).
 						distinct(true);
-		final Root<PendingEnrichment> entity = cq.from(PendingEnrichment.class);
+		final Root<CompletedEnrichment> entity = cq.from(CompletedEnrichment.class);
 		cq.select(entity);
 
-		final CriteriaHelper<PendingEnrichment> helper=new CriteriaHelper<PendingEnrichment>(em,cq,entity);
-		helper.registerCriteria("location","repositoryLocation",repositoryLocation);
-		helper.registerCriteria("name","branchName",branchName);
-		helper.registerCriteria("id","commitId",commitId);
+		final CriteriaHelper<CompletedEnrichment> helper=new CriteriaHelper<CompletedEnrichment>(em,cq,entity);
+		helper.registerCriteria("repository","repositoryResource",repositoryResource);
+		helper.registerCriteria("branch","branchResource",branchResource);
+		helper.registerCriteria("commit","commitResource",commitResource);
 
 		return helper.getQuery().getResultList();
 	}

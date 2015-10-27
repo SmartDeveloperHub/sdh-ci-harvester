@@ -30,6 +30,7 @@ import java.io.Closeable;
 
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
@@ -52,6 +53,8 @@ public interface ComponentRegistry extends Closeable {
 	CommitRepository getCommitRepository();
 
 	PendingEnrichmentRepository getPendingEnrichmentRepository();
+
+	CompletedEnrichmentRepository getCompletedEnrichmentRepository();
 
 	TransactionManager getTransactionManager();
 

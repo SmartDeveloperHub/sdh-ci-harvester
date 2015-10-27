@@ -35,8 +35,6 @@ import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManageme
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.spi.ComponentRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.spi.RuntimeDelegate;
-import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
-import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionException;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
 public final class BackendFacade implements Closeable {
@@ -58,7 +56,9 @@ public final class BackendFacade implements Closeable {
 		this.enrichmentService=
 			new EnrichmentService(
 				this.scmService,
-				this.componentRegistry.getPendingEnrichmentRepository());
+				this.componentRegistry.getExecutionRepository(),
+				this.componentRegistry.getPendingEnrichmentRepository(),
+				this.componentRegistry.getCompletedEnrichmentRepository());
 		this.applicationService=
 			new ContinuousIntegrationService(
 				this.componentRegistry.getServiceRepository(),
@@ -97,17 +97,7 @@ public final class BackendFacade implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		final Transaction tx = this.componentRegistry.getTransactionManager().currentTransaction();
-		try {
-			tx.begin();
-			this.componentRegistry.getPendingEnrichmentRepository().removeAll();
-			tx.commit();
-		} catch (final TransactionException e) {
-			throw new IOException("Could not clear pending enrichments",e);
-		} finally {
-			this.componentRegistry.close();
-		}
-
+		this.componentRegistry.close();
 	}
 
 }
