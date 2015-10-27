@@ -63,8 +63,8 @@
 				<codebase>
 					<location><xsl:value-of select="//action/lastBuiltRevision/../remoteUrl"/></location>
 					<branch><xsl:value-of select="//action/lastBuiltRevision/branch/name"/></branch>
-					<commit><xsl:value-of select="//action/lastBuiltRevision/SHA1"/></commit>
 				</codebase>
+				<commit><xsl:value-of select="//action/lastBuiltRevision/SHA1"/></commit>
 			</xsl:if>
 		</ci:run>
 	</xsl:template>

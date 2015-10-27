@@ -30,6 +30,9 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+import javax.net.ssl.SSLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,31 +45,36 @@ import org.smartdeveloperhub.jenkins.client.JenkinsResourceProxy;
 import org.smartdeveloperhub.jenkins.crawler.application.ModelMappingService;
 import org.smartdeveloperhub.jenkins.crawler.application.spi.TransformationException;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Entity;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
+
+import com.google.common.collect.Sets;
 
 abstract class AbstractCrawlingTask implements Task {
 
 	private static final int RETRY_THRESHOLD = 5;
 
+	private static final CopyOnWriteArraySet<URI> NO_HTTPS_SUPPORT=Sets.newCopyOnWriteArraySet();
+
 	private final Logger logger=LoggerFactory.getLogger(getClass()); // NOSONAR
 
-	private URI location;
-	private JenkinsEntityType entity;
-	private JenkinsArtifactType artifact;
+	private final URI location;
+	private final JenkinsEntityType entity;
+	private final JenkinsArtifactType artifact;
 	private Context context;
 	private int retries;
 
-	AbstractCrawlingTask(URI location, JenkinsEntityType entity, JenkinsArtifactType artifact) {
+
+	AbstractCrawlingTask(final URI location, final JenkinsEntityType entity, final JenkinsArtifactType artifact) {
 		this.location=location;
 		this.entity=entity;
 		this.artifact=artifact;
 		this.retries=0;
 	}
 
-	private void setContext(Context context) {
+	private void setContext(final Context context) {
 		this.context=context;
 	}
 
@@ -74,11 +82,27 @@ abstract class AbstractCrawlingTask implements Task {
 		return
 			JenkinsResourceProxy.
 				create(this.location).
-					withUseHttps(true).
+					withUseHttps(isHttpsSupported(this.location)).
 					withEntity(this.entity);
 	}
 
-	private void retryTask(Throwable failure) {
+	private boolean isHttpsSupported(final URI location) {
+		final String strLocation = location.toString();
+		for(final URI forbidden:NO_HTTPS_SUPPORT) {
+			if(strLocation.startsWith(forbidden.toString())) {
+				this.logger.trace("{} cannot be accessed over HTTPS ({} has already failed)",location,forbidden);
+				return false;
+			}
+		}
+		this.logger.trace("{} can be accessed over HTTPS",location);
+		return true;
+	}
+
+	private void retryTask(final Throwable failure) {
+		if(failure.getCause() instanceof SSLException) {
+			this.logger.info("Location {} does not support HTTP over HTTPS ({})",this.location,failure.getCause().getMessage());
+			NO_HTTPS_SUPPORT.add(this.location);
+		}
 		this.retries++;
 		if(this.retries<RETRY_THRESHOLD) {
 			if(this.logger.isInfoEnabled()) {
@@ -90,25 +114,25 @@ abstract class AbstractCrawlingTask implements Task {
 		}
 	}
 
-	private void failSilently(Throwable failure, String errorMessage, Object... args) {
-		String log=String.format(errorMessage,args);
+	private void failSilently(final Throwable failure, final String errorMessage, final Object... args) {
+		final String log=String.format(errorMessage,args);
 		this.logger.error(log,failure);
 		throw new JenkinsClientException(log,failure);
 	}
 
-	private void persistResource(JenkinsResource resource) {
+	private void persistResource(final JenkinsResource resource) {
 		try {
 			this.context.resourceRepository().saveResource(resource);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			failSilently(e,"Could not persist resource %s",resource);
 		}
 	}
 
-	private void dispatchResource(JenkinsResource resource) {
+	private void dispatchResource(final JenkinsResource resource) {
 		if(Status.AVAILABLE.equals(resource.status())) {
 			try {
 				processResource(resource);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				failSilently(e,"Could not process resource %s",resource);
 			}
 		} else {
@@ -118,11 +142,11 @@ abstract class AbstractCrawlingTask implements Task {
 
 	@Override
 	public final String id() {
-		return String.format("%s:%s:%s:%s",taskPrefix(),entity,artifact,location);
+		return String.format("%s:%s:%s:%s",taskPrefix(),this.entity,this.artifact,this.location);
 	}
 
 	@Override
-	public final void execute(Context context) {
+	public final void execute(final Context context) {
 		if(!context.
 				crawlingDecissionPoint().
 					canProcessEntityType(
@@ -135,7 +159,7 @@ abstract class AbstractCrawlingTask implements Task {
 
 		setContext(context);
 		try {
-			JenkinsResource resource=
+			final JenkinsResource resource=
 				createProxy().
 					get(this.artifact);
 			persistResource(resource);
@@ -145,7 +169,7 @@ abstract class AbstractCrawlingTask implements Task {
 				return;
 			}
 			dispatchResource(resource);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			retryTask(e);
 		}
 	}
@@ -167,37 +191,37 @@ abstract class AbstractCrawlingTask implements Task {
 		return this.entity;
 	}
 
-	protected final  void persistEntity(Entity entity, JenkinsEntityType type) throws IOException {
+	protected final  void persistEntity(final Entity entity, final JenkinsEntityType type) throws IOException {
 		checkState(this.context!=null);
 		this.context.entityRepository().saveEntity(entity,type);
 	}
 
-	protected final Job loadJob(JenkinsResource resource) throws TransformationException {
+	protected final Job loadJob(final JenkinsResource resource) throws TransformationException {
 		checkState(this.context!=null);
 		return this.context.modelMapper().loadJob(resource);
 	}
 
-	protected final Run loadRun(JenkinsResource resource) throws TransformationException {
+	protected final Run loadRun(final JenkinsResource resource) throws TransformationException {
 		checkState(this.context!=null);
 		return this.context.modelMapper().loadRun(resource);
 	}
 
-	protected final Instance loadInstance(JenkinsResource resource) throws TransformationException {
+	protected final Instance loadInstance(final JenkinsResource resource) throws TransformationException {
 		checkState(this.context!=null);
 		return this.context.modelMapper().loadInstance(resource);
 	}
 
-	protected final void scheduleTask(Task task) {
+	protected final void scheduleTask(final Task task) {
 		checkState(this.context!=null);
 		this.context.schedule(task);
 	}
 
-	protected final void fireEvent(JenkinsEvent event) {
+	protected final void fireEvent(final JenkinsEvent event) {
 		checkState(this.context!=null);
 		this.context.fireEvent(event);
 	}
 
-	protected final <S extends Entity> S entityOfId(URI id, JenkinsEntityType entityType, Class<? extends S> entityClass) throws IOException {
+	protected final <S extends Entity> S entityOfId(final URI id, final JenkinsEntityType entityType, final Class<? extends S> entityClass) throws IOException {
 		checkState(this.context!=null);
 		return this.context.entityRepository().entityOfId(id,entityType,entityClass);
 	}

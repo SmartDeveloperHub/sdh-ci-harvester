@@ -63,23 +63,23 @@ public final class JenkinsResourceProxy {
 
 	private final JenkinsEntityType entity;
 
-	private JenkinsResourceProxy(URI location, JenkinsEntityType entity, boolean useHttps) {
+	private JenkinsResourceProxy(final URI location, final JenkinsEntityType entity, final boolean useHttps) {
 		this.useHttps = useHttps;
 		this.location = location;
 		this.entity = entity;
 	}
 
-	public JenkinsResourceProxy withLocation(URI location) {
+	public JenkinsResourceProxy withLocation(final URI location) {
 		checkNotNull(location,"Resource location cannot be null");
 		return new JenkinsResourceProxy(location,this.entity,this.useHttps);
 	}
 
-	public JenkinsResourceProxy withEntity(JenkinsEntityType entity) {
+	public JenkinsResourceProxy withEntity(final JenkinsEntityType entity) {
 		checkNotNull(entity,"Resource entity cannot be null");
 		return new JenkinsResourceProxy(this.location,entity,this.useHttps);
 	}
 
-	public JenkinsResourceProxy withUseHttps(boolean useHttps) {
+	public JenkinsResourceProxy withUseHttps(final boolean useHttps) {
 		return new JenkinsResourceProxy(this.location,this.entity,useHttps);
 	}
 
@@ -87,20 +87,20 @@ public final class JenkinsResourceProxy {
 		return this.location;
 	}
 
-	public JenkinsResource get(JenkinsArtifactType artifact) throws IOException {
+	public JenkinsResource get(final JenkinsArtifactType artifact) throws IOException {
 		checkNotNull(artifact,"Artifact cannot be null");
-		InMemoryJenkinsResource resource=
+		final InMemoryJenkinsResource resource=
 			new InMemoryJenkinsResource(new Date()).
 			withEntity(this.entity).
 				withLocation(this.location).
 				withEntity(this.entity). // Temporary
 				withArtifact(artifact);
-		CloseableHttpClient httpClient=HttpClients.createDefault();
+		final CloseableHttpClient httpClient=HttpClients.createDefault();
 		CloseableHttpResponse httpResponse=null;
-		HttpGet httpGet = createGetMethod(artifact.locate(location));
+		final HttpGet httpGet = createGetMethod(artifact.locate(this.location));
 		try {
 			httpResponse = httpClient.execute(httpGet);
-			int statusCode = httpResponse.getStatusLine().getStatusCode();
+			final int statusCode = httpResponse.getStatusLine().getStatusCode();
 			resource.
 				metadata().
 					withServerVersion(HttpResponseUtil.retrieveServiceVersion(httpResponse)).
@@ -109,7 +109,7 @@ public final class JenkinsResourceProxy {
 						withEtag(HttpResponseUtil.retrieveEntityTag(httpResponse)).
 						withLastModified(HttpResponseUtil.retrieveLastModified(httpResponse));
 
-			ContentType contentType=processResponseBody(resource,httpResponse.getEntity());
+			final ContentType contentType=processResponseBody(resource,httpResponse.getEntity());
 
 			if(statusCode!=200) {
 				resource.
@@ -121,9 +121,9 @@ public final class JenkinsResourceProxy {
 					resource,
 					contentType);
 			}
-		} catch (Exception cause) {
-			LOGGER.error("Communication with the server failed",cause);
-			throw new IOException("Communication with the server failed",cause);
+		} catch (final Exception cause) {
+			LOGGER.error("Communication with {} failed",this.location,cause);
+			throw new IOException("Communication with "+this.location+" failed",cause);
 		} finally {
 			IOUtils.closeQuietly(httpResponse);
 			IOUtils.closeQuietly(httpClient);
@@ -143,12 +143,12 @@ public final class JenkinsResourceProxy {
 					toString();
 	}
 
-	private ContentType processResponseBody(InMemoryJenkinsResource resource, HttpEntity httpEntity) throws IOException {
+	private ContentType processResponseBody(final InMemoryJenkinsResource resource, final HttpEntity httpEntity) throws IOException {
 		if(httpEntity==null) {
 			return null;
 		}
 
-		ContentType contentType =
+		final ContentType contentType =
 			ContentType.
 				parse(httpEntity.getContentType().getValue());
 
@@ -174,7 +174,7 @@ public final class JenkinsResourceProxy {
 		return contentType;
 	}
 
-	private void processResourceEntity(InMemoryJenkinsResource resource, ContentType contentType) {
+	private void processResourceEntity(final InMemoryJenkinsResource resource, final ContentType contentType) {
 		try {
 			if(resource.metadata().serverVersion()==null && resource.artifact().isModelObject()) {
 				resource.
@@ -189,20 +189,20 @@ public final class JenkinsResourceProxy {
 			} else {
 				updateRepresentationContent(resource);
 			}
-		} catch (Exception cause) {
+		} catch (final Exception cause) {
 			resource.
 				withStatus(
 					Status.UNPROCESSABLE_RESOURCE,cause,"Could not process response body");
 		}
 	}
 
-	private void updateRepresentationContent(InMemoryJenkinsResource resource) {
-		String body = resource.metadata().response().body().get().content();
+	private void updateRepresentationContent(final InMemoryJenkinsResource resource) {
+		final String body = resource.metadata().response().body().get().content();
 		try {
-			Document content = XmlUtils.toDocument(body);
-			String localName=content.getFirstChild().getNodeName();
+			final Document content = XmlUtils.toDocument(body);
+			final String localName=content.getFirstChild().getNodeName();
 			if(JenkinsArtifactType.RESOURCE.equals(resource.artifact())) {
-				JenkinsEntityType receivedEntity=JenkinsEntityType.fromNode(localName);
+				final JenkinsEntityType receivedEntity=JenkinsEntityType.fromNode(localName);
 				if(receivedEntity==null) {
 					resource.withStatus(
 						Status.UNSUPPORTED_RESOURCE,
@@ -221,21 +221,21 @@ public final class JenkinsResourceProxy {
 					withStatus(Status.AVAILABLE);
 			}
 			resource.withContent(content);
-		} catch (Exception cause) {
+		} catch (final Exception cause) {
 			LOGGER.debug("Could not process response body {}",body,cause);
 			resource.withStatus(Status.UNPROCESSABLE_RESOURCE,cause,"Could not process response body");
 		}
 	}
 
-	private HttpGet createGetMethod(URI buildLocation) {
+	private HttpGet createGetMethod(final URI buildLocation) {
 		String newURI=buildLocation.toString();
 		if(this.useHttps) {
 			newURI=newURI.replace("http://", "https://");
 		}
-		HttpGet httpGet = new HttpGet(newURI);
+		final HttpGet httpGet = new HttpGet(newURI);
 		httpGet.setHeader("Accept", "application/xml; charset=utf-8");
 		httpGet.setHeader("User-Agent", " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36");
-		RequestConfig config =
+		final RequestConfig config =
 			RequestConfig.
 				custom().
 					setConnectTimeout(5000).
@@ -246,7 +246,7 @@ public final class JenkinsResourceProxy {
 		return httpGet;
 	}
 
-	public static JenkinsResourceProxy create(URI location) {
+	public static JenkinsResourceProxy create(final URI location) {
 		checkNotNull(location,"Resource location cannot be null");
 		return new JenkinsResourceProxy(location,JenkinsEntityType.INSTANCE,false);
 	}
