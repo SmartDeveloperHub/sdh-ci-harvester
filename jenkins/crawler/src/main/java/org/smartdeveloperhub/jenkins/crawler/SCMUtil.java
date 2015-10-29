@@ -32,7 +32,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
-import org.smartdeveloperhub.jenkins.crawler.util.GitUtil;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
 import org.smartdeveloperhub.util.xml.XmlProcessingException;
 import org.smartdeveloperhub.util.xml.XmlUtils;
@@ -45,11 +44,11 @@ final class SCMUtil {
 	private SCMUtil() {
 	}
 
-	static boolean isDefined(Codebase codebase) {
+	static boolean isDefined(final Codebase codebase) {
 		return codebase!=null && (codebase.isSetBranch() || codebase.isSetLocation());
 	}
 
-	static Codebase createCodebase(JenkinsResource resource) {
+	static Codebase createCodebase(final JenkinsResource resource) {
 		final Document document = resource.content().get();
 		return
 			new Codebase().
@@ -57,9 +56,9 @@ final class SCMUtil {
 				withBranch(getBranch(document));
 	}
 
-	static Codebase mergeCodebases(List<Codebase> codebases) {
-		Codebase result=new Codebase();
-		for(Codebase codebase:codebases) {
+	static Codebase mergeCodebases(final List<Codebase> codebases) {
+		final Codebase result=new Codebase();
+		for(final Codebase codebase:codebases) {
 			if(codebase!=null) {
 				result.setLocation(firstNonNull(result.getLocation(),codebase.getLocation()));
 				result.setBranch(firstNonNull(result.getBranch(),codebase.getBranch()));
@@ -68,15 +67,14 @@ final class SCMUtil {
 		return result;
 	}
 
-	private static <V> V firstNonNull(V v1, V v2) {
+	private static <V> V firstNonNull(final V v1, final V v2) {
 		return v1!=null?v1:v2;
 	}
-
 
 	private static URI getLocation(final Document document) {
 		URI location=null;
 		try {
-			String rawLocation=
+			final String rawLocation=
 				XmlUtils.
 					evaluateXPath(
 						"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
@@ -84,8 +82,8 @@ final class SCMUtil {
 			if(rawLocation!=null && !rawLocation.isEmpty()) {
 				location = URI.create(rawLocation);
 			}
-		} catch (XmlProcessingException e) {
-			LOGGER.error("Could not recover codebase location information",e);
+		} catch (final XmlProcessingException e) {
+			LOGGER.error("Could not recover codebase location information from {}",toStringQuietly(document),e);
 		}
 		return location;
 	}
@@ -93,18 +91,27 @@ final class SCMUtil {
 	private static String getBranch(final Document document) {
 		String branch=null;
 		try {
-			String rawBranch=
+			final String rawBranch=
 				XmlUtils.
 					evaluateXPath(
 						"//scm[@class='hudson.plugins.git.GitSCM']/branches//name",
 						document);
 			if(rawBranch!=null && !rawBranch.isEmpty()) {
-				branch=GitUtil.normalizeBranchName(rawBranch);
+				branch=rawBranch;
 			}
-		} catch (XmlProcessingException e) {
-			LOGGER.error("Could not recover codebase branch information",e);
+		} catch (final XmlProcessingException e) {
+			LOGGER.error("Could not recover codebase branch information from {}",toStringQuietly(document),e);
 		}
 		return branch;
+	}
+
+	private static String toStringQuietly(final Document document) {
+		try {
+			return XmlUtils.toString(document);
+		} catch (final XmlProcessingException e) {
+			LOGGER.error("Could process {}",document,e);
+			return "<not available>";
+		}
 	}
 
 }

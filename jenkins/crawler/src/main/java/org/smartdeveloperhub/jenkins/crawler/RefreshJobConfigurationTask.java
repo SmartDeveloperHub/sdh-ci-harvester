@@ -30,21 +30,20 @@ import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 
-final class RefreshJobConfigurationTask extends AbstractArtifactCrawlingTask<Job> {
+final class RefreshJobConfigurationTask extends AbstractJobConfigurationTask {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshJobConfigurationTask.class);
 
 	private final Job previousJob;
 
-	RefreshJobConfigurationTask(URI location, Job previousJob, Job job, JenkinsEntityType type) {
-		super(location,type,JenkinsArtifactType.CONFIGURATION,job);
+	RefreshJobConfigurationTask(final URI location, final Job previousJob, final Job job, final JenkinsEntityType type) {
+		super(location,job,type);
 		this.previousJob= previousJob;
 	}
 
@@ -54,15 +53,18 @@ final class RefreshJobConfigurationTask extends AbstractArtifactCrawlingTask<Job
 	}
 
 	@Override
-	protected void processSubresource(Job parent, JenkinsResource resource) {
-		Codebase codebase=SCMUtil.createCodebase(resource);
+	protected void processSubresource(final Job parent, final JenkinsResource resource) {
+		final Codebase codebase = loadCodebase(parent, resource);
 		try {
+			LOGGER.trace("Retrieved SCM information for {}: {}",parent.getUrl(),codebase);
 			if(!codebase.equals(this.previousJob.getCodebase())) {
-				persistEntity(parent, entityType());
+				LOGGER.debug("Updating SCM information for {} from {} to {}",parent.getUrl(),parent.getCodebase(),codebase);
+				parent.setCodebase(codebase);
+				super.persistEntity(parent, entityType());
 				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
 			}
-		} catch (Exception e) {
-			LOGGER.error("Could not update SCM information {}",codebase,e);
+		} catch (final Exception e) {
+			LOGGER.error("Could not refresh SCM information {} for {}",codebase,parent,e);
 		}
 	}
 

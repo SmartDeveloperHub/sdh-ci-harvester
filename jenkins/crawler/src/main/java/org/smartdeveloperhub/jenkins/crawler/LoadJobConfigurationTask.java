@@ -31,19 +31,18 @@ import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 
-final class LoadJobConfigurationTask extends AbstractArtifactCrawlingTask<Job> {
+final class LoadJobConfigurationTask extends AbstractJobConfigurationTask {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(LoadJobConfigurationTask.class);
 
-	LoadJobConfigurationTask(URI location, Job job, JenkinsEntityType type) {
-		super(location,type,JenkinsArtifactType.CONFIGURATION,job);
+	LoadJobConfigurationTask(final URI location, final Job job, final JenkinsEntityType type) {
+		super(location,job,type);
 	}
 
 	@Override
@@ -52,16 +51,18 @@ final class LoadJobConfigurationTask extends AbstractArtifactCrawlingTask<Job> {
 	}
 
 	@Override
-	protected void processSubresource(Job parent, JenkinsResource resource) {
-		Codebase codebase = SCMUtil.createCodebase(resource);
+	protected void processSubresource(final Job parent, final JenkinsResource resource) {
+		final Codebase codebase = loadCodebase(parent, resource);
 		try {
+			LOGGER.trace("Retrieved SCM information for {}: {}",parent.getUrl(),codebase);
 			if(SCMUtil.isDefined(codebase)) {
+				LOGGER.debug("Setting SCM information for {} to {}",parent.getUrl(),codebase);
 				parent.withCodebase(codebase);
 				super.persistEntity(parent, entityType());
 				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
 			}
-		} catch (IOException e) {
-			LOGGER.error("Could not update SCM information {}",codebase,e);
+		} catch (final IOException e) {
+			LOGGER.error("Could not update SCM information {} for {}",codebase,parent,e);
 		}
 	}
 

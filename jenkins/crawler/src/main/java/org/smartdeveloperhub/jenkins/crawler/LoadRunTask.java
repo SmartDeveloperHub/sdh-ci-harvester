@@ -51,7 +51,7 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 
 	private static final String SEPARATOR = "/";
 
-	LoadRunTask(URI location) {
+	LoadRunTask(final URI location) {
 		super(location,Run.class,JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
 	}
 
@@ -61,13 +61,13 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 	}
 
 	@Override
-	protected void processEntity(Run run, JenkinsResource resource) throws IOException {
-		List<Codebase> codebases=Lists.newArrayList();
+	protected void processEntity(final Run run, final JenkinsResource resource) throws IOException {
+		final List<Codebase> codebases=Lists.newArrayList();
 		codebases.add(getNormalizedCodebase(run));
 
 		if(JenkinsEntityType.MAVEN_MODULE_RUN.isCompatible(resource.entity())) {
 			// We know for sure that this type of runs do not bear any SCM information
-			addSCMInformationFromAggregatorBuild(run, codebases);
+			addSCMInformationFromAggregatorRun(run, codebases);
 		}
 
 		codebases.add(getCodebaseFromJob(run));
@@ -87,8 +87,8 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 
 	}
 
-	private Codebase getNormalizedCodebase(Run run) {
-		Codebase result=new Codebase();
+	private Codebase getNormalizedCodebase(final Run run) {
+		final Codebase result=new Codebase();
 		if(run.isSetCodebase()) {
 			final Codebase codebase = run.getCodebase();
 			if(codebase.getLocation()!=null && codebase.getLocation().toString().isEmpty()) {
@@ -99,30 +99,30 @@ final class LoadRunTask extends AbstractEntityCrawlingTask<Run> {
 		return result;
 	}
 
-	private Codebase getCodebaseFromJob(Run run) {
+	private Codebase getCodebaseFromJob(final Run run) {
 		Codebase result=null;
 		try {
-			Job job = super.entityOfId(run.getJob(), JenkinsEntityType.JOB,Job.class);
+			final Job job = super.entityOfId(run.getJob(), JenkinsEntityType.JOB,Job.class);
 			if(job!=null) {
 				result=job.getCodebase();
 			}
-		} catch (IOException e) {
-			LOGGER.warn("Could not retrieve job "+run.getJob()+" for run "+run.getUrl(),e);
+		} catch (final IOException e) {
+			LOGGER.warn("Could not retrieve job {} for run {}",run.getJob(),run.getUrl(),e);
 		}
 		return result;
 	}
 
-	private void addSCMInformationFromAggregatorBuild(Run run, List<Codebase> codebases) {
-		JenkinsURI breakdown = JenkinsURI.create(run.getUrl());
+	private void addSCMInformationFromAggregatorRun(final Run run, final List<Codebase> codebases) {
+		final JenkinsURI breakdown = JenkinsURI.create(run.getUrl());
 		final URI parentURI = URI.create(breakdown.instance()+"job/"+breakdown.job()+SEPARATOR+breakdown.run()+SEPARATOR);
 		try {
-			Run parent = super.entityOfId(parentURI,JenkinsEntityType.MAVEN_MULTIMODULE_RUN,Run.class);
-			if(parent!=null) {
-				codebases.add(parent.getCodebase());
-				run.setCommit(parent.getCommit());
+			final Run aggregator = super.entityOfId(parentURI,JenkinsEntityType.MAVEN_MULTIMODULE_RUN,Run.class);
+			if(aggregator!=null) {
+				codebases.add(aggregator.getCodebase());
+				run.setCommit(aggregator.getCommit());
 			}
-		} catch (IOException e) {
-			LOGGER.warn("Could not retrieve aggregator build "+parentURI+" for run "+run.getUrl(),e);
+		} catch (final IOException e) {
+			LOGGER.warn("Could not retrieve aggregator run {} for module run {}",parentURI,run.getUrl(),e);
 		}
 	}
 
