@@ -43,7 +43,7 @@ abstract class BuildVocabulary {
 	static final String CI_SUB_BUILD_TYPE       = "http://www.smartdeveloperhub.org/vocabulary/ci#SubBuild";
 	static final String CI_LOCATION             = "http://www.smartdeveloperhub.org/vocabulary/ci#location";
 	static final String SCM_LOCATION            = "http://www.smartdeveloperhub.org/vocabulary/scm#location";
-	static final String CI_BRANCH_ID            = "http://www.smartdeveloperhub.org/vocabulary/ci#branchId";
+	static final String CI_BRANCH_SPECIFIER     = "http://www.smartdeveloperhub.org/vocabulary/ci#branchSpecifier";
 	static final String CI_HAS_EXECUTION        = "http://www.smartdeveloperhub.org/vocabulary/ci#hasResource";
 	static final String CI_INCLUDES_BUILD       = "http://www.smartdeveloperhub.org/vocabulary/ci#includesBuild";
 	static final String CI_IS_PART_OF           = "http://www.smartdeveloperhub.org/vocabulary/ci#isPartOf";

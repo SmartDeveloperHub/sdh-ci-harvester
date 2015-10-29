@@ -67,7 +67,7 @@ final class BuildMapper extends BuildVocabulary {
 						withLiteral(build.description()).
 					property(SCM_LOCATION).
 						withLiteral(build.codebase().location()).
-					property(CI_BRANCH_ID).
+					property(CI_BRANCH_SPECIFIER).
 						withLiteral(build.codebase().branchName()).
 					property(CI_LOCATION).
 						withLiteral(build.location());
