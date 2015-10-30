@@ -20,27 +20,22 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-spi:0.2.0-SNAPSHOT
- *   Bundle      : ci-frontend-spi-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.spi;
+package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import com.google.common.base.Optional;
 
-public interface EntityIndex {
+public interface ExecutionEnrichment {
 
-	Service findService(URI serviceId);
+	Optional<URI> repositoryResource();
 
-	Build findBuild(URI buildId);
+	Optional<URI> branchResource();
 
-	@Deprecated
-	Execution findExecution(URI executionId);
-
-	EnrichedExecution findEnrichedExecution(URI executionId);
+	Optional<URI> commitResource();
 
 }

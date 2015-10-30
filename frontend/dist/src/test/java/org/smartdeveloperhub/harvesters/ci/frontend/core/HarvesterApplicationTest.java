@@ -31,8 +31,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
@@ -44,6 +48,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.QueryHelper.ResultProcessor;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.jayway.restassured.response.Response;
 
 @RunWith(Arquillian.class)
 public class HarvesterApplicationTest extends SmokeTest {
@@ -62,8 +73,8 @@ public class HarvesterApplicationTest extends SmokeTest {
 
 	@Test
 	@OperateOnDeployment("testing")
-	public void testService(@ArquillianResource URL contextURL) throws Exception {
-		List<String> builds = getServiceBuilds(contextURL);
+	public void testService(@ArquillianResource final URL contextURL) throws Exception {
+		final List<String> builds = getServiceBuilds(contextURL);
 		assertThat(builds,hasSize(2));
 		assertThat(builds,
 			hasItems(
@@ -73,7 +84,7 @@ public class HarvesterApplicationTest extends SmokeTest {
 
 	@Test
 	@OperateOnDeployment("testing")
-	public void testSimpleBuild(@ArquillianResource URL contextURL) throws Exception {
+	public void testSimpleBuild(@ArquillianResource final URL contextURL) throws Exception {
 		given().
 			accept(TEXT_TURTLE).
 			baseUri(contextURL.toString()).
@@ -87,7 +98,7 @@ public class HarvesterApplicationTest extends SmokeTest {
 
 	@Test
 	@OperateOnDeployment("testing")
-	public void testCompositeBuild(@ArquillianResource URL contextURL) throws Exception {
+	public void testCompositeBuild(@ArquillianResource final URL contextURL) throws Exception {
 		given().
 			accept(TEXT_TURTLE).
 			baseUri(contextURL.toString()).
@@ -101,7 +112,7 @@ public class HarvesterApplicationTest extends SmokeTest {
 
 	@Test
 	@OperateOnDeployment("testing")
-	public void testSubBuild(@ArquillianResource URL contextURL) throws Exception {
+	public void testSubBuild(@ArquillianResource final URL contextURL) throws Exception {
 		given().
 			accept(TEXT_TURTLE).
 			baseUri(contextURL.toString()).
@@ -113,18 +124,70 @@ public class HarvesterApplicationTest extends SmokeTest {
 		testExecutions(TestingUtil.resolve(contextURL,SUB_BUILD));
 	}
 
-	public void testExecutions(String base) throws Exception {
+	public void testExecutions(final String base) throws Exception {
 		for(int i=1;i<7;i++) {
 			LOGGER.info("Trying {}executions/{}/",base,i);
-			given().
-				accept(TEXT_TURTLE).
-				baseUri(base).
-			expect().
-				statusCode(OK).
-				contentType(TEXT_TURTLE).
-			when().
-				get("executions/"+i+"/");
+			final String path = "executions/"+i+"/";
+			final Response response =
+				given().
+					accept(TEXT_TURTLE).
+					baseUri(base).
+				expect().
+					statusCode(OK).
+					contentType(TEXT_TURTLE).
+				when().
+					get(path);
+			final String body = response.getBody().asString();
+			LOGGER.trace(body);
+			final List<Map<String, String>> enrichments = getEnrichments(response, base, path);
+			assertThat(enrichments,hasSize(1));
+			LOGGER.debug("Found: \n{}",toString(base+path,enrichments));
 		}
+	}
+
+	private List<Map<String, String>> getEnrichments(final Response response, final String base, final String path) throws IOException {
+		return
+			QueryHelper.
+				newInstance().
+					withModel(
+						TestingUtil.
+							asModel(response,new URL(base),path)).
+					withQuery().
+						fromResource("queries/execution_scm.sparql").
+					select(
+						new ResultProcessor<List<Map<String,String>>>() {
+							private final List<Map<String,String>> results=Lists.newArrayList();
+							@Override
+							protected void processSolution() {
+								final QuerySolution solution = solution();
+								final Iterator<String> names=solution.varNames();
+								final Map<String,String> item=Maps.newLinkedHashMap();
+								for(;names.hasNext();) {
+									final String name = names.next();
+									item.put(name,solution.get(name).asNode().toString(false));
+								}
+								this.results.add(item);
+							}
+							@Override
+							public List<Map<String,String>> getResult() {
+								return ImmutableList.copyOf(this.results);
+							}
+						}
+					);
+	}
+
+	private String toString(final String executionId,final List<Map<String, String>> builds) {
+		final StringBuilder builder=new StringBuilder();
+		builder.append(executionId).append(" {").append(System.lineSeparator());
+		for(final Map<String,String> item:builds) {
+			builder.append("  ").append("- ExecutionEnrichment {").append(System.lineSeparator());
+			for(final Entry<String,String> entry:item.entrySet()) {
+				builder.append("      + ").append(entry.getKey()).append(" : ").append(entry.getValue()).append(System.lineSeparator());
+			}
+			builder.append("    }").append(System.lineSeparator());
+		}
+		builder.append("}").append(System.lineSeparator());
+		return builder.toString();
 	}
 
 }

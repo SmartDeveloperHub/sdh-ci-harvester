@@ -30,9 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.CopyOnWriteArraySet;
-
-import javax.net.ssl.SSLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,13 +47,9 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
-import com.google.common.collect.Sets;
-
 abstract class AbstractCrawlingTask implements Task {
 
 	private static final int RETRY_THRESHOLD = 5;
-
-	private static final CopyOnWriteArraySet<URI> NO_HTTPS_SUPPORT=Sets.newCopyOnWriteArraySet();
 
 	private final Logger logger=LoggerFactory.getLogger(getClass()); // NOSONAR
 
@@ -82,27 +75,10 @@ abstract class AbstractCrawlingTask implements Task {
 		return
 			JenkinsResourceProxy.
 				create(this.location).
-					withUseHttps(isHttpsSupported(this.location)).
 					withEntity(this.entity);
 	}
 
-	private boolean isHttpsSupported(final URI location) {
-		final String strLocation = location.toString();
-		for(final URI forbidden:NO_HTTPS_SUPPORT) {
-			if(strLocation.startsWith(forbidden.toString())) {
-				this.logger.trace("{} cannot be accessed over HTTPS ({} has already failed)",location,forbidden);
-				return false;
-			}
-		}
-		this.logger.trace("{} can be accessed over HTTPS",location);
-		return true;
-	}
-
 	private void retryTask(final Throwable failure) {
-		if(failure.getCause() instanceof SSLException) {
-			this.logger.info("Location {} does not support HTTP over HTTPS ({})",this.location,failure.getCause().getMessage());
-			NO_HTTPS_SUPPORT.add(this.location);
-		}
 		this.retries++;
 		if(this.retries<RETRY_THRESHOLD) {
 			if(this.logger.isInfoEnabled()) {

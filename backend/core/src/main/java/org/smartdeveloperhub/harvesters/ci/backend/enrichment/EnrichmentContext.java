@@ -40,19 +40,19 @@ final class EnrichmentContext {
 	private final String branchName;
 	private final String commitId;
 
-	private URI repositoryResource;
-	private URI branchResource;
+	private ImmutableExecutionEnrichment enrichment;
+
 	private Long pendingEnrichment;
-	private URI commitResource;
 
 	EnrichmentContext(final Execution execution) {
 		this.target=execution.executionId();
 		this.repositoryLocation=execution.codebase().location();
 		this.branchName=execution.codebase().branchName();
 		this.commitId=execution.commitId();
+		this.enrichment=new ImmutableExecutionEnrichment();
 	}
 
-	URI target() {
+	URI targetExecution() {
 		return this.target;
 	}
 
@@ -68,6 +68,10 @@ final class EnrichmentContext {
 		return this.commitId;
 	}
 
+	ExecutionEnrichment enrichment() {
+		return this.enrichment;
+	}
+
 	boolean requiresRepository() {
 		return this.repositoryLocation!=null;
 	}
@@ -80,29 +84,16 @@ final class EnrichmentContext {
 		return requiresBranch() && this.commitId!=null;
 	}
 
-	Optional<URI> repositoryResource() {
-		return Optional.fromNullable(this.repositoryResource);
-	}
-
-	Optional<URI> branchResource() {
-		return Optional.fromNullable(this.branchResource);
-	}
-
-	Optional<URI> commitResource() {
-		return Optional.fromNullable(this.commitResource);
-	}
-
 	void setRepositoryResource(final URI resource) {
-		this.repositoryResource=resource;
+		this.enrichment=this.enrichment.withRepositoryResource(resource);
 	}
 
 	void setBranchResource(final URI resource) {
-		this.branchResource=resource;
+		this.enrichment=this.enrichment.withBranchResource(resource);
 	}
 
 	void setCommitResource(final URI resource) {
-		this.commitResource = resource;
-
+		this.enrichment=this.enrichment.withCommitResource(resource);
 	}
 
 	void setPendingEnrichment(final long pendingEnrichment) {
@@ -111,15 +102,18 @@ final class EnrichmentContext {
 
 	boolean requiresEnrichment() {
 		return
-			!isResolved(requiresCommit(), this.commitResource) ||
-			!isResolved(requiresBranch(), this.branchResource) ||
-			!isResolved(requiresRepository(), this.repositoryResource);
+			!isResolved(requiresCommit(), this.enrichment.commitResource()) ||
+			!isResolved(requiresBranch(), this.enrichment.branchResource()) ||
+			!isResolved(requiresRepository(), this.enrichment.repositoryResource());
 	}
 
-	private boolean isResolved(final boolean condition, final URI resource) {
-		return !condition || resource!=null;
+	private boolean isResolved(final boolean condition, final Optional<URI> resource) {
+		return !condition || resource.isPresent();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return
@@ -130,13 +124,9 @@ final class EnrichmentContext {
 					add("repositoryLocation",this.repositoryLocation).
 					add("branchName",this.branchName).
 					add("commitId",this.commitId).
-					add("repositoryResource",this.repositoryResource).
-					add("branchResource",this.branchResource).
-					add("commitResource",this.commitResource).
+					add("enrichment",this.enrichment).
 					add("pendingEnrichment",this.pendingEnrichment).
 					toString();
 	}
-
-
 
 }

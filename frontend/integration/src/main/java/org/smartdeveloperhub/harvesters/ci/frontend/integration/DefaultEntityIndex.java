@@ -34,9 +34,12 @@ import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ExecutionEnrichment;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionException;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EnrichedExecution;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
 final class DefaultEntityIndex implements EntityIndex {
@@ -46,33 +49,36 @@ final class DefaultEntityIndex implements EntityIndex {
 	private final TransactionManager txManager;
 	private final ContinuousIntegrationService cis;
 
-	DefaultEntityIndex(TransactionManager txManager, ContinuousIntegrationService cis) {
+	private final EnrichmentService es;
+
+	DefaultEntityIndex(final TransactionManager txManager, final ContinuousIntegrationService cis, final EnrichmentService es) {
 		this.txManager = txManager;
 		this.cis = cis;
+		this.es = es;
 	}
 
-	private void rollbackQuietly(URI id, Transaction transaction) {
+	private void rollbackQuietly(final URI id, final Transaction transaction) {
 		if(transaction!=null) {
 			try {
 				transaction.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOGGER.error("Could not rollback transaction for the retrieval of {}",id,e);
 			}
 		}
 	}
 
-	private void logFailure(URI id, TransactionException e) {
+	private void logFailure(final URI id, final TransactionException e) {
 		LOGGER.error("Could not begin transaction for retrieving {}",id,e);
 	}
 
 	@Override
-	public Service findService(URI serviceId) {
+	public Service findService(final URI serviceId) {
 		Service result=null;
-		Transaction transaction=this.txManager.currentTransaction();
+		final Transaction transaction=this.txManager.currentTransaction();
 		try {
 			transaction.begin();
 			result=this.cis.getService(serviceId);
-		} catch(TransactionException e) {
+		} catch(final TransactionException e) {
 			logFailure(serviceId,e);
 		} finally {
 			rollbackQuietly(serviceId,transaction);
@@ -81,13 +87,28 @@ final class DefaultEntityIndex implements EntityIndex {
 	}
 
 	@Override
-	public Execution findExecution(URI executionId) {
+	public Build findBuild(final URI buildId) {
+		Build result=null;
+		final Transaction transaction=this.txManager.currentTransaction();
+		try {
+			transaction.begin();
+			result=this.cis.getBuild(buildId);
+		} catch(final TransactionException e) {
+			logFailure(buildId,e);
+		} finally {
+			rollbackQuietly(buildId,transaction);
+		}
+		return result;
+	}
+
+	@Override
+	public Execution findExecution(final URI executionId) {
 		Execution result=null;
-		Transaction transaction=this.txManager.currentTransaction();
+		final Transaction transaction=this.txManager.currentTransaction();
 		try {
 			transaction.begin();
 			result=this.cis.getExecution(executionId);
-		} catch(TransactionException e) {
+		} catch(final TransactionException e) {
 			logFailure(executionId,e);
 		} finally {
 			rollbackQuietly(executionId,transaction);
@@ -96,16 +117,18 @@ final class DefaultEntityIndex implements EntityIndex {
 	}
 
 	@Override
-	public Build findBuild(URI buildId) {
-		Build result=null;
-		Transaction transaction=this.txManager.currentTransaction();
+	public EnrichedExecution findEnrichedExecution(final URI executionId) {
+		EnrichedExecution result=null;
+		final Transaction transaction=this.txManager.currentTransaction();
 		try {
 			transaction.begin();
-			result=this.cis.getBuild(buildId);
-		} catch(TransactionException e) {
-			logFailure(buildId,e);
+			final Execution execution=this.cis.getExecution(executionId);
+			final ExecutionEnrichment enrichment = this.es.getEnrichment(execution);
+			result=new DelegatedEnrichedExecution(enrichment, execution);
+		} catch(final TransactionException e) {
+			logFailure(executionId,e);
 		} finally {
-			rollbackQuietly(buildId,transaction);
+			rollbackQuietly(executionId,transaction);
 		}
 		return result;
 	}

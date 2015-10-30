@@ -27,6 +27,7 @@
 package org.smartdeveloperhub.harvesters.ci.frontend.core.execution;
 
 
+
 abstract class ExecutionVocabulary {
 
 	static final String TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -63,6 +64,9 @@ abstract class ExecutionVocabulary {
 	static final String CI_HAS_RESULT                   = "http://www.smartdeveloperhub.org/vocabulary/ci#hasResult";
 	static final String CI_BRANCH_ID                    = "http://www.smartdeveloperhub.org/vocabulary/ci#branchId";
 	static final String CI_COMMIT_ID                    = "http://www.smartdeveloperhub.org/vocabulary/ci#commitId";
+	static final String CI_FOR_BRANCH                   = "http://www.smartdeveloperhub.org/vocabulary/ci#forBranch";
+	static final String CI_FOR_COMMIT                   = "http://www.smartdeveloperhub.org/vocabulary/ci#forCommit";
+
 	static final String SCM_LOCATION                    = "http://www.smartdeveloperhub.org/vocabulary/scm#location";
 
 	ExecutionVocabulary() {

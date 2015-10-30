@@ -42,7 +42,10 @@ import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecu
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EnrichedExecution;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
+
+import com.google.common.base.Optional;
 
 final class BackendControllerManager {
 
@@ -77,6 +80,35 @@ final class BackendControllerManager {
 	private static final class NullBackendController implements BackendController {
 
 		private final class NullEntityIndex implements EntityIndex {
+			private final class NullEnrichedExecution implements
+					EnrichedExecution {
+				private final Execution target;
+
+				private NullEnrichedExecution(final Execution target) {
+					this.target = target;
+				}
+
+				@Override
+				public Execution target() {
+					return this.target;
+				}
+
+				@Override
+				public Optional<URI> repositoryResource() {
+					return Optional.absent();
+				}
+
+				@Override
+				public Optional<URI> branchResource() {
+					return Optional.absent();
+				}
+
+				@Override
+				public Optional<URI> commitResource() {
+					return Optional.absent();
+				}
+			}
+
 			@Override
 			public Service findService(final URI serviceId) {
 				return NullBackendController.this.service.getService(serviceId);
@@ -90,6 +122,11 @@ final class BackendControllerManager {
 			@Override
 			public Build findBuild(final URI buildId) {
 				return NullBackendController.this.service.getBuild(buildId);
+			}
+
+			@Override
+			public EnrichedExecution findEnrichedExecution(final URI executionId) {
+				return new NullEnrichedExecution(findExecution(executionId));
 			}
 		}
 

@@ -33,10 +33,10 @@ import org.ldp4j.application.ext.ResourceHandler;
 import org.ldp4j.application.ext.UnknownResourceException;
 import org.ldp4j.application.ext.annotations.Resource;
 import org.ldp4j.application.session.ResourceSnapshot;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EnrichedExecution;
 
 @Resource(
 	id=ExecutionHandler.ID
@@ -45,12 +45,12 @@ public class ExecutionHandler extends Serviceable implements ResourceHandler {
 
 	public static final String ID="ExecutionHandler";
 
-	public ExecutionHandler(BackendController controller) {
+	public ExecutionHandler(final BackendController controller) {
 		super(controller);
 	}
 
-	private Execution findExecution(URI id) throws UnknownResourceException {
-		Execution execution=entityIndex().findExecution(id);
+	private EnrichedExecution findExecution(final URI id) throws UnknownResourceException {
+		final EnrichedExecution execution=entityIndex().findEnrichedExecution(id);
 		if(execution==null) {
 			super.unknownResource(id,"Execution");
 		}
@@ -58,10 +58,10 @@ public class ExecutionHandler extends Serviceable implements ResourceHandler {
 	}
 
 	@Override
-	public DataSet get(ResourceSnapshot resource) throws UnknownResourceException {
-		URI executionId = IdentityUtil.executionId(resource);
+	public DataSet get(final ResourceSnapshot resource) throws UnknownResourceException {
+		final URI executionId = IdentityUtil.executionId(resource);
 		trace("Requested execution %s retrieval",executionId);
-		Execution execution = findExecution(executionId);
+		final EnrichedExecution execution = findExecution(executionId);
 		info("Retrieved execution %s: %s",executionId,execution);
 		return ExecutionMapper.toDataSet(execution);
 	}

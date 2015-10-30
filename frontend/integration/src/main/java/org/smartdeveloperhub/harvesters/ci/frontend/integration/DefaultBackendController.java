@@ -58,7 +58,8 @@ final class DefaultBackendController implements BackendController {
 		this.index=
 			new DefaultEntityIndex(
 				this.backendFacade.transactionManager(),
-				this.backendFacade.applicationService());
+				this.backendFacade.applicationService(),
+				this.backendFacade.enrichmentService());
 
 	}
 

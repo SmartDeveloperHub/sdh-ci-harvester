@@ -70,7 +70,7 @@ public final class Branch extends External {
 	public Commit createCommit(final String commitId, final URI resource) {
 		checkNotNull(commitId,"Commit identifier cannot be null");
 		checkNotNull(resource,"Commit resource cannot be null");
-		checkState(commits().add(commitId),"A commit identified by '%s' does already exist",commitId);
+		checkState(commits().add(commitId),"A commit identified by '%s' does already exist in branch '%s' of repository '%s'",commitId,this.id.name(),this.id.repository());
 		return Commit.newInstance(this,commitId,resource);
 	}
 

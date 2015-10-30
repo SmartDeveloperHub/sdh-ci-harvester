@@ -26,21 +26,11 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
-import java.net.URI;
-
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ExecutionEnrichment;
 
-public interface EntityIndex {
+public interface EnrichedExecution extends ExecutionEnrichment {
 
-	Service findService(URI serviceId);
-
-	Build findBuild(URI buildId);
-
-	@Deprecated
-	Execution findExecution(URI executionId);
-
-	EnrichedExecution findEnrichedExecution(URI executionId);
+	Execution target();
 
 }

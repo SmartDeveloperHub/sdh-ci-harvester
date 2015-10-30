@@ -20,53 +20,47 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:0.2.0-SNAPSHOT
- *   Bundle      : ci-frontend-test-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-integration:0.2.0-SNAPSHOT
+ *   Bundle      : ci-frontend-integration-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.test;
+package org.smartdeveloperhub.harvesters.ci.frontend.integration;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ExecutionEnrichment;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EnrichedExecution;
-import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
-final class TestingEntityIndex implements EntityIndex {
+import com.google.common.base.Optional;
 
-	private final ContinuousIntegrationService cis;
-	private final EnrichmentService es;
+final class DelegatedEnrichedExecution implements EnrichedExecution {
 
-	TestingEntityIndex(final ContinuousIntegrationService cis, final EnrichmentService es) {
-		this.cis = cis;
-		this.es = es;
+	private final ExecutionEnrichment enrichment;
+	private final Execution execution;
+
+	DelegatedEnrichedExecution(final ExecutionEnrichment enrichment, final Execution execution) {
+		this.enrichment = enrichment;
+		this.execution = execution;
 	}
 
 	@Override
-	public Service findService(final URI serviceId) {
-		return this.cis.getService(serviceId);
+	public Optional<URI> repositoryResource() {
+		return this.enrichment.repositoryResource();
 	}
 
 	@Override
-	public Build findBuild(final URI buildId) {
-		return this.cis.getBuild(buildId);
+	public Optional<URI> branchResource() {
+		return this.enrichment.branchResource();
 	}
 
 	@Override
-	public Execution findExecution(final URI executionId) {
-		return this.cis.getExecution(executionId);
+	public Optional<URI> commitResource() {
+		return this.enrichment.repositoryResource();
 	}
 
 	@Override
-	public EnrichedExecution findEnrichedExecution(final URI executionId) {
-		final Execution execution = findExecution(executionId);
-		final ExecutionEnrichment enrichment=this.es.getEnrichment(execution);
-		return new SimpleEnrichedExecution(execution,enrichment);
+	public Execution target() {
+		return this.execution;
 	}
-
 }

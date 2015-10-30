@@ -59,28 +59,21 @@ public final class JenkinsResourceProxy {
 
 	private final URI location;
 
-	private final boolean useHttps;
-
 	private final JenkinsEntityType entity;
 
-	private JenkinsResourceProxy(final URI location, final JenkinsEntityType entity, final boolean useHttps) {
-		this.useHttps = useHttps;
+	private JenkinsResourceProxy(final URI location, final JenkinsEntityType entity) {
 		this.location = location;
 		this.entity = entity;
 	}
 
 	public JenkinsResourceProxy withLocation(final URI location) {
 		checkNotNull(location,"Resource location cannot be null");
-		return new JenkinsResourceProxy(location,this.entity,this.useHttps);
+		return new JenkinsResourceProxy(location,this.entity);
 	}
 
 	public JenkinsResourceProxy withEntity(final JenkinsEntityType entity) {
 		checkNotNull(entity,"Resource entity cannot be null");
-		return new JenkinsResourceProxy(this.location,entity,this.useHttps);
-	}
-
-	public JenkinsResourceProxy withUseHttps(final boolean useHttps) {
-		return new JenkinsResourceProxy(this.location,this.entity,useHttps);
+		return new JenkinsResourceProxy(this.location,entity);
 	}
 
 	public URI location() {
@@ -139,7 +132,6 @@ public final class JenkinsResourceProxy {
 					omitNullValues().
 					add("location",this.location).
 					add("entity",this.location).
-					add("useHttps",this.useHttps).
 					toString();
 	}
 
@@ -228,11 +220,7 @@ public final class JenkinsResourceProxy {
 	}
 
 	private HttpGet createGetMethod(final URI buildLocation) {
-		String newURI=buildLocation.toString();
-		if(this.useHttps) {
-			newURI=newURI.replace("http://", "https://");
-		}
-		final HttpGet httpGet = new HttpGet(newURI);
+		final HttpGet httpGet = new HttpGet(buildLocation.toString());
 		httpGet.setHeader("Accept", "application/xml; charset=utf-8");
 		httpGet.setHeader("User-Agent", " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36");
 		final RequestConfig config =
@@ -248,7 +236,7 @@ public final class JenkinsResourceProxy {
 
 	public static JenkinsResourceProxy create(final URI location) {
 		checkNotNull(location,"Resource location cannot be null");
-		return new JenkinsResourceProxy(location,JenkinsEntityType.INSTANCE,false);
+		return new JenkinsResourceProxy(location,JenkinsEntityType.INSTANCE);
 	}
 
 }

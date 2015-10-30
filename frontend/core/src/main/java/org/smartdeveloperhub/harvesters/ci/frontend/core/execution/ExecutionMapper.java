@@ -35,8 +35,12 @@ import org.ldp4j.application.data.DataSets;
 import org.ldp4j.application.data.IndividualPropertyHelper;
 import org.ldp4j.application.data.Name;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ExecutionEnrichment;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EnrichedExecution;
+
+import com.google.common.base.Optional;
 
 final class ExecutionMapper extends ExecutionVocabulary {
 
@@ -45,18 +49,19 @@ final class ExecutionMapper extends ExecutionVocabulary {
 	private ExecutionMapper() {
 	}
 
-	static DataSet toDataSet(Execution execution) {
-		Name<URI> executionName=IdentityUtil.executionName(execution);
+	static DataSet toDataSet(final EnrichedExecution enrichedExecution) {
+		final Execution execution = enrichedExecution.target();
+		final Name<URI> executionName=IdentityUtil.executionName(execution);
 
-		ResultMapping resultMapping=
+		final ResultMapping resultMapping=
 			ResultMapping.newInstance(execution.result());
 
-		DataSet dataSet=DataSets.createDataSet(executionName);
+		final DataSet dataSet=DataSets.createDataSet(executionName);
 
-		DataSetHelper helper=DataSetUtils.newHelper(dataSet);
+		final DataSetHelper helper=DataSetUtils.newHelper(dataSet);
 
-		Name<URI> buildName = IdentityUtil.buildName(execution);
-		IndividualPropertyHelper executionHelper =
+		final Name<URI> buildName = IdentityUtil.buildName(execution);
+		final IndividualPropertyHelper executionHelper =
 			helper.
 				managedIndividual(executionName,ExecutionHandler.ID).
 					property(TYPE).
@@ -84,6 +89,8 @@ final class ExecutionMapper extends ExecutionVocabulary {
 						withIndividual(resultMapping.state()).
 					property(CI_HAS_RESULT).
 						withIndividual(executionName,ExecutionHandler.ID,RESULT_PATH);
+
+		populateEnrichedData(executionHelper, enrichedExecution);
 
 		if(execution.isFinished()) {
 			executionHelper.
@@ -115,6 +122,21 @@ final class ExecutionMapper extends ExecutionVocabulary {
 					withIndividual(executionName, ExecutionHandler.ID);
 
 		return dataSet;
+	}
+
+	private static void populateEnrichedData(final IndividualPropertyHelper helper, final ExecutionEnrichment enrichment) {
+		final Optional<URI> branchResource = enrichment.branchResource();
+		if(branchResource.isPresent()) {
+			helper.
+				property(CI_FOR_BRANCH).
+					withIndividual(branchResource.get());
+		}
+		final Optional<URI> commitResource = enrichment.commitResource();
+		if(commitResource.isPresent()) {
+			helper.
+				property(CI_FOR_COMMIT).
+					withIndividual(commitResource.get());
+		}
 	}
 
 }

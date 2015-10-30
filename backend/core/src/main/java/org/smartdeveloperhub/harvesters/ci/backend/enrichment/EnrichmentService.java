@@ -209,29 +209,30 @@ public class EnrichmentService {
 	}
 
 	private void processCompletedEnrichment(final EnrichmentContext context) {
-		final CompletedEnrichment completed=this.completedRepository.completedEnrichmentOfExecution(context.target());
+		final CompletedEnrichment completed=this.completedRepository.completedEnrichmentOfExecution(context.targetExecution());
 		if(completed!=null) {
 			LOGGER.trace("{} enrichment is already completed (#{})",context,completed.id());
 			return;
 		}
 
-		final List<CompletedEnrichment> potentialEnrichments=this.completedRepository.findCompletedEnrichments(context.repositoryResource().orNull(),context.branchResource().orNull(),context.commitResource().orNull());
+		final ExecutionEnrichment enrichment=context.enrichment();
+		final List<CompletedEnrichment> potentialEnrichments=this.completedRepository.findCompletedEnrichments(enrichment.repositoryResource().orNull(),enrichment.branchResource().orNull(),enrichment.commitResource().orNull());
 		if(!potentialEnrichments.isEmpty()) {
 			final CompletedEnrichment delegate = potentialEnrichments.get(0);
 			LOGGER.trace("{} enrichment is now completed by enrichment #{}",context,delegate.id());
-			delegate.executions().add(context.target());
+			delegate.executions().add(context.targetExecution());
 			return;
 		}
 
-		final CompletedEnrichment newCompleted=CompletedEnrichment.newInstance(context.repositoryResource().orNull(),context.branchResource().orNull(),context.commitResource().orNull());
-		newCompleted.executions().add(context.target());
+		final CompletedEnrichment newCompleted=CompletedEnrichment.newInstance(enrichment.repositoryResource().orNull(),enrichment.branchResource().orNull(),enrichment.commitResource().orNull());
+		newCompleted.executions().add(context.targetExecution());
 		this.completedRepository.add(newCompleted);
 		LOGGER.trace("{} enrichment is completed by {}",context,newCompleted);
 
 	}
 
 	private void processPendingEnrichment(final EnrichmentContext context) {
-		final PendingEnrichment pending=this.pendingRepository.pendingEnrichmentOfExecution(context.target());
+		final PendingEnrichment pending=this.pendingRepository.pendingEnrichmentOfExecution(context.targetExecution());
 		if(pending!=null) {
 			LOGGER.trace("{} enrichment request is already being undertaken by pending enrichment #{}",context,pending.id());
 			return;
@@ -241,12 +242,12 @@ public class EnrichmentService {
 		if(!potentialEnrichments.isEmpty()) {
 			final PendingEnrichment delegate = potentialEnrichments.get(0);
 			LOGGER.trace("{} enrichment request joins to pending enrichment #{}",context,delegate.id());
-			delegate.executions().add(context.target());
+			delegate.executions().add(context.targetExecution());
 			return;
 		}
 
 		final PendingEnrichment newPending=PendingEnrichment.newInstance(context.repositoryLocation(),context.branchName(),context.commitId());
-		newPending.executions().add(context.target());
+		newPending.executions().add(context.targetExecution());
 		this.pendingRepository.add(newPending);
 		LOGGER.trace("{} creates {}",context,pending);
 
@@ -280,6 +281,15 @@ public class EnrichmentService {
 		this.read.lock();
 		try {
 			this.state.enrich(execution);
+		} finally {
+			this.read.unlock();
+		}
+	}
+
+	public ExecutionEnrichment getEnrichment(final Execution execution) {
+		this.read.lock();
+		try {
+			return createContext(execution).enrichment();
 		} finally {
 			this.read.unlock();
 		}

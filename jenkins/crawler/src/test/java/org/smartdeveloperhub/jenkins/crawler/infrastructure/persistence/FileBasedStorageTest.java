@@ -52,49 +52,47 @@ public class FileBasedStorageTest {
 
 	@Test
 	public void testEntityManagement() throws Exception {
-		URI instanceId=URI.create("http://www.example.org/");
+		final URI instanceId=URI.create("http://www.example.org/");
 
-		Instance in=new Instance();
+		final Instance in=new Instance();
 		in.setUrl(instanceId);
 		in.setId(instanceId.toString());
 
-		FileBasedStorage write = storage();
+		final FileBasedStorage write = storage();
 		write.saveEntity(in,JenkinsEntityType.INSTANCE);
 		write.save();
 
-		FileBasedStorage read = storage();
-		Instance out=read.entityOfId(instanceId,JenkinsEntityType.INSTANCE,Instance.class);
+		final FileBasedStorage read = storage();
+		final Instance out=read.entityOfId(instanceId,JenkinsEntityType.INSTANCE,Instance.class);
 
 		assertThat(out,equalTo(in));
 	}
 
 	@Test
 	public void testBadEncoding() throws Exception {
-		String location="http://ci.jenkins-ci.org/job/infra_changelog_refresh/27821/";
-		JenkinsResourceProxy sut =
+		final String location="https://ci.jenkins-ci.org/job/infra_changelog_refresh/27821/";
+		final JenkinsResourceProxy sut =
 			JenkinsResourceProxy.
 				create(URI.create(location)).
-					withUseHttps(true).
 					withEntity(JenkinsEntityType.RUN);
 
 		try {
-			JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
 			System.out.println("Resource from '"+location+"':");
 			System.out.println(representation);
 			storage().saveResource(representation);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			System.err.println("Could not retrieve service: "+e.getMessage());
 			e.printStackTrace(System.err);
 		}
 	}
 
 	private FileBasedStorage storage() throws IOException {
-		FileBasedStorage storage =
+		return
 			FileBasedStorage.
 				builder().
 					withWorkingDirectory(this.testFolder.getRoot()).
 					build();
-		return storage;
 	}
 
 }

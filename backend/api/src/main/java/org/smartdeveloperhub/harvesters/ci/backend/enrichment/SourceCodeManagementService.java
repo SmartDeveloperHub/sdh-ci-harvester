@@ -109,7 +109,7 @@ public class SourceCodeManagementService {
 
 		final URI location=aCommand.repositoryLocation();
 		Repository repository = repositoryRepository().repositoryOfLocation(location);
-		checkState(repository!=null,"A repository locate at '%s' does already exist",location);
+		checkState(repository==null,"A repository located at '%s' does already exist",location);
 
 		final URI resource=aCommand.repositoryResource();
 		repository = Repository.newInstance(location, resource);

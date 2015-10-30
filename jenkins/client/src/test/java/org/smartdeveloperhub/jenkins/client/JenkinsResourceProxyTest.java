@@ -38,17 +38,16 @@ public class JenkinsResourceProxyTest {
 
 	@Test
 	public void testGet() throws Exception {
-		String location="https://ci.jenkins-ci.org/";
-		JenkinsResourceProxy sut =
+		final String location="https://ci.jenkins-ci.org/";
+		final JenkinsResourceProxy sut =
 			JenkinsResourceProxy.
 				create(URI.create(location)).
-					withUseHttps(true).
 					withEntity(JenkinsEntityType.INSTANCE);
 		try {
-			JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
 			System.out.println("Resource from '"+location+"':");
 			System.out.println(representation);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			System.err.println("Could not retrieve service: "+e.getMessage());
 			e.printStackTrace(System.err);
 		}
@@ -56,20 +55,19 @@ public class JenkinsResourceProxyTest {
 
 	@Test
 	public void testBadEncoding() throws Exception {
-		String location="http://ci.jenkins-ci.org/job/infra_changelog_refresh/27821/";
-		JenkinsResourceProxy sut =
+		final String location="https://ci.jenkins-ci.org/job/infra_changelog_refresh/27821/";
+		final JenkinsResourceProxy sut =
 			JenkinsResourceProxy.
 				create(URI.create(location)).
-					withUseHttps(true).
 					withEntity(JenkinsEntityType.RUN);
 		try {
-			JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
 			System.out.println("Resource from '"+location+"':");
 			System.out.println(representation);
 			if(representation.failure().isPresent()) {
 				representation.failure().get().printStackTrace();
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			System.err.println("Could not retrieve service: "+e.getMessage());
 			e.printStackTrace(System.err);
 		}

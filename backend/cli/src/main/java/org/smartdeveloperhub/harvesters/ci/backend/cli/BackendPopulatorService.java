@@ -46,7 +46,7 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 
 	private final class EventDumper implements EntityLifecycleEventListener {
 		@Override
-		public void onEvent(EntityLifecycleEvent event) {
+		public void onEvent(final EntityLifecycleEvent event) {
 			Consoles.
 				defaultConsole().
 					printf(
@@ -64,7 +64,7 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 	private final BackendFacade facade;
 	private JenkinsIntegrationService jis;
 
-	BackendPopulatorService(BackendConfig config, BackendFacade facade) {
+	BackendPopulatorService(final BackendConfig config, final BackendFacade facade) {
 		this.config = config;
 		this.facade = facade;
 	}
@@ -84,7 +84,7 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 	private void execute() throws IOException {
 		LOGGER.info("Starting population...");
 		this.jis.registerListener(new EventDumper());
-		this.jis.connect(URI.create("http://ci.jenkins-ci.org/"));
+		this.jis.connect(URI.create("https://ci.jenkins-ci.org/"));
 		this.jis.awaitCrawlingCompletion();
 	}
 
@@ -93,14 +93,14 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 			LOGGER.info("Terminating population...");
 			this.jis.disconnect();
 			LOGGER.info("Population completed.");
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("Could not disconnect integration service. Full stacktrace follows",e);
 		}
 	}
 
 	private void setUp() {
 		LOGGER.info("Preparing backend...");
-		File tmpDirectory=new File(this.config.getWorkingDirectory());
+		final File tmpDirectory=new File(this.config.getWorkingDirectory());
 		this.jis=this.facade.integrationService();
 		this.jis.
 			setWorkingDirectory(tmpDirectory).

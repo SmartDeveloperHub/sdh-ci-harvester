@@ -56,7 +56,7 @@ public final class HarvesterConfiguration extends Configuration {
 	public URI target() {
 		String target = System.getProperty(CI_HARVESTER_TARGET);
 		if(target==null) {
-			target="http://ci.jenkins-ci.org/";
+			target="https://ci.jenkins-ci.org/";
 		}
 		return URI.create(target);
 	}

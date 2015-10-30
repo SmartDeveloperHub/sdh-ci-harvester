@@ -78,7 +78,7 @@ public class SmokeTest {
 		this.tmpDirectory = new File("target","jenkins"+new Date().getTime());
 		jis.setWorkingDirectory(this.tmpDirectory);
 		LOGGER.info("Warming up...");
-		jis.connect(URI.create("http://ci.jenkins-ci.org/"));
+		jis.connect(URI.create("https://ci.jenkins-ci.org/"));
 		try {
 			TimeUnit.SECONDS.sleep(60);
 		} catch(final InterruptedException e) {
