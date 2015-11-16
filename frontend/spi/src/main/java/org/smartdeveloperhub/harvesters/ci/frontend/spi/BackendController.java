@@ -29,6 +29,7 @@ package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 import java.io.IOException;
 import java.net.URI;
 
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 
 public interface BackendController {
@@ -36,6 +37,8 @@ public interface BackendController {
 	EntityIndex entityIndex();
 
 	boolean setTargetService(URI instance);
+
+	void setExecutionResolver(ResolverService resolver);
 
 	void connect(EntityLifecycleEventListener listener) throws IOException;
 

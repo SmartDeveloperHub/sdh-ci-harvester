@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
 import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
@@ -52,6 +53,8 @@ final class DefaultBackendController implements BackendController {
 	private URI jenkinsInstance;
 
 	private final DefaultEntityIndex index;
+
+	private ResolverService resolver;
 
 	DefaultBackendController(final BackendFacade backendFacade) {
 		this.backendFacade = backendFacade;
@@ -75,6 +78,14 @@ final class DefaultBackendController implements BackendController {
 				LOGGER.warn("Could not discard transaction",e);
 			}
 		}
+	}
+
+	private boolean hasTargetService(final URI instance) {
+		return
+			this.backendFacade.
+				applicationService().
+					getRegisteredServices().
+						contains(instance);
 	}
 
 	/**
@@ -117,12 +128,10 @@ final class DefaultBackendController implements BackendController {
 		return result;
 	}
 
-	private boolean hasTargetService(final URI instance) {
-		return
-			this.backendFacade.
-				applicationService().
-					getRegisteredServices().
-						contains(instance);
+	@Override
+	public void setExecutionResolver(final ResolverService resolver) {
+		checkNotNull(resolver,"Execution resolver cannot be null");
+		this.resolver=resolver;
 	}
 
 	/**
@@ -131,9 +140,11 @@ final class DefaultBackendController implements BackendController {
 	@Override
 	public void connect(final EntityLifecycleEventListener listener) throws IOException {
 		checkState(this.jenkinsInstance!=null,"No target service defined");
+		checkState(this.resolver!=null,"No execution resolver defined");
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
 		try {
 			integrationService().registerListener(listener);
+			integrationService().setEntityResolver(this.resolver);
 			integrationService().connect(this.jenkinsInstance);
 		} catch (final IOException e) {
 			LOGGER.info("Could not connect to {}. Full stacktrace follows",this.jenkinsInstance,e);

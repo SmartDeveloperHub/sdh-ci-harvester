@@ -26,6 +26,7 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.test;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.net.URI;
@@ -45,6 +46,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateBranchCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateCommitCommand;
@@ -247,6 +249,15 @@ final class TestingBackendController implements BackendController {
 			LOGGER.error("Could not populate testing backend controller",e);
 			return false;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setExecutionResolver(final ResolverService resolver) {
+		checkNotNull(resolver,"Execution resolver cannot be null");
+		this.es.withResolverService(resolver);
 	}
 
 	/**

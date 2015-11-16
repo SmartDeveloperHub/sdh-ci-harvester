@@ -36,6 +36,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecutionRepository;
@@ -57,6 +58,11 @@ final class BackendControllerManager {
 
 		@Override
 		public boolean setTargetService(final URI instance) {
+			throw getFailure();
+		}
+
+		@Override
+		public void setExecutionResolver(final ResolverService resolver) {
 			throw getFailure();
 		}
 
@@ -142,6 +148,11 @@ final class BackendControllerManager {
 		}
 
 		@Override
+		public void setExecutionResolver(final ResolverService resolver) {
+			// NOTHING TO DO
+		}
+
+		@Override
 		public void connect(final EntityLifecycleEventListener listener) throws IOException {
 			// NOTHING TO DO
 		}
@@ -155,6 +166,7 @@ final class BackendControllerManager {
 		public void disconnect() {
 			// NOTHING TO DO
 		}
+
 	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendControllerManager.class);

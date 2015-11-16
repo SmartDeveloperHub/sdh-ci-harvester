@@ -35,7 +35,9 @@ import com.google.common.base.Optional;
 
 final class EnrichmentContext {
 
-	private final URI target;
+	static final EnrichmentContext NULL=new EnrichmentContext();
+
+	private final Execution targetExecution;
 	private final URI repositoryLocation;
 	private final String branchName;
 	private final String commitId;
@@ -44,16 +46,23 @@ final class EnrichmentContext {
 
 	private Long pendingEnrichment;
 
+	private EnrichmentContext() {
+		this.targetExecution=null;
+		this.repositoryLocation=null;
+		this.branchName=null;
+		this.commitId=null;
+	}
+
 	EnrichmentContext(final Execution execution) {
-		this.target=execution.executionId();
+		this.targetExecution=execution;
 		this.repositoryLocation=execution.codebase().location();
 		this.branchName=execution.codebase().branchName();
 		this.commitId=execution.commitId();
 		this.enrichment=new ImmutableExecutionEnrichment();
 	}
 
-	URI targetExecution() {
-		return this.target;
+	Execution targetExecution() {
+		return this.targetExecution;
 	}
 
 	URI repositoryLocation() {
@@ -120,7 +129,7 @@ final class EnrichmentContext {
 			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
-					add("target",this.target).
+					add("targetExecution",this.targetExecution.executionId()).
 					add("repositoryLocation",this.repositoryLocation).
 					add("branchName",this.branchName).
 					add("commitId",this.commitId).

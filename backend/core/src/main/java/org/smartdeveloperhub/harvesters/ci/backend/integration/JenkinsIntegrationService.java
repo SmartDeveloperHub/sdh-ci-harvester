@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 import org.smartdeveloperhub.jenkins.crawler.CrawlingStrategy;
@@ -57,11 +58,12 @@ public final class JenkinsIntegrationService {
 
 	private interface ServiceState {
 
-		void setWorkingDirectory(File directory);
 		void connectTo(URI instance) throws IOException;
 		void disconnect() throws IOException;
+		void setWorkingDirectory(File directory);
 		void setCrawlingStrategy(CrawlingStrategy strategy);
 		void setOperationStrategy(OperationStrategy strategy);
+		void setExecutionResolver(ResolverService resolver);
 
 		boolean isConnected();
 
@@ -97,6 +99,11 @@ public final class JenkinsIntegrationService {
 		@Override
 		public void setOperationStrategy(final OperationStrategy strategy) {
 			throw new IllegalStateException("Cannot change operation strategy while connected");
+		}
+
+		@Override
+		public void setExecutionResolver(final ResolverService resolver) {
+			throw new IllegalStateException("Cannot execution resolver directory while connected");
 		}
 
 		@Override
@@ -136,6 +143,7 @@ public final class JenkinsIntegrationService {
 		private File workingDirectory;
 		private CrawlingStrategy crawlingStrategy;
 		private OperationStrategy operationStrategy;
+		private ResolverService executionResolver;
 
 		private ServiceDisconnected() {
 		}
@@ -145,13 +153,8 @@ public final class JenkinsIntegrationService {
 		}
 
 		@Override
-		public void setWorkingDirectory(final File directory) {
-			this.workingDirectory = directory;
-		}
-
-		@Override
 		public void connectTo(final URI instance) throws IOException {
-			doConnect(instance, this.workingDirectory,this.crawlingStrategy,this.operationStrategy);
+			doConnect(instance,this.workingDirectory,this.crawlingStrategy,this.operationStrategy,this.executionResolver);
 			JenkinsIntegrationService.this.state=new ServiceConnected(this.workingDirectory);
 		}
 
@@ -176,6 +179,11 @@ public final class JenkinsIntegrationService {
 		}
 
 		@Override
+		public void setWorkingDirectory(final File directory) {
+			this.workingDirectory = directory;
+		}
+
+		@Override
 		public void setCrawlingStrategy(final CrawlingStrategy strategy) {
 			this.crawlingStrategy=strategy;
 		}
@@ -183,6 +191,11 @@ public final class JenkinsIntegrationService {
 		@Override
 		public void setOperationStrategy(final OperationStrategy strategy) {
 			this.operationStrategy=strategy;
+		}
+
+		@Override
+		public void setExecutionResolver(final ResolverService resolver) {
+			this.executionResolver=resolver;
 		}
 
 		@Override
@@ -254,8 +267,9 @@ public final class JenkinsIntegrationService {
 			final URI jenkinsInstance,
 			final File workingDirectory,
 			final CrawlingStrategy crawlingStrategy,
-			final OperationStrategy operationStrategy) throws IOException {
-		this.erService.connect();
+			final OperationStrategy operationStrategy,
+			final ResolverService resolver) throws IOException {
+		this.erService.withResolverService(resolver).connect();
 		try {
 			LOGGER.info("Connecting to {}...",jenkinsInstance);
 			this.monitor.startAsync();
@@ -333,6 +347,16 @@ public final class JenkinsIntegrationService {
 		this.write.lock();
 		try {
 			this.state.setWorkingDirectory(directory);
+			return this;
+		} finally {
+			this.write.unlock();
+		}
+	}
+
+	public JenkinsIntegrationService setEntityResolver(final ResolverService resolver) {
+		this.write.lock();
+		try {
+			this.state.setExecutionResolver(resolver);
 			return this;
 		} finally {
 			this.write.unlock();

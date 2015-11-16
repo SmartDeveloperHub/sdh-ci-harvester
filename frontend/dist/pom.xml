@@ -59,7 +59,6 @@
 	<!-- =================================================================== -->
 
 	<properties>
-		<ldp4j.version>0.1.0</ldp4j.version>
 		<jena.version>2.13.0</jena.version>
 		<frontend.http.port>80</frontend.http.port>
 		<failsafe.arg.line>-Xmx1024m -XX:MaxPermSize=256m</failsafe.arg.line>
@@ -98,7 +97,6 @@
 		<dependency>
 			<groupId>org.ldp4j.framework</groupId>
 			<artifactId>ldp4j-server-core</artifactId>
-			<version>${ldp4j.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>geronimo-servlet_3.0_spec</artifactId>

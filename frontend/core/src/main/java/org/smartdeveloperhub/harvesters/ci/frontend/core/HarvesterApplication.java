@@ -64,8 +64,13 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 		LOGGER.info("- Provider: {}",configuration.provider());
 		LOGGER.info("- Target..: {}",configuration.target());
 
+		final DefaultResolverService resolver = new DefaultResolverService();
+
 		this.target=configuration.target();
 		this.controller=BackendControllerManager.create(configuration.provider());
+		this.controller.setExecutionResolver(resolver);
+
+		environment.lifecycle().addApplicationLifecycleListener(resolver);
 
 		bootstrap.addHandler(new ServiceHandler(this.controller));
 		bootstrap.addHandler(new BuildContainerHandler(this.controller));

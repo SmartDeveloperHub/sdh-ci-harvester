@@ -27,6 +27,7 @@
 package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.io.IOException;
 import java.net.URI;
@@ -38,6 +39,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.curator.connector.Connector;
+import org.smartdeveloperhub.curator.connector.protocol.ProtocolFactory;
+import org.smartdeveloperhub.curator.protocol.DeliveryChannel;
 import org.smartdeveloperhub.harvesters.ci.backend.Codebase;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
@@ -68,7 +72,7 @@ public class EnrichmentService {
 
 		@Override
 		public void disconnect() throws IOException {
-			EnrichmentService.this.state=new ServiceDisconnected();
+			doDisconnect();
 		}
 
 		@Override
@@ -109,15 +113,26 @@ public class EnrichmentService {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(EnrichmentService.class);
 
+	private static final DeliveryChannel DEFAULT_DELIVERY_CHANNEL =
+		ProtocolFactory.
+			newDeliveryChannel().
+				withRoutingKey("ci.connector.enrichments").
+				build();
+
+	private static final String DEFAULT_BASE   = "http://localhost:8080/harvester/service/";
+
 	private final SourceCodeManagementService scmService;
 	private final PendingEnrichmentRepository pendingRepository;
 	private final CompletedEnrichmentRepository completedRepository;
 	private final ExecutionRepository executionRepository;
+	private final Connector connector;
 
 	private final Lock read;
 	private final Lock write;
 
 	private ServiceState state;
+	private ResolverService resolver;
+	private EnrichmentRequestor requestor;
 
 	public EnrichmentService(final SourceCodeManagementService scmService, final ExecutionRepository executionRepository, final PendingEnrichmentRepository repository, final CompletedEnrichmentRepository completedRepository) {
 		this.scmService = scmService;
@@ -128,13 +143,31 @@ public class EnrichmentService {
 		final ReadWriteLock lock=new ReentrantReadWriteLock();
 		this.read=lock.readLock();
 		this.write=lock.writeLock();
+		this.connector =
+			Connector.
+				builder().
+					withConnectorChannel(DEFAULT_DELIVERY_CHANNEL).
+					withQueueName("ci.connector.queue").
+					withBase(DEFAULT_BASE).
+					withNamespacePrefix(UseCase.CI_NAMESPACE,"ci").
+					withNamespacePrefix(UseCase.SCM_NAMESPACE,"scm").
+					withNamespacePrefix(UseCase.DOAP_NAMESPACE,"doap").
+					build();
 	}
 
-	private void doConnect() {
+	private void doConnect() throws IOException {
 		LOGGER.info("Initializing Enrichment Service...");
+		this.requestor=new EnrichmentRequestor(this.connector,this.resolver);
+		this.requestor.start();
+		initializeEnrichments();
+		LOGGER.info("Enrichment Service initialized.");
+		this.state=new ServiceConnected();
+	}
+
+	private void initializeEnrichments() {
 		final List<URI> executions=this.executionRepository.executionIds();
 		final Set<URI> enrichedExecutions=enrichedExecutions();
-		final Set<URI> pendingExecutions = clearPendingEnrichments();
+		final Set<URI> pendingExecutions=clearPendingEnrichments();
 		final Set<URI> toBeEnriched=Sets.newLinkedHashSet();
 		toBeEnriched.addAll(executions);
 		toBeEnriched.addAll(pendingExecutions);
@@ -146,8 +179,12 @@ public class EnrichmentService {
 			LOGGER.trace("Executions to enrich: {}",toBeEnriched);
 		}
 		retryEnrichments(toBeEnriched);
-		LOGGER.info("Enrichment Service initialized.");
-		this.state=new ServiceConnected();
+	}
+
+	private void doDisconnect() throws IOException {
+		this.requestor.stop();
+		LOGGER.info("Enrichment Service stopped.");
+		this.state=new ServiceDisconnected();
 	}
 
 	private Set<URI> enrichedExecutions() {
@@ -209,7 +246,7 @@ public class EnrichmentService {
 	}
 
 	private void processCompletedEnrichment(final EnrichmentContext context) {
-		final CompletedEnrichment completed=this.completedRepository.completedEnrichmentOfExecution(context.targetExecution());
+		final CompletedEnrichment completed=this.completedRepository.completedEnrichmentOfExecution(context.targetExecution().executionId());
 		if(completed!=null) {
 			LOGGER.trace("{} enrichment is already completed (#{})",context,completed.id());
 			return;
@@ -220,19 +257,19 @@ public class EnrichmentService {
 		if(!potentialEnrichments.isEmpty()) {
 			final CompletedEnrichment delegate = potentialEnrichments.get(0);
 			LOGGER.trace("{} enrichment is now completed by enrichment #{}",context,delegate.id());
-			delegate.executions().add(context.targetExecution());
+			delegate.executions().add(context.targetExecution().executionId());
 			return;
 		}
 
 		final CompletedEnrichment newCompleted=CompletedEnrichment.newInstance(enrichment.repositoryResource().orNull(),enrichment.branchResource().orNull(),enrichment.commitResource().orNull());
-		newCompleted.executions().add(context.targetExecution());
+		newCompleted.executions().add(context.targetExecution().executionId());
 		this.completedRepository.add(newCompleted);
 		LOGGER.trace("{} enrichment is completed by {}",context,newCompleted);
 
 	}
 
 	private void processPendingEnrichment(final EnrichmentContext context) {
-		final PendingEnrichment pending=this.pendingRepository.pendingEnrichmentOfExecution(context.targetExecution());
+		final PendingEnrichment pending=this.pendingRepository.pendingEnrichmentOfExecution(context.targetExecution().executionId());
 		if(pending!=null) {
 			LOGGER.trace("{} enrichment request is already being undertaken by pending enrichment #{}",context,pending.id());
 			return;
@@ -242,21 +279,28 @@ public class EnrichmentService {
 		if(!potentialEnrichments.isEmpty()) {
 			final PendingEnrichment delegate = potentialEnrichments.get(0);
 			LOGGER.trace("{} enrichment request joins to pending enrichment #{}",context,delegate.id());
-			delegate.executions().add(context.targetExecution());
+			delegate.executions().add(context.targetExecution().executionId());
 			return;
 		}
 
 		final PendingEnrichment newPending=PendingEnrichment.newInstance(context.repositoryLocation(),context.branchName(),context.commitId());
-		newPending.executions().add(context.targetExecution());
+		newPending.executions().add(context.targetExecution().executionId());
 		this.pendingRepository.add(newPending);
 		LOGGER.trace("{} creates {}",context,pending);
 
 		context.setPendingEnrichment(newPending.id());
-		fireEnrichmentRequest(context);
+		this.requestor.enqueueRequest(context);
 	}
 
-	private void fireEnrichmentRequest(final EnrichmentContext context) {
-		LOGGER.warn("{} requires firing an enrichment request",context);
+	public EnrichmentService withResolverService(final ResolverService resolver) {
+		this.write.lock();
+		try {
+			checkState(!this.state.isConnected(),"Cannot change resolver service while connected");
+			this.resolver=resolver;
+			return this;
+		} finally {
+			this.write.unlock();
+		}
 	}
 
 	public void connect() throws IOException {
