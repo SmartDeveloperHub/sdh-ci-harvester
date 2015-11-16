@@ -8,6 +8,8 @@ notifications:
 language: java
 jdk:
 - oraclejdk7
+services:
+- rabbitmq
 before_install:
 - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 before_script:
