@@ -81,13 +81,12 @@ final class EnrichmentRequestor {
 						new EnrichmentResultHandler() {
 							@Override
 							public void onResult(final EnrichmentResult result) {
-								// TODO: Auto-generated method stub
 								LOGGER.warn("Handling of result {} for context {} is still to be implemented",result,context);
 							}
 						}
 					);
 				} catch (final IOException e) {
-					LOGGER.warn("Could not request enrichment {} ({}). Full stacktrace follows",context,request);
+					LOGGER.warn("Could not request enrichment {} ({}). Full stacktrace follows",context,request,e);
 					// TODO: Think about how to handle the failure. Propagate?
 				}
 			}

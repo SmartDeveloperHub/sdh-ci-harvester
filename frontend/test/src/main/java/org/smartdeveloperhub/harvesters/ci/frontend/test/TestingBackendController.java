@@ -70,6 +70,8 @@ final class TestingBackendController implements BackendController {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(TestingBackendController.class);
 
+	private static int count;
+
 	private URI jenkinsInstance;
 
 	private final ServiceRepository serviceRepository;
@@ -156,8 +158,6 @@ final class TestingBackendController implements BackendController {
 		scmService.createCommit(command);
 		return newExecution;
 	}
-
-	private static int count;
 
 	private static String randomSHA1(final Build build, final int executionId) {
 		final Random r=new Random(System.currentTimeMillis());

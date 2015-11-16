@@ -28,10 +28,7 @@ package org.smartdeveloperhub.harvesters.ci.frontend.core.build;
 
 import org.ldp4j.application.data.DataSet;
 import org.ldp4j.application.data.DataSets;
-import org.ldp4j.application.ext.ApplicationRuntimeException;
 import org.ldp4j.application.ext.ContainerHandler;
-import org.ldp4j.application.ext.UnknownResourceException;
-import org.ldp4j.application.ext.UnsupportedContentException;
 import org.ldp4j.application.ext.annotations.DirectContainer;
 import org.ldp4j.application.session.ContainerSnapshot;
 import org.ldp4j.application.session.ResourceSnapshot;
@@ -48,28 +45,27 @@ public class BuildContainerHandler extends Serviceable implements ContainerHandl
 
 	public static final String ID="BuildContainerHandler";
 
-	public BuildContainerHandler(BackendController controller) {
+	public BuildContainerHandler(final BackendController controller) {
 		super(controller);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public DataSet get(ResourceSnapshot resource)
-			throws UnknownResourceException, ApplicationRuntimeException {
+	public DataSet get(final ResourceSnapshot resource) {
 		// For the time there is nothing to return
-		return
-			DataSets.
-				createDataSet(resource.name());
+		return DataSets.createDataSet(resource.name());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ResourceSnapshot create(
-			ContainerSnapshot container,
-			DataSet representation,
-			WriteSession session)
-					throws
-						UnknownResourceException,
-						UnsupportedContentException,
-						ApplicationRuntimeException {
+			final ContainerSnapshot container,
+			final DataSet representation,
+			final WriteSession session) {
 		trace("Requested build creation from: %n%s",representation);
 		throw super.unexpectedFailure("Build creation is not supported");
 	}

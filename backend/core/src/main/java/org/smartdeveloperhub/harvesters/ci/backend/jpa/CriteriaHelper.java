@@ -74,7 +74,7 @@ final class CriteriaHelper<E> {
 	}
 
 	private void updateCriteria() {
-		if (this.criteria.size() == 0) {
+		if (this.criteria.isEmpty()) {
 			// Nothing to do
 		} else if (this.criteria.size() == 1) {
 			this.query.where(this.criteria.get(0));

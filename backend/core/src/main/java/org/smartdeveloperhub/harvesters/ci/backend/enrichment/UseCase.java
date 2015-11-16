@@ -38,6 +38,9 @@ import org.smartdeveloperhub.curator.protocol.vocabulary.XSD;
 
 final class UseCase {
 
+	private static final String BRANCH = "branch";
+	private static final String COMMIT = "commit";
+
 	private static final Logger LOGGER=LoggerFactory.getLogger(UseCase.class);
 
 	static final String DOAP_NAMESPACE = "http://usefulinc.com/ns/doap#";
@@ -56,8 +59,8 @@ final class UseCase {
 					withFilters(
 						Filters.
 							newInstance().
-								withFilter(ci("forBranch"), "branch").
-								withFilter(ci("forCommit"), "commit")).
+								withFilter(ci("forBranch"), BRANCH).
+								withFilter(ci("forCommit"), COMMIT)).
 					withConstraints(
 						Constraints.
 							newInstance().
@@ -67,15 +70,15 @@ final class UseCase {
 									withProperty(scm("location")).
 										andTypedLiteral(context.repositoryLocation(),XSD.ANY_URI_TYPE).
 									withProperty(scm("hasBranch")).
-										andVariable("branch").
-								forVariable("branch").
+										andVariable(BRANCH).
+								forVariable(BRANCH).
 									withProperty(RDF.TYPE).
 										andResource(scm("Branch")).
 									withProperty(doap("name")).
 										andTypedLiteral(context.branchName(),XSD.STRING_TYPE).
 									withProperty(scm("hasCommit")).
-										andVariable("commit").
-								forVariable("commit").
+										andVariable(COMMIT).
+								forVariable(COMMIT).
 									withProperty(RDF.TYPE).
 										andResource(scm("Commit")).
 									withProperty(scm("commitId")).

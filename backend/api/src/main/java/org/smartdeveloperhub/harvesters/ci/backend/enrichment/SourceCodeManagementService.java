@@ -41,6 +41,8 @@ import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.Reposi
 
 public class SourceCodeManagementService {
 
+	private static final String COMMAND_CANNOT_BE_NULL = "Command cannot be null";
+
 	private RepositoryRepository repositoryRepository;
 	private BranchRepository branchRepository;
 	private CommitRepository commitRepository;
@@ -105,7 +107,7 @@ public class SourceCodeManagementService {
 	}
 
 	public void createRepository(final CreateRepositoryCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 
 		final URI location=aCommand.repositoryLocation();
 		Repository repository = repositoryRepository().repositoryOfLocation(location);
@@ -117,14 +119,14 @@ public class SourceCodeManagementService {
 	}
 
 	public void createBranch(final CreateBranchCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		final Repository repository=findRepository(aCommand);
 		final Branch branch = repository.createBranch(aCommand.branchName(), aCommand.branchResource());
 		branchRepository().add(branch);
 	}
 
 	public void createCommit(final CreateCommitCommand aCommand) {
-		checkNotNull(aCommand,"Command cannot be null");
+		checkNotNull(aCommand,COMMAND_CANNOT_BE_NULL);
 		final Branch branch=findBranch(aCommand);
 		final Commit commit = branch.createCommit(aCommand.commitId(), aCommand.commitResource());
 		commitRepository().add(commit);

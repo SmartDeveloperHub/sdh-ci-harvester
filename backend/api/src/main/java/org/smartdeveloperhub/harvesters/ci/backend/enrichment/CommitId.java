@@ -36,27 +36,27 @@ public final class CommitId implements Serializable {
 	private static final long serialVersionUID = 552945621672015380L;
 
 	private BranchId branchId;
-	private String commitId;
+	private String hash;
 
 	CommitId() {
 	}
 
 	private CommitId(final BranchId branchId, final String commitId) {
 		this.branchId = branchId;
-		this.commitId = commitId;
+		this.hash = commitId;
 	}
 
 	public BranchId branchId() {
 		return this.branchId;
 	}
 
-	public String commitId() {
-		return this.commitId;
+	public String hash() {
+		return this.hash;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.branchId,this.commitId);
+		return Objects.hash(this.branchId,this.hash);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public final class CommitId implements Serializable {
 			final CommitId that=(CommitId)obj;
 			result=
 				Objects.equals(this.branchId,that.branchId) &&
-				Objects.equals(this.commitId,that.commitId);
+				Objects.equals(this.hash,that.hash);
 		}
 		return result;
 	}
@@ -77,7 +77,7 @@ public final class CommitId implements Serializable {
 			MoreObjects.
 				toStringHelper(getClass()).
 					add("branchId",this.branchId).
-					add("commitId",this.commitId).
+					add("hash",this.hash).
 					toString();
 	}
 

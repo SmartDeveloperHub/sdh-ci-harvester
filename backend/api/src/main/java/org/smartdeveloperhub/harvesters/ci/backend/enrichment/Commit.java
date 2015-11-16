@@ -57,7 +57,7 @@ public final class Commit extends External {
 	}
 
 	public String commitId() {
-		return this.id.commitId();
+		return this.id.hash();
 	}
 
 	@Override
