@@ -56,9 +56,13 @@
 	<properties>
 		<ci.harvester.version>@project.version@</ci.harvester.version>
 		<deployment.dir>${basedir}${file.separator}.webapp</deployment.dir>
-		<harvester.http.port>80</harvester.http.port>
 		<harvester.config>${basedir}${file.separator}.config${file.separator}config.yml</harvester.config>
-		<harvester.target>https://ci.jenkins-ci.org/</harvester.target>
+		<harvester.target>${env.TARGET}</harvester.target>
+		<harvester.http.port>${env.HTTP_PORT}</harvester.http.port>
+		<harvester.http.host>${env.HTTP_HOST}</harvester.http.host>
+		<harvester.base>http://${harvester.http.host}:${harvester.http.port}/harvester/</harvester.base>
+		<harvester.broker.port>${env.BROKER_PORT}</harvester.broker.port>
+		<harvester.broker.host>${env.BROKER_HOST}</harvester.broker.host>
 	</properties>
 
 	<repositories>
@@ -181,9 +185,12 @@
 							<configurationDir>${basedir}${file.separator}.container</configurationDir>
 							<path>/harvester</path>
 							<systemProperties>
-								<ci.harvester.target>${harvester.target}</ci.harvester.target>
 								<ci.harvester.provider>DefaultBackendController</ci.harvester.provider>
+								<ci.harvester.target>${harvester.target}</ci.harvester.target>
 								<ci.harvester.config>${harvester.config}</ci.harvester.config>
+								<ci.harvester.base>${harvester.base}</ci.harvester.base>
+								<ci.broker.port>${harvester.broker.port}</ci.broker.port>
+								<ci.broker.host>${harvester.broker.host}</ci.broker.host>
 							</systemProperties>
 							<useTestClasspath>false</useTestClasspath>
 						</configuration>
