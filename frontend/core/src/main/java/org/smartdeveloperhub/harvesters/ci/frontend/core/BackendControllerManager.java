@@ -32,6 +32,7 @@ import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
 import org.smartdeveloperhub.harvesters.ci.backend.Build;
 import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
@@ -174,15 +175,20 @@ final class BackendControllerManager {
 	private BackendControllerManager() {
 	}
 
-	public static BackendController create(final String providerId) {
-		if(providerId==null) {
-			return new NullBackendController();
+	public static BackendController create(final String providerId, final BackendConfig config) {
+		BackendController result = new NullBackendController();
+		if(providerId!=null && config!=null) {
+			result=loadBackend(providerId,config);
 		}
+		return result;
+	}
+
+	private static BackendController loadBackend(final String providerId, final BackendConfig cfg) {
 		final ServiceLoader<BackendControllerFactory> providers=ServiceLoader.load(BackendControllerFactory.class);
 		for(final BackendControllerFactory provider:providers) {
 			LOGGER.debug("Trying to create backend controller {} using provider {}...",providerId,provider.getClass().getCanonicalName());
 			try {
-				final BackendController controller = provider.create(providerId);
+				final BackendController controller = provider.create(providerId,cfg);
 				if(controller!=null) {
 					LOGGER.debug("Created backend controller {} via {}",providerId,provider.getClass().getCanonicalName());
 					return controller;

@@ -20,25 +20,44 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:0.2.0-SNAPSHOT
- *   Bundle      : ci-frontend-test-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-spi:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-spi-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.test;
+package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
-import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
-import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
-import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
+public final class BrokerConfig {
 
-public final class TestingBackendControllerFactory implements BackendControllerFactory {
+	private String host;
+	private int port;
+	private String virtualHost;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public BackendController create(final String providerId, final BackendConfig config) {
-		return new TestingBackendController(Deployment.fromConfiguration(config.getEnrichment()));
+	public BrokerConfig() {
+		this.port=5672;
+	}
+
+	public String getHost() {
+		return this.host;
+	}
+
+	public void setHost(final String host) {
+		this.host = host;
+	}
+
+	public int getPort() {
+		return this.port;
+	}
+
+	public void setPort(final int port) {
+		this.port = port;
+	}
+
+	public String getVirtualHost() {
+		return this.virtualHost;
+	}
+
+	public void setVirtualHost(final String virtualHost) {
+		this.virtualHost = virtualHost;
 	}
 
 }

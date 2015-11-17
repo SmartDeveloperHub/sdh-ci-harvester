@@ -26,9 +26,11 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
+import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
+
 
 public interface BackendControllerFactory {
 
-	BackendController create(String providerId);
+	BackendController create(String providerId, BackendConfig config);
 
 }

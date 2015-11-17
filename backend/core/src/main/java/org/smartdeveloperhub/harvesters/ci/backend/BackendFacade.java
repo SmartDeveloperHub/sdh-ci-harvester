@@ -29,7 +29,7 @@ package org.smartdeveloperhub.harvesters.ci.backend;
 import java.io.Closeable;
 import java.io.IOException;
 
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
@@ -46,7 +46,7 @@ public final class BackendFacade implements Closeable {
 	private final EnrichmentService enrichmentService;
 	private final SourceCodeManagementService scmService;
 
-	private BackendFacade(final ComponentRegistry componentRegistry) {
+	private BackendFacade(final ComponentRegistry componentRegistry, final Deployment configuration) {
 		this.componentRegistry=componentRegistry;
 		this.scmService =
 			new SourceCodeManagementService(
@@ -58,7 +58,8 @@ public final class BackendFacade implements Closeable {
 				this.scmService,
 				this.componentRegistry.getExecutionRepository(),
 				this.componentRegistry.getPendingEnrichmentRepository(),
-				this.componentRegistry.getCompletedEnrichmentRepository());
+				this.componentRegistry.getCompletedEnrichmentRepository(),
+				configuration);
 		this.applicationService=
 			new ContinuousIntegrationService(
 				this.componentRegistry.getServiceRepository(),
@@ -71,8 +72,11 @@ public final class BackendFacade implements Closeable {
 				this.componentRegistry.getTransactionManager());
 	}
 
-	public static BackendFacade create(final DatabaseConfig config) {
-		return new BackendFacade(RuntimeDelegate.getInstance().getComponentRegistry(config));
+	public static BackendFacade create(final BackendConfig config) {
+		return
+			new BackendFacade(
+				RuntimeDelegate.getInstance().getComponentRegistry(config.getDatabase()),
+				Deployment.fromConfiguration(config.getEnrichment()));
 	}
 
 	public TransactionManager transactionManager() {

@@ -26,24 +26,16 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.integration;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public final class DefaultBackendControllerFactory implements BackendControllerFactory {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(DefaultBackendControllerFactory.class);
-
-	private static final String CI_HARVESTER_DATABASE_CONFIG_PATH = "ci.harvester.config";
 
 	private static final String PROVIDER_ID = "DefaultBackendController";
 
@@ -51,32 +43,16 @@ public final class DefaultBackendControllerFactory implements BackendControllerF
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BackendController create(String providerId) {
+	public BackendController create(final String providerId, final BackendConfig config) {
 		if(!PROVIDER_ID.equals(providerId)) {
 			return null;
 		}
-		String property=System.getProperty(CI_HARVESTER_DATABASE_CONFIG_PATH);
 		try {
-			DatabaseConfig config = loadConfiguration(property);
-			BackendFacade backend = BackendFacade.create(config);
+			final BackendFacade backend = BackendFacade.create(config);
 			return new DefaultBackendController(backend);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Could not initialize backend",e);
 			return null;
-		}
-	}
-
-	private static DatabaseConfig loadConfiguration(String pathname) throws IOException {
-		try {
-			LOGGER.info("Loading configuration from {}...",pathname);
-			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-			DatabaseConfig configuration = mapper.readValue(new File(pathname), DatabaseConfig.class);
-			LOGGER.info("Configuration loaded: {}",configuration);
-			return configuration;
-		} catch (Exception e) {
-			String errorMessage = String.format("Could not load configuration from %s",pathname);
-			LOGGER.warn(errorMessage+". Full stacktrace follows: ",e);
-			throw new IOException(errorMessage,e);
 		}
 	}
 

@@ -45,6 +45,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
 import org.smartdeveloperhub.harvesters.ci.backend.Service;
 import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
@@ -88,7 +89,7 @@ final class TestingBackendController implements BackendController {
 
 	private final EnrichmentService es;
 
-	TestingBackendController() {
+	TestingBackendController(final Deployment deployment) {
 		this.serviceRepository = new InMemoryServiceRepository();
 		this.buildRepository = new InMemoryBuildRepository();
 		this.executionRepository = new InMemoryExecutionRepository();
@@ -107,7 +108,8 @@ final class TestingBackendController implements BackendController {
 				this.scmService,
 				this.executionRepository,
 				new InMemoryPendingEnrichmentRepository(),
-				new InMemoryCompletedEnrichmentRepository());
+				new InMemoryCompletedEnrichmentRepository(),
+				deployment);
 		this.index=new TestingEntityIndex(this.service,this.es);
 	}
 

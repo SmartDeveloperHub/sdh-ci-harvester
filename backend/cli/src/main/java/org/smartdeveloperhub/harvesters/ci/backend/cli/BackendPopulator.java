@@ -52,8 +52,8 @@ public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 		super(NAME,BackendConfig.class);
 	}
 
-	public static void main(String[] args) throws Exception {
-		BackendPopulator bs = new BackendPopulator();
+	public static void main(final String[] args) throws Exception {
+		final BackendPopulator bs = new BackendPopulator();
 		bs.run(args);
 		bs.terminate();
 	}
@@ -64,20 +64,23 @@ public class BackendPopulator extends AbstractBootstrap<BackendConfig> {
 		try {
 			this.facade.close();
 			Consoles.defaultConsole().printf("Retrieved data available at %s.",this.config.getDatabase().getLocation());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			Consoles.defaultConsole().printf("Failed to shutdown the populator");
 			LOGGER.error("Failed to shutdown the application. Full stacktrace follows",e);
 		}
 	}
 
 	@Override
-	protected Iterable<Service> getServices(BackendConfig config) {
+	protected Iterable<Service> getServices(final BackendConfig config) {
 		Consoles.
 			defaultConsole().
 				printf("Using '%s' as working directory%n",config.getWorkingDirectory()).
 				printf("Persisting retrieved data in '%s'%n",config.getDatabase().getLocation());
 		this.config=config;
-		this.facade=BackendFacade.create(config.getDatabase());
+		final org.smartdeveloperhub.harvesters.ci.backend.BackendConfig backendConfig=new org.smartdeveloperhub.harvesters.ci.backend.BackendConfig();
+		backendConfig.setDatabase(config.getDatabase());
+		backendConfig.setEnrichment(config.getEnrichment());
+		this.facade=BackendFacade.create(backendConfig);
 		this.service=new BackendPopulatorService(config,this.facade);
 		return Collections.<Service>singleton(this.service);
 	}

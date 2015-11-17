@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.curator.connector.Connector;
 import org.smartdeveloperhub.curator.connector.protocol.ProtocolFactory;
-import org.smartdeveloperhub.curator.protocol.DeliveryChannel;
 import org.smartdeveloperhub.harvesters.ci.backend.Codebase;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
@@ -113,14 +112,6 @@ public class EnrichmentService {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(EnrichmentService.class);
 
-	private static final DeliveryChannel DEFAULT_DELIVERY_CHANNEL =
-		ProtocolFactory.
-			newDeliveryChannel().
-				withRoutingKey("ci.connector.enrichments").
-				build();
-
-	private static final String DEFAULT_BASE   = "http://localhost:8080/harvester/service/";
-
 	private final SourceCodeManagementService scmService;
 	private final PendingEnrichmentRepository pendingRepository;
 	private final CompletedEnrichmentRepository completedRepository;
@@ -134,7 +125,7 @@ public class EnrichmentService {
 	private ResolverService resolver;
 	private EnrichmentRequestor requestor;
 
-	public EnrichmentService(final SourceCodeManagementService scmService, final ExecutionRepository executionRepository, final PendingEnrichmentRepository repository, final CompletedEnrichmentRepository completedRepository) {
+	public EnrichmentService(final SourceCodeManagementService scmService, final ExecutionRepository executionRepository, final PendingEnrichmentRepository repository, final CompletedEnrichmentRepository completedRepository, final Deployment deployment) {
 		this.scmService = scmService;
 		this.executionRepository = executionRepository;
 		this.pendingRepository = repository;
@@ -146,9 +137,14 @@ public class EnrichmentService {
 		this.connector =
 			Connector.
 				builder().
-					withConnectorChannel(DEFAULT_DELIVERY_CHANNEL).
+					withConnectorChannel(
+						ProtocolFactory.
+							newDeliveryChannel().
+								withBroker(deployment.broker()).
+								withRoutingKey("ci.connector.enrichments").
+								build()).
 					withQueueName("ci.connector.queue").
-					withBase(DEFAULT_BASE).
+					withBase(deployment.base()).
 					withNamespacePrefix(UseCase.CI_NAMESPACE,"ci").
 					withNamespacePrefix(UseCase.SCM_NAMESPACE,"scm").
 					withNamespacePrefix(UseCase.DOAP_NAMESPACE,"doap").

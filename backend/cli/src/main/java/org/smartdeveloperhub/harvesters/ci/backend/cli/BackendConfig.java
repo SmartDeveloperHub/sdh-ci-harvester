@@ -29,6 +29,7 @@ package org.smartdeveloperhub.harvesters.ci.backend.cli;
 import java.io.File;
 
 import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentConfig;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
@@ -37,8 +38,9 @@ public final class BackendConfig {
 
 	private String workingDirectory;
 	private DatabaseConfig database;
+	private EnrichmentConfig enrichment;
 
-	public void setWorkingDirectory(String workingDirectory) {
+	public void setWorkingDirectory(final String workingDirectory) {
 		this.workingDirectory = workingDirectory;
 	}
 
@@ -50,7 +52,7 @@ public final class BackendConfig {
 		return this.database;
 	}
 
-	public void setDatabase(DatabaseConfig dbConfig) {
+	public void setDatabase(final DatabaseConfig dbConfig) {
 		this.database=dbConfig;
 	}
 
@@ -65,6 +67,14 @@ public final class BackendConfig {
 		return base+this.database.getLocation();
 	}
 
+	public void setEnrichment(final EnrichmentConfig enrichment) {
+		this.enrichment = enrichment;
+	}
+
+	public EnrichmentConfig getEnrichment() {
+		return this.enrichment;
+	}
+
 	@Override
 	public String toString() {
 		return
@@ -72,6 +82,7 @@ public final class BackendConfig {
 				toStringHelper(getClass()).
 					add("workingDirectory",this.workingDirectory).
 					add("database",this.database).
+					add("enrichment",this.enrichment).
 					toString();
 	}
 

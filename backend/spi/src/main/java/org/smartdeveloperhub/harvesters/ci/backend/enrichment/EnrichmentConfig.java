@@ -20,25 +20,32 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:0.2.0-SNAPSHOT
- *   Bundle      : ci-frontend-test-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-spi:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-spi-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.test;
+package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
-import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
-import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
-import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
 
-public final class TestingBackendControllerFactory implements BackendControllerFactory {
+public final class EnrichmentConfig {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public BackendController create(final String providerId, final BackendConfig config) {
-		return new TestingBackendController(Deployment.fromConfiguration(config.getEnrichment()));
+	private BrokerConfig broker;
+	private String base;
+
+	public BrokerConfig getBroker() {
+		return this.broker;
+	}
+
+	public void setBroker(final BrokerConfig broker) {
+		this.broker = broker;
+	}
+
+	public String getBase() {
+		return this.base;
+	}
+
+	public void setBase(final String base) {
+		this.base = base;
 	}
 
 }

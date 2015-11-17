@@ -32,3 +32,8 @@ database:
   deployment: PACKED
   mode: DROP_CREATE
   location: target/populator/db/population.zip
+enrichment:
+  base: http://localhost/harvester/
+  broker:
+    host: localhost
+    port: 5672

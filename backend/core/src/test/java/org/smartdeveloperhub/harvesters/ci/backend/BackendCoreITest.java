@@ -35,6 +35,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
@@ -82,7 +83,8 @@ public class BackendCoreITest extends SmokeTest {
 					this.persistencyFacade.getCommitRepository()),
 				this.persistencyFacade.getExecutionRepository(),
 				this.persistencyFacade.getPendingEnrichmentRepository(),
-				this.persistencyFacade.getCompletedEnrichmentRepository());
+				this.persistencyFacade.getCompletedEnrichmentRepository(),
+				Deployment.builder().build());
 		final ContinuousIntegrationService cis =
 			new ContinuousIntegrationService(
 				this.persistencyFacade.getServiceRepository(),

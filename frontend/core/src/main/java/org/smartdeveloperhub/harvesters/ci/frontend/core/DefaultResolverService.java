@@ -47,13 +47,16 @@ final class DefaultResolverService implements ResolverService, ApplicationLifecy
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(DefaultResolverService.class);
 
+	private final URI canonicalBase;
+
 	private final Lock read;
 
 	private final Lock write;
 
 	private ApplicationContext context;
 
-	DefaultResolverService() {
+	DefaultResolverService(final URI canonicalBase) {
+		this.canonicalBase = canonicalBase;
 		final ReadWriteLock lock=new ReentrantReadWriteLock();
 		this.read=lock.readLock();
 		this.write=lock.writeLock();
@@ -77,7 +80,7 @@ final class DefaultResolverService implements ResolverService, ApplicationLifecy
 			final SnapshotResolver resolver=
 				SnapshotResolver.
 					builder().
-						withCanonicalBase(URI.create("http://localhost/harvester/")).
+						withCanonicalBase(this.canonicalBase).
 						withReadSession(session).
 						build();
 			final ResourceSnapshot snapshot=session.find(ResourceSnapshot.class,IdentityUtil.executionName(execution),ExecutionHandler.class);

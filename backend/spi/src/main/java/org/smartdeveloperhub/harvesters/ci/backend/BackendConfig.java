@@ -20,25 +20,34 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:0.2.0-SNAPSHOT
- *   Bundle      : ci-frontend-test-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-spi:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-spi-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.frontend.test;
+package org.smartdeveloperhub.harvesters.ci.backend;
 
-import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
-import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
-import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
+import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentConfig;
 
-public final class TestingBackendControllerFactory implements BackendControllerFactory {
+public final class BackendConfig {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public BackendController create(final String providerId, final BackendConfig config) {
-		return new TestingBackendController(Deployment.fromConfiguration(config.getEnrichment()));
+	private DatabaseConfig database;
+	private EnrichmentConfig enrichment;
+
+	public DatabaseConfig getDatabase() {
+		return this.database;
+	}
+
+	public void setDatabase(final DatabaseConfig database) {
+		this.database = database;
+	}
+
+	public EnrichmentConfig getEnrichment() {
+		return this.enrichment;
+	}
+
+	public void setEnrichment(final EnrichmentConfig enrichment) {
+		this.enrichment = enrichment;
 	}
 
 }

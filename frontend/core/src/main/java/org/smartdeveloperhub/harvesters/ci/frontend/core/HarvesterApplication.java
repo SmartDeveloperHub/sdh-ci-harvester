@@ -26,16 +26,22 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
 
+import java.io.File;
 import java.net.URI;
 
 import org.ldp4j.application.data.NamingScheme;
 import org.ldp4j.application.ext.Application;
 import org.ldp4j.application.ext.ApplicationInitializationException;
+import org.ldp4j.application.ext.ApplicationSetupException;
 import org.ldp4j.application.session.WriteSession;
 import org.ldp4j.application.setup.Bootstrap;
 import org.ldp4j.application.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.BrokerConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentConfig;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.SubBuildContainerHandler;
@@ -45,29 +51,33 @@ import org.smartdeveloperhub.harvesters.ci.frontend.core.service.ServiceHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 public final class HarvesterApplication extends Application<HarvesterConfiguration> {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(HarvesterApplication.class);
 
 	private static final String SERVICE_PATH="service/";
 
-	private URI target;
+	private HarvesterConfiguration configuration;
 
 	private BackendController controller;
 
 	@Override
-	public void setup(final Environment environment, final Bootstrap<HarvesterConfiguration> bootstrap) {
+	public void setup(final Environment environment, final Bootstrap<HarvesterConfiguration> bootstrap) throws ApplicationSetupException {
 		LOGGER.info("Starting CI Harvester Application configuration...");
 
-		final HarvesterConfiguration configuration = bootstrap.configuration();
+		this.configuration = bootstrap.configuration();
+		final BackendConfig backendConfig=toBackendConfig(this.configuration);
 
-		LOGGER.info("- Provider: {}",configuration.provider());
-		LOGGER.info("- Target..: {}",configuration.target());
+		logConfiguration(backendConfig);
 
-		final DefaultResolverService resolver = new DefaultResolverService();
+		final DefaultResolverService resolver=
+			new DefaultResolverService(
+				URI.create(this.configuration.canonicalBase()));
 
-		this.target=configuration.target();
-		this.controller=BackendControllerManager.create(configuration.provider());
+		this.controller=BackendControllerManager.create(this.configuration.provider(),backendConfig);
 		this.controller.setExecutionResolver(resolver);
 
 		environment.lifecycle().addApplicationLifecycleListener(resolver);
@@ -83,7 +93,7 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 			publishResource(
 				NamingScheme.
 					getDefault().
-						name(this.target),
+						name(this.configuration.target()),
 				ServiceHandler.class,
 				SERVICE_PATH);
 
@@ -93,8 +103,8 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 	@Override
 	public void initialize(final WriteSession session) throws ApplicationInitializationException {
 		LOGGER.info("Initializing CI Harvester Application...");
-		if(!this.controller.setTargetService(this.target)) {
-			final String errorMessage = "CI Harvester Application initialization failed: cannot create target service "+this.target;
+		if(!this.controller.setTargetService(this.configuration.target())) {
+			final String errorMessage = "CI Harvester Application initialization failed: cannot create target service "+this.configuration.target();
 			LOGGER.error(errorMessage);
 			throw new ApplicationInitializationException(errorMessage);
 		}
@@ -104,7 +114,7 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 				BackendModelPublisher.
 					builder().
 						withBackendService(index).
-						withMainService(this.target).
+						withMainService(this.configuration.target()).
 						build();
 			publisher.publish(session);
 			session.saveChanges();
@@ -122,6 +132,52 @@ public final class HarvesterApplication extends Application<HarvesterConfigurati
 		LOGGER.info("Starting CI Harvester Application shutdown...");
 		this.controller.disconnect();
 		LOGGER.info("CI Harvester Application shutdown completed.");
+	}
+
+	private void logConfiguration(final BackendConfig backendConfig) {
+		LOGGER.info("- Target..................: {}",this.configuration.target());
+		LOGGER.info("- Provider................: {}",this.configuration.provider());
+		LOGGER.info("- Database configuration..:");
+		LOGGER.info("  + Deployment............: {}",backendConfig.getDatabase().getDeployment());
+		LOGGER.info("  + Location..............: {}",backendConfig.getDatabase().getLocation());
+		LOGGER.info("  + Mode..................: {}",backendConfig.getDatabase().getMode());
+		LOGGER.info("- Enrichment configuration:");
+		LOGGER.info("  + Canonical base........: {}",this.configuration.canonicalBase());
+		LOGGER.info("  + Messaging broker......:");
+		LOGGER.info("    + Host................: {}",this.configuration.brokerHost());
+		LOGGER.info("    + Port................: {}",this.configuration.brokerPort());
+	}
+
+	static BackendConfig toBackendConfig(final HarvesterConfiguration config) throws ApplicationSetupException {
+		final BackendConfig cfg=new BackendConfig();
+		cfg.setDatabase(loadDatabaseConfig(config));
+		cfg.setEnrichment(createEnrichmentConfig(config));
+		return cfg;
+	}
+
+	private static EnrichmentConfig createEnrichmentConfig(final HarvesterConfiguration config) {
+		final BrokerConfig brokerConfig = new BrokerConfig();
+		brokerConfig.setHost(config.brokerHost());
+		brokerConfig.setPort(config.brokerPort());
+		final EnrichmentConfig enrichmentConfig = new EnrichmentConfig();
+		enrichmentConfig.setBroker(brokerConfig);
+		enrichmentConfig.setBase(config.canonicalBase());
+		return enrichmentConfig;
+	}
+
+	private static DatabaseConfig loadDatabaseConfig(final HarvesterConfiguration config) throws ApplicationSetupException {
+		final String pathname=config.databaseConfigPath();
+		try {
+			LOGGER.info("Loading database configuration from {}...",pathname);
+			final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+			final DatabaseConfig configuration = mapper.readValue(new File(pathname), DatabaseConfig.class);
+			LOGGER.info("Database configuration loaded: {}",configuration);
+			return configuration;
+		} catch (final Exception e) {
+			final String errorMessage = String.format("Could not load database configuration from %s",pathname);
+			LOGGER.warn(errorMessage+". Full stacktrace follows: ",e);
+			throw new ApplicationSetupException(errorMessage,e);
+		}
 	}
 
 }

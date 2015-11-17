@@ -32,6 +32,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.BrokerConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentConfig;
 
 public class BackendFacadeITest extends SmokeTest {
 
@@ -39,8 +41,13 @@ public class BackendFacadeITest extends SmokeTest {
 
 	@Before
 	public void startUp() throws IOException {
-		final DatabaseConfig config = new DatabaseConfig();
-		config.setProvider(DerbyProvider.class.getCanonicalName());
+		final DatabaseConfig databaseConfig = new DatabaseConfig();
+		databaseConfig.setProvider(DerbyProvider.class.getCanonicalName());
+		final BackendConfig config=new BackendConfig();
+		config.setDatabase(databaseConfig);
+		final EnrichmentConfig enrichment = new EnrichmentConfig();
+		config.setEnrichment(enrichment);
+		enrichment.setBroker(new BrokerConfig());
 		this.facade = BackendFacade.create(config);
 	}
 
