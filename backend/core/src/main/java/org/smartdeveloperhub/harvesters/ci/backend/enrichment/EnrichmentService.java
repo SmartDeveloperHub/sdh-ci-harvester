@@ -44,12 +44,6 @@ import org.smartdeveloperhub.curator.connector.protocol.ProtocolFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.Codebase;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Branch;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Commit;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.CompletedEnrichment;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Repository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateBranchCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateCommitCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateRepositoryCommand;
@@ -289,15 +283,7 @@ public class EnrichmentService {
 		final URI repositoryLocation = context.repositoryLocation();
 		if(freshContext.requiresRepository()) {
 			if(enrichment.repositoryResource().isPresent()) {
-				final URI repositoryResource = enrichment.repositoryResource().get();
-				this.scmService.createRepository(
-					CreateRepositoryCommand.
-						builder().
-							withRepositoryLocation(repositoryLocation).
-							withResource(repositoryResource).
-							build());
-				freshContext.setRepositoryResource(repositoryResource);
-				LOGGER.debug("Created repository {} ({})",repositoryLocation);
+				createRepository(freshContext, enrichment, repositoryLocation);
 			} else {
 				LOGGER.error("Enrichment does not have the expected resource for repository {}",repositoryLocation);
 				return;
@@ -307,16 +293,7 @@ public class EnrichmentService {
 		final String branchName = context.branchName();
 		if(freshContext.requiresBranch()) {
 			if(enrichment.branchResource().isPresent()) {
-				final URI branchResource = enrichment.branchResource().get();
-				this.scmService.createBranch(
-					CreateBranchCommand.
-						builder().
-							withRepositoryLocation(repositoryLocation).
-							withBranchName(branchName).
-							withResource(branchResource).
-							build());
-				freshContext.setBranchResource(branchResource);
-				LOGGER.debug("Created branch {} ({}) in repository {}",branchName,branchResource,repositoryLocation);
+				createBranch(freshContext, enrichment, repositoryLocation,branchName);
 			} else {
 				LOGGER.error("Enrichment does not have the expected resource for branch {{}}{}",repositoryLocation,branchName);
 				return;
@@ -326,23 +303,69 @@ public class EnrichmentService {
 		final String commitId = context.commitId();
 		if(freshContext.requiresCommit()) {
 			if(enrichment.commitResource().isPresent()) {
-				final URI commitResource = enrichment.commitResource().get();
-				this.scmService.createCommit(
-					CreateCommitCommand.
-						builder().
-							withRepositoryLocation(repositoryLocation).
-							withBranchName(branchName).
-							withCommitId(commitId).
-							withResource(commitResource).
-							build());
-				freshContext.setCommitResource(commitResource);
-				LOGGER.debug("Created commit {} ({}) in branch {} of repository {}",commitId,commitResource,branchName,repositoryLocation);
+				createCommit(freshContext, enrichment, repositoryLocation, branchName, commitId);
 			} else {
 				LOGGER.error("Enrichment does not have the expected resource for commit {{{}}{}}{}",repositoryLocation,branchName,commitId);
 				return;
 			}
 		}
 
+		finalizePendingEnrichment(pendingEnrichment);
+		processCompletedEnrichment(freshContext);
+	}
+
+	private void createCommit(
+			final EnrichmentContext context,
+			final ExecutionEnrichment enrichment,
+			final URI repositoryLocation,
+			final String branchName,
+			final String commitId) {
+		final URI commitResource = enrichment.commitResource().get();
+		this.scmService.createCommit(
+			CreateCommitCommand.
+				builder().
+					withRepositoryLocation(repositoryLocation).
+					withBranchName(branchName).
+					withCommitId(commitId).
+					withResource(commitResource).
+					build());
+		context.setCommitResource(commitResource);
+		LOGGER.debug("Created commit {} ({}) in branch {} of repository {}",commitId,commitResource,branchName,repositoryLocation);
+	}
+
+	private void createBranch(
+			final EnrichmentContext context,
+			final ExecutionEnrichment enrichment,
+			final URI repositoryLocation,
+			final String branchName) {
+		final URI branchResource = enrichment.branchResource().get();
+		this.scmService.createBranch(
+			CreateBranchCommand.
+				builder().
+					withRepositoryLocation(repositoryLocation).
+					withBranchName(branchName).
+					withResource(branchResource).
+					build());
+		context.setBranchResource(branchResource);
+		LOGGER.debug("Created branch {} ({}) in repository {}",branchName,branchResource,repositoryLocation);
+	}
+
+	private void createRepository(
+			final EnrichmentContext context,
+			final ExecutionEnrichment enrichment,
+			final URI repositoryLocation) {
+		final URI repositoryResource = enrichment.repositoryResource().get();
+		this.scmService.createRepository(
+			CreateRepositoryCommand.
+				builder().
+					withRepositoryLocation(repositoryLocation).
+					withResource(repositoryResource).
+					build());
+		context.setRepositoryResource(repositoryResource);
+		LOGGER.debug("Created repository {} ({})",repositoryLocation);
+	}
+
+	private void finalizePendingEnrichment(final PendingEnrichment pendingEnrichment) {
 		this.pendingRepository.remove(pendingEnrichment);
 		for(final URI executionId:pendingEnrichment.executions()) {
 			final EntityLifecycleEvent event =
@@ -351,10 +374,7 @@ public class EnrichmentService {
 			final EntityLifecycleEventNotification notification=new EntityLifecycleEventNotification(event);
 			this.listeners.notify(notification);
 		}
-
-		processCompletedEnrichment(freshContext);
 	}
-
 
 	private EnrichmentContext createContext(final Execution execution) {
 		final Codebase codebase=checkNotNull(execution.codebase(),"Codebase cannot be null");
