@@ -43,8 +43,7 @@ final class EnrichmentContext {
 	private final String commitId;
 
 	private ImmutableExecutionEnrichment enrichment;
-
-	private Long pendingEnrichment;
+	private PendingEnrichment pendingEnrichment;
 
 	private EnrichmentContext() {
 		this.targetExecution=null;
@@ -81,6 +80,10 @@ final class EnrichmentContext {
 		return this.enrichment;
 	}
 
+	PendingEnrichment pendingEnrichment() {
+		return this.pendingEnrichment;
+	}
+
 	boolean requiresRepository() {
 		return this.repositoryLocation!=null;
 	}
@@ -105,7 +108,7 @@ final class EnrichmentContext {
 		this.enrichment=this.enrichment.withCommitResource(resource);
 	}
 
-	void setPendingEnrichment(final long pendingEnrichment) {
+	void setPendingEnrichment(final PendingEnrichment pendingEnrichment) {
 		this.pendingEnrichment=pendingEnrichment;
 	}
 

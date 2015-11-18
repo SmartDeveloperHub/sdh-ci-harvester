@@ -84,6 +84,7 @@ public class BackendCoreITest extends SmokeTest {
 				this.persistencyFacade.getExecutionRepository(),
 				this.persistencyFacade.getPendingEnrichmentRepository(),
 				this.persistencyFacade.getCompletedEnrichmentRepository(),
+				this.persistencyFacade.getTransactionManager(),
 				Deployment.builder().build());
 		final ContinuousIntegrationService cis =
 			new ContinuousIntegrationService(

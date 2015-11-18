@@ -20,11 +20,11 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-mem:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-mem-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.mem;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence.mem;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,42 +33,42 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Repository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-public class InMemoryRepositoryRepository implements RepositoryRepository {
+public class InMemoryExecutionRepository implements ExecutionRepository {
 
-	private final ConcurrentMap<URI,Repository> repositories;
+	private final ConcurrentMap<URI,Execution> executions;
 
-	public InMemoryRepositoryRepository() {
-		this.repositories=Maps.newConcurrentMap();
+	public InMemoryExecutionRepository() {
+		this.executions=Maps.newConcurrentMap();
 	}
 
 	@Override
-	public List<URI> repositoryLocations() {
-		return ImmutableList.copyOf(this.repositories.keySet());
+	public void add(final Execution entity) {
+		checkNotNull(entity,"Execution cannot be null");
+		final Execution previous = this.executions.putIfAbsent(entity.executionId(),entity);
+		checkArgument(previous==null,"An execution identified by '%s' already exists",entity.executionId());
 	}
 
 	@Override
-	public void add(final Repository repository) {
-		checkNotNull(repository,"Repository cannot be null");
-		final Repository previous = this.repositories.putIfAbsent(repository.location(),repository);
-		checkArgument(previous==null,"A repository located at '%s' already exists",repository.location());
+	public void remove(final Execution entity) {
+		checkNotNull(entity,"Execution cannot be null");
+		this.executions.remove(entity.executionId(),entity);
 	}
 
 	@Override
-	public void remove(final Repository repository) {
-		checkNotNull(repository,"Repository cannot be null");
-		this.repositories.remove(repository.location(),repository);
+	public Execution executionOfId(final URI executionId) {
+		checkNotNull(executionId,"Execution identifier cannot be null");
+		return this.executions.get(executionId);
 	}
 
 	@Override
-	public Repository repositoryOfLocation(final URI location) {
-		checkNotNull(location,"Repository location cannot be null");
-		return this.repositories.get(location);
+	public List<URI> executionIds() {
+		return ImmutableList.copyOf(this.executions.keySet());
 	}
 
 }

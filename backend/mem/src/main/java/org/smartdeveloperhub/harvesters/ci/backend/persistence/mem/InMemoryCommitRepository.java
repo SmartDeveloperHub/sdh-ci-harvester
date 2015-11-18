@@ -20,48 +20,48 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-mem:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-mem-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.mem;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence.mem;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.concurrent.ConcurrentMap;
 
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Branch;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.BranchId;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Commit;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.CommitId;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
 
 import com.google.common.collect.Maps;
 
-public class InMemoryBranchRepository implements BranchRepository {
+public class InMemoryCommitRepository implements CommitRepository {
 
-	private final ConcurrentMap<BranchId,Branch> branches;
+	private final ConcurrentMap<CommitId,Commit> commits;
 
-	public InMemoryBranchRepository() {
-		this.branches=Maps.newConcurrentMap();
+	public InMemoryCommitRepository() {
+		this.commits=Maps.newConcurrentMap();
 	}
 
 	@Override
-	public void add(final Branch branch) {
-		checkNotNull(branch,"Branch cannot be null");
-		final Branch previous = this.branches.putIfAbsent(branch.id(),branch);
-		checkArgument(previous==null,"A branch identified by '%s' already exists",branch.id());
+	public void add(final Commit commit) {
+		checkNotNull(commit,"Commit cannot be null");
+		final Commit previous = this.commits.putIfAbsent(commit.id(),commit);
+		checkArgument(previous==null,"A commit identified by '%s' already exists",commit.id());
 	}
 
 	@Override
-	public void remove(final Branch branch) {
-		checkNotNull(branch,"Branch cannot be null");
-		this.branches.remove(branch.id(),branch);
+	public void remove(final Commit commit) {
+		checkNotNull(commit,"Commit cannot be null");
+		this.commits.remove(commit.id(),commit);
 	}
 
 	@Override
-	public Branch branchOfId(final BranchId branchId) {
-		checkNotNull(branchId,"Branch identifier cannot be null");
-		return this.branches.get(branchId);
+	public Commit commitOfId(final CommitId commitId) {
+		checkNotNull(commitId,"Commit identifier cannot be null");
+		return this.commits.get(commitId);
 	}
 
 }

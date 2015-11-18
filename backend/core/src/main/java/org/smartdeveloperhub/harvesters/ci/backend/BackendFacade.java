@@ -59,6 +59,7 @@ public final class BackendFacade implements Closeable {
 				this.componentRegistry.getExecutionRepository(),
 				this.componentRegistry.getPendingEnrichmentRepository(),
 				this.componentRegistry.getCompletedEnrichmentRepository(),
+				this.componentRegistry.getTransactionManager(),
 				configuration);
 		this.applicationService=
 			new ContinuousIntegrationService(

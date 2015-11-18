@@ -81,6 +81,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
+			<artifactId>ci-backend-mem</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
 			<artifactId>ci-backend-core</artifactId>
 		</dependency>
 		<dependency>

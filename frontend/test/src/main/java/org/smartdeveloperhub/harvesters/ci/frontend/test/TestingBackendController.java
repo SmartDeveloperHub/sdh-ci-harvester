@@ -52,18 +52,19 @@ import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManageme
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateBranchCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateCommitCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateRepositoryCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.mem.InMemoryBranchRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.mem.InMemoryCommitRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.mem.InMemoryCompletedEnrichmentRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.mem.InMemoryPendingEnrichmentRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.mem.InMemoryRepositoryRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBranchRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryCommitRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryCompletedEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryPendingEnrichmentRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryRepositoryRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryTransactionManager;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
@@ -109,6 +110,7 @@ final class TestingBackendController implements BackendController {
 				this.executionRepository,
 				new InMemoryPendingEnrichmentRepository(),
 				new InMemoryCompletedEnrichmentRepository(),
+				new InMemoryTransactionManager(),
 				deployment);
 		this.index=new TestingEntityIndex(this.service,this.es);
 	}

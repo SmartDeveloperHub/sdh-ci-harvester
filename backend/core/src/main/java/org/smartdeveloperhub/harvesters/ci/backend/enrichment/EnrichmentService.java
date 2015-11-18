@@ -43,9 +43,21 @@ import org.smartdeveloperhub.curator.connector.Connector;
 import org.smartdeveloperhub.curator.connector.protocol.ProtocolFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.Codebase;
 import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateBranchCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateCommitCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateRepositoryCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent.EntityType;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent.State;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventNotification;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
+import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionException;
+import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
+import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
 
 import com.google.common.collect.Sets;
 
@@ -59,6 +71,7 @@ public class EnrichmentService {
 		boolean isConnected();
 
 		void enrich(Execution execution) throws IOException;
+		void addEnrichment(EnrichmentContext context, ExecutionEnrichment enrichment) throws IOException;
 
 	}
 
@@ -81,7 +94,12 @@ public class EnrichmentService {
 
 		@Override
 		public void enrich(final Execution execution) {
-			doEnrich(execution);
+			doRequestEnrichment(execution);
+		}
+
+		@Override
+		public void addEnrichment(final EnrichmentContext context, final ExecutionEnrichment enrichment) throws IOException {
+			doProcessEnrichment(context,enrichment);
 		}
 
 	}
@@ -108,6 +126,11 @@ public class EnrichmentService {
 			throw new IllegalStateException("Not connected");
 		}
 
+		@Override
+		public void addEnrichment(final EnrichmentContext context, final ExecutionEnrichment enrichment) {
+			throw new IllegalStateException("Not connected");
+		}
+
 	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(EnrichmentService.class);
@@ -125,15 +148,21 @@ public class EnrichmentService {
 	private ResolverService resolver;
 	private EnrichmentRequestor requestor;
 
-	public EnrichmentService(final SourceCodeManagementService scmService, final ExecutionRepository executionRepository, final PendingEnrichmentRepository repository, final CompletedEnrichmentRepository completedRepository, final Deployment deployment) {
+	private final TransactionManager transactionManager;
+
+	private final ListenerManager<EntityLifecycleEventListener> listeners;
+
+	public EnrichmentService(final SourceCodeManagementService scmService, final ExecutionRepository executionRepository, final PendingEnrichmentRepository repository, final CompletedEnrichmentRepository completedRepository, final TransactionManager transactionManager, final Deployment deployment) {
 		this.scmService = scmService;
 		this.executionRepository = executionRepository;
 		this.pendingRepository = repository;
 		this.completedRepository = completedRepository;
+		this.transactionManager = transactionManager;
 		this.state=new ServiceDisconnected();
 		final ReadWriteLock lock=new ReentrantReadWriteLock();
 		this.read=lock.readLock();
 		this.write=lock.writeLock();
+		this.listeners=ListenerManager.newInstance();
 		this.connector =
 			Connector.
 				builder().
@@ -153,7 +182,7 @@ public class EnrichmentService {
 
 	private void doConnect() throws IOException {
 		LOGGER.info("Initializing Enrichment Service...");
-		this.requestor=new EnrichmentRequestor(this.connector,this.resolver);
+		this.requestor=new EnrichmentRequestor(this,this.connector,this.resolver);
 		this.requestor.start();
 		initializeEnrichments();
 		LOGGER.info("Enrichment Service initialized.");
@@ -194,7 +223,7 @@ public class EnrichmentService {
 	private void retryEnrichments(final Set<URI> executions) {
 		for(final URI executionId:executions) {
 			final Execution execution = this.executionRepository.executionOfId(executionId);
-			doEnrich(execution);
+			doRequestEnrichment(execution);
 		}
 	}
 
@@ -207,7 +236,7 @@ public class EnrichmentService {
 		return executions;
 	}
 
-	private void doEnrich(final Execution execution) {
+	private void doRequestEnrichment(final Execution execution) {
 		LOGGER.debug("Requested enrichment for {}",execution);
 		final EnrichmentContext context = createContext(execution);
 		if(context.requiresEnrichment()) {
@@ -216,6 +245,110 @@ public class EnrichmentService {
 			processCompletedEnrichment(context);
 		}
 	}
+
+	private void doProcessEnrichment(final EnrichmentContext context, final ExecutionEnrichment enrichment) throws IOException {
+		LOGGER.debug("Requested adding execution enrichment {} for {}",enrichment,context);
+		final Transaction tx = this.transactionManager.currentTransaction();
+		try {
+			tx.begin();
+			transactionalEnrichmentProcessing(context, enrichment);
+			tx.commit();
+		} catch (final TransactionException e) {
+			throw new IOException("Could not process enrichment",e);
+		} finally {
+			if(tx.isActive()) {
+				try {
+					tx.rollback();
+				} catch (final TransactionException e) {
+					LOGGER.warn("Transaction rollback failure while processing enrichment result {} about {}. Full stacktrace follows",enrichment,context,e);
+				}
+			}
+		}
+	}
+
+	private void transactionalEnrichmentProcessing(final EnrichmentContext context, final ExecutionEnrichment enrichment) {
+		final PendingEnrichment pendingEnrichment=this.pendingRepository.pendingEnrichmentOfId(context.pendingEnrichment().id());
+		if(pendingEnrichment==null) {
+			LOGGER.info("Discarding enrichment {}: pending enrichment does not exist",enrichment);
+		}
+
+		final Execution execution = this.executionRepository.executionOfId(context.targetExecution().executionId());
+
+		final EnrichmentContext freshContext=createContext(execution);
+		if(!freshContext.requiresEnrichment()) {
+			LOGGER.info("Discarding enrichment {}: execution {} is already enriched",enrichment,execution);
+			return;
+		}
+
+		final URI repositoryLocation = context.repositoryLocation();
+		if(freshContext.requiresRepository()) {
+			if(enrichment.repositoryResource().isPresent()) {
+				final URI repositoryResource = enrichment.repositoryResource().get();
+				this.scmService.createRepository(
+					CreateRepositoryCommand.
+						builder().
+							withRepositoryLocation(repositoryLocation).
+							withResource(repositoryResource).
+							build());
+				freshContext.setRepositoryResource(repositoryResource);
+				LOGGER.debug("Created repository {} ({})",repositoryLocation);
+			} else {
+				LOGGER.error("Enrichment does not have the expected resource for repository {}",repositoryLocation);
+				return;
+			}
+		}
+
+		final String branchName = context.branchName();
+		if(freshContext.requiresBranch()) {
+			if(enrichment.branchResource().isPresent()) {
+				final URI branchResource = enrichment.branchResource().get();
+				this.scmService.createBranch(
+					CreateBranchCommand.
+						builder().
+							withRepositoryLocation(repositoryLocation).
+							withBranchName(branchName).
+							withResource(branchResource).
+							build());
+				freshContext.setBranchResource(branchResource);
+				LOGGER.debug("Created branch {} ({}) in repository {}",branchName,branchResource,repositoryLocation);
+			} else {
+				LOGGER.error("Enrichment does not have the expected resource for branch {{}}{}",repositoryLocation,branchName);
+				return;
+			}
+		}
+
+		final String commitId = context.commitId();
+		if(freshContext.requiresCommit()) {
+			if(enrichment.commitResource().isPresent()) {
+				final URI commitResource = enrichment.commitResource().get();
+				this.scmService.createCommit(
+					CreateCommitCommand.
+						builder().
+							withRepositoryLocation(repositoryLocation).
+							withBranchName(branchName).
+							withCommitId(commitId).
+							withResource(commitResource).
+							build());
+				freshContext.setCommitResource(commitResource);
+				LOGGER.debug("Created commit {} ({}) in branch {} of repository {}",commitId,commitResource,branchName,repositoryLocation);
+			} else {
+				LOGGER.error("Enrichment does not have the expected resource for commit {{{}}{}}{}",repositoryLocation,branchName,commitId);
+				return;
+			}
+		}
+
+		this.pendingRepository.remove(pendingEnrichment);
+		for(final URI executionId:pendingEnrichment.executions()) {
+			final EntityLifecycleEvent event =
+				EntityLifecycleEvent.
+					newInstance(EntityType.EXECUTION,State.ENRICHED,executionId);
+			final EntityLifecycleEventNotification notification=new EntityLifecycleEventNotification(event);
+			this.listeners.notify(notification);
+		}
+
+		processCompletedEnrichment(freshContext);
+	}
+
 
 	private EnrichmentContext createContext(final Execution execution) {
 		final Codebase codebase=checkNotNull(execution.codebase(),"Codebase cannot be null");
@@ -284,7 +417,7 @@ public class EnrichmentService {
 		this.pendingRepository.add(newPending);
 		LOGGER.trace("{} creates {}",context,pending);
 
-		context.setPendingEnrichment(newPending.id());
+		context.setPendingEnrichment(newPending);
 		this.requestor.enqueueRequest(context);
 	}
 
@@ -326,6 +459,15 @@ public class EnrichmentService {
 		}
 	}
 
+	public void addEnrichment(final EnrichmentContext context, final ExecutionEnrichment enrichment) throws IOException {
+		this.read.lock();
+		try {
+			this.state.addEnrichment(context,enrichment);
+		} finally {
+			this.read.unlock();
+		}
+	}
+
 	public ExecutionEnrichment getEnrichment(final Execution execution) {
 		this.read.lock();
 		try {
@@ -351,6 +493,16 @@ public class EnrichmentService {
 		} finally {
 			this.read.unlock();
 		}
+	}
+
+	public EnrichmentService registerListener(final EntityLifecycleEventListener listener) {
+		this.listeners.registerListener(listener);
+		return this;
+	}
+
+	public EnrichmentService deregisterListener(final EntityLifecycleEventListener listener) {
+		this.listeners.deregisterListener(listener);
+		return this;
 	}
 
 }

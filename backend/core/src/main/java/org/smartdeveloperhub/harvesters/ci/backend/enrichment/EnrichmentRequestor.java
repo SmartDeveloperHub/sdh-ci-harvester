@@ -44,6 +44,23 @@ final class EnrichmentRequestor {
 
 	private final class Worker implements Runnable {
 
+		private final class EnrichmentResultProcessor implements
+				EnrichmentResultHandler {
+			private final EnrichmentContext context;
+			private final EnrichmentRequest request;
+
+			private EnrichmentResultProcessor(
+					final EnrichmentContext context, final EnrichmentRequest request) {
+				this.context = context;
+				this.request = request;
+			}
+
+			@Override
+			public void onResult(final EnrichmentResult result) {
+				processEnrichmentResult(this.context,this.request,result);
+			}
+		}
+
 		private final Connector connector;
 		private final ResolverService resolver;
 		private final BlockingQueue<EnrichmentContext> queue;
@@ -67,6 +84,7 @@ final class EnrichmentRequestor {
 			}
 		}
 
+		// TODO: Ensure that interruptions do not stop the job processing loop.
 		private void processJobs() throws InterruptedException {
 			while(true) {
 				final EnrichmentContext context=this.queue.take();
@@ -76,19 +94,22 @@ final class EnrichmentRequestor {
 				final EnrichmentRequest request=UseCase.createRequest(this.resolver.resolveExecution(context.targetExecution()),context);
 				try {
 					LOGGER.trace("{} submitting {}",context,request);
-					this.connector.requestEnrichment(
-						request,
-						new EnrichmentResultHandler() {
-							@Override
-							public void onResult(final EnrichmentResult result) {
-								LOGGER.warn("Handling of result {} for context {} is still to be implemented",result,context);
-							}
-						}
-					);
+					final EnrichmentResultProcessor processor = new EnrichmentResultProcessor(context,request);
+					this.connector.requestEnrichment(request,processor);
 				} catch (final IOException e) {
 					LOGGER.warn("Could not request enrichment {} ({}). Full stacktrace follows",context,request,e);
 					// TODO: Think about how to handle the failure. Propagate?
 				}
+			}
+		}
+
+		protected void processEnrichmentResult(final EnrichmentContext context, final EnrichmentRequest request, final EnrichmentResult result) {
+			LOGGER.debug("Processing enrichment result {} about {} ({})",result,request,context);
+			final ExecutionEnrichment enrichment=UseCase.processResult(context,result);
+			try {
+				EnrichmentRequestor.this.service.addEnrichment(context,enrichment);
+			} catch (final IOException e) {
+				LOGGER.warn("Processing of enrichment result {} about {} ({}) failed. Full stacktrace follows",result,request,context,e);
 			}
 		}
 
@@ -124,12 +145,15 @@ final class EnrichmentRequestor {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(EnrichmentService.class);
 
-
 	private final Thread thread;
 	private final Worker worker;
+
 	private boolean started;
 
-	EnrichmentRequestor(final Connector connector, final ResolverService resolver) {
+	private final EnrichmentService service;
+
+	EnrichmentRequestor(final EnrichmentService service, final Connector connector, final ResolverService resolver) {
+		this.service = service;
 		this.worker = new Worker(connector,resolver);
 		this.thread = new Thread(this.worker,"EnrichmentRequestor");
 		this.thread.setUncaughtExceptionHandler(

@@ -33,6 +33,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.command.Command;
 import org.smartdeveloperhub.harvesters.ci.backend.command.CommandVisitor;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
+import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventNotification;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 import org.smartdeveloperhub.jenkins.crawler.util.ListenerManager;
 

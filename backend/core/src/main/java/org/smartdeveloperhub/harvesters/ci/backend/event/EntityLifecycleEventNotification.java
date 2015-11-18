@@ -24,22 +24,20 @@
  *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.integration;
+package org.smartdeveloperhub.harvesters.ci.backend.event;
 
-import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent;
-import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.jenkins.crawler.util.Notification;
 
-final class EntityLifecycleEventNotification implements Notification<EntityLifecycleEventListener> {
+public final class EntityLifecycleEventNotification implements Notification<EntityLifecycleEventListener> {
 
 	private final EntityLifecycleEvent event;
 
-	EntityLifecycleEventNotification(EntityLifecycleEvent event) {
+	public EntityLifecycleEventNotification(final EntityLifecycleEvent event) {
 		this.event = event;
 	}
 
 	@Override
-	public void propagate(EntityLifecycleEventListener listener) {
-		listener.onEvent(event);
+	public void propagate(final EntityLifecycleEventListener listener) {
+		listener.onEvent(this.event);
 	}
 }

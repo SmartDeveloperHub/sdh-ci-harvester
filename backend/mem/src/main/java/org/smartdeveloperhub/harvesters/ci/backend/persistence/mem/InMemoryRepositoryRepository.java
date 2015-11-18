@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-mem:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-mem-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.persistence.mem;
@@ -33,42 +33,42 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Repository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-public class InMemoryServiceRepository implements ServiceRepository {
+public class InMemoryRepositoryRepository implements RepositoryRepository {
 
-	private final ConcurrentMap<URI,Service> services;
+	private final ConcurrentMap<URI,Repository> repositories;
 
-	public InMemoryServiceRepository() {
-		this.services=Maps.newConcurrentMap();
+	public InMemoryRepositoryRepository() {
+		this.repositories=Maps.newConcurrentMap();
 	}
 
 	@Override
-	public List<URI> serviceIds() {
-		return ImmutableList.copyOf(this.services.keySet());
+	public List<URI> repositoryLocations() {
+		return ImmutableList.copyOf(this.repositories.keySet());
 	}
 
 	@Override
-	public void add(Service service) {
-		checkNotNull(service,"Service cannot be null");
-		Service previous = this.services.putIfAbsent(service.serviceId(),service);
-		checkArgument(previous==null,"A service identified by '%s' already exists",service.serviceId());
+	public void add(final Repository repository) {
+		checkNotNull(repository,"Repository cannot be null");
+		final Repository previous = this.repositories.putIfAbsent(repository.location(),repository);
+		checkArgument(previous==null,"A repository located at '%s' already exists",repository.location());
 	}
 
 	@Override
-	public void remove(Service service) {
-		checkNotNull(service,"Service cannot be null");
-		this.services.remove(service.serviceId(),service);
+	public void remove(final Repository repository) {
+		checkNotNull(repository,"Repository cannot be null");
+		this.repositories.remove(repository.location(),repository);
 	}
 
 	@Override
-	public Service serviceOfId(URI serviceId) {
-		checkNotNull(serviceId,"Service identifier cannot be null");
-		return this.services.get(serviceId);
+	public Repository repositoryOfLocation(final URI location) {
+		checkNotNull(location,"Repository location cannot be null");
+		return this.repositories.get(location);
 	}
 
 }

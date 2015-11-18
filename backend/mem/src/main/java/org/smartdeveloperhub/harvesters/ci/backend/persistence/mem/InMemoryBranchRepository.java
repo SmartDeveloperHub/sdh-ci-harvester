@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-mem:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-mem-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.persistence.mem;
@@ -29,46 +29,39 @@ package org.smartdeveloperhub.harvesters.ci.backend.persistence.mem;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.URI;
-import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Branch;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.BranchId;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-public class InMemoryExecutionRepository implements ExecutionRepository {
+public class InMemoryBranchRepository implements BranchRepository {
 
-	private final ConcurrentMap<URI,Execution> executions;
+	private final ConcurrentMap<BranchId,Branch> branches;
 
-	public InMemoryExecutionRepository() {
-		this.executions=Maps.newConcurrentMap();
+	public InMemoryBranchRepository() {
+		this.branches=Maps.newConcurrentMap();
 	}
 
 	@Override
-	public void add(final Execution entity) {
-		checkNotNull(entity,"Execution cannot be null");
-		final Execution previous = this.executions.putIfAbsent(entity.executionId(),entity);
-		checkArgument(previous==null,"An execution identified by '%s' already exists",entity.executionId());
+	public void add(final Branch branch) {
+		checkNotNull(branch,"Branch cannot be null");
+		final Branch previous = this.branches.putIfAbsent(branch.id(),branch);
+		checkArgument(previous==null,"A branch identified by '%s' already exists",branch.id());
 	}
 
 	@Override
-	public void remove(final Execution entity) {
-		checkNotNull(entity,"Execution cannot be null");
-		this.executions.remove(entity.executionId(),entity);
+	public void remove(final Branch branch) {
+		checkNotNull(branch,"Branch cannot be null");
+		this.branches.remove(branch.id(),branch);
 	}
 
 	@Override
-	public Execution executionOfId(final URI executionId) {
-		checkNotNull(executionId,"Execution identifier cannot be null");
-		return this.executions.get(executionId);
-	}
-
-	@Override
-	public List<URI> executionIds() {
-		return ImmutableList.copyOf(this.executions.keySet());
+	public Branch branchOfId(final BranchId branchId) {
+		checkNotNull(branchId,"Branch identifier cannot be null");
+		return this.branches.get(branchId);
 	}
 
 }

@@ -66,6 +66,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
+				<artifactId>ci-backend-bom</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -73,6 +80,11 @@
 		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.frontend</groupId>
 			<artifactId>ci-frontend-spi</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
+			<artifactId>ci-backend-mem</artifactId>
 		</dependency>
 
 		<!-- Default unit testing frameworks-->

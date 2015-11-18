@@ -30,16 +30,21 @@ import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.curator.connector.Bindings;
 import org.smartdeveloperhub.curator.connector.Constraints;
 import org.smartdeveloperhub.curator.connector.EnrichmentRequest;
+import org.smartdeveloperhub.curator.connector.EnrichmentResult;
 import org.smartdeveloperhub.curator.connector.Filters;
+import org.smartdeveloperhub.curator.protocol.Resource;
+import org.smartdeveloperhub.curator.protocol.Value;
 import org.smartdeveloperhub.curator.protocol.vocabulary.RDF;
 import org.smartdeveloperhub.curator.protocol.vocabulary.XSD;
 
 final class UseCase {
 
-	private static final String BRANCH = "branch";
-	private static final String COMMIT = "commit";
+	private static final String REPOSITORY = "repository";
+	private static final String BRANCH     = "branch";
+	private static final String COMMIT     = "commit";
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(UseCase.class);
 
@@ -51,7 +56,7 @@ final class UseCase {
 	}
 
 	static EnrichmentRequest createRequest(final URI targetResource, final EnrichmentContext context) {
-		LOGGER.warn("{} enrichment request creation is still missing",context);
+		LOGGER.warn("{} enrichment request customization is still missing",context);
 		return
 			EnrichmentRequest.
 				newInstance().
@@ -59,12 +64,13 @@ final class UseCase {
 					withFilters(
 						Filters.
 							newInstance().
+								withFilter(ci("forRepository"), REPOSITORY).
 								withFilter(ci("forBranch"), BRANCH).
 								withFilter(ci("forCommit"), COMMIT)).
 					withConstraints(
 						Constraints.
 							newInstance().
-								forVariable("repository").
+								forVariable(REPOSITORY).
 									withProperty(RDF.TYPE).
 										andResource(scm("Repository")).
 									withProperty(scm("location")).
@@ -83,6 +89,25 @@ final class UseCase {
 										andResource(scm("Commit")).
 									withProperty(scm("commitId")).
 										andTypedLiteral(context.commitId(),XSD.STRING_TYPE));
+	}
+
+	static ExecutionEnrichment processResult(final EnrichmentContext context, final EnrichmentResult result) {
+		LOGGER.warn("{} enrichment result customized processing is still missing",context);
+		final Bindings additions = result.additions();
+		return
+			new ImmutableExecutionEnrichment().
+				withRepositoryResource(resolveResource(additions, ci("forRepository"))).
+				withBranchResource(resolveResource(additions, ci("forBranch"))).
+				withCommitResource(resolveResource(additions, ci("forCommit")));
+	}
+
+	private static URI resolveResource(final Bindings additions, final String property) {
+		URI name=null;
+		final Value value = additions.value(URI.create(property));
+		if(value instanceof Resource) {
+			name=((Resource)value).name();
+		}
+		return name;
 	}
 
 	static String ci(final String term) {

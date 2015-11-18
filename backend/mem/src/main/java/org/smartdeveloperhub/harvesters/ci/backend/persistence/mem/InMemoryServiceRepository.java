@@ -20,48 +20,55 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-api:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-mem:0.2.0-SNAPSHOT
+ *   Bundle      : ci-backend-mem-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.mem;
+package org.smartdeveloperhub.harvesters.ci.backend.persistence.mem;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.net.URI;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Commit;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.CommitId;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-public class InMemoryCommitRepository implements CommitRepository {
+public class InMemoryServiceRepository implements ServiceRepository {
 
-	private final ConcurrentMap<CommitId,Commit> commits;
+	private final ConcurrentMap<URI,Service> services;
 
-	public InMemoryCommitRepository() {
-		this.commits=Maps.newConcurrentMap();
+	public InMemoryServiceRepository() {
+		this.services=Maps.newConcurrentMap();
 	}
 
 	@Override
-	public void add(final Commit commit) {
-		checkNotNull(commit,"Commit cannot be null");
-		final Commit previous = this.commits.putIfAbsent(commit.id(),commit);
-		checkArgument(previous==null,"A commit identified by '%s' already exists",commit.id());
+	public List<URI> serviceIds() {
+		return ImmutableList.copyOf(this.services.keySet());
 	}
 
 	@Override
-	public void remove(final Commit commit) {
-		checkNotNull(commit,"Commit cannot be null");
-		this.commits.remove(commit.id(),commit);
+	public void add(Service service) {
+		checkNotNull(service,"Service cannot be null");
+		Service previous = this.services.putIfAbsent(service.serviceId(),service);
+		checkArgument(previous==null,"A service identified by '%s' already exists",service.serviceId());
 	}
 
 	@Override
-	public Commit commitOfId(final CommitId commitId) {
-		checkNotNull(commitId,"Commit identifier cannot be null");
-		return this.commits.get(commitId);
+	public void remove(Service service) {
+		checkNotNull(service,"Service cannot be null");
+		this.services.remove(service.serviceId(),service);
+	}
+
+	@Override
+	public Service serviceOfId(URI serviceId) {
+		checkNotNull(serviceId,"Service identifier cannot be null");
+		return this.services.get(serviceId);
 	}
 
 }
