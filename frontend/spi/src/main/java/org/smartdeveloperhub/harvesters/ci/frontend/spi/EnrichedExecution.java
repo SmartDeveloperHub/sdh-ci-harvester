@@ -26,7 +26,7 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ExecutionEnrichment;
 
 public interface EnrichedExecution extends ExecutionEnrichment {

@@ -28,7 +28,7 @@ package org.smartdeveloperhub.harvesters.ci.frontend.integration;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ExecutionEnrichment;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EnrichedExecution;
 

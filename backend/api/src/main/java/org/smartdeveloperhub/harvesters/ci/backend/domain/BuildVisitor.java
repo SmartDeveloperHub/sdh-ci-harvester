@@ -24,22 +24,20 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.persistence;
+package org.smartdeveloperhub.harvesters.ci.backend.domain;
 
-import java.net.URI;
-import java.util.List;
+public class BuildVisitor {
 
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
+	public void visitSimpleBuild(SimpleBuild aBuild) {
+		// To be extended by subclasses
+	}
 
+	public void visitCompositeBuild(CompositeBuild aBuild) {
+		// To be extended by subclasses
+	}
 
-public interface ServiceRepository {
-
-	List<URI> serviceIds();
-
-	void add(Service service);
-
-	void remove(Service service);
-
-	Service serviceOfId(URI serviceId);
+	public void visitSubBuild(SubBuild aBuild) {
+		// To be extended by subclasses
+	}
 
 }

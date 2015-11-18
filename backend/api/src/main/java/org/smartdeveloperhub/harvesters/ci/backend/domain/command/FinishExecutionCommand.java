@@ -24,31 +24,82 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.command;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.command;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
+import java.util.Date;
+
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Result.Status;
 
 import com.google.common.base.MoreObjects;
 
-public final class DeleteExecutionCommand implements Command {
+public final class FinishExecutionCommand implements Command {
+
+	public static final class Builder {
+
+		private URI executionId;
+		private Status status;
+		private Date finishedOn;
+
+		private Builder() {
+			this.status=Status.PASSED;
+		}
+
+		public Builder withExecutionId(URI executionId) {
+			this.executionId = executionId;
+			return this;
+		}
+
+		public Builder withStatus(Status status) {
+			this.status = status;
+			return this;
+		}
+
+		public Builder withFinishedOn(Date finishedOn) {
+			this.finishedOn = finishedOn;
+			return this;
+		}
+
+		public FinishExecutionCommand build() {
+			return
+				new FinishExecutionCommand(
+					checkNotNull(this.executionId,"Execution identifier cannot be null"),
+					checkNotNull(this.status,"Status cannot be null"),
+					checkNotNull(this.finishedOn,"Finalization date cannot be null")
+				);
+		}
+
+	}
 
 	private final URI executionId;
+	private final Status status;
+	private final Date finishedOn;
 
-	private DeleteExecutionCommand(URI executionId) {
+	private FinishExecutionCommand(URI executionId, Status status, Date finishedOn) {
 		this.executionId = executionId;
+		this.status = status;
+		this.finishedOn = finishedOn;
 	}
 
 	@Override
 	public void accept(CommandVisitor visitor) {
 		if(visitor!=null) {
-			visitor.visitDeleteExecutionCommand(this);
+			visitor.visitFinishExecutionCommand(this);
 		}
 	}
 
 	public URI executionId() {
 		return this.executionId;
+	}
+
+	public Status status() {
+		return this.status;
+	}
+
+	public Date finishedOn() {
+		return this.finishedOn;
 	}
 
 	@Override
@@ -57,13 +108,13 @@ public final class DeleteExecutionCommand implements Command {
 			MoreObjects.
 				toStringHelper(getClass()).
 					add("executionId",this.executionId).
+					add("status",this.status).
+					add("finishedOn",this.finishedOn).
 					toString();
 	}
 
-	public static DeleteExecutionCommand create(URI executionId) {
-		return
-			new DeleteExecutionCommand(
-				checkNotNull(executionId,"Execution identifier cannot be null"));
+	public static Builder builder() {
+		return new Builder();
 	}
 
 }

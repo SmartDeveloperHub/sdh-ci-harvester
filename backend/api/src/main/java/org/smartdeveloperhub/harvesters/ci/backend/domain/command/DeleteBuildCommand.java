@@ -24,22 +24,47 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.command;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.command;
 
-public interface CommandVisitor {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-	void visitRegisterServiceCommand(RegisterServiceCommand command);
+import java.net.URI;
 
-	void visitCreateBuildCommand(CreateBuildCommand command);
+import com.google.common.base.MoreObjects;
 
-	void visitUpdateBuildCommand(UpdateBuildCommand command);
 
-	void visitDeleteBuildCommand(DeleteBuildCommand command);
+public final class DeleteBuildCommand implements Command {
 
-	void visitCreateExecutionCommand(CreateExecutionCommand command);
+	private final URI buildId;
 
-	void visitFinishExecutionCommand(FinishExecutionCommand command);
+	private DeleteBuildCommand(URI buildId) {
+		this.buildId = buildId;
+	}
 
-	void visitDeleteExecutionCommand(DeleteExecutionCommand command);
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitDeleteBuildCommand(this);
+		}
+	}
+
+	public URI buildId() {
+		return this.buildId;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("buildId",this.buildId).
+					toString();
+	}
+
+	public static DeleteBuildCommand create(URI buildId) {
+		return
+			new DeleteBuildCommand(
+				checkNotNull(buildId,"Build identifier cannot be null"));
+	}
 
 }

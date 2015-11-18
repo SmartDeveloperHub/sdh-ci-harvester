@@ -24,7 +24,7 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.command;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.command;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

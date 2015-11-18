@@ -26,7 +26,7 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.execution;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Result;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Result;
 
 import com.google.common.base.MoreObjects;
 

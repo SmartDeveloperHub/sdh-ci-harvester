@@ -32,6 +32,7 @@ import org.smartdeveloperhub.curator.connector.protocol.ProtocolFactory;
 import org.smartdeveloperhub.curator.connector.protocol.ProtocolFactory.BrokerBuilder;
 import org.smartdeveloperhub.curator.connector.protocol.ValidationException;
 import org.smartdeveloperhub.curator.protocol.Broker;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentConfig;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;

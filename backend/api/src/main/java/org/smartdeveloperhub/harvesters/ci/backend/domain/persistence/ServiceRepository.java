@@ -24,21 +24,22 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.persistence;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.persistence;
 
 import java.net.URI;
 import java.util.List;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
 
-public interface ExecutionRepository {
 
-	void add(Execution execution);
+public interface ServiceRepository {
 
-	void remove(Execution execution);
+	List<URI> serviceIds();
 
-	Execution executionOfId(URI executionId);
+	void add(Service service);
 
-	List<URI> executionIds();
+	void remove(Service service);
+
+	Service serviceOfId(URI serviceId);
 
 }

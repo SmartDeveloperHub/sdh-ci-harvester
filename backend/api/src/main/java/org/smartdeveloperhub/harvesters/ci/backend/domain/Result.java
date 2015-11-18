@@ -24,74 +24,47 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.command;
+package org.smartdeveloperhub.harvesters.ci.backend.domain;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.URI;
 import java.util.Date;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
-
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 
-public final class FinishExecutionCommand implements Command {
+public final class Result {
 
-	public static final class Builder {
-
-		private URI executionId;
-		private Status status;
-		private Date finishedOn;
-
-		private Builder() {
-			this.status=Status.PASSED;
-		}
-
-		public Builder withExecutionId(URI executionId) {
-			this.executionId = executionId;
-			return this;
-		}
-
-		public Builder withStatus(Status status) {
-			this.status = status;
-			return this;
-		}
-
-		public Builder withFinishedOn(Date finishedOn) {
-			this.finishedOn = finishedOn;
-			return this;
-		}
-
-		public FinishExecutionCommand build() {
-			return
-				new FinishExecutionCommand(
-					checkNotNull(this.executionId,"Execution identifier cannot be null"),
-					checkNotNull(this.status,"Status cannot be null"),
-					checkNotNull(this.finishedOn,"Finalization date cannot be null")
-				);
-		}
-
+	public enum Status {
+		PASSED,
+		FAILED,
+		WARNING,
+		ABORTED,
+		UNAVAILABLE,
+		NOT_BUILT
 	}
 
-	private final URI executionId;
-	private final Status status;
-	private final Date finishedOn;
+	private Result.Status status;
+	private Date finishedOn;
 
-	private FinishExecutionCommand(URI executionId, Status status, Date finishedOn) {
-		this.executionId = executionId;
-		this.status = status;
+	Result() {
+		this.status=Status.UNAVAILABLE;
+		this.finishedOn=null;
+	}
+
+	public Result(Status status, Date finishedOn) {
+		setStatus(status);
+		setFinishedOn(finishedOn);
+	}
+
+	protected void setFinishedOn(Date finishedOn) {
+		checkNotNull(finishedOn,"Finished date cannot be null");
 		this.finishedOn = finishedOn;
 	}
 
-	@Override
-	public void accept(CommandVisitor visitor) {
-		if(visitor!=null) {
-			visitor.visitFinishExecutionCommand(this);
-		}
-	}
-
-	public URI executionId() {
-		return this.executionId;
+	protected void setStatus(Status status) {
+		checkNotNull(status,"Status cannot be null");
+		this.status = status;
 	}
 
 	public Status status() {
@@ -103,18 +76,33 @@ public final class FinishExecutionCommand implements Command {
 	}
 
 	@Override
+	public int hashCode() {
+		return
+			Objects.
+				hashCode(this.status,this.finishedOn);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		boolean result=false;
+		if(obj instanceof Result) {
+			Result that=(Result)obj;
+			result=
+				Objects.equal(this.status,that.status) &&
+				Objects.equal(this.finishedOn,that.finishedOn);
+		}
+		return result;
+	}
+
+	@Override
 	public String toString() {
 		return
 			MoreObjects.
 				toStringHelper(getClass()).
-					add("executionId",this.executionId).
+					omitNullValues().
 					add("status",this.status).
 					add("finishedOn",this.finishedOn).
 					toString();
-	}
-
-	public static Builder builder() {
-		return new Builder();
 	}
 
 }

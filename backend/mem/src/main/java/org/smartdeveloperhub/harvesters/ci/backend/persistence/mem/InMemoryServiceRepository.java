@@ -33,8 +33,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ServiceRepository;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;

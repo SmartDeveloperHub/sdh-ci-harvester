@@ -32,9 +32,9 @@ import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.command.Command;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CommandVisitor;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.Command;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CommandVisitor;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 

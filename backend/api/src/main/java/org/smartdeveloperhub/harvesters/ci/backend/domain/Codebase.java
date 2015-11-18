@@ -24,10 +24,61 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.command;
+package org.smartdeveloperhub.harvesters.ci.backend.domain;
 
-public interface Command {
+import java.net.URI;
+import java.util.Objects;
 
-	void accept(CommandVisitor visitor);
+import com.google.common.base.MoreObjects;
+
+public final class Codebase {
+
+	private URI location;
+	private String branchName;
+
+	public Codebase(URI location, String branchName) {
+		this.location = location;
+		this.branchName = branchName;
+	}
+
+	public Codebase() {
+		this(null,null);
+	}
+
+	public final URI location() {
+		return this.location;
+	}
+
+	public final String branchName() {
+		return this.branchName;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.location,this.branchName);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		boolean result=false;
+		if(obj instanceof Codebase) {
+			Codebase that=(Codebase)obj;
+			result=
+				Objects.equals(this.location,that.location) &&
+				Objects.equals(this.branchName, that.branchName);
+		}
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					omitNullValues().
+						add("location",this.location).
+						add("branchName",this.branchName).
+						toString();
+	}
 
 }

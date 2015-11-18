@@ -24,82 +24,69 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.domain;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
 
 import com.google.common.base.MoreObjects.ToStringHelper;
-import com.google.common.collect.Lists;
 
-public final class CompositeBuild extends Build {
+public final class SubBuild extends Build {
 
-	private static final int PRIME = 17;
+	private static final int PRIME = 13;
 
-	private List<URI> subBuilds;
+	private URI parentId;
 
-	CompositeBuild() {
+	SubBuild() {
 	}
 
-	private CompositeBuild(URI serviceId,URI buildId,String title, List<URI> subBuilds) {
+	private SubBuild(URI serviceId, URI parentId, URI buildId, String title) {
 		super(serviceId,buildId,title);
-		setSubBuilds(Lists.newArrayList(subBuilds));
+		setParentId(parentId);
 	}
 
-	private CompositeBuild(CompositeBuild build) {
-		this(build.serviceId(),build.buildId(),build.title(),build.subBuilds());
+	private SubBuild(SubBuild build) {
+		this(build.serviceId(),build.parentId(),build.buildId(),build.title());
 	}
 
-	CompositeBuild(URI serviceId,URI buildId,String title) {
-		this(serviceId,buildId,title,Collections.<URI>emptyList());
+	SubBuild(CompositeBuild parent, URI buildId,String title) {
+		this(parent.serviceId(),parent.buildId(),buildId,title);
+	}
+
+	protected void setParentId(URI parentId) {
+		checkNotNull(parentId,"Parent identifier cannot be null");
+		this.parentId = parentId;
 	}
 
 	@Override
 	Build makeClone() {
-		return new CompositeBuild(this);
+		return new SubBuild(this);
 	}
 
-	protected void setSubBuilds(List<URI> subBuilds) {
-		checkNotNull(subBuilds,"Sub builds cannot be null");
-		this.subBuilds=subBuilds;
-	}
-
-	public SubBuild addSubBuild(URI buildId, String title) {
-		SubBuild childBuild=new SubBuild(this,buildId,title);
-		this.subBuilds().add(childBuild.buildId());
-		return childBuild;
-	}
-
-	public void removeSubBuild(SubBuild subBuild) {
-		checkNotNull(subBuild,"Sub build cannot be null");
-		this.subBuilds().remove(subBuild.buildId());
-	}
-
-	public List<URI> subBuilds() {
-		return this.subBuilds;
+	public URI parentId() {
+		return this.parentId;
 	}
 
 	@Override
 	public void accept(BuildVisitor visitor) {
-		visitor.visitCompositeBuild(this);
+		visitor.visitSubBuild(this);
 	}
+
 
 	@Override
 	public int hashCode() {
-		return super.hashCode()+PRIME*CompositeBuild.class.hashCode();
+		return super.hashCode()+PRIME*SubBuild.class.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return super.equals(obj) && CompositeBuild.class.isInstance(obj);
+		return super.equals(obj) && SubBuild.class.isInstance(obj);
 	}
 
 	@Override
 	protected void toString(ToStringHelper helper) {
-		helper.add("subBuilds",this.subBuilds);
+		helper.add("parentId",this.parentId);
 	}
 
 }

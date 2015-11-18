@@ -35,7 +35,7 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
-import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.RegisterServiceCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;

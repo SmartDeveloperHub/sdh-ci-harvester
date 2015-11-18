@@ -24,7 +24,7 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.domain;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,16 +34,16 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
-import org.smartdeveloperhub.harvesters.ci.backend.command.CreateBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CreateExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.FinishExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.UpdateBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.FinishExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.UpdateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ServiceRepository;
 
 public final class ContinuousIntegrationService {
 

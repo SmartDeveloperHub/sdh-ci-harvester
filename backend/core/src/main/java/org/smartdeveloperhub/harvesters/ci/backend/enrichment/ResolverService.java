@@ -28,7 +28,7 @@ package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 
 public interface ResolverService {
 

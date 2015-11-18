@@ -28,14 +28,14 @@ package org.smartdeveloperhub.harvesters.ci.backend.spi;
 
 import java.io.Closeable;
 
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
 public interface ComponentRegistry extends Closeable {

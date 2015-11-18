@@ -24,20 +24,46 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.command;
 
-public class BuildVisitor {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-	public void visitSimpleBuild(SimpleBuild aBuild) {
-		// To be extended by subclasses
+import java.net.URI;
+
+import com.google.common.base.MoreObjects;
+
+public final class DeleteExecutionCommand implements Command {
+
+	private final URI executionId;
+
+	private DeleteExecutionCommand(URI executionId) {
+		this.executionId = executionId;
 	}
 
-	public void visitCompositeBuild(CompositeBuild aBuild) {
-		// To be extended by subclasses
+	@Override
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitDeleteExecutionCommand(this);
+		}
 	}
 
-	public void visitSubBuild(SubBuild aBuild) {
-		// To be extended by subclasses
+	public URI executionId() {
+		return this.executionId;
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("executionId",this.executionId).
+					toString();
+	}
+
+	public static DeleteExecutionCommand create(URI executionId) {
+		return
+			new DeleteExecutionCommand(
+				checkNotNull(executionId,"Execution identifier cannot be null"));
 	}
 
 }

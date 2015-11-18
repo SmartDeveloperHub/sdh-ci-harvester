@@ -24,50 +24,31 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.command;
 
 import java.net.URI;
-import java.util.Objects;
 
 import com.google.common.base.MoreObjects;
 
-public final class Codebase {
+import static com.google.common.base.Preconditions.*;
 
-	private URI location;
-	private String branchName;
+public final class RegisterServiceCommand implements Command {
 
-	public Codebase(URI location, String branchName) {
-		this.location = location;
-		this.branchName = branchName;
-	}
+	private final URI serviceId;
 
-	public Codebase() {
-		this(null,null);
-	}
-
-	public final URI location() {
-		return this.location;
-	}
-
-	public final String branchName() {
-		return this.branchName;
+	private RegisterServiceCommand(URI serviceId) {
+		this.serviceId = serviceId;
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(this.location,this.branchName);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		boolean result=false;
-		if(obj instanceof Codebase) {
-			Codebase that=(Codebase)obj;
-			result=
-				Objects.equals(this.location,that.location) &&
-				Objects.equals(this.branchName, that.branchName);
+	public void accept(CommandVisitor visitor) {
+		if(visitor!=null) {
+			visitor.visitRegisterServiceCommand(this);
 		}
-		return result;
+	}
+
+	public URI serviceId() {
+		return this.serviceId;
 	}
 
 	@Override
@@ -75,10 +56,14 @@ public final class Codebase {
 		return
 			MoreObjects.
 				toStringHelper(getClass()).
-					omitNullValues().
-						add("location",this.location).
-						add("branchName",this.branchName).
-						toString();
+					add("serviceId",this.serviceId).
+					toString();
+	}
+
+	public static RegisterServiceCommand create(URI serviceId) {
+		return
+			new RegisterServiceCommand(
+				checkNotNull(serviceId,"Service identifier cannot be null"));
 	}
 
 }

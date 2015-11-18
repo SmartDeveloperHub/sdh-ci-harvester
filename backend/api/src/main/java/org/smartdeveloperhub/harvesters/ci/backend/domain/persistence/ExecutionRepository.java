@@ -24,43 +24,21 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.persistence;
 
 import java.net.URI;
+import java.util.List;
 
-public final class SimpleBuild extends Build {
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 
-	private static final int PRIME = 19;
+public interface ExecutionRepository {
 
-	SimpleBuild() {
-	}
+	void add(Execution execution);
 
-	private SimpleBuild(SimpleBuild build) {
-		super(build.serviceId(),build.buildId(),build.title());
-	}
+	void remove(Execution execution);
 
-	SimpleBuild(URI serviceId, URI buildId, String title) {
-		super(serviceId,buildId,title);
-	}
+	Execution executionOfId(URI executionId);
 
-	@Override
-	Build makeClone() {
-		return new SimpleBuild(this);
-	}
-
-	@Override
-	public void accept(BuildVisitor visitor) {
-		visitor.visitSimpleBuild(this);
-	}
-
-	@Override
-	public int hashCode() {
-		return super.hashCode()+PRIME*SimpleBuild.class.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj) && SimpleBuild.class.isInstance(obj);
-	}
+	List<URI> executionIds();
 
 }

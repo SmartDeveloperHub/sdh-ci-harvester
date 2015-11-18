@@ -34,9 +34,9 @@ import org.ldp4j.application.data.DataSetUtils;
 import org.ldp4j.application.data.DataSets;
 import org.ldp4j.application.data.IndividualPropertyHelper;
 import org.ldp4j.application.data.Name;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.CompositeBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 
 final class BuildMapper extends BuildVocabulary {

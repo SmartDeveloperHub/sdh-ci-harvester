@@ -24,69 +24,22 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.command;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+public interface CommandVisitor {
 
-import java.net.URI;
+	void visitRegisterServiceCommand(RegisterServiceCommand command);
 
-import com.google.common.base.MoreObjects.ToStringHelper;
+	void visitCreateBuildCommand(CreateBuildCommand command);
 
-public final class SubBuild extends Build {
+	void visitUpdateBuildCommand(UpdateBuildCommand command);
 
-	private static final int PRIME = 13;
+	void visitDeleteBuildCommand(DeleteBuildCommand command);
 
-	private URI parentId;
+	void visitCreateExecutionCommand(CreateExecutionCommand command);
 
-	SubBuild() {
-	}
+	void visitFinishExecutionCommand(FinishExecutionCommand command);
 
-	private SubBuild(URI serviceId, URI parentId, URI buildId, String title) {
-		super(serviceId,buildId,title);
-		setParentId(parentId);
-	}
-
-	private SubBuild(SubBuild build) {
-		this(build.serviceId(),build.parentId(),build.buildId(),build.title());
-	}
-
-	SubBuild(CompositeBuild parent, URI buildId,String title) {
-		this(parent.serviceId(),parent.buildId(),buildId,title);
-	}
-
-	protected void setParentId(URI parentId) {
-		checkNotNull(parentId,"Parent identifier cannot be null");
-		this.parentId = parentId;
-	}
-
-	@Override
-	Build makeClone() {
-		return new SubBuild(this);
-	}
-
-	public URI parentId() {
-		return this.parentId;
-	}
-
-	@Override
-	public void accept(BuildVisitor visitor) {
-		visitor.visitSubBuild(this);
-	}
-
-
-	@Override
-	public int hashCode() {
-		return super.hashCode()+PRIME*SubBuild.class.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj) && SubBuild.class.isInstance(obj);
-	}
-
-	@Override
-	protected void toString(ToStringHelper helper) {
-		helper.add("parentId",this.parentId);
-	}
+	void visitDeleteExecutionCommand(DeleteExecutionCommand command);
 
 }

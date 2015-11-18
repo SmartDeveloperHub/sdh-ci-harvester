@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.command.Command;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.Command;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;

@@ -24,20 +24,10 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.persistence;
+package org.smartdeveloperhub.harvesters.ci.backend.domain.command;
 
-import java.net.URI;
+public interface Command {
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-
-public interface BuildRepository {
-
-	void add(Build build);
-
-	void remove(Build build);
-
-	Build buildOfId(URI id);
-
-	<T extends Build> T buildOfId(URI parentId, Class<? extends T> clazz);
+	void accept(CommandVisitor visitor);
 
 }

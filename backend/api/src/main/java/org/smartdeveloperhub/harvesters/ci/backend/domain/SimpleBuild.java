@@ -24,85 +24,43 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.domain;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.net.URI;
 
-import java.util.Date;
+public final class SimpleBuild extends Build {
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
+	private static final int PRIME = 19;
 
-public final class Result {
-
-	public enum Status {
-		PASSED,
-		FAILED,
-		WARNING,
-		ABORTED,
-		UNAVAILABLE,
-		NOT_BUILT
+	SimpleBuild() {
 	}
 
-	private Result.Status status;
-	private Date finishedOn;
-
-	Result() {
-		this.status=Status.UNAVAILABLE;
-		this.finishedOn=null;
+	private SimpleBuild(SimpleBuild build) {
+		super(build.serviceId(),build.buildId(),build.title());
 	}
 
-	public Result(Status status, Date finishedOn) {
-		setStatus(status);
-		setFinishedOn(finishedOn);
+	SimpleBuild(URI serviceId, URI buildId, String title) {
+		super(serviceId,buildId,title);
 	}
 
-	protected void setFinishedOn(Date finishedOn) {
-		checkNotNull(finishedOn,"Finished date cannot be null");
-		this.finishedOn = finishedOn;
+	@Override
+	Build makeClone() {
+		return new SimpleBuild(this);
 	}
 
-	protected void setStatus(Status status) {
-		checkNotNull(status,"Status cannot be null");
-		this.status = status;
-	}
-
-	public Status status() {
-		return this.status;
-	}
-
-	public Date finishedOn() {
-		return this.finishedOn;
+	@Override
+	public void accept(BuildVisitor visitor) {
+		visitor.visitSimpleBuild(this);
 	}
 
 	@Override
 	public int hashCode() {
-		return
-			Objects.
-				hashCode(this.status,this.finishedOn);
+		return super.hashCode()+PRIME*SimpleBuild.class.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		boolean result=false;
-		if(obj instanceof Result) {
-			Result that=(Result)obj;
-			result=
-				Objects.equal(this.status,that.status) &&
-				Objects.equal(this.finishedOn,that.finishedOn);
-		}
-		return result;
-	}
-
-	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					omitNullValues().
-					add("status",this.status).
-					add("finishedOn",this.finishedOn).
-					toString();
+		return super.equals(obj) && SimpleBuild.class.isInstance(obj);
 	}
 
 }

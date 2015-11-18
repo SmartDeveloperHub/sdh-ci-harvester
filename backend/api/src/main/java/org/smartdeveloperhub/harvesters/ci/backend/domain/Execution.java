@@ -24,14 +24,14 @@
  *   Bundle      : ci-backend-api-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.domain;
 
 import static com.google.common.base.Preconditions.*;
 
 import java.net.URI;
 import java.util.Date;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Result.Status;
 
 import com.google.common.base.MoreObjects;
 

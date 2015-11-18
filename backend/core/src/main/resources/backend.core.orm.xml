@@ -35,7 +35,7 @@
 		http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
 	version="2.1">
 	<orm:description>Backend Persistency for the Continuous Integration Harvester of the Smart Developer Hub project</orm:description>
-	<orm:package>org.smartdeveloperhub.harvesters.ci.backend</orm:package>
+	<orm:package>org.smartdeveloperhub.harvesters.ci.backend.domain</orm:package>
 	<orm:access>FIELD</orm:access>
 	<orm:mapped-superclass class="org.smartdeveloperhub.harvesters.ci.backend.enrichment.External">
 		<orm:attributes>

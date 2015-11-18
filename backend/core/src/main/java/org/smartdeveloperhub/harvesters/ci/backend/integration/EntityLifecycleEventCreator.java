@@ -28,14 +28,14 @@ package org.smartdeveloperhub.harvesters.ci.backend.integration;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.command.CommandVisitor;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CreateBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CreateExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.FinishExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.UpdateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CommandVisitor;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.FinishExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.UpdateBuildCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent.EntityType;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent.State;

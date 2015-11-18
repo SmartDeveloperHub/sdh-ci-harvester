@@ -30,8 +30,8 @@ import java.net.URI;
 
 import javax.persistence.EntityManager;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.BuildRepository;
 
 public class JPABuildRepository implements BuildRepository {
 

@@ -35,6 +35,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;

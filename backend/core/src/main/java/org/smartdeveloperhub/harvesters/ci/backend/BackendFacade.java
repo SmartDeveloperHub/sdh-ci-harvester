@@ -29,6 +29,7 @@ package org.smartdeveloperhub.harvesters.ci.backend;
 import java.io.Closeable;
 import java.io.IOException;
 
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;

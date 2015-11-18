@@ -34,15 +34,15 @@ import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.LifecycleDescriptorRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.spi.ComponentRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
