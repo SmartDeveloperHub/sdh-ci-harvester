@@ -148,10 +148,10 @@ final class DefaultBackendController implements BackendController {
 		checkState(this.resolver!=null,"No execution resolver defined");
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
 		try {
+			enrichmentService().registerListener(listener);
 			integrationService().registerListener(listener);
 			integrationService().setEntityResolver(this.resolver);
 			integrationService().connect(this.jenkinsInstance);
-			enrichmentService().registerListener(listener);
 		} catch (final IOException e) {
 			LOGGER.info("Could not connect to {}. Full stacktrace follows",this.jenkinsInstance,e);
 			this.jenkinsInstance=null;

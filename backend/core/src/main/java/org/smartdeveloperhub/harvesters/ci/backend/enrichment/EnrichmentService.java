@@ -40,6 +40,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.curator.connector.Connector;
+import org.smartdeveloperhub.curator.connector.CuratorConfiguration;
 import org.smartdeveloperhub.curator.connector.protocol.ProtocolFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.Codebase;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
@@ -172,6 +173,10 @@ public class EnrichmentService {
 								withBroker(deployment.broker()).
 								withRoutingKey("ci.connector.enrichments").
 								build()).
+					withCuratorConfiguration(
+						CuratorConfiguration.
+							newInstance().
+								withBroker(deployment.broker())).
 					withQueueName("ci.connector.queue").
 					withBase(deployment.base()).
 					withNamespacePrefix(UseCase.CI_NAMESPACE,"ci").
