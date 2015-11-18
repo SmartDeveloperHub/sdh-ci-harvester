@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.command.RegisterServiceCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
@@ -69,10 +68,6 @@ final class DefaultBackendController implements BackendController {
 
 	private JenkinsIntegrationService integrationService() {
 		return this.backendFacade.integrationService();
-	}
-
-	private EnrichmentService enrichmentService() {
-		return this.backendFacade.enrichmentService();
 	}
 
 	private void rollbackQuietly(final Transaction tx) {
@@ -148,9 +143,8 @@ final class DefaultBackendController implements BackendController {
 		checkState(this.resolver!=null,"No execution resolver defined");
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
 		try {
-			enrichmentService().registerListener(listener);
 			integrationService().registerListener(listener);
-			integrationService().setEntityResolver(this.resolver);
+			integrationService().setResolverService(this.resolver);
 			integrationService().connect(this.jenkinsInstance);
 		} catch (final IOException e) {
 			LOGGER.info("Could not connect to {}. Full stacktrace follows",this.jenkinsInstance,e);

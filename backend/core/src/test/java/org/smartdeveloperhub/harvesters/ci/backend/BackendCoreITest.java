@@ -27,6 +27,7 @@
 package org.smartdeveloperhub.harvesters.ci.backend;
 
 import java.io.IOException;
+import java.net.URI;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -36,8 +37,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPAComponentRegistry;
@@ -97,6 +100,18 @@ public class BackendCoreITest extends SmokeTest {
 				cis,
 				ers,
 				this.persistencyFacade.getTransactionManager());
+		jis.setResolverService(
+			new ResolverService() {
+				@Override
+				public URI resolveExecution(final Execution execution) {
+					return null;
+				}
+				@Override
+				public boolean isReady() {
+					return true;
+				}
+			}
+		);
 		smokeTest(cis,jis,ers);
 	}
 

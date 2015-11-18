@@ -164,6 +164,7 @@ public class EnrichmentService {
 		this.read=lock.readLock();
 		this.write=lock.writeLock();
 		this.listeners=ListenerManager.newInstance();
+		this.resolver=new NullResolverService();
 		this.connector =
 			Connector.
 				builder().
@@ -446,7 +447,7 @@ public class EnrichmentService {
 		final PendingEnrichment newPending=PendingEnrichment.newInstance(context.repositoryLocation(),context.branchName(),context.commitId());
 		newPending.executions().add(context.targetExecution().executionId());
 		this.pendingRepository.add(newPending);
-		LOGGER.trace("{} creates {}",context,pending);
+		LOGGER.trace("{} creates {}",context,newPending);
 
 		context.setPendingEnrichment(newPending);
 		this.requestor.enqueueRequest(context);
@@ -456,7 +457,11 @@ public class EnrichmentService {
 		this.write.lock();
 		try {
 			checkState(!this.state.isConnected(),"Cannot change resolver service while connected");
-			this.resolver=resolver;
+			if(resolver!=null) {
+				this.resolver=resolver;
+			} else {
+				this.resolver=new NullResolverService();
+			}
 			return this;
 		} finally {
 			this.write.unlock();

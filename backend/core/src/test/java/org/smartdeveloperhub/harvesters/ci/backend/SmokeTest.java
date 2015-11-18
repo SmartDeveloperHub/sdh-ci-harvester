@@ -63,6 +63,8 @@ import com.google.common.collect.Sets;
 
 public class SmokeTest {
 
+	private static final String DEFAULT_TARGET = "https://ci.jenkins-ci.org/";
+
 	private static final Logger LOGGER=LoggerFactory.getLogger(SmokeTest.class);
 
 	@BeforeClass
@@ -85,7 +87,8 @@ public class SmokeTest {
 		this.tmpDirectory = new File("target","jenkins"+new Date().getTime());
 		jis.setWorkingDirectory(this.tmpDirectory);
 		LOGGER.info("Warming up...");
-		jis.connect(URI.create("https://ci.jenkins-ci.org/"));
+		// Local: http://vps164.cesvima.upm.es:8000/
+		jis.connect(URI.create(DEFAULT_TARGET));
 		try {
 			TimeUnit.SECONDS.sleep(60);
 		} catch(final InterruptedException e) {

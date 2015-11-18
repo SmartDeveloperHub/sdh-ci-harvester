@@ -353,7 +353,7 @@ public final class JenkinsIntegrationService {
 		}
 	}
 
-	public JenkinsIntegrationService setEntityResolver(final ResolverService resolver) {
+	public JenkinsIntegrationService setResolverService(final ResolverService resolver) {
 		this.write.lock();
 		try {
 			this.state.setExecutionResolver(resolver);
@@ -413,11 +413,13 @@ public final class JenkinsIntegrationService {
 	}
 
 	public JenkinsIntegrationService registerListener(final EntityLifecycleEventListener listener) {
+		this.erService.registerListener(listener);
 		this.listeners.registerListener(listener);
 		return this;
 	}
 
 	public JenkinsIntegrationService deregisterListener(final EntityLifecycleEventListener listener) {
+		this.erService.deregisterListener(listener);
 		this.listeners.deregisterListener(listener);
 		return this;
 	}
