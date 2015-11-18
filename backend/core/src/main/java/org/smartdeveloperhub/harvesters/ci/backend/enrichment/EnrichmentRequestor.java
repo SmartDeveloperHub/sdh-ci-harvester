@@ -143,6 +143,7 @@ final class EnrichmentRequestor {
 		void queueJob(final RequestJob job) {
 			if(!job.requiresTermination() && this.terminated) {
 				LOGGER.info("Rejected request job for execution {}",job.context().targetExecution().executionId());
+				return;
 			}
 			while(true) {
 				try {
