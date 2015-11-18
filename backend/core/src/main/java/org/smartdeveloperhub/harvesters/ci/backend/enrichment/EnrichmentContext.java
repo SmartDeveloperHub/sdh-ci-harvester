@@ -29,14 +29,11 @@ package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 import java.net.URI;
 
 import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
 final class EnrichmentContext {
-
-	static final EnrichmentContext NULL=new EnrichmentContext();
 
 	private final Execution targetExecution;
 	private final URI repositoryLocation;
@@ -45,13 +42,6 @@ final class EnrichmentContext {
 
 	private ImmutableExecutionEnrichment enrichment;
 	private PendingEnrichment pendingEnrichment;
-
-	private EnrichmentContext() {
-		this.targetExecution=null;
-		this.repositoryLocation=null;
-		this.branchName=null;
-		this.commitId=null;
-	}
 
 	EnrichmentContext(final Execution execution) {
 		this.targetExecution=execution;

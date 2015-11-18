@@ -28,8 +28,11 @@ package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.URI;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -39,71 +42,185 @@ import org.smartdeveloperhub.curator.connector.ConnectorException;
 import org.smartdeveloperhub.curator.connector.EnrichmentRequest;
 import org.smartdeveloperhub.curator.connector.EnrichmentResult;
 import org.smartdeveloperhub.curator.connector.EnrichmentResultHandler;
+import org.smartdeveloperhub.curator.connector.protocol.ValidationException;
+import org.smartdeveloperhub.harvesters.ci.backend.util.CustomScheduledThreadPoolExecutor;
+
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 final class EnrichmentRequestor {
 
-	private final class Worker implements Runnable {
+	private final class RequestJob implements Runnable {
 
-		private final class EnrichmentResultProcessor implements
-				EnrichmentResultHandler {
-			private final EnrichmentContext context;
-			private final EnrichmentRequest request;
+		private static final int DEFAULT_RETRY_DELAY = 5000;
 
-			private EnrichmentResultProcessor(
-					final EnrichmentContext context, final EnrichmentRequest request) {
-				this.context = context;
-				this.request = request;
+		private final EnrichmentContext context;
+		private long retries;
+
+		private volatile boolean cancelled;
+
+		private RequestJob(final EnrichmentContext context) {
+			this.context=context;
+			this.retries=0;
+		}
+
+		boolean requiresTermination() {
+			return this.context==null;
+		}
+
+		EnrichmentContext context() {
+			return this.context;
+		}
+
+		void cancel() {
+			this.cancelled=true;
+		}
+
+		long retry(final BlockingQueue<RequestJob> queue) {
+			if(!this.cancelled) {
+				this.retries++;
+				EnrichmentRequestor.this.pool.schedule(
+					this,
+					DEFAULT_RETRY_DELAY,
+					TimeUnit.MILLISECONDS
+				);
 			}
+			return this.retries;
+		}
 
-			@Override
-			public void onResult(final EnrichmentResult result) {
-				processEnrichmentResult(this.context,this.request,result);
+		@Override
+		public void run() {
+			if(!RequestJob.this.cancelled) {
+				EnrichmentRequestor.this.worker.queueJob(RequestJob.this);
 			}
 		}
 
+		@Override
+		public String toString() {
+			return
+				MoreObjects.
+					toStringHelper(getClass()).
+						add("retries",this.retries).
+						add("context",this.context).
+						toString();
+		}
+
+	}
+
+	private final class Worker implements Runnable {
+
 		private final Connector connector;
 		private final ResolverService resolver;
-		private final BlockingQueue<EnrichmentContext> queue;
-		private volatile boolean terminate;
+		private final BlockingQueue<RequestJob> queue;
+
+		private volatile boolean terminated;
 
 		private Worker(final Connector connector, final ResolverService resolver) {
 			this.connector=connector;
 			this.resolver=resolver;
-			this.queue=new LinkedBlockingDeque<EnrichmentContext>();
-			this.terminate=false;
+			this.queue=new LinkedBlockingDeque<RequestJob>();
+			this.terminated=false;
 		}
 
-		private void queueJob(final EnrichmentContext context) {
+		@Override
+		public void run() {
+			try {
+				LOGGER.debug("Starting Enrichment Requestor worker. Awaiting resolver availability...");
+				awaitAvailability();
+				if(!this.terminated) {
+					LOGGER.debug("Resolver is available. Started processing queued request...");
+					processJobs();
+					LOGGER.debug("Processing of queued requests completed.");
+				}
+				LOGGER.debug("Enrichment Requestor worker terminated.");
+			} catch (final InterruptedException e) {
+				LOGGER.trace("Enrichment Requestor worker interrupted",e);
+			}
+		}
+
+		void queueJob(final RequestJob job) {
+			if(!job.requiresTermination() && this.terminated) {
+				LOGGER.info("Rejected request job for execution {}",job.context().targetExecution().executionId());
+			}
 			while(true) {
 				try {
-					this.queue.put(context);
+					this.queue.put(job);
+					LOGGER.trace("Queued {}",job);
 					break;
 				} catch (final InterruptedException e) {
-					LOGGER.info("Enrichment Requestor interrupted while awaiting for enqueueing {}",context,e);
+					LOGGER.info("Enrichment Requestor interrupted while awaiting for enqueueing {}",job,e);
 				}
 			}
 		}
 
-		// TODO: Ensure that interruptions do not stop the job processing loop.
+		void triggerTermination() {
+			this.terminated=true;
+			queueJob(new RequestJob(null));
+		}
+
 		private void processJobs() throws InterruptedException {
 			while(true) {
-				final EnrichmentContext context=this.queue.take();
-				if(context==EnrichmentContext.NULL) {
-					break;
-				}
-				final EnrichmentRequest request=UseCase.createRequest(this.resolver.resolveExecution(context.targetExecution()),context);
 				try {
-					LOGGER.trace("{} submitting {}",context,request);
-					final EnrichmentResultProcessor processor = new EnrichmentResultProcessor(context,request);
-					this.connector.requestEnrichment(request,processor);
-				} catch (final IOException e) {
-					LOGGER.warn("Could not request enrichment {} ({}). Full stacktrace follows",context,request,e);
-					// TODO: Think about how to handle the failure. Propagate?
+					final RequestJob job=this.queue.take();
+					if(job.requiresTermination()) {
+						cancelPendingJobs();
+						break;
+					}
+					final EnrichmentContext context = job.context();
+					final URI executionResource = this.resolver.resolveExecution(context.targetExecution());
+					if(executionResource==null) {
+						final long retries=job.retry(this.queue);
+						LOGGER.info("Could not resolve resource for execution {} yet. Retrying ({})",context.targetExecution(),retries);
+						continue;
+					}
+					processContext(context, executionResource);
+				} catch (final InterruptedException e) {
+					// Ignore interruption. Worker can only be terminated via
+					// the triggerTermination method
 				}
 			}
 		}
 
-		protected void processEnrichmentResult(final EnrichmentContext context, final EnrichmentRequest request, final EnrichmentResult result) {
+		private void processContext(final EnrichmentContext context, final URI executionResource) {
+			try {
+				final EnrichmentRequest request=UseCase.createRequest(executionResource,context);
+				try {
+					LOGGER.trace("{} submitting {}",context,request);
+					this.connector.requestEnrichment(
+						request,
+						new EnrichmentResultHandler() {
+							@Override
+							public void onResult(final EnrichmentResult result) {
+								processEnrichmentResult(context,request,result);
+							}
+						}
+					);
+				} catch (final IOException e) {
+					LOGGER.warn("Could not request enrichment {} ({}). Full stacktrace follows",request,context,e);
+				}
+			} catch (final ValidationException e) {
+				LOGGER.warn("Could not create request for enrichment {}. Full stacktrace follows",context,e);
+			}
+		}
+
+		private void cancelPendingJobs() {
+			final List<RequestJob> pendingJobs=Lists.newArrayList();
+			this.queue.drainTo(pendingJobs);
+			for(final RequestJob job:pendingJobs) {
+				job.cancel();
+			}
+			if(LOGGER.isTraceEnabled()) {
+				final List<URI> executionIds=Lists.newArrayList();
+				for(final RequestJob job:pendingJobs) {
+					executionIds.add(job.context().targetExecution().executionId());
+				}
+				LOGGER.debug("Cancelled {} pending execution enrichment request jobs ({})",pendingJobs.size(),executionIds);
+			}
+		}
+
+		private void processEnrichmentResult(final EnrichmentContext context, final EnrichmentRequest request, final EnrichmentResult result) {
 			LOGGER.debug("Processing enrichment result {} about {} ({})",result,request,context);
 			final ExecutionEnrichment enrichment=UseCase.processResult(context,result);
 			try {
@@ -115,61 +232,56 @@ final class EnrichmentRequestor {
 
 		// TODO: Use an exponential back-off delay
 		private void awaitAvailability() throws InterruptedException {
-			while(!this.resolver.isReady() && !this.terminate) {
+			while(!this.resolver.isReady() && !this.terminated) {
 				TimeUnit.MILLISECONDS.sleep(3000);
-			}
-		}
-
-		private void triggerTermination() {
-			this.terminate=true;
-			queueJob(EnrichmentContext.NULL);
-		}
-
-		@Override
-		public void run() {
-			try {
-				LOGGER.debug("Starting Enrichment Requestor worker. Awaiting resolver availability...");
-				awaitAvailability();
-				if(!this.terminate) {
-					LOGGER.debug("Resolver is availble. Started processing queued request...");
-					processJobs();
-					LOGGER.debug("Processing of queued requests completed.");
-				}
-				LOGGER.debug("Enrichment Requestor worker terminated.");
-			} catch (final InterruptedException e) {
-				LOGGER.trace("Enrichment Requestor worker interrupted",e);
 			}
 		}
 
 	}
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(EnrichmentService.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(EnrichmentRequestor.class);
 
-	private final Thread thread;
 	private final Worker worker;
+	private final CustomScheduledThreadPoolExecutor pool;
+	private final EnrichmentService service;
 
 	private boolean started;
-
-	private final EnrichmentService service;
 
 	EnrichmentRequestor(final EnrichmentService service, final Connector connector, final ResolverService resolver) {
 		this.service = service;
 		this.worker = new Worker(connector,resolver);
-		this.thread = new Thread(this.worker,"EnrichmentRequestor");
-		this.thread.setUncaughtExceptionHandler(
-			new UncaughtExceptionHandler() {
-				@Override
-				public void uncaughtException(final Thread t, final Throwable e) {
-					LOGGER.error("Requestor thread died. Full stacktrace follows",e);
-				}
-			}
-		);
+		final ThreadFactory threadFactory =
+			new ThreadFactoryBuilder().
+				setNameFormat("EnrichmentRequestor-worker-%d").
+				setPriority(Thread.MAX_PRIORITY).
+				setUncaughtExceptionHandler(
+					new UncaughtExceptionHandler() {
+						@Override
+						public void uncaughtException(final Thread t, final Throwable e) {
+							LOGGER.error("Requestor thread {} died unexpectedly",t.getName(),e);
+						}
+					}).
+				build();
+		this.pool=new CustomScheduledThreadPoolExecutor(2,threadFactory);
 		this.started=false;
 	}
 
 	void enqueueRequest(final EnrichmentContext context) {
 		if(context.requiresCommit()) {
-			this.worker.queueJob(context);
+			this.worker.queueJob(new RequestJob(context));
+		}
+	}
+
+	void start() throws IOException {
+		LOGGER.info("Starting Enrichment Requestor...");
+		try {
+			this.worker.connector.connect();
+			this.pool.submit(this.worker);
+			this.started=true;
+			LOGGER.info("Enrichment Requestor started.");
+		} catch (final ConnectorException e) {
+			LOGGER.error("Could not initialize the curator connector. Full stacktrace follows",e);
+			throw new IOException("Could not initialize the curator connector",e);
 		}
 	}
 
@@ -177,11 +289,7 @@ final class EnrichmentRequestor {
 		LOGGER.info("Stopping Enrichment Requestor...");
 		if(this.started) {
 			this.worker.triggerTermination();
-			try {
-				this.thread.join();
-			} catch (final InterruptedException e) {
-				LOGGER.trace("Enrichment Requestor interrupted while awaiting for daemon thread termination",e);
-			}
+			shutdownPoolGracefully(5,TimeUnit.SECONDS);
 			try {
 				this.worker.connector.disconnect();
 			} catch (final ConnectorException e) {
@@ -192,16 +300,29 @@ final class EnrichmentRequestor {
 		LOGGER.info("Enrichment Requestor stopped.");
 	}
 
-	void start() throws IOException {
-		LOGGER.info("Starting Enrichment Requestor...");
-		try {
-			this.worker.connector.connect();
-			this.thread.start();
-			this.started=true;
-			LOGGER.info("Enrichment Requestor started.");
-		} catch (final ConnectorException e) {
-			LOGGER.error("Could not initialize the curator connector. Full stacktrace follows",e);
-			throw new IOException("Could not initialize the curator connector",e);
+	private void shutdownPoolGracefully(final int period, final TimeUnit unit) {
+		this.pool.shutdown();
+		final Stopwatch watch=Stopwatch.createStarted();
+		while(!this.pool.isTerminated() && watch.elapsed(unit)<period) {
+			try {
+				this.pool.awaitTermination(500, TimeUnit.MILLISECONDS);
+			} catch (final InterruptedException e) {
+				LOGGER.trace("Enrichment Requestor interrupted while awaiting for termination",e);
+				Thread.currentThread().interrupt();
+			}
+		}
+		if(!this.pool.isTerminated()) {
+			final List<Runnable> unfinished = this.pool.shutdownNow();
+			if(LOGGER.isTraceEnabled()) {
+				final List<URI> aborted=Lists.newArrayList();
+				for(final Runnable runnable:unfinished) {
+					final RequestJob job=this.pool.getTask(runnable,RequestJob.class);
+					if(job!=null) {
+						aborted.add(job.context().targetExecution().executionId());
+					}
+				}
+				LOGGER.trace("Aborted {} pending execution enrichment requests ({})",aborted.size(),aborted);
+			}
 		}
 	}
 
