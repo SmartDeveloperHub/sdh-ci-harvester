@@ -42,7 +42,6 @@ import org.smartdeveloperhub.curator.connector.ConnectorException;
 import org.smartdeveloperhub.curator.connector.EnrichmentRequest;
 import org.smartdeveloperhub.curator.connector.EnrichmentResult;
 import org.smartdeveloperhub.curator.connector.EnrichmentResultHandler;
-import org.smartdeveloperhub.curator.connector.protocol.ValidationException;
 import org.smartdeveloperhub.harvesters.ci.backend.util.CustomScheduledThreadPoolExecutor;
 
 import com.google.common.base.MoreObjects;
@@ -176,7 +175,7 @@ final class EnrichmentRequestor {
 						LOGGER.
 							info(
 								"Could not resolve resource for execution {} yet. Retrying ({})",
-								context.targetExecution(),
+								context.targetExecution().executionId(),
 								retries);
 					} else {
 						processContext(context, executionResource);
@@ -191,8 +190,8 @@ final class EnrichmentRequestor {
 		private void processContext(final EnrichmentContext context, final URI executionResource) {
 			try {
 				submitEnrichmentRequest(context,UseCase.createRequest(executionResource,context));
-			} catch (final ValidationException e) {
-				LOGGER.warn("Could not create request for enrichment {}. Full stacktrace follows",context,e);
+			} catch (final Exception e) {
+				LOGGER.error("Could not process {} ({}). Full stacktrace follows",context,executionResource,e);
 			}
 		}
 
@@ -208,8 +207,8 @@ final class EnrichmentRequestor {
 						}
 					}
 				);
-			} catch (final IOException e) {
-				LOGGER.warn("Could submit enrichment {} for enrichment {}. Full stacktrace follows",request,context,e);
+			} catch (final Exception e) {
+				LOGGER.error("Could not submit {} related to {}. Full stacktrace follows",request,context,e);
 			}
 		}
 
