@@ -27,6 +27,7 @@
 package org.smartdeveloperhub.jenkins.crawler;
 
 import java.net.URI;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,8 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
+
+import com.google.common.collect.Lists;
 
 final class RefreshJobConfigurationTask extends AbstractJobConfigurationTask {
 
@@ -54,17 +57,22 @@ final class RefreshJobConfigurationTask extends AbstractJobConfigurationTask {
 
 	@Override
 	protected void processSubresource(final Job parent, final JenkinsResource resource) {
-		final Codebase codebase = loadCodebase(parent, resource);
+		final Codebase currentCodebase = loadCodebase(parent, resource);
+		final Codebase oldCodebase = this.previousJob.getCodebase();
 		try {
-			LOGGER.trace("Retrieved SCM information for {}: {}",parent.getUrl(),codebase);
-			if(!codebase.equals(this.previousJob.getCodebase())) {
-				LOGGER.debug("Updating SCM information for {} from {} to {}",parent.getUrl(),parent.getCodebase(),codebase);
-				parent.setCodebase(codebase);
+			LOGGER.trace("Retrieved SCM information for {}: {}",parent.getUrl(),currentCodebase);
+			final List<Codebase> codebases=Lists.newArrayList();
+			codebases.add(currentCodebase);
+			codebases.add(oldCodebase);
+			final Codebase newCodebase=SCMUtil.mergeCodebases(codebases);
+			if(SCMUtil.isDefined(newCodebase) && !newCodebase.equals(oldCodebase)) {
+				LOGGER.debug("Updating SCM information for {} from {} to {}",parent.getUrl(),oldCodebase,newCodebase);
+				parent.setCodebase(newCodebase);
 				super.persistEntity(parent, entityType());
 				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Could not refresh SCM information {} for {}",codebase,parent,e);
+			LOGGER.error("Could not refresh SCM information {} for {}",currentCodebase,parent,e);
 		}
 	}
 

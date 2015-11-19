@@ -51,12 +51,12 @@ public final class JenkinsCrawlerExec {
 	private JenkinsCrawlerExec() {
 	}
 
-	public static void main(String[] args) {
-		File tmpDirectory = new File("target","jenkins"+new Date().getTime());
+	public static void main(final String[] args) {
+		final File tmpDirectory = new File("target","jenkins"+new Date().getTime());
 		tmpDirectory.deleteOnExit();
-		String location="http://ci.jenkins-ci.org/";
+		final String location="https://ci.jenkins-ci.org/";
 		try {
-			JenkinsCrawler crawler=
+			final JenkinsCrawler crawler=
 				JenkinsCrawler.
 					builder().
 						withDirectory(tmpDirectory).
@@ -78,8 +78,8 @@ public final class JenkinsCrawlerExec {
 											withDelay(15,TimeUnit.SECONDS).
 										build()).
 						build();
-			JenkinsEventListener jenkinsEventListener = new ConsoleLoggingJenkinsEventListener();
-			CrawlerEventListener crawlerEventListener = new ConsoleLoggingCrawlerEventListener();
+			final JenkinsEventListener jenkinsEventListener = new ConsoleLoggingJenkinsEventListener();
+			final CrawlerEventListener crawlerEventListener = new ConsoleLoggingCrawlerEventListener();
 			crawler.
 				registerListener(jenkinsEventListener).
 				registerListener(crawlerEventListener);
@@ -89,22 +89,22 @@ public final class JenkinsCrawlerExec {
 			crawler.
 				deregisterListener(crawlerEventListener).
 				deregisterListener(jenkinsEventListener);
-			FileBasedStorage tmp=
+			final FileBasedStorage tmp=
 					FileBasedStorage.
 						builder().
 							withConfigFile(new File(tmpDirectory,"repository.xml")).
 							build();
-			JenkinsResource resource=
+			final JenkinsResource resource=
 				tmp.
 					findResource(
-						URI.create("http://ci.jenkins-ci.org/job/jenkins_rc_branch/423/"),
+						URI.create("https://ci.jenkins-ci.org/job/jenkins_rc_branch/423/"),
 						JenkinsArtifactType.RESOURCE);
 			if(resource!=null) {
 				LOGGER.info(resource.toString());
 			}
-		} catch (JenkinsCrawlerException e) {
+		} catch (final JenkinsCrawlerException e) {
 			LOGGER.error("Could not create crawler",e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("Unexpected failure",e);
 		}
 	}
