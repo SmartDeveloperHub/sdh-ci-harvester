@@ -56,6 +56,7 @@ public class HarvesterApplicationITest extends SmokeTest {
 
 	private static final String SIMPLE_BUILD    = "service/builds/1/";
 	private static final String COMPOSITE_BUILD = "service/builds/2/";
+	private static int expectedResources;
 	private static boolean available;
 
 	private static boolean checkAvailability(final String str) {
@@ -75,9 +76,11 @@ public class HarvesterApplicationITest extends SmokeTest {
 	public static WebArchive createDeployment() throws Exception {
 		String target = "https://ci.jenkins-ci.org/";
 		HarvesterApplicationITest.available = checkAvailability(target);
+		HarvesterApplicationITest.expectedResources = 5;
 		if(!HarvesterApplicationITest.available) {
 			target = "http://vps164.cesvima.upm.es:8000/";
 			HarvesterApplicationITest.available=checkAvailability(target);
+			HarvesterApplicationITest.expectedResources = 0;
 		}
 		if(!HarvesterApplicationITest.available) {
 			target = "http://www.notfound.org/";
@@ -92,7 +95,7 @@ public class HarvesterApplicationITest extends SmokeTest {
 		assumeThat(HarvesterApplicationITest.available,equalTo(true));
 		TimeUnit.MINUTES.sleep(1);
 		final List<String> builds = getServiceBuilds(contextURL);
-		assertThat(builds,hasSize(greaterThan(5)));
+		assertThat(builds,hasSize(greaterThan(HarvesterApplicationITest.expectedResources)));
 		assertThat(builds,
 			hasItems(
 				TestingUtil.resolve(contextURL,SIMPLE_BUILD),

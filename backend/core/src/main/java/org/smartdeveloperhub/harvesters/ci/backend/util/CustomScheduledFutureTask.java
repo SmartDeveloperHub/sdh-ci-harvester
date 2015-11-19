@@ -48,7 +48,7 @@ final class CustomScheduledFutureTask<V> implements RunnableScheduledFuture<V> {
 
 	@Override
 	public void run() {
-		this.delegate.run();
+		this.delegate.run();  // NOSONAR
 	}
 
 	@Override

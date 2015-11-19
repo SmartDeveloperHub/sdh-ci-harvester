@@ -78,7 +78,7 @@ final class EnrichmentRequestor {
 			this.cancelled=true;
 		}
 
-		long retry(final BlockingQueue<RequestJob> queue) {
+		long retry() {
 			if(!this.cancelled) {
 				this.retries++;
 				EnrichmentRequestor.this.pool.schedule(
@@ -172,11 +172,15 @@ final class EnrichmentRequestor {
 					final EnrichmentContext context = job.context();
 					final URI executionResource = this.resolver.resolveExecution(context.targetExecution());
 					if(executionResource==null) {
-						final long retries=job.retry(this.queue);
-						LOGGER.info("Could not resolve resource for execution {} yet. Retrying ({})",context.targetExecution(),retries);
-						continue;
+						final long retries = job.retry();
+						LOGGER.
+							info(
+								"Could not resolve resource for execution {} yet. Retrying ({})",
+								context.targetExecution(),
+								retries);
+					} else {
+						processContext(context, executionResource);
 					}
-					processContext(context, executionResource);
 				} catch (final InterruptedException e) {
 					// Ignore interruption. Worker can only be terminated via
 					// the triggerTermination method
@@ -186,23 +190,26 @@ final class EnrichmentRequestor {
 
 		private void processContext(final EnrichmentContext context, final URI executionResource) {
 			try {
-				final EnrichmentRequest request=UseCase.createRequest(executionResource,context);
-				try {
-					LOGGER.trace("{} submitting {}",context,request);
-					this.connector.requestEnrichment(
-						request,
-						new EnrichmentResultHandler() {
-							@Override
-							public void onResult(final EnrichmentResult result) {
-								processEnrichmentResult(context,request,result);
-							}
-						}
-					);
-				} catch (final IOException e) {
-					LOGGER.warn("Could not request enrichment {} ({}). Full stacktrace follows",request,context,e);
-				}
+				submitEnrichmentRequest(context,UseCase.createRequest(executionResource,context));
 			} catch (final ValidationException e) {
 				LOGGER.warn("Could not create request for enrichment {}. Full stacktrace follows",context,e);
+			}
+		}
+
+		private void submitEnrichmentRequest(final EnrichmentContext context, final EnrichmentRequest request) {
+			try {
+				LOGGER.trace("{} submitting {}",context,request);
+				this.connector.requestEnrichment(
+					request,
+					new EnrichmentResultHandler() {
+						@Override
+						public void onResult(final EnrichmentResult result) {
+							processEnrichmentResult(context,request,result);
+						}
+					}
+				);
+			} catch (final IOException e) {
+				LOGGER.warn("Could submit enrichment {} for enrichment {}. Full stacktrace follows",request,context,e);
 			}
 		}
 
@@ -314,16 +321,20 @@ final class EnrichmentRequestor {
 		}
 		if(!this.pool.isTerminated()) {
 			final List<Runnable> unfinished = this.pool.shutdownNow();
-			if(LOGGER.isTraceEnabled()) {
-				final List<URI> aborted=Lists.newArrayList();
-				for(final Runnable runnable:unfinished) {
-					final RequestJob job=this.pool.getTask(runnable,RequestJob.class);
-					if(job!=null) {
-						aborted.add(job.context().targetExecution().executionId());
-					}
+			logAbortedRequestJobs(unfinished);
+		}
+	}
+
+	private void logAbortedRequestJobs(final List<Runnable> unfinished) {
+		if(LOGGER.isTraceEnabled()) {
+			final List<URI> aborted=Lists.newArrayList();
+			for(final Runnable runnable:unfinished) {
+				final RequestJob job=this.pool.getTask(runnable,RequestJob.class);
+				if(job!=null) {
+					aborted.add(job.context().targetExecution().executionId());
 				}
-				LOGGER.trace("Aborted {} pending execution enrichment requests ({})",aborted.size(),aborted);
 			}
+			LOGGER.trace("Aborted {} pending execution enrichment requests ({})",aborted.size(),aborted);
 		}
 	}
 

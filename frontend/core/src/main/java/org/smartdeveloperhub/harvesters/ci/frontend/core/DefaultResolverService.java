@@ -62,6 +62,25 @@ final class DefaultResolverService implements ResolverService, ApplicationLifecy
 		this.write=lock.writeLock();
 	}
 
+	private URI tryResolve(final Execution execution) {
+		URI resolved=null;
+		try(final WriteSession session=this.context.createSession()) {
+			final SnapshotResolver resolver=
+				SnapshotResolver.
+					builder().
+						withCanonicalBase(this.canonicalBase).
+						withReadSession(session).
+						build();
+			final ResourceSnapshot snapshot=session.find(ResourceSnapshot.class,IdentityUtil.executionName(execution),ExecutionHandler.class);
+			if(snapshot!=null) {
+				resolved=resolver.toURI(snapshot);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Could not resolve the URI of {}. Full stacktrace follows",execution,e);
+		}
+		return resolved;
+	}
+
 	@Override
 	public boolean isReady() {
 		this.read.lock();
@@ -76,19 +95,10 @@ final class DefaultResolverService implements ResolverService, ApplicationLifecy
 	public URI resolveExecution(final Execution execution) {
 		URI result=null;
 		this.read.lock();
-		try(final WriteSession session=this.context.createSession()) {
-			final SnapshotResolver resolver=
-				SnapshotResolver.
-					builder().
-						withCanonicalBase(this.canonicalBase).
-						withReadSession(session).
-						build();
-			final ResourceSnapshot snapshot=session.find(ResourceSnapshot.class,IdentityUtil.executionName(execution),ExecutionHandler.class);
-			if(snapshot!=null) {
-				result=resolver.toURI(snapshot);
+		try {
+			if(this.context!=null) {
+				result=tryResolve(execution);
 			}
-		} catch (final Exception e) {
-			LOGGER.error("Could not resolve the URI of {}. Full stacktrace follows",execution,e);
 		} finally {
 			this.read.unlock();
 		}
