@@ -29,6 +29,7 @@ package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -51,10 +52,104 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 final class EnrichmentRequestor {
 
+	static final class JobMetrics {
+	
+		private static final class Counter {
+	
+			private final String name;
+			private volatile long value;
+	
+			private Counter(final String name) {
+				this.name = name;
+				this.value=0;
+			}
+	
+			private long get() {
+				return this.value;
+			}
+	
+			private long incrementAndGet() {
+				return ++this.value;
+			}
+	
+			private long decrementAndGet() {
+				return --this.value;
+			}
+	
+			@Override
+			public String toString() {
+				return this.name+": "+this.value;
+			}
+	
+		}
+	
+		private static final int CREATED_JOBS  =0;
+		private static final int PENDING_JOBS  =1;
+		private static final int PROCESSED_JOBS=2;
+		private static final int FAILED_JOBS   =3;
+		private static final int COMPLETED_JOBS=4;
+	
+		private final Counter[] metrics=new Counter[5];
+	
+		private JobMetrics() {
+			this.metrics[CREATED_JOBS]  =new Counter("createdJobs");
+			this.metrics[PENDING_JOBS]  =new Counter("pendingJobs");
+			this.metrics[PROCESSED_JOBS]=new Counter("processedJobs");
+			this.metrics[FAILED_JOBS]   =new Counter("failedJobs");
+			this.metrics[COMPLETED_JOBS]=new Counter("completedJobs");
+		}
+	
+		private long createJob(final EnrichmentContext context) {
+			long id=0;
+			synchronized(this) {
+				this.metrics[PENDING_JOBS].incrementAndGet();
+				id=this.metrics[CREATED_JOBS].incrementAndGet();
+			}
+			LOGGER.trace("Created job #{} for {}",id,context==null?"<termination>":context.pendingEnrichment());
+			return id;
+		}
+	
+		private void jobProcessed(final RequestJob job, final boolean completed) {
+			synchronized(this) {
+				this.metrics[PENDING_JOBS].decrementAndGet();
+				this.metrics[PROCESSED_JOBS].incrementAndGet();
+				if(completed) {
+					this.metrics[COMPLETED_JOBS].incrementAndGet();
+				} else {
+					this.metrics[FAILED_JOBS].incrementAndGet();
+				}
+			}
+			LOGGER.trace("{} processing job #{} ({})",completed?"Completed ":"Failed ",job.id(),job.context().pendingEnrichment());
+		}
+	
+		synchronized long pendingJobs() {
+			return this.metrics[PENDING_JOBS].get();
+		}
+	
+		synchronized long processedJobs() {
+			return this.metrics[PROCESSED_JOBS].get();
+		}
+	
+		synchronized long completedJobs() {
+			return this.metrics[COMPLETED_JOBS].get();
+		}
+	
+		synchronized long failedJobs() {
+			return this.metrics[FAILED_JOBS].get();
+		}
+	
+		@Override
+		public synchronized String toString() {
+			return Arrays.toString(this.metrics);
+		}
+	
+	}
+
 	private final class RequestJob implements Runnable {
 
 		private static final int DEFAULT_RETRY_DELAY = 5000;
 
+		private final long id;
 		private final EnrichmentContext context;
 		private long retries;
 
@@ -63,6 +158,11 @@ final class EnrichmentRequestor {
 		private RequestJob(final EnrichmentContext context) {
 			this.context=context;
 			this.retries=0;
+			this.id=EnrichmentRequestor.this.metrics.createJob(context);
+		}
+
+		long id() {
+			return this.id;
 		}
 
 		boolean requiresTermination() {
@@ -101,6 +201,7 @@ final class EnrichmentRequestor {
 			return
 				MoreObjects.
 					toStringHelper(getClass()).
+						add("id",this.id).
 						add("retries",this.retries).
 						add("context",this.context).
 						toString();
@@ -166,32 +267,50 @@ final class EnrichmentRequestor {
 					final RequestJob job=this.queue.take();
 					if(job.requiresTermination()) {
 						cancelPendingJobs();
-						break;
-					}
-					final EnrichmentContext context = job.context();
-					final URI executionResource = this.resolver.resolveExecution(context.targetExecution());
-					if(executionResource==null) {
-						final long retries = job.retry();
-						LOGGER.
-							info(
-								"Could not resolve resource for execution {} yet. Retrying ({})",
-								context.targetExecution().executionId(),
-								retries);
 					} else {
-						processContext(context, executionResource);
+						processJob(job);
 					}
 				} catch (final InterruptedException e) {
 					// Ignore interruption. Worker can only be terminated via
 					// the triggerTermination method
+					LOGGER.trace("Interrupted while waiting for RequestJob",e);
 				}
 			}
 		}
 
-		private void processContext(final EnrichmentContext context, final URI executionResource) {
+		private void processJob(final RequestJob job) {
+			final URI executionResource =
+				this.resolver.
+					resolveExecution(
+						job.context().targetExecution());
+			if(executionResource==null) {
+				retryJob(job);
+			} else {
+				completeJob(job, executionResource);
+			}
+		}
+
+		private void retryJob(final RequestJob job) {
+			final long retries = job.retry();
+			LOGGER.
+				info(
+					"Retrying job #{} ({}): could not resolve resource for execution {} ",
+					job.id(),
+					retries,
+					job.context().targetExecution().executionId(),
+					retries);
+		}
+
+		private void completeJob(final RequestJob job, final URI executionResource) {
+			final EnrichmentContext ctx = job.context();
+			boolean completed=false;
 			try {
-				submitEnrichmentRequest(context,UseCase.createRequest(executionResource,context));
+				submitEnrichmentRequest(ctx,UseCase.createRequest(executionResource,ctx));
+				completed=true;
 			} catch (final Exception e) {
-				LOGGER.error("Could not process {} ({}). Full stacktrace follows",context,executionResource,e);
+				LOGGER.error("Could not process {} ({}). Full stacktrace follows",ctx.pendingEnrichment(),executionResource,e);
+			} finally {
+				EnrichmentRequestor.this.metrics.jobProcessed(job, completed);
 			}
 		}
 
@@ -251,11 +370,13 @@ final class EnrichmentRequestor {
 	private final Worker worker;
 	private final CustomScheduledThreadPoolExecutor pool;
 	private final EnrichmentService service;
+	private final JobMetrics metrics;
 
 	private boolean started;
 
 	EnrichmentRequestor(final EnrichmentService service, final Connector connector, final ResolverService resolver) {
 		this.service = service;
+		this.metrics = new JobMetrics();
 		this.worker = new Worker(connector,resolver);
 		final ThreadFactory threadFactory =
 			new ThreadFactoryBuilder().
@@ -265,7 +386,7 @@ final class EnrichmentRequestor {
 					new UncaughtExceptionHandler() {
 						@Override
 						public void uncaughtException(final Thread t, final Throwable e) {
-							LOGGER.error("Requestor thread {} died unexpectedly",t.getName(),e);
+							LOGGER.error("Requestor thread {} died unexpectedly",t,e);
 						}
 					}).
 				build();
@@ -277,6 +398,10 @@ final class EnrichmentRequestor {
 		if(context.requiresCommit()) {
 			this.worker.queueJob(new RequestJob(context));
 		}
+	}
+
+	JobMetrics metrics() {
+		return this.metrics;
 	}
 
 	void start() throws IOException {
@@ -328,7 +453,7 @@ final class EnrichmentRequestor {
 		if(LOGGER.isTraceEnabled()) {
 			final List<URI> aborted=Lists.newArrayList();
 			for(final Runnable runnable:unfinished) {
-				final RequestJob job=this.pool.getTask(runnable,RequestJob.class);
+				final RequestJob job=this.pool.unwrap(runnable,RequestJob.class);
 				if(job!=null) {
 					aborted.add(job.context().targetExecution().executionId());
 				}

@@ -24,21 +24,24 @@
  *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.util;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPATestsSuite;
-import org.smartdeveloperhub.harvesters.ci.backend.util.UtilTestsSuite;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Map;
 
-@RunWith(Suite.class)
-@SuiteClasses({
-	JPATestsSuite.class,
-	UtilTestsSuite.class,
-	BackendCoreITest.class,
-	BackendFacadeITest.class
-})
-public class AllTestsSuite {
+import com.google.common.collect.Maps;
+
+final class MockExceptionHandler implements UncaughtExceptionHandler {
+
+	final Map<String,Throwable> invocations;
+
+	MockExceptionHandler() {
+		this.invocations=Maps.newLinkedHashMap();
+	}
+
+	@Override
+	public void uncaughtException(final Thread t, final Throwable e) {
+		this.invocations.put(t.getName(),e);
+	}
 
 }

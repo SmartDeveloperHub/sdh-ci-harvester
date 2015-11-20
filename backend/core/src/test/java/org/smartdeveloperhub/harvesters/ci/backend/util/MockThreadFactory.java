@@ -24,21 +24,24 @@
  *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.util;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPATestsSuite;
-import org.smartdeveloperhub.harvesters.ci.backend.util.UtilTestsSuite;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
-@RunWith(Suite.class)
-@SuiteClasses({
-	JPATestsSuite.class,
-	UtilTestsSuite.class,
-	BackendCoreITest.class,
-	BackendFacadeITest.class
-})
-public class AllTestsSuite {
+final class MockThreadFactory implements ThreadFactory {
+
+	static final MockExceptionHandler EXCEPTION_HANDLER = new MockExceptionHandler();
+
+	final AtomicInteger counter=new AtomicInteger();
+
+	@Override
+	public Thread newThread(final Runnable r) {
+		final Thread thread = new Thread(r,"test-thread-"+this.counter.incrementAndGet());
+		thread.setDaemon(true);
+		thread.setPriority(Thread.NORM_PRIORITY);
+		thread.setUncaughtExceptionHandler(EXCEPTION_HANDLER);
+		return thread;
+	}
 
 }

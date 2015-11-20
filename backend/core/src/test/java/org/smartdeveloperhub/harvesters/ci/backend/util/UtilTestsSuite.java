@@ -24,21 +24,16 @@
  *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend;
+package org.smartdeveloperhub.harvesters.ci.backend.util;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPATestsSuite;
-import org.smartdeveloperhub.harvesters.ci.backend.util.UtilTestsSuite;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	JPATestsSuite.class,
-	UtilTestsSuite.class,
-	BackendCoreITest.class,
-	BackendFacadeITest.class
+	CustomScheduledFutureTaskTest.class,
+	CustomScheduledThreadPoolExecutorTest.class
 })
-public class AllTestsSuite {
-
+public class UtilTestsSuite {
 }

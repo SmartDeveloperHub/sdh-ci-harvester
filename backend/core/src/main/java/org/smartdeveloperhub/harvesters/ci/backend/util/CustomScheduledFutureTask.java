@@ -35,20 +35,32 @@ import java.util.concurrent.TimeoutException;
 final class CustomScheduledFutureTask<V> implements RunnableScheduledFuture<V> {
 
 	private final RunnableScheduledFuture<V> delegate;
-	private final Runnable task;
+	private final Object task;
 
-	CustomScheduledFutureTask(final Runnable task, final RunnableScheduledFuture<V> delegate) {
+	CustomScheduledFutureTask(final Object task, final RunnableScheduledFuture<V> delegate) {
 		this.delegate=delegate;
 		this.task=task;
 	}
 
-	Runnable task() {
+	Object task() {
 		return this.task;
 	}
 
 	@Override
 	public void run() {
 		this.delegate.run();  // NOSONAR
+		if(!this.delegate.isCancelled() && this.delegate.isDone()) {
+			try {
+				this.delegate.get();
+			} catch (final InterruptedException e) { // NOSONAR
+				// IGNORE
+			} catch (final ExecutionException e) {
+				final Thread thread = Thread.currentThread();
+				thread.
+					getUncaughtExceptionHandler().
+						uncaughtException(thread, e.getCause());
+			}
+		}
 	}
 
 	@Override

@@ -27,6 +27,7 @@
 package org.smartdeveloperhub.harvesters.ci.backend.util;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -44,17 +45,32 @@ public final class CustomScheduledThreadPoolExecutor extends ScheduledThreadPool
 
 	@Override
 	protected <V> RunnableScheduledFuture<V> decorateTask(final Callable<V> c, final RunnableScheduledFuture<V> task) {
-		return task;
+		return new CustomScheduledFutureTask<V>(c, task);
 	}
 
-	public <S> S getTask(final Runnable runnable, final Class<? extends S> clazz) {
-		if(runnable instanceof CustomScheduledFutureTask<?>) {
-			final CustomScheduledFutureTask<?> csft=(CustomScheduledFutureTask<?>)runnable;
-			final Object task = csft.task();
-			if(clazz.isInstance(task)) {
-				return clazz.cast(task);
-			}
+	private <S> S safeUnwrap(final CustomScheduledFutureTask<?> csft, final Class<? extends S> clazz) {
+		S result=null;
+		final Object task = csft.task();
+		if(clazz.isInstance(task)) {
+			result=clazz.cast(task);
 		}
-		return null;
+		return result;
 	}
+
+	public <S> S unwrap(final Runnable runnable, final Class<? extends S> clazz) {
+		S result=null;
+		if(runnable instanceof CustomScheduledFutureTask<?>) {
+			result=safeUnwrap((CustomScheduledFutureTask<?>)runnable, clazz);
+		}
+		return result;
+	}
+
+	public <S,V> S getTask(final Future<V> future, final Class<? extends S> clazz) {
+		S result=null;
+		if(future instanceof CustomScheduledFutureTask<?>) {
+			result=safeUnwrap((CustomScheduledFutureTask<?>)future, clazz);
+		}
+		return result;
+	}
+
 }
