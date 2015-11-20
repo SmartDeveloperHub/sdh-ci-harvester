@@ -33,7 +33,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 	CustomScheduledFutureTaskTest.class,
-	CustomScheduledThreadPoolExecutorTest.class
+	CustomScheduledThreadPoolExecutorTest.class,
+	MoreExecutorsTest.class,
 })
 public class UtilTestsSuite {
 }

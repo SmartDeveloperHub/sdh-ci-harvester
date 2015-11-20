@@ -57,6 +57,10 @@
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
 
+	<properties>
+		<ldp4j.version>0.2.0-SNAPSHOT</ldp4j.version>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -94,8 +98,8 @@
 
 		<dependency>
 			<groupId>org.smartdeveloperhub.curator</groupId>
-			<version>0.1.0-SNAPSHOT</version>
 			<artifactId>sdh-curator-connector</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -144,6 +148,13 @@
 		<dependency>
 			<groupId>org.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ldp4j.commons</groupId>
+			<artifactId>ldp4j-commons-testing</artifactId>
+			<version>${ldp4j.version}</version>
 			<scope>test</scope>
 		</dependency>
 

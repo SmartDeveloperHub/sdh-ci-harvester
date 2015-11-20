@@ -26,25 +26,13 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.util;
 
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
-final class MockThreadFactory implements ThreadFactory {
+public interface MemoizingScheduledExecutorService extends ScheduledExecutorService {
 
-	static final MockExceptionHandler EXCEPTION_HANDLER = new MockExceptionHandler();
+	<S> S unwrap(final Runnable runnable, final Class<? extends S> clazz);
 
-	final AtomicInteger counter=new AtomicInteger();
-
-	MockThreadFactory() {
-	}
-
-	@Override
-	public Thread newThread(final Runnable r) {
-		final Thread thread = new Thread(r,"test-thread-"+this.counter.incrementAndGet());
-		thread.setDaemon(true);
-		thread.setPriority(Thread.NORM_PRIORITY);
-		thread.setUncaughtExceptionHandler(EXCEPTION_HANDLER);
-		return thread;
-	}
+	<S,V> S getCommand(final Future<V> future, final Class<? extends S> clazz);
 
 }

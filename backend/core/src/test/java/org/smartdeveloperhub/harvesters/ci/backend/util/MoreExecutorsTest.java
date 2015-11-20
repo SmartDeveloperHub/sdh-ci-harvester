@@ -26,25 +26,35 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.util;
 
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 
-final class MockThreadFactory implements ThreadFactory {
+import org.junit.Test;
+import org.ldp4j.commons.testing.Utils;
 
-	static final MockExceptionHandler EXCEPTION_HANDLER = new MockExceptionHandler();
+public class MoreExecutorsTest  {
 
-	final AtomicInteger counter=new AtomicInteger();
-
-	MockThreadFactory() {
+	@Test
+	public void verifyIsValidUtilityClass() {
+		assertThat(Utils.isUtilityClass(MoreExecutors.class),equalTo(true));
 	}
 
-	@Override
-	public Thread newThread(final Runnable r) {
-		final Thread thread = new Thread(r,"test-thread-"+this.counter.incrementAndGet());
-		thread.setDaemon(true);
-		thread.setPriority(Thread.NORM_PRIORITY);
-		thread.setUncaughtExceptionHandler(EXCEPTION_HANDLER);
-		return thread;
+	@Test(expected=IllegalArgumentException.class)
+	public void testCreation$invalidCorePoolSize() {
+		MoreExecutors.newMemoizingScheduledExecutorService(-1,null);
+	}
+
+	@Test(expected=NullPointerException.class)
+	public void testCreation$invalidThreadFactory() {
+		MoreExecutors.newMemoizingScheduledExecutorService(1,null);
+	}
+
+	@Test
+	public void testCreation$happyPath() {
+		final MockThreadFactory threadFactory = new MockThreadFactory();
+		final MemoizingScheduledExecutorService executor = MoreExecutors.newMemoizingScheduledExecutorService(1,threadFactory);
+		assertThat(executor,instanceOf(CustomScheduledThreadPoolExecutor.class));
 	}
 
 }

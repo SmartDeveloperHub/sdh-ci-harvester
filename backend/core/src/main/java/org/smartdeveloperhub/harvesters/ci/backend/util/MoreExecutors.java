@@ -26,25 +26,20 @@
  */
 package org.smartdeveloperhub.harvesters.ci.backend.util;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
-final class MockThreadFactory implements ThreadFactory {
+public final class MoreExecutors {
 
-	static final MockExceptionHandler EXCEPTION_HANDLER = new MockExceptionHandler();
-
-	final AtomicInteger counter=new AtomicInteger();
-
-	MockThreadFactory() {
+	private MoreExecutors() {
 	}
 
-	@Override
-	public Thread newThread(final Runnable r) {
-		final Thread thread = new Thread(r,"test-thread-"+this.counter.incrementAndGet());
-		thread.setDaemon(true);
-		thread.setPriority(Thread.NORM_PRIORITY);
-		thread.setUncaughtExceptionHandler(EXCEPTION_HANDLER);
-		return thread;
+	public static MemoizingScheduledExecutorService newMemoizingScheduledExecutorService(final int corePoolSize, final ThreadFactory threadFactory) {
+		checkArgument(corePoolSize>=0,"Core pool size cannot be null");
+		checkNotNull(threadFactory,"Thread factory cannot be null");
+		return new CustomScheduledThreadPoolExecutor(corePoolSize, threadFactory);
 	}
 
 }

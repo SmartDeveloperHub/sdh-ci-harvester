@@ -32,9 +32,9 @@ import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
-public final class CustomScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor {
+final class CustomScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor implements MemoizingScheduledExecutorService {
 
-	public CustomScheduledThreadPoolExecutor(final int corePoolSize, final ThreadFactory threadFactory) {
+	CustomScheduledThreadPoolExecutor(final int corePoolSize, final ThreadFactory threadFactory) {
 		super(corePoolSize, threadFactory);
 	}
 
@@ -57,6 +57,7 @@ public final class CustomScheduledThreadPoolExecutor extends ScheduledThreadPool
 		return result;
 	}
 
+	@Override
 	public <S> S unwrap(final Runnable runnable, final Class<? extends S> clazz) {
 		S result=null;
 		if(runnable instanceof CustomScheduledFutureTask<?>) {
@@ -65,7 +66,8 @@ public final class CustomScheduledThreadPoolExecutor extends ScheduledThreadPool
 		return result;
 	}
 
-	public <S,V> S getTask(final Future<V> future, final Class<? extends S> clazz) {
+	@Override
+	public <S,V> S getCommand(final Future<V> future, final Class<? extends S> clazz) {
 		S result=null;
 		if(future instanceof CustomScheduledFutureTask<?>) {
 			result=safeUnwrap((CustomScheduledFutureTask<?>)future, clazz);

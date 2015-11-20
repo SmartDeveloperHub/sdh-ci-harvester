@@ -43,7 +43,8 @@ import org.smartdeveloperhub.curator.connector.ConnectorException;
 import org.smartdeveloperhub.curator.connector.EnrichmentRequest;
 import org.smartdeveloperhub.curator.connector.EnrichmentResult;
 import org.smartdeveloperhub.curator.connector.EnrichmentResultHandler;
-import org.smartdeveloperhub.harvesters.ci.backend.util.CustomScheduledThreadPoolExecutor;
+import org.smartdeveloperhub.harvesters.ci.backend.util.MemoizingScheduledExecutorService;
+import org.smartdeveloperhub.harvesters.ci.backend.util.MoreExecutors;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
@@ -53,44 +54,44 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 final class EnrichmentRequestor {
 
 	static final class JobMetrics {
-	
+
 		private static final class Counter {
-	
+
 			private final String name;
 			private volatile long value;
-	
+
 			private Counter(final String name) {
 				this.name = name;
 				this.value=0;
 			}
-	
+
 			private long get() {
 				return this.value;
 			}
-	
+
 			private long incrementAndGet() {
 				return ++this.value;
 			}
-	
+
 			private long decrementAndGet() {
 				return --this.value;
 			}
-	
+
 			@Override
 			public String toString() {
 				return this.name+": "+this.value;
 			}
-	
+
 		}
-	
+
 		private static final int CREATED_JOBS  =0;
 		private static final int PENDING_JOBS  =1;
 		private static final int PROCESSED_JOBS=2;
 		private static final int FAILED_JOBS   =3;
 		private static final int COMPLETED_JOBS=4;
-	
+
 		private final Counter[] metrics=new Counter[5];
-	
+
 		private JobMetrics() {
 			this.metrics[CREATED_JOBS]  =new Counter("createdJobs");
 			this.metrics[PENDING_JOBS]  =new Counter("pendingJobs");
@@ -98,7 +99,7 @@ final class EnrichmentRequestor {
 			this.metrics[FAILED_JOBS]   =new Counter("failedJobs");
 			this.metrics[COMPLETED_JOBS]=new Counter("completedJobs");
 		}
-	
+
 		private long createJob(final EnrichmentContext context) {
 			long id=0;
 			synchronized(this) {
@@ -108,7 +109,7 @@ final class EnrichmentRequestor {
 			LOGGER.trace("Created job #{} for {}",id,context==null?"<termination>":context.pendingEnrichment());
 			return id;
 		}
-	
+
 		private void jobProcessed(final RequestJob job, final boolean completed) {
 			synchronized(this) {
 				this.metrics[PENDING_JOBS].decrementAndGet();
@@ -121,28 +122,28 @@ final class EnrichmentRequestor {
 			}
 			LOGGER.trace("{} processing job #{} ({})",completed?"Completed ":"Failed ",job.id(),job.context().pendingEnrichment());
 		}
-	
+
 		synchronized long pendingJobs() {
 			return this.metrics[PENDING_JOBS].get();
 		}
-	
+
 		synchronized long processedJobs() {
 			return this.metrics[PROCESSED_JOBS].get();
 		}
-	
+
 		synchronized long completedJobs() {
 			return this.metrics[COMPLETED_JOBS].get();
 		}
-	
+
 		synchronized long failedJobs() {
 			return this.metrics[FAILED_JOBS].get();
 		}
-	
+
 		@Override
 		public synchronized String toString() {
 			return Arrays.toString(this.metrics);
 		}
-	
+
 	}
 
 	private final class RequestJob implements Runnable {
@@ -180,7 +181,7 @@ final class EnrichmentRequestor {
 		long retry() {
 			if(!this.cancelled) {
 				this.retries++;
-				EnrichmentRequestor.this.pool.schedule(
+				EnrichmentRequestor.this.executor.schedule(
 					this,
 					DEFAULT_RETRY_DELAY,
 					TimeUnit.MILLISECONDS
@@ -368,7 +369,7 @@ final class EnrichmentRequestor {
 	private static final Logger LOGGER=LoggerFactory.getLogger(EnrichmentRequestor.class);
 
 	private final Worker worker;
-	private final CustomScheduledThreadPoolExecutor pool;
+	private final MemoizingScheduledExecutorService executor;
 	private final EnrichmentService service;
 	private final JobMetrics metrics;
 
@@ -390,7 +391,7 @@ final class EnrichmentRequestor {
 						}
 					}).
 				build();
-		this.pool=new CustomScheduledThreadPoolExecutor(2,threadFactory);
+		this.executor=MoreExecutors.newMemoizingScheduledExecutorService(2, threadFactory);
 		this.started=false;
 	}
 
@@ -408,7 +409,7 @@ final class EnrichmentRequestor {
 		LOGGER.info("Starting Enrichment Requestor...");
 		try {
 			this.worker.connector.connect();
-			this.pool.submit(this.worker);
+			this.executor.submit(this.worker);
 			this.started=true;
 			LOGGER.info("Enrichment Requestor started.");
 		} catch (final ConnectorException e) {
@@ -433,18 +434,18 @@ final class EnrichmentRequestor {
 	}
 
 	private void shutdownPoolGracefully(final int period, final TimeUnit unit) {
-		this.pool.shutdown();
+		this.executor.shutdown();
 		final Stopwatch watch=Stopwatch.createStarted();
-		while(!this.pool.isTerminated() && watch.elapsed(unit)<period) {
+		while(!this.executor.isTerminated() && watch.elapsed(unit)<period) {
 			try {
-				this.pool.awaitTermination(500, TimeUnit.MILLISECONDS);
+				this.executor.awaitTermination(500, TimeUnit.MILLISECONDS);
 			} catch (final InterruptedException e) {
 				LOGGER.trace("Enrichment Requestor interrupted while awaiting for termination",e);
 				Thread.currentThread().interrupt();
 			}
 		}
-		if(!this.pool.isTerminated()) {
-			final List<Runnable> unfinished = this.pool.shutdownNow();
+		if(!this.executor.isTerminated()) {
+			final List<Runnable> unfinished = this.executor.shutdownNow();
 			logAbortedRequestJobs(unfinished);
 		}
 	}
@@ -453,7 +454,7 @@ final class EnrichmentRequestor {
 		if(LOGGER.isTraceEnabled()) {
 			final List<URI> aborted=Lists.newArrayList();
 			for(final Runnable runnable:unfinished) {
-				final RequestJob job=this.pool.unwrap(runnable,RequestJob.class);
+				final RequestJob job=this.executor.unwrap(runnable,RequestJob.class);
 				if(job!=null) {
 					aborted.add(job.context().targetExecution().executionId());
 				}

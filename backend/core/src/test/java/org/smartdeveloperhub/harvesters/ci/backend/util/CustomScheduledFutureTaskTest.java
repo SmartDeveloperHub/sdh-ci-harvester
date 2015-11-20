@@ -78,7 +78,6 @@ public class CustomScheduledFutureTaskTest {
 				public void execute(final CustomScheduledFutureTask<?> sut, final Thread thread, final MockExceptionHandler handler) throws Exception {
 					new Expectations() {{
 						CustomScheduledFutureTaskTest.this.delegate.isCancelled();this.result=true;
-						CustomScheduledFutureTaskTest.this.delegate.isDone();this.result=true;
 					}};
 					sut.run();
 					assertThat(handler.invocations.isEmpty(),equalTo(true));
@@ -95,23 +94,6 @@ public class CustomScheduledFutureTaskTest {
 				public void execute(final CustomScheduledFutureTask<?> sut, final Thread thread, final MockExceptionHandler handler) throws Exception {
 					new Expectations() {{
 						CustomScheduledFutureTaskTest.this.delegate.isCancelled();this.result=false;
-						CustomScheduledFutureTaskTest.this.delegate.isDone();this.result=false;
-					}};
-					sut.run();
-					assertThat(handler.invocations.isEmpty(),equalTo(true));
-				}
-			}
-		);
-	}
-
-	@Test
-	public void testRun$wtf() throws Exception {
-		verify(
-			new Threaded() {
-				@Override
-				public void execute(final CustomScheduledFutureTask<?> sut, final Thread thread, final MockExceptionHandler handler) throws Exception {
-					new Expectations() {{
-						CustomScheduledFutureTaskTest.this.delegate.isCancelled();this.result=true;
 						CustomScheduledFutureTaskTest.this.delegate.isDone();this.result=false;
 					}};
 					sut.run();

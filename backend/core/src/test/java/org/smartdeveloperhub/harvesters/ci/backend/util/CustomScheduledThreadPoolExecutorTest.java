@@ -79,7 +79,7 @@ public class CustomScheduledThreadPoolExecutorTest {
 	}
 
 	@Test
-	public void testGetTask$happyPath() throws Exception {
+	public void testGetCommand$happyPath() throws Exception {
 		final Runnable r=new Runnable() {
 			@Override
 			public void run() {
@@ -87,19 +87,19 @@ public class CustomScheduledThreadPoolExecutorTest {
 			}
 		};
 		final Future<?> future = this.sut.submit(r);
-		final Runnable task = this.sut.getTask(future, r.getClass());
+		final Runnable task = this.sut.getCommand(future, r.getClass());
 		assertThat(task,sameInstance(r));
 		completeSafeExecution(future);
 	}
 
 	@Test
-	public void testGetTask$invalidFuture(@Mocked final Future<?> invalidFuture) throws Exception {
-		final Runnable task = this.sut.getTask(invalidFuture, Runnable.class);
+	public void testGetCommand$invalidFuture(@Mocked final Future<?> invalidFuture) throws Exception {
+		final Runnable task = this.sut.getCommand(invalidFuture, Runnable.class);
 		assertThat(task,nullValue());
 	}
 
 	@Test
-	public void testGetTask$notMatchingRunnableClass() throws Exception {
+	public void testGetCommand$notMatchingRunnableClass() throws Exception {
 		final Runnable r=new Runnable() {
 			@Override
 			public void run() {
@@ -107,13 +107,13 @@ public class CustomScheduledThreadPoolExecutorTest {
 			}
 		};
 		final Future<?> future = this.sut.submit(r);
-		final Runnable task = this.sut.getTask(future, RuntimeExceptionRunnable.class);
+		final Runnable task = this.sut.getCommand(future, RuntimeExceptionRunnable.class);
 		assertThat(task,nullValue());
 		completeSafeExecution(future);
 	}
 
 	@Test
-	public void testUnwrap$happyPath() throws Exception {
+	public void testUnwrapCommand$happyPath() throws Exception {
 		final Runnable r=new Runnable() {
 			@Override
 			public void run() {
@@ -121,17 +121,17 @@ public class CustomScheduledThreadPoolExecutorTest {
 			}
 		};
 		final Future<?> future = this.sut.schedule(r, 3, TimeUnit.SECONDS);
-		final Runnable scheduledTask = this.sut.getTask(future, r.getClass());
+		final Runnable scheduledTask = this.sut.getCommand(future, r.getClass());
 		assertThat(scheduledTask,sameInstance(r));
 
 		final List<Runnable> runnables = this.sut.shutdownNow();
 		assertThat(runnables,hasSize(1));
-		final Runnable canceledTask = this.sut.unwrap(runnables.get(0),r.getClass());
+		final Runnable canceledTask=this.sut.unwrap(runnables.get(0),r.getClass());
 		assertThat(canceledTask,sameInstance(r));
 	}
 
 	@Test
-	public void testUnwrap$invalidRunnable(@Mocked final Runnable invalidRunnable) throws Exception {
+	public void testUnwrapCommand$invalidRunnable(@Mocked final Runnable invalidRunnable) throws Exception {
 		final Runnable task = this.sut.unwrap(invalidRunnable, Runnable.class);
 		assertThat(task,nullValue());
 	}
