@@ -26,7 +26,7 @@
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
-import org.smartdeveloperhub.jenkins.crawler.util.Delay;
+import org.smartdeveloperhub.harvesters.util.concurrent.Delay;
 
 
 interface OperationDecissionPoint {

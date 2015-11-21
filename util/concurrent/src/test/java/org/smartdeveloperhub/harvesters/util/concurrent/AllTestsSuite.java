@@ -20,19 +20,21 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-concurrent:0.2.0-SNAPSHOT
+ *   Bundle      : ci-util-concurrent-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.util;
+package org.smartdeveloperhub.harvesters.util.concurrent;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
-public interface MemoizingScheduledExecutorService extends ScheduledExecutorService {
-
-	<S> S unwrap(final Runnable runnable, final Class<? extends S> clazz);
-
-	<S,V> S getCommand(final Future<V> future, final Class<? extends S> clazz);
-
+@RunWith(Suite.class)
+@SuiteClasses({
+	CustomScheduledFutureTaskTest.class,
+	CustomScheduledThreadPoolExecutorTest.class,
+	MoreExecutorsTest.class,
+})
+public class AllTestsSuite {
 }

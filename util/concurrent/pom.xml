@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
-      Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
+      Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-concurrent:0.2.0-SNAPSHOT
+      Bundle      : ci-util-concurrent-0.2.0-SNAPSHOT.jar
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -37,21 +37,21 @@
 	<!-- =================================================================== -->
 
 	<parent>
-		<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
-		<artifactId>ci-backend-aggregator</artifactId>
+		<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
+		<artifactId>ci-util-aggregator</artifactId>
 		<version>0.2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>ci-backend-core</artifactId>
+	<artifactId>ci-util-concurrent</artifactId>
 
 	<!-- =================================================================== -->
 	<!--   MODULE INFORMATION                                                -->
 	<!-- =================================================================== -->
 
-	<name>SDH :: CIH :: Backend :: Core</name>
+	<name>SDH :: CIH :: Util :: Concurrent</name>
 
-	<description>The Core implementation of the Backend of the Continuous Integration Harvester of the Smart Developer Hub project</description>
+	<description>Concurrency utilities for the Continuous Integration Harvester of the Smart Developer Hub project</description>
 
 	<!-- =================================================================== -->
 	<!--   BUILD SETTINGS                                                    -->
@@ -61,87 +61,20 @@
 		<ldp4j.version>0.2.0-SNAPSHOT</ldp4j.version>
 	</properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
-				<artifactId>ci-jenkins-bom</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
-				<artifactId>ci-backend-bom</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
-				<artifactId>ci-util-bom</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 
 		<dependency>
-			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
-			<artifactId>ci-backend-api</artifactId>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.smartdeveloperhub.harvesters.ci.backend</groupId>
-			<artifactId>ci-backend-spi</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
-			<artifactId>ci-jenkins-crawler</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
-			<artifactId>ci-util-concurrent</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.smartdeveloperhub.curator</groupId>
-			<artifactId>sdh-curator-connector</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hibernate.javax.persistence</groupId>
-			<artifactId>hibernate-jpa-2.1-api</artifactId>
-			<version>1.0.0.Final</version>
-			<scope>provided</scope>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-			<version>10.11.1.1</version>
 			<scope>test</scope>
 		</dependency>
 

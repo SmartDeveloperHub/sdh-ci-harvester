@@ -20,11 +20,11 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0-SNAPSHOT
- *   Bundle      : ci-jenkins-crawler-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-concurrent:0.2.0-SNAPSHOT
+ *   Bundle      : ci-util-concurrent-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.util;
+package org.smartdeveloperhub.harvesters.util.concurrent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

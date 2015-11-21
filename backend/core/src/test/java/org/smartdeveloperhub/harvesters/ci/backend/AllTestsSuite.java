@@ -30,12 +30,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPATestsSuite;
-import org.smartdeveloperhub.harvesters.ci.backend.util.UtilTestsSuite;
 
 @RunWith(Suite.class)
 @SuiteClasses({
 	JPATestsSuite.class,
-	UtilTestsSuite.class,
 	BackendCoreITest.class,
 	BackendFacadeITest.class
 })

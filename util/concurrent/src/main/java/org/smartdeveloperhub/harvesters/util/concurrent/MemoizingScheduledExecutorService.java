@@ -20,46 +20,19 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0-SNAPSHOT
- *   Bundle      : ci-jenkins-crawler-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-concurrent:0.2.0-SNAPSHOT
+ *   Bundle      : ci-util-concurrent-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.util;
+package org.smartdeveloperhub.harvesters.util.concurrent;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
-import java.util.concurrent.TimeUnit;
+public interface MemoizingScheduledExecutorService extends ScheduledExecutorService {
 
-import com.google.common.base.MoreObjects;
+	<S> S unwrap(final Runnable runnable, final Class<? extends S> clazz);
 
-public final class Delay {
-
-	private final long time;
-	private final TimeUnit unit;
-
-	private Delay(long time, TimeUnit unit) {
-		this.time = time;
-		this.unit = unit;
-	}
-
-	public long getTime(TimeUnit unit) {
-		return unit.convert(this.time,this.unit);
-	}
-
-	@Override
-	public String toString() {
-		return
-			MoreObjects.
-				toStringHelper(getClass()).
-					add("time",this.time).
-					add("unit",this.unit).
-					toString();
-	}
-
-	public static  Delay create(long time, TimeUnit unit) {
-		checkNotNull(time,"Time cannot be null");
-		checkNotNull(unit,"Time unit cannot be null");
-		return new Delay(time,unit);
-	}
+	<S,V> S getCommand(final Future<V> future, final Class<? extends S> clazz);
 
 }

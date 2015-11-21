@@ -43,8 +43,8 @@ import org.smartdeveloperhub.curator.connector.ConnectorException;
 import org.smartdeveloperhub.curator.connector.EnrichmentRequest;
 import org.smartdeveloperhub.curator.connector.EnrichmentResult;
 import org.smartdeveloperhub.curator.connector.EnrichmentResultHandler;
-import org.smartdeveloperhub.harvesters.ci.backend.util.MemoizingScheduledExecutorService;
-import org.smartdeveloperhub.harvesters.ci.backend.util.MoreExecutors;
+import org.smartdeveloperhub.harvesters.util.concurrent.MemoizingScheduledExecutorService;
+import org.smartdeveloperhub.harvesters.util.concurrent.MoreExecutors;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;

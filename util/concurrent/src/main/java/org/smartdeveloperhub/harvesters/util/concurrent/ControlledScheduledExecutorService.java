@@ -20,11 +20,11 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0-SNAPSHOT
- *   Bundle      : ci-jenkins-crawler-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-concurrent:0.2.0-SNAPSHOT
+ *   Bundle      : ci-util-concurrent-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.jenkins.crawler.util;
+package org.smartdeveloperhub.harvesters.util.concurrent;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,13 +53,13 @@ public final class ControlledScheduledExecutorService extends ScheduledThreadPoo
 			this.threadFactory=new ThreadFactoryBuilder().build();
 		}
 
-		public Builder withPoolSize(int poolSize) {
+		public Builder withPoolSize(final int poolSize) {
 			checkArgument(poolSize>0,"Pool size must be greatern that 0 (%s)",this.poolSize);
 			this.poolSize = poolSize;
 			return this;
 		}
 
-		public Builder withThreadFactory(ThreadFactory threadFactory) {
+		public Builder withThreadFactory(final ThreadFactory threadFactory) {
 			checkNotNull(threadFactory,"Thread factory cannot be null");
 			this.threadFactory = threadFactory;
 			return this;
@@ -73,30 +73,30 @@ public final class ControlledScheduledExecutorService extends ScheduledThreadPoo
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(ControlledScheduledExecutorService.class);
 
-	private ControlledScheduledExecutorService(int corePoolSize, ThreadFactory threadFactory) {
+	private ControlledScheduledExecutorService(final int corePoolSize, final ThreadFactory threadFactory) {
 		super(corePoolSize, threadFactory);
 	}
 
 	@Override
-	protected void afterExecute(Runnable r, Throwable t) {
+	protected void afterExecute(final Runnable r, final Throwable t) {
 		super.afterExecute(r,t);
 		Throwable failure=t;
 		if(failure == null && r instanceof Future<?>) {
 			try {
-				Future<?> future = (Future<?>) r;
+				final Future<?> future = (Future<?>) r;
 				if(future.isDone()) {
 					future.get();
 				}
-			} catch (CancellationException ce) {
+			} catch (final CancellationException ce) {
 				failure = ce;
-			} catch (ExecutionException ee) { // NOSONAR
+			} catch (final ExecutionException ee) { // NOSONAR
 				failure = ee.getCause();
-			} catch (InterruptedException ie) {
+			} catch (final InterruptedException ie) {
 				Thread.currentThread().interrupt(); // ignore/reset
 			}
 		}
 		if(failure!=null) {
-			LOGGER.error(String.format("Runnable %s died",r.getClass().getName()),failure);
+			LOGGER.error("Runnable {} died",r.getClass().getName(),failure);
 		}
 	}
 

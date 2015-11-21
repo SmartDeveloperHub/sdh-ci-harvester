@@ -20,21 +20,46 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-concurrent:0.2.0-SNAPSHOT
+ *   Bundle      : ci-util-concurrent-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.util;
+package org.smartdeveloperhub.harvesters.util.concurrent;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-@RunWith(Suite.class)
-@SuiteClasses({
-	CustomScheduledFutureTaskTest.class,
-	CustomScheduledThreadPoolExecutorTest.class,
-	MoreExecutorsTest.class,
-})
-public class UtilTestsSuite {
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.base.MoreObjects;
+
+public final class Delay {
+
+	private final long time;
+	private final TimeUnit unit;
+
+	private Delay(long time, TimeUnit unit) {
+		this.time = time;
+		this.unit = unit;
+	}
+
+	public long getTime(TimeUnit unit) {
+		return unit.convert(this.time,this.unit);
+	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("time",this.time).
+					add("unit",this.unit).
+					toString();
+	}
+
+	public static  Delay create(long time, TimeUnit unit) {
+		checkNotNull(time,"Time cannot be null");
+		checkNotNull(unit,"Time unit cannot be null");
+		return new Delay(time,unit);
+	}
+
 }

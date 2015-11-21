@@ -77,6 +77,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
+				<artifactId>ci-util-concurrent</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
 				<artifactId>ci-util-depchain</artifactId>
 				<type>pom</type>
 				<version>${project.version}</version>

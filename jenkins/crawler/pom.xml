@@ -111,6 +111,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.smartdeveloperhub.harvesters.ci.util</groupId>
+			<artifactId>ci-util-concurrent</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 			<artifactId>ci-jenkins-client</artifactId>
 		</dependency>

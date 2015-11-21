@@ -20,11 +20,11 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-concurrent:0.2.0-SNAPSHOT
+ *   Bundle      : ci-util-concurrent-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.util;
+package org.smartdeveloperhub.harvesters.util.concurrent;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -42,6 +42,7 @@ import mockit.integration.junit4.JMockit;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.smartdeveloperhub.harvesters.util.concurrent.CustomScheduledFutureTask;
 
 @RunWith(JMockit.class)
 public class CustomScheduledFutureTaskTest {

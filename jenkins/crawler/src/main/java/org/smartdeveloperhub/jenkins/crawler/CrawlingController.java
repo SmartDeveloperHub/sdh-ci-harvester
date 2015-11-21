@@ -37,13 +37,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.util.concurrent.Delay;
+import org.smartdeveloperhub.harvesters.util.concurrent.Sleeper;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
-import org.smartdeveloperhub.jenkins.crawler.util.Delay;
-import org.smartdeveloperhub.jenkins.crawler.util.Sleeper;
 import org.smartdeveloperhub.jenkins.crawler.util.Timer;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 

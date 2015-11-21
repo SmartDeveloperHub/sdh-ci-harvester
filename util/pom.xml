@@ -64,6 +64,7 @@
 		<module>xml</module>
 		<module>console</module>
 		<module>bootstrap</module>
+		<module>concurrent</module>
 		<module>depchain</module>
 	</modules>
 

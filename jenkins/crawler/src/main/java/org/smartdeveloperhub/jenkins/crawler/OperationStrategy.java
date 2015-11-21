@@ -28,7 +28,7 @@ package org.smartdeveloperhub.jenkins.crawler;
 
 import java.util.concurrent.TimeUnit;
 
-import org.smartdeveloperhub.jenkins.crawler.util.Delay;
+import org.smartdeveloperhub.harvesters.util.concurrent.Delay;
 
 import static com.google.common.base.Preconditions.*;
 

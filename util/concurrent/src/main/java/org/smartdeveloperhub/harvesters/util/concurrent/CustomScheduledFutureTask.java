@@ -20,11 +20,11 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0-SNAPSHOT
- *   Bundle      : ci-backend-core-0.2.0-SNAPSHOT.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-concurrent:0.2.0-SNAPSHOT
+ *   Bundle      : ci-util-concurrent-0.2.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
-package org.smartdeveloperhub.harvesters.ci.backend.util;
+package org.smartdeveloperhub.harvesters.util.concurrent;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
@@ -54,7 +54,7 @@ final class CustomScheduledFutureTask<V> implements RunnableScheduledFuture<V> {
 				this.delegate.get();
 			} catch (final InterruptedException e) { // NOSONAR
 				// IGNORE
-			} catch (final ExecutionException e) {
+			} catch (final ExecutionException e) { // NOSONAR
 				final Thread thread = Thread.currentThread();
 				thread.
 					getUncaughtExceptionHandler().
