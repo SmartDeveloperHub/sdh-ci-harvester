@@ -58,6 +58,7 @@
 			<runnable><xsl:value-of select="buildable"/></runnable>
 			<runs>
 				<xsl:for-each select="build">
+					<xsl:sort select="number" data-type="number" order="ascending"/>
 					<xsl:variable name="number" select="number"/>
 					<run id="{$number}"><xsl:value-of select="url"/></run>
 				</xsl:for-each>
