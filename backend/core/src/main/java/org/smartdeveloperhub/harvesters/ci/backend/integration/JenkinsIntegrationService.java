@@ -255,7 +255,7 @@ public final class JenkinsIntegrationService {
 		this.erService=erService;
 		this.transactionManager = manager;
 		this.monitor=new CommandProcessingMonitor();
-		this.listener=new CommandProducerListener(this.monitor);
+		this.listener=new CommandProducerListener(this.monitor,false);
 		final ReadWriteLock lock=new ReentrantReadWriteLock();
 		this.read=lock.readLock();
 		this.write=lock.writeLock();

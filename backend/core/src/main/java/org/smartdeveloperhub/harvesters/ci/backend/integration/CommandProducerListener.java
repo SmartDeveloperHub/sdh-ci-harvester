@@ -31,12 +31,12 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.Result.Status;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateBuildCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateExecutionCommand.Builder;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteBuildCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteExecutionCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.command.FinishExecutionCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.command.RegisterServiceCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.domain.command.UpdateBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateExecutionCommand.Builder;
 import org.smartdeveloperhub.jenkins.crawler.event.InstanceFoundEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
@@ -54,11 +54,14 @@ final class CommandProducerListener implements JenkinsEventListener {
 
 	private final CommandProcessingMonitor monitor;
 
-	CommandProducerListener(CommandProcessingMonitor monitor) {
+	private final boolean acceptDeletions;
+
+	CommandProducerListener(final CommandProcessingMonitor monitor, final boolean acceptDeletions) {
 		this.monitor = monitor;
+		this.acceptDeletions = acceptDeletions;
 	}
 
-	private Status toStatus(RunResult result) {
+	private Status toStatus(final RunResult result) {
 		Status status=null;
 		switch(result) {
 			case ABORTED:
@@ -83,14 +86,14 @@ final class CommandProducerListener implements JenkinsEventListener {
 		return status;
 	}
 
-	private void logEvent(JenkinsEvent event) {
+	private void logEvent(final JenkinsEvent event) {
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace("Received event {}",event);
 		}
 	}
 
 	@Override
-	public void onInstanceFound(InstanceFoundEvent event) {
+	public void onInstanceFound(final InstanceFoundEvent event) {
 		logEvent(event);
 		this.monitor.offer(
 			RegisterServiceCommand.create(event.instanceId())
@@ -98,9 +101,9 @@ final class CommandProducerListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onJobCreation(JobCreatedEvent event) {
+	public void onJobCreation(final JobCreatedEvent event) {
 		logEvent(event);
-		CreateBuildCommand.Builder builder=
+		final CreateBuildCommand.Builder builder=
 			CreateBuildCommand.
 				builder().
 				withServiceId(event.instanceId()).
@@ -126,7 +129,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onJobUpdate(JobUpdatedEvent event) {
+	public void onJobUpdate(final JobUpdatedEvent event) {
 		logEvent(event);
 		this.monitor.offer(
 			UpdateBuildCommand.
@@ -141,15 +144,17 @@ final class CommandProducerListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onJobDeletion(JobDeletedEvent event) {
+	public void onJobDeletion(final JobDeletedEvent event) {
 		logEvent(event);
-		this.monitor.offer(
-			DeleteBuildCommand.create(event.jobId())
-		);
+		if(this.acceptDeletions) {
+			this.monitor.offer(
+				DeleteBuildCommand.create(event.jobId())
+			);
+		}
 	}
 
 	@Override
-	public void onRunCreation(RunCreatedEvent event) {
+	public void onRunCreation(final RunCreatedEvent event) {
 		logEvent(event);
 		final Builder builder =
 			CreateExecutionCommand.
@@ -169,7 +174,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onRunUpdate(RunUpdatedEvent event) {
+	public void onRunUpdate(final RunUpdatedEvent event) {
 		logEvent(event);
 		this.monitor.offer(
 			FinishExecutionCommand.
@@ -182,11 +187,13 @@ final class CommandProducerListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onRunDeletion(RunDeletedEvent event) {
+	public void onRunDeletion(final RunDeletedEvent event) {
 		logEvent(event);
-		this.monitor.offer(
-			DeleteExecutionCommand.create(event.runId())
-		);
+		if(this.acceptDeletions) {
+			this.monitor.offer(
+				DeleteExecutionCommand.create(event.runId())
+			);
+		}
 	}
 
 }
