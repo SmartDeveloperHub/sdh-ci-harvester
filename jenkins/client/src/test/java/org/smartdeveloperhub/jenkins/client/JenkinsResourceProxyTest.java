@@ -26,6 +26,9 @@
  */
 package org.smartdeveloperhub.jenkins.client;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+
 import java.io.IOException;
 import java.net.URI;
 
@@ -45,11 +48,38 @@ public class JenkinsResourceProxyTest {
 					withEntity(JenkinsEntityType.INSTANCE);
 		try {
 			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
-			System.out.println("Resource from '"+location+"':");
-			System.out.println(representation);
+			assertThat(representation,notNullValue());
 		} catch (final IOException e) {
-			System.err.println("Could not retrieve service: "+e.getMessage());
-			e.printStackTrace(System.err);
+		}
+	}
+
+	@Test
+	public void testGet$withDepth() throws Exception {
+		final String location="https://ci.jenkins-ci.org/job/jenkins_main_trunk/";
+		final JenkinsResourceProxy sut =
+			JenkinsResourceProxy.
+				create(URI.create(location)).
+					withDepth(1).
+					withEntity(JenkinsEntityType.FREE_STYLE_BUILD);
+		try {
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			assertThat(representation,notNullValue());
+		} catch (final IOException e) {
+		}
+	}
+
+	@Test
+	public void testGet$withTree() throws Exception {
+		final String location="https://ci.jenkins-ci.org/job/jenkins_main_trunk/";
+		final JenkinsResourceProxy sut =
+			JenkinsResourceProxy.
+				create(URI.create(location)).
+					withTree("allBuilds[url,number,building,duration,result,timestamp]").
+					withEntity(JenkinsEntityType.FREE_STYLE_BUILD);
+		try {
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			assertThat(representation,notNullValue());
+		} catch (final IOException e) {
 		}
 	}
 
@@ -62,14 +92,11 @@ public class JenkinsResourceProxyTest {
 					withEntity(JenkinsEntityType.RUN);
 		try {
 			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
-			System.out.println("Resource from '"+location+"':");
-			System.out.println(representation);
+			assertThat(representation,notNullValue());
 			if(representation.failure().isPresent()) {
-				representation.failure().get().printStackTrace();
+				assertThat(representation.failure().get(),notNullValue());
 			}
 		} catch (final IOException e) {
-			System.err.println("Could not retrieve service: "+e.getMessage());
-			e.printStackTrace(System.err);
 		}
 	}
 

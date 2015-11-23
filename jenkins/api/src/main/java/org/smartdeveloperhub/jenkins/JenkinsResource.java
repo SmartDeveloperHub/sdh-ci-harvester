@@ -28,6 +28,7 @@ package org.smartdeveloperhub.jenkins;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 
 import org.w3c.dom.Document;
 
@@ -36,6 +37,14 @@ import com.google.common.base.Optional;
 public interface JenkinsResource {
 
 	interface Metadata {
+
+		interface Filter {
+
+			String expression();
+
+		}
+
+		List<Filter> filters();
 
 		Date retrievedOn();
 

@@ -26,6 +26,7 @@
  */
 package org.smartdeveloperhub.jenkins.client;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
@@ -33,6 +34,8 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -47,13 +50,38 @@ import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.JenkinsResource.Metadata.Filter;
 import org.smartdeveloperhub.jenkins.Status;
 import org.smartdeveloperhub.util.xml.XmlUtils;
 import org.w3c.dom.Document;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public final class JenkinsResourceProxy {
+
+	private static final class ImmutableFilter implements Filter {
+
+		private final Object value;
+		private final String parameter;
+
+		private ImmutableFilter(final String parameter, final Object value) {
+			this.value = value;
+			this.parameter = parameter;
+		}
+
+		@Override
+		public String expression() {
+			return this.parameter+"="+this.value;
+		}
+
+		@Override
+		public String toString() {
+			return expression();
+		}
+
+	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JenkinsResourceProxy.class);
 
@@ -61,19 +89,46 @@ public final class JenkinsResourceProxy {
 
 	private final JenkinsEntityType entity;
 
-	private JenkinsResourceProxy(final URI location, final JenkinsEntityType entity) {
+	private final Map<Integer,Filter> filters;
+
+	private JenkinsResourceProxy(final URI location, final JenkinsEntityType entity, final Map<Integer,Filter> filters) {
 		this.location = location;
 		this.entity = entity;
+		this.filters=Maps.newLinkedHashMap(filters);
 	}
 
 	public JenkinsResourceProxy withLocation(final URI location) {
 		checkNotNull(location,"Resource location cannot be null");
-		return new JenkinsResourceProxy(location,this.entity);
+		return new JenkinsResourceProxy(location,this.entity,this.filters);
+	}
+
+	public JenkinsResourceProxy withDepth(final long depth) {
+		checkArgument(depth>0,"Depth must be greater than 0 (%d)",depth);
+		this.filters.put(1,new ImmutableFilter("depth",depth));
+		return new JenkinsResourceProxy(this.location,this.entity,this.filters);
+	}
+
+	public JenkinsResourceProxy withTree(final String tree) {
+		checkNotNull(tree,"Tree cannot be null");
+		this.filters.put(1,new ImmutableFilter("tree",tree));
+		return new JenkinsResourceProxy(this.location,this.entity,this.filters);
+	}
+
+	public JenkinsResourceProxy withWrapper(final String wrapper) {
+		checkNotNull(wrapper,"Wrapper cannot be null");
+		this.filters.put(2,new ImmutableFilter("wrapper",wrapper));
+		return new JenkinsResourceProxy(this.location,this.entity,this.filters);
+	}
+
+	public JenkinsResourceProxy withXPath(final String xpath) {
+		checkNotNull(xpath,"XPath cannot be null");
+		this.filters.put(3,new ImmutableFilter("xpath", xpath));
+		return new JenkinsResourceProxy(this.location,this.entity,this.filters);
 	}
 
 	public JenkinsResourceProxy withEntity(final JenkinsEntityType entity) {
 		checkNotNull(entity,"Resource entity cannot be null");
-		return new JenkinsResourceProxy(this.location,entity);
+		return new JenkinsResourceProxy(this.location,entity,this.filters);
 	}
 
 	public URI location() {
@@ -84,13 +139,13 @@ public final class JenkinsResourceProxy {
 		checkNotNull(artifact,"Artifact cannot be null");
 		final InMemoryJenkinsResource resource=
 			new InMemoryJenkinsResource(new Date()).
-			withEntity(this.entity).
+				withFilters(filters()).
+				withEntity(this.entity).
 				withLocation(this.location).
-				withEntity(this.entity). // Temporary
 				withArtifact(artifact);
 		final CloseableHttpClient httpClient=HttpClients.createDefault();
 		CloseableHttpResponse httpResponse=null;
-		final HttpGet httpGet = createGetMethod(artifact.locate(this.location));
+		final HttpGet httpGet = createGetMethod(resource.effectiveLocation());
 		try {
 			httpResponse = httpClient.execute(httpGet);
 			final int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -130,9 +185,21 @@ public final class JenkinsResourceProxy {
 			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
+					add("filters",this.filters).
 					add("location",this.location).
 					add("entity",this.location).
 					toString();
+	}
+
+	private List<Filter> filters() {
+		final List<Filter> result=Lists.newArrayList();
+		for(int i=1;i<4;i++) {
+			final Filter value=this.filters.get(i);
+			if(value!=null) {
+				result.add(value);
+			}
+		}
+		return result;
 	}
 
 	private ContentType processResponseBody(final InMemoryJenkinsResource resource, final HttpEntity httpEntity) throws IOException {
@@ -236,7 +303,7 @@ public final class JenkinsResourceProxy {
 
 	public static JenkinsResourceProxy create(final URI location) {
 		checkNotNull(location,"Resource location cannot be null");
-		return new JenkinsResourceProxy(location,JenkinsEntityType.INSTANCE);
+		return new JenkinsResourceProxy(location,JenkinsEntityType.INSTANCE,Maps.<Integer,Filter>newLinkedHashMap());
 	}
 
 }

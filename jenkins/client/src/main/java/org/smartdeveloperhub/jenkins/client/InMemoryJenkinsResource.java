@@ -28,10 +28,13 @@ package org.smartdeveloperhub.jenkins.client;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
+import org.smartdeveloperhub.jenkins.JenkinsResource.Metadata.Filter;
 import org.smartdeveloperhub.jenkins.Status;
 import org.w3c.dom.Document;
 
@@ -50,11 +53,16 @@ final class InMemoryJenkinsResource implements JenkinsResource {
 
 	private JenkinsArtifactType artifact;
 
-	InMemoryJenkinsResource(Date retrievedOn) {
+	InMemoryJenkinsResource(final Date retrievedOn) {
 		this.metadata = new InMemoryMetadata(retrievedOn);
 	}
 
-	private InMemoryJenkinsResource withStatus(Status status, Throwable failure) {
+	InMemoryJenkinsResource withFilters(final List<Filter> filters) {
+		this.metadata.withFilters(filters);
+		return this;
+	}
+
+	private InMemoryJenkinsResource withStatus(final Status status, final Throwable failure) {
 		this.status = status;
 		if(failure instanceof RuntimeException) {
 			this.failure = (RuntimeException)failure;
@@ -66,34 +74,34 @@ final class InMemoryJenkinsResource implements JenkinsResource {
 		return this;
 	}
 
-	InMemoryJenkinsResource withLocation(URI location) {
+	InMemoryJenkinsResource withLocation(final URI location) {
 		this.location = location;
 		return this;
 	}
 
-	InMemoryJenkinsResource withEntity(JenkinsEntityType entity) {
+	InMemoryJenkinsResource withEntity(final JenkinsEntityType entity) {
 		this.entity = entity;
 		return this;
 	}
 
-	InMemoryJenkinsResource withArtifact(JenkinsArtifactType artifact) {
+	InMemoryJenkinsResource withArtifact(final JenkinsArtifactType artifact) {
 		this.artifact = artifact;
 		return this;
 	}
 
-	InMemoryJenkinsResource withStatus(Status status) {
+	InMemoryJenkinsResource withStatus(final Status status) {
 		return withStatus(status,null);
 	}
 
-	InMemoryJenkinsResource withStatus(Status status, String message, Object... args) {
+	InMemoryJenkinsResource withStatus(final Status status, final String message, final Object... args) {
 		return withStatus(status,new RuntimeException(String.format(message,args)));
 	}
 
-	InMemoryJenkinsResource withStatus(Status status, Throwable cause, String message, Object... args) {
+	InMemoryJenkinsResource withStatus(final Status status, final Throwable cause, final String message, final Object... args) {
 		return withStatus(status,new RuntimeException(String.format(message,args),cause));
 	}
 
-	InMemoryJenkinsResource withContent(Document document) {
+	InMemoryJenkinsResource withContent(final Document document) {
 		this.document=document;
 		return this;
 	}
@@ -101,6 +109,14 @@ final class InMemoryJenkinsResource implements JenkinsResource {
 	@Override
 	public URI location() {
 		return this.location;
+	}
+
+	public URI effectiveLocation() {
+		URI targetLocation = this.artifact.locate(this.location);
+		if(JenkinsArtifactType.RESOURCE.equals(this.artifact)) {
+			targetLocation=targetLocation.resolve(applyFilters(this.metadata.filters()));
+		}
+		return targetLocation;
 	}
 
 	@Override
@@ -146,6 +162,21 @@ final class InMemoryJenkinsResource implements JenkinsResource {
 	@Override
 	public Optional<Throwable> failure() {
 		return Optional.<Throwable>fromNullable(this.failure);
+	}
+
+	private String applyFilters(final List<Filter> filters) {
+		if(filters.isEmpty()) {
+			return "xml";
+		}
+		final StringBuilder builder=new StringBuilder();
+		builder.append("xml?");
+		for(final Iterator<Filter> it=filters.iterator();it.hasNext();) {
+			builder.append(it.next().expression());
+			if(it.hasNext()) {
+				builder.append("&");
+			}
+		}
+		return builder.toString();
 	}
 
 }
