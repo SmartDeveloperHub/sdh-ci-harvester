@@ -59,12 +59,12 @@ final class RefreshJobConfigurationTask extends AbstractJobConfigurationTask {
 	protected void processSubresource(final Job parent, final JenkinsResource resource) {
 		final Codebase currentCodebase = loadCodebase(parent, resource);
 		final Codebase oldCodebase = this.previousJob.getCodebase();
+		LOGGER.trace("Retrieved SCM information for {}: {}",parent.getUrl(),currentCodebase);
+		final List<Codebase> codebases=Lists.newArrayList();
+		codebases.add(currentCodebase);
+		codebases.add(oldCodebase);
+		final Codebase newCodebase=SCMUtil.mergeCodebases(codebases);
 		try {
-			LOGGER.trace("Retrieved SCM information for {}: {}",parent.getUrl(),currentCodebase);
-			final List<Codebase> codebases=Lists.newArrayList();
-			codebases.add(currentCodebase);
-			codebases.add(oldCodebase);
-			final Codebase newCodebase=SCMUtil.mergeCodebases(codebases);
 			if(SCMUtil.isDefined(newCodebase) && !newCodebase.equals(oldCodebase)) {
 				LOGGER.debug("Updating SCM information for {} from {} to {}",parent.getUrl(),oldCodebase,newCodebase);
 				parent.setCodebase(newCodebase);
@@ -72,7 +72,7 @@ final class RefreshJobConfigurationTask extends AbstractJobConfigurationTask {
 				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Could not refresh SCM information {} for {}",currentCodebase,parent,e);
+			LOGGER.error("Could not refresh SCM information {} for {}",newCodebase,parent,e);
 		}
 	}
 
