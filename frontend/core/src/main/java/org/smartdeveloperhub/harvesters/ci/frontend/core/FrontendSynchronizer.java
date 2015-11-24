@@ -31,6 +31,7 @@ import java.net.URI;
 import org.ldp4j.application.ApplicationContext;
 import org.ldp4j.application.ApplicationContextException;
 import org.ldp4j.application.data.Name;
+import org.ldp4j.application.ext.ResourceHandler;
 import org.ldp4j.application.session.ResourceSnapshot;
 import org.ldp4j.application.session.SessionTerminationException;
 import org.ldp4j.application.session.WriteSession;
@@ -42,6 +43,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
@@ -147,17 +149,20 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 
 	private ResourceSnapshot findResource(final EntityLifecycleEvent event, final WriteSession session) {
 		Name<URI> name=null;
+		Class<? extends ResourceHandler> handlerClass=null;
 		switch(event.entityType()) {
 			case BUILD:
 				name=IdentityUtil.buildName(event.entityId());
+				handlerClass=BuildHandler.class;
 				break;
 			case EXECUTION:
 				name=IdentityUtil.executionName(event.entityId());
+				handlerClass=ExecutionHandler.class;
 				break;
 			default:
 				break;
 		}
-		return session.find(ResourceSnapshot.class,name,BuildHandler.class);
+		return session.find(ResourceSnapshot.class,name,handlerClass);
 	}
 
 }
