@@ -28,6 +28,7 @@ package org.smartdeveloperhub.jenkins.crawler;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +73,13 @@ final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 					this.job.getRuns().getRuns(),
 					currentJob.getRuns().getRuns());
 
-		// TODO: Refresh if any of the following change:
-		// currentJob.getTitle();
-		// currentJob.getDescription();
-		// currentJob.getCodebase();
+		if(hasChanged(currentJob)) {
+			super.fireEvent(
+				JenkinsEventFactory.
+					newJobUpdatedEvent(
+						super.jenkinsInstance(),
+						currentJob));
+		}
 
 		//scheduleTask(new RefreshJobConfigurationTask(super.location(),this.job,currentJob,resource.entity()));
 		//scheduleTask(new LoadJobSCMTask(super.location(),currentJob));
@@ -109,6 +113,13 @@ final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 						deletedRuns));
 		}
 
+	}
+
+	private boolean hasChanged(final Job currentJob) {
+		return
+			!Objects.equals(currentJob.getTitle(),this.job.getTitle()) ||
+			!Objects.equals(currentJob.getDescription(),this.job.getDescription()) ||
+			!Objects.equals(currentJob.getCodebase(),this.job.getCodebase());
 	}
 
 	private void refreshSubJobs(final CompositeJob currentCompositeJob) {
