@@ -55,6 +55,12 @@
 				<description><xsl:value-of select="description"/></description>
 			</xsl:if>
 			<type><xsl:value-of select="fn:local-name()"/></type>
+			<xsl:if test="exists(scm)">
+				<codebase>
+					<location><xsl:value-of select="scm/userRemoteConfig/url"/></location>
+					<branch><xsl:value-of select="scm/branche/name"/></branch>
+				</codebase>
+			</xsl:if>
 			<runnable><xsl:value-of select="buildable"/></runnable>
 			<runs>
 				<xsl:for-each select="build">

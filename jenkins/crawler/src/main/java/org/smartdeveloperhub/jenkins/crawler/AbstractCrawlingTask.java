@@ -47,6 +47,8 @@ import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
+import com.google.common.base.Optional;
+
 abstract class AbstractCrawlingTask implements Task {
 
 	private static final int RETRY_THRESHOLD = 5;
@@ -72,10 +74,42 @@ abstract class AbstractCrawlingTask implements Task {
 	}
 
 	private JenkinsResourceProxy createProxy() {
-		return
-			JenkinsResourceProxy.
-				create(this.location).
-					withEntity(this.entity);
+		JenkinsResourceProxy result = JenkinsResourceProxy.
+			create(this.location).
+				withEntity(this.entity);
+		final Optional<Long> depth=getDepth();
+		if(depth.isPresent()) {
+			result=result.withDepth(depth.get());
+		}
+		final Optional<String> tree=getTree();
+		if(tree.isPresent()) {
+			result=result.withTree(tree.get());
+		}
+		final Optional<String> wrapper=getWrapper();
+		if(wrapper.isPresent()) {
+			result=result.withWrapper(wrapper.get());
+		}
+		final Optional<String> xpath=getXPath();
+		if(xpath.isPresent()) {
+			result=result.withXPath(xpath.get());
+		}
+		return result;
+	}
+
+	protected Optional<Long> getDepth() {
+		return Optional.absent();
+	}
+
+	protected Optional<String> getTree() {
+		return Optional.absent();
+	}
+
+	protected Optional<String> getWrapper() {
+		return Optional.absent();
+	}
+
+	protected Optional<String> getXPath() {
+		return Optional.absent();
 	}
 
 	private void retryTask(final Throwable failure) {
@@ -124,11 +158,11 @@ abstract class AbstractCrawlingTask implements Task {
 	@Override
 	public final void execute(final Context context) {
 		if(!context.
-				crawlingDecissionPoint().
-					canProcessEntityType(
-						this.entity,
-						context.jenkinsInformationPoint(),
-						context.currentSession())) {
+			crawlingDecissionPoint().
+				canProcessEntityType(
+					this.entity,
+					context.jenkinsInformationPoint(),
+					context.currentSession())) {
 			this.logger.info("Dismissing execution of task {}: not allowed",id());
 			return;
 		}
