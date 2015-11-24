@@ -224,7 +224,7 @@ public final class XmlUtils {
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,true);
 			marshaller.setProperty(Marshaller.JAXB_ENCODING,"UTF-8");
 			marshaller.marshal(entity,target);
-		} catch (final JAXBException e) {
+		} catch (final Exception e) {
 			throwable.initCause(e);
 			throw throwable;
 		}
