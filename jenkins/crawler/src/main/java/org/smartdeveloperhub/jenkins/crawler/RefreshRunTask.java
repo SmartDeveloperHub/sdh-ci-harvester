@@ -66,7 +66,8 @@ final class RefreshRunTask extends AbstractEntityCrawlingTask<Run> {
 		}
 	}
 
-	private boolean hasChanged(final Run currentRun) {
+	@SuppressWarnings("unused")
+	private boolean hasChanged(final Run currentRun) { // NOSONAR
 		return
 			!Objects.equals(currentRun.getTitle(),this.run.getTitle()) ||
 			!Objects.equals(currentRun.getDescription(),this.run.getDescription()) ||

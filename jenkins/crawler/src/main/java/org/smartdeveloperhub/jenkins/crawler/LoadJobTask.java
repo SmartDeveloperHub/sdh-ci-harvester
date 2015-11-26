@@ -61,9 +61,6 @@ final class LoadJobTask extends AbstractEntityCrawlingTask<Job> {
 			JenkinsEventFactory.
 				newJobCreatedEvent(super.jenkinsInstance(),job));
 
-		//scheduleTask(new LoadJobConfigurationTask(super.location(),job,resource.entity()));
-		//scheduleTask(new LoadJobSCMTask(super.location(),job));
-
 		if(job instanceof CompositeJob) {
 			final CompositeJob compositeJob=(CompositeJob)job;
 			for(final Reference ref:compositeJob.getSubJobs().getJobs()) {

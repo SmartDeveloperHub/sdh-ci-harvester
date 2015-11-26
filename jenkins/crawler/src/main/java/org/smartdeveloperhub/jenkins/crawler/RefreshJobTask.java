@@ -81,9 +81,6 @@ final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 						currentJob));
 		}
 
-		//scheduleTask(new RefreshJobConfigurationTask(super.location(),this.job,currentJob,resource.entity()));
-		//scheduleTask(new LoadJobSCMTask(super.location(),currentJob));
-
 		if(currentJob instanceof CompositeJob) {
 			refreshSubJobs((CompositeJob)currentJob);
 		}
