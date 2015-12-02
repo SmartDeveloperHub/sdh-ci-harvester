@@ -89,6 +89,7 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 				result=update(event, session);
 				break;
 			case MODIFIED:
+			case ENRICHED:
 				result=modify(event, session);
 				break;
 			case DELETED:
