@@ -32,6 +32,7 @@ import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ExecutionEnrichment;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EnrichedExecution;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 
 final class DelegatedEnrichedExecution implements EnrichedExecution {
@@ -63,4 +64,15 @@ final class DelegatedEnrichedExecution implements EnrichedExecution {
 	public Execution target() {
 		return this.execution;
 	}
+
+	@Override
+	public String toString() {
+		return
+			MoreObjects.
+				toStringHelper(getClass()).
+					add("execution", this.execution).
+					add("enrichment",this.enrichment).
+					toString();
+	}
+
 }
