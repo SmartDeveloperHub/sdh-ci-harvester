@@ -28,10 +28,6 @@ package org.smartdeveloperhub.harvesters.ci.backend.enrichment;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Branch;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Commit;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment;
-import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Repository;
 import org.smartdeveloperhub.harvesters.ci.backend.jpa.Accessor;
 
 final class AccessorImpl extends Accessor {
@@ -54,6 +50,11 @@ final class AccessorImpl extends Accessor {
 	@Override
 	public PendingEnrichment createPendingEnrichment(final URI repositoryLocation, final String branchName, final String commitId) {
 		return PendingEnrichment.newInstance(repositoryLocation,branchName,commitId);
+	}
+
+	@Override
+	public CompletedEnrichment createCompletedEnrichment(final URI repositoryResource, final URI branchResource, final URI commitResource) {
+		return CompletedEnrichment.newInstance(repositoryResource, branchResource, commitResource);
 	}
 
 }

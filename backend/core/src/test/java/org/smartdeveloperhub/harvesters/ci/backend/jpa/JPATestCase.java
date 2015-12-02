@@ -36,6 +36,7 @@ import org.junit.BeforeClass;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
@@ -94,6 +95,10 @@ public class JPATestCase {
 
 		protected final PendingEnrichmentRepository pendingEnrichmentRepository() {
 			return persistencyFacade.getPendingEnrichmentRepository();
+		}
+
+		protected final CompletedEnrichmentRepository completedEnrichmentRepository() {
+			return persistencyFacade.getCompletedEnrichmentRepository();
 		}
 
 		protected abstract void execute() throws Exception;

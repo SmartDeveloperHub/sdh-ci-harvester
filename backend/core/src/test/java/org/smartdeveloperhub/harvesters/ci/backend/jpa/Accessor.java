@@ -30,6 +30,7 @@ import java.net.URI;
 
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Branch;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Commit;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.CompletedEnrichment;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Factory;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Repository;
@@ -62,5 +63,6 @@ public abstract class Accessor {
 	public abstract Branch createBranch(URI location, String branchName, URI resource);
 	public abstract Commit createCommit(URI location, String branchName, String commitId, URI resource);
 	public abstract PendingEnrichment createPendingEnrichment(URI repositoryLocation, String branchName, String commitId);
+	public abstract CompletedEnrichment createCompletedEnrichment(URI repositoryResource, URI branchResource, URI commitResource);
 
 }
