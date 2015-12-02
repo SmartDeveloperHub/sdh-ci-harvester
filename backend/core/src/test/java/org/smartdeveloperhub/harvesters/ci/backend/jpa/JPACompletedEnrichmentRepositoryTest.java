@@ -32,6 +32,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
@@ -155,6 +156,36 @@ public class JPACompletedEnrichmentRepositoryTest extends JPATestCase {
 		} finally {
 			ADDED_COMPLETED_ENRICHMENTS--;
 		}
+	}
+
+	@Test
+	public void testCompletedEnrichmentOfExecution$found() throws Exception {
+		final CompletedEnrichment completedEnrichment=Accessor.getDefault().createCompletedEnrichment(repository("example"),branch("master"),commit("commitId"));
+		final URI execution = execution("1");
+		completedEnrichment.executions().add(execution);
+		addCompletedEnrichment(completedEnrichment);
+		transactional(new Operation() {
+			@Override
+			protected void execute() throws Exception {
+				final CompletedEnrichment found = completedEnrichmentRepository().completedEnrichmentOfExecution(execution);
+				assertThat(found.repositoryResource(),equalTo(completedEnrichment.repositoryResource()));
+				assertThat(found.branchResource(),equalTo(completedEnrichment.branchResource()));
+				assertThat(found.commitResource(),equalTo(completedEnrichment.commitResource()));
+				assertThat(found.executions(),hasItems(completedEnrichment.executions().toArray(new URI[0])));
+			}
+		});
+	}
+
+	@Test
+	public void testCompletedEnrichmentOfExecution$notFound() throws Exception {
+		final URI execution = execution("1");
+		transactional(new Operation() {
+			@Override
+			protected void execute() throws Exception {
+				final CompletedEnrichment found = completedEnrichmentRepository().completedEnrichmentOfExecution(execution);
+				assertThat(found,nullValue());
+			}
+		});
 	}
 
 	@Test

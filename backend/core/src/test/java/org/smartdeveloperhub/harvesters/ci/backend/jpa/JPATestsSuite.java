@@ -36,7 +36,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	JPABranchRepositoryTest.class,
 	JPACommitRepositoryTest.class,
 	JPARepositoryRepositoryTest.class,
-	JPAPendingEnrichmentRepositoryTest.class
+	JPAPendingEnrichmentRepositoryTest.class,
+	JPACompletedEnrichmentRepositoryTest.class
 })
 public class JPATestsSuite {
 
