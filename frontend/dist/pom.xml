@@ -62,6 +62,7 @@
 		<jena.version>2.13.0</jena.version>
 		<frontend.http.port>80</frontend.http.port>
 		<failsafe.arg.line>-Xmx1024m -XX:MaxPermSize=256m</failsafe.arg.line>
+		<curator.connector.version>0.1.0-SNAPSHOT</curator.connector.version>
 	</properties>
 
 	<dependencyManagement>
@@ -147,6 +148,14 @@
 			<scope>test</scope>
 		</dependency>
 		 -->
+
+		<dependency>
+			<groupId>org.smartdeveloperhub.curator</groupId>
+			<artifactId>sdh-curator-connector</artifactId>
+			<version>${curator.connector.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Default unit testing frameworks-->
 		<dependency>
@@ -302,6 +311,22 @@
 						<ci.harvester.provider>DefaultBackendController</ci.harvester.provider>
 						<ci.harvester.config>${basedir}${file.separator}src${file.separator}test${file.separator}resources${file.separator}integration.yml</ci.harvester.config>
 					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.4.0</version>
+				<configuration>
+					<mainClass>org.smartdeveloperhub.harvesters.ci.frontend.curator.HarvesterCurator</mainClass>
+					<classpathScope>test</classpathScope>
+					<systemProperties>
+						<systemProperty>
+							<key>log4j.configuration</key>
+							<value>file:/./src/test/resources/curator.log4j.properties</value>
+						</systemProperty>
+					</systemProperties>
 				</configuration>
 			</plugin>
 
