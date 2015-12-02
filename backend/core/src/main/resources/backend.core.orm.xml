@@ -269,7 +269,7 @@
 	</orm:embeddable>
 	<orm:embeddable class="org.smartdeveloperhub.harvesters.ci.backend.enrichment.CommitId">
 		<orm:attributes>
-			<orm:basic name="commitId" optional="false"/>
+			<orm:basic name="hash" optional="false"/>
 			<orm:embedded name="branchId"/>
 		</orm:attributes>
 	</orm:embeddable>
