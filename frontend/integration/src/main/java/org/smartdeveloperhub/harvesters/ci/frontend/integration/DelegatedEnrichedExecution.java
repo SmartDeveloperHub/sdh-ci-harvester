@@ -56,7 +56,7 @@ final class DelegatedEnrichedExecution implements EnrichedExecution {
 
 	@Override
 	public Optional<URI> commitResource() {
-		return this.enrichment.repositoryResource();
+		return this.enrichment.commitResource();
 	}
 
 	@Override
