@@ -29,22 +29,29 @@ package org.smartdeveloperhub.harvesters.ci.backend.jpa;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.persistence.PersistenceException;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionException;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class JPAPendingEnrichmentRepositoryTest extends JPATestCase {
 
@@ -57,6 +64,17 @@ public class JPAPendingEnrichmentRepositoryTest extends JPATestCase {
 
 	protected URI execution(final String name) {
 		return URI.create(this.testName.getMethodName()+"/"+name+"/");
+	}
+
+	private List<PendingEnrichment> getAllPendingEnrichments() throws Exception {
+		final List<PendingEnrichment> all=Lists.newArrayList();
+		transactional(new Operation() {
+			@Override
+			protected void execute() throws Exception {
+				all.addAll(pendingEnrichmentRepository().findPendingEnrichments(null,null,null));
+			}
+		});
+		return all;
 	}
 
 	@Test
@@ -167,6 +185,38 @@ public class JPAPendingEnrichmentRepositoryTest extends JPATestCase {
 				assertThat(found,nullValue());
 			}
 		});
+	}
+
+	@Test
+	public void testRemoveAll() throws Exception {
+		final List<PendingEnrichment> beforeRemove = getAllPendingEnrichments();
+		Assume.assumeThat(beforeRemove,not(hasSize(0)));
+		transactional(new Operation() {
+			@Override
+			protected void execute() throws Exception {
+				final List<URI> executions=Lists.newArrayList();
+				final List<Long> ids=Lists.newArrayList();
+				for(final PendingEnrichment pending:pendingEnrichmentRepository().findPendingEnrichments(null, null,null)) {
+					final URI executionId = Iterables.getFirst(pending.executions(),null);
+					if(executionId!=null) {
+						executions.add(executionId);
+					} else {
+						ids.add(pending.id());
+					}
+				}
+				pendingEnrichmentRepository().removeAll();
+				for(final URI executionId:executions) {
+					final PendingEnrichment found=pendingEnrichmentRepository().pendingEnrichmentOfExecution(executionId);
+					assertThat(found,nullValue());
+				}
+				for(final long id:ids) {
+					final PendingEnrichment found=pendingEnrichmentRepository().pendingEnrichmentOfId(id);
+					assertThat(found,nullValue());
+				}
+			}
+		});
+		final List<PendingEnrichment> afterRemove = getAllPendingEnrichments();
+		assertThat(afterRemove,hasSize(0));
 	}
 
 }

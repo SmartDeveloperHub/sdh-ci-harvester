@@ -30,6 +30,7 @@ import java.net.URI;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -63,9 +64,13 @@ public class JPAPendingEnrichmentRepository implements PendingEnrichmentReposito
 
 	@Override
 	public void removeAll() {
-		final List<PendingEnrichment> pendingEnrichments = findPendingEnrichments(null, null, null);
 		final EntityManager entityManager = entityManager();
-		for(final PendingEnrichment pending:pendingEnrichments) {
+		final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		final CriteriaQuery<PendingEnrichment> cq = cb.createQuery(PendingEnrichment.class);
+		final Root<PendingEnrichment> rootEntry = cq.from(PendingEnrichment.class);
+		final CriteriaQuery<PendingEnrichment> all = cq.select(rootEntry);
+		final TypedQuery<PendingEnrichment> allQuery = entityManager.createQuery(all);
+		for (final PendingEnrichment pending : allQuery.getResultList()) {
 			entityManager.remove(pending);
 		}
 	}

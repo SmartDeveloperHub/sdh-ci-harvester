@@ -191,24 +191,40 @@ public class EnrichmentService {
 		LOGGER.info("Initializing Enrichment Service...");
 		this.requestor=new EnrichmentRequestor(this,this.connector,this.resolver);
 		this.requestor.start();
-		initializeEnrichments();
+		initializePendingEnrichmentsTransactionally();
 		LOGGER.info("Enrichment Service initialized.");
 		this.state=new ServiceConnected();
 	}
 
-	private void initializeEnrichments() {
+	private void initializePendingEnrichmentsTransactionally() {
+		final Transaction tx = this.transactionManager.currentTransaction();
+		try {
+			tx.begin();
+			initializePendingEnrichments();
+			tx.commit();
+		} catch (final Exception e) {
+			LOGGER.error("Could not initialize pending enrichments. Full stacktrace follows",e);
+		} finally {
+			if(tx.isActive()) {
+				try {
+					tx.rollback();
+				} catch (final TransactionException e) {
+					LOGGER.warn("Transaction rollback failure while initializing pending enrichments. Full stacktrace follows",e);
+				}
+			}
+		}
+	}
+
+	private void initializePendingEnrichments() {
+		this.pendingRepository.removeAll();
 		final List<URI> executions=this.executionRepository.executionIds();
 		final Set<URI> enrichedExecutions=enrichedExecutions();
-		final Set<URI> pendingExecutions=clearPendingEnrichments();
-		final Set<URI> toBeEnriched=Sets.newLinkedHashSet();
-		toBeEnriched.addAll(executions);
-		toBeEnriched.addAll(pendingExecutions);
+		final Set<URI> toBeEnriched=Sets.newLinkedHashSet(executions);
 		toBeEnriched.removeAll(enrichedExecutions);
 		if(LOGGER.isTraceEnabled()) {
-			LOGGER.trace("Executions..........: {}",executions);
-			LOGGER.trace("Enriched executions.: {}",enrichedExecutions);
-			LOGGER.trace("Pending executions..: {}",pendingExecutions);
-			LOGGER.trace("Executions to enrich: {}",toBeEnriched);
+			LOGGER.trace("Executions           ({}): {}",executions.size(),executions);
+			LOGGER.trace("Enriched executions  ({}): {}",enrichedExecutions.size(),enrichedExecutions);
+			LOGGER.trace("Executions to enrich ({}): {}",toBeEnriched.size(),toBeEnriched);
 		}
 		retryEnrichments(toBeEnriched);
 	}
@@ -234,15 +250,6 @@ public class EnrichmentService {
 		}
 	}
 
-	private Set<URI> clearPendingEnrichments() {
-		final Set<URI> executions=Sets.newLinkedHashSet();
-		for(final PendingEnrichment pe:pendingEnrichments()) {
-			executions.addAll(pe.executions());
-		}
-		this.pendingRepository.removeAll();
-		return executions;
-	}
-
 	private void doRequestEnrichment(final Execution execution) {
 		LOGGER.debug("Requested enrichment for {}",execution);
 		final EnrichmentContext context = createContext(execution);
@@ -258,7 +265,7 @@ public class EnrichmentService {
 		final Transaction tx = this.transactionManager.currentTransaction();
 		try {
 			tx.begin();
-			transactionalEnrichmentProcessing(context, enrichment);
+			processExecutionEnrichment(context, enrichment);
 			tx.commit();
 		} catch (final Exception e) {
 			throw new IOException("Could not process "+enrichment+" for "+context,e);
@@ -273,7 +280,7 @@ public class EnrichmentService {
 		}
 	}
 
-	private void transactionalEnrichmentProcessing(final EnrichmentContext context, final ExecutionEnrichment enrichment) {
+	private void processExecutionEnrichment(final EnrichmentContext context, final ExecutionEnrichment enrichment) {
 		final PendingEnrichment pendingEnrichment=this.pendingRepository.pendingEnrichmentOfId(context.pendingEnrichment().id());
 		if(pendingEnrichment==null) {
 			LOGGER.info("Discarding enrichment {}: pending enrichment does not exist",enrichment);
