@@ -33,6 +33,7 @@ import static org.junit.Assume.assumeThat;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -97,12 +98,15 @@ public class EnrichmentITest extends SmokeTest {
 		LOGGER.info("Warming up...");
 		TimeUnit.SECONDS.sleep(30);
 		curator.stop();
-		LOGGER.info("Letting enrichment response apply...");
+		final List<Action> actionsUndertaken = curator.actionsUndertaken();
+		LOGGER.info("Processed {} enrichment requests",actionsUndertaken.size());
+		LOGGER.info("Awaiting for the processing of the enrichment responses...");
 		TimeUnit.SECONDS.sleep(30);
 		LOGGER.info("Starting verification...");
-		for(final Action action:curator.actionsUndertaken()) {
+		for(final Action action:actionsUndertaken) {
 			assertThat(hasBeenApplied(contextURL, action),equalTo(true));
 		}
+		LOGGER.info("Verified {} enrichment response updates",actionsUndertaken.size());
 	}
 
 }
