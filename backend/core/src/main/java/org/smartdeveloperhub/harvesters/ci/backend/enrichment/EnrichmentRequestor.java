@@ -140,7 +140,7 @@ final class EnrichmentRequestor {
 			try {
 				LOGGER.debug("Starting Enrichment Requestor worker. Awaiting resolver availability...");
 				awaitAvailability();
-				LOGGER.debug("Resolver is available. Started processing queued request...");
+				LOGGER.debug("Resolver is available. Started processing queued requests...");
 				processJobs();
 				LOGGER.debug("Enrichment Requestor worker terminated");
 			} catch (final InterruptedException e) {
