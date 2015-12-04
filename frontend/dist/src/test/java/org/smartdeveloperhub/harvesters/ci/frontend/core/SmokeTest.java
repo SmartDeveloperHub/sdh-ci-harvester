@@ -30,6 +30,8 @@ import static com.jayway.restassured.RestAssured.given;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
@@ -39,9 +41,12 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.QueryHelper.ResultProcessor;
+import org.smartdeveloperhub.harvesters.ci.frontend.curator.Action;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.jayway.restassured.response.Response;
 
 public class SmokeTest {
@@ -53,9 +58,9 @@ public class SmokeTest {
 
 	protected static final String SERVICE     = "service/";
 
-	protected static WebArchive createWebArchive(String archiveName) throws Exception {
+	protected static WebArchive createWebArchive(final String archiveName) throws Exception {
 		try {
-			File[] files =
+			final File[] files =
 				Maven.
 					configureResolver().
 						loadPomFromFile("target/test-classes/pom.xml").
@@ -70,14 +75,14 @@ public class SmokeTest {
 						addAsResource("ldp4j-server-frontend.cfg").
 						addAsResource("log4j.properties").
 						setWebXML(new File("src/main/webapp/WEB-INF/web.xml"));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Could not create archive",e);
 			throw e;
 		}
 	}
 
-	protected final List<String> getServiceBuilds(URL contextURL) throws IOException {
-		Response response=
+	protected final List<String> getServiceBuilds(final URL contextURL) throws IOException {
+		final Response response=
 			given().
 				accept(TEXT_TURTLE).
 				baseUri(contextURL.toString()).
@@ -87,7 +92,7 @@ public class SmokeTest {
 			when().
 				get(SERVICE);
 
-		List<String> builds=
+		final List<String> builds=
 			QueryHelper.
 				newInstance().
 					withModel(
@@ -98,7 +103,7 @@ public class SmokeTest {
 						withURIRefParam("service",TestingUtil.resolve(contextURL,SERVICE)).
 					select(
 						new ResultProcessor<List<String>>() {
-							private List<String> builds=Lists.newArrayList();
+							private final List<String> builds=Lists.newArrayList();
 							@Override
 							protected void processSolution() {
 								this.builds.add(resource("build").getURI());
@@ -112,5 +117,66 @@ public class SmokeTest {
 		return builds;
 	}
 
+	protected boolean hasBeenApplied(final URL contextURL, final Action action) throws URISyntaxException {
+		final String executionPath = contextURL.toURI().relativize(action.targetResource()).toString();
+		try {
+			final Response response=
+				given().
+					accept(TEXT_TURTLE).
+					baseUri(contextURL.toString()).
+				expect().
+					statusCode(OK).
+					contentType(TEXT_TURTLE).
+				when().
+					get(executionPath);
+
+			return
+				QueryHelper.
+					newInstance().
+						withModel(
+							TestingUtil.
+								asModel(response,contextURL,executionPath)).
+						withQuery().
+							fromResource("queries/execution_enrichment.sparql").
+							withURIRefParam("execution",action.targetResource().toString()).
+						select(
+							new ResultProcessor<Boolean>() {
+								private boolean result;
+
+								@Override
+								protected void processSolution() {
+									this.result=
+										check("ci:forBranch", action.enrichment().branchResource(), "branchResource") &&
+										check("ci:forCommit", action.enrichment().commitResource(), "commitResource");
+								}
+
+								private boolean check(
+										final String property,
+										final Optional<URI> expected,
+										final String binding) {
+									boolean matches=false;
+									final Resource got = resource(binding);
+									if(expected.isPresent()) {
+										matches=got.hasURI(expected.get().toString());
+									} else {
+										matches=got==null;
+									}
+									if(!matches) {
+										LOGGER.error("[{}] {} mismatch: expected [{}] but got [{}]",action.targetResource(),property,expected.orNull(),got.toString());
+									}
+									return matches;
+								}
+
+								@Override
+								public Boolean getResult() {
+									return this.result;
+								}
+							}
+						);
+		} catch (final Exception e) {
+			LOGGER.debug("{} ({},{}) Could not check {} ({})",action.targetResource(),contextURL,executionPath,action.enrichment(),e.getMessage());
+			return false;
+		}
+	}
 
 }

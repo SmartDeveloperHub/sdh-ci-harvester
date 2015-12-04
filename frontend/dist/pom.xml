@@ -310,6 +310,7 @@
 						<maven.repo.local>${settings.localRepository}</maven.repo.local>
 						<ci.harvester.provider>DefaultBackendController</ci.harvester.provider>
 						<ci.harvester.config>${basedir}${file.separator}src${file.separator}test${file.separator}resources${file.separator}integration.yml</ci.harvester.config>
+						<ci.harvester.base>http://localhost:${tomcat.http.port}/default-harvester/</ci.harvester.base>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>
@@ -319,14 +320,8 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.4.0</version>
 				<configuration>
-					<mainClass>org.smartdeveloperhub.harvesters.ci.frontend.curator.HarvesterCurator</mainClass>
+					<mainClass>org.smartdeveloperhub.harvesters.ci.frontend.curator.HarvesterCuratorApplication</mainClass>
 					<classpathScope>test</classpathScope>
-					<systemProperties>
-						<systemProperty>
-							<key>log4j.configuration</key>
-							<value>file:/./src/test/resources/curator.log4j.properties</value>
-						</systemProperty>
-					</systemProperties>
 				</configuration>
 			</plugin>
 

@@ -27,6 +27,7 @@
 package org.smartdeveloperhub.harvesters.ci.frontend.curator;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -49,13 +50,15 @@ import org.smartdeveloperhub.curator.protocol.Value;
 import org.smartdeveloperhub.curator.protocol.Variable;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 final class TestingResponseProvider implements ResponseProvider {
 
-	private static final URI FOR_COMMIT = URI.create(UseCase.ci("forCommit"));
-	private static final URI FOR_BRANCH = URI.create(UseCase.ci("forBranch"));
+	private static final URI FOR_COMMIT     = URI.create(UseCase.ci("forCommit"));
+	private static final URI FOR_BRANCH     = URI.create(UseCase.ci("forBranch"));
 	private static final URI FOR_REPOSITORY = URI.create(UseCase.ci("forRepository"));
+
 	private static final Map<URI,URI> REQUIRED_PROPERTY=
 			ImmutableMap.
 				<URI,URI>builder().
@@ -66,10 +69,12 @@ final class TestingResponseProvider implements ResponseProvider {
 
 	private final Logger logger;
 	private final ConcurrentMap<String,URI> repositories;
+	private final List<Action> actions;
 
 	TestingResponseProvider(final Logger logger) {
-		this.logger = logger;
+		this.logger=logger;
 		this.repositories=Maps.newConcurrentMap();
+		this.actions=Lists.newArrayList();
 	}
 
 	private EnrichmentResult createResult(final URI targetResource, final URI repository, final URI branch, final URI commit) {
@@ -105,7 +110,7 @@ final class TestingResponseProvider implements ResponseProvider {
 	private Map<URI, Value> getFilters(final EnrichmentRequest request) {
 		final Map<URI,Value> values=Maps.newLinkedHashMap();
 		for(final Filter filter:request.filters()) {
-			final URI constrainedProperty = this.REQUIRED_PROPERTY.get(filter.property());
+			final URI constrainedProperty = REQUIRED_PROPERTY.get(filter.property());
 			final Variable target=filter.variable();
 			for(final Constraint constraint:request.constraints()) {
 				if(target.equals(constraint.target())) {
@@ -148,24 +153,23 @@ final class TestingResponseProvider implements ResponseProvider {
 	public EnrichmentResult getResult(final UUID messageId, final EnrichmentRequest request) {
 		final URI targetResource = request.targetResource();
 		final Map<URI, Value> values = getFilters(request);
+		final URI repository=createRepository(values.get(FOR_REPOSITORY));
+		final URI branch=createBranch(repository,values.get(FOR_BRANCH));
+		final URI commit=createCommit(branch,values.get(FOR_COMMIT));
+		this.actions.add(Action.newInstance(messageId,targetResource,repository,branch,commit));
 
 		this.logger.info("Received enrichment request:");
 		this.logger.info("  - Message Id: {} ",messageId);
 		this.logger.info("  - Target resource: {}",targetResource);
 		this.logger.info("  - Filters: ");
 		for(final Entry<URI,Value> entry:values.entrySet()) {
-			this.logger.info("    + {}: {}",entry.getKey(),toString(entry.getValue()));
+			this.logger.info("    + {} ({})",entry.getKey(),toString(entry.getValue()));
 		}
-
-		final URI repository=createRepository(values.get(FOR_REPOSITORY));
-		final URI branch=createBranch(repository,values.get(FOR_BRANCH));
-		final URI commit=createCommit(branch,values.get(FOR_COMMIT));
-		this.logger.info("Generated result:");
-		this.logger.info("  - Target resource: {}",targetResource);
-		this.logger.info("  - Additions: ");
-		this.logger.info("    + {}: {}",FOR_REPOSITORY,repository);
-		this.logger.info("    + {}: {}",FOR_BRANCH,branch);
-		this.logger.info("    + {}: {}",FOR_COMMIT,commit);
+		this.logger.info("  - Generated result:");
+		this.logger.info("    + Additions: ");
+		this.logger.info("      * {}: {}",FOR_REPOSITORY,repository);
+		this.logger.info("      * {}: {}",FOR_BRANCH,branch);
+		this.logger.info("      * {}: {}",FOR_COMMIT,commit);
 
 		return createResult(targetResource, repository, branch, commit);
 	}
@@ -178,5 +182,9 @@ final class TestingResponseProvider implements ResponseProvider {
 	@Override
 	public long resultDelay(final UUID messageId, final TimeUnit unit) {
 		return 0;
+	}
+
+	List<Action> actions() {
+		return this.actions;
 	}
 }

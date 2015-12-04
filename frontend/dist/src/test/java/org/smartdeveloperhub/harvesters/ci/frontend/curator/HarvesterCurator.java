@@ -26,7 +26,11 @@
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.curator;
 
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -36,49 +40,150 @@ import org.smartdeveloperhub.curator.connector.UseCase;
 import org.smartdeveloperhub.curator.connector.io.ConversionContext;
 import org.smartdeveloperhub.curator.connector.protocol.ProtocolFactory;
 import org.smartdeveloperhub.curator.protocol.Agent;
-import org.smartdeveloperhub.curator.protocol.DeliveryChannel;
+import org.smartdeveloperhub.curator.protocol.EnrichmentResponseMessage;
+
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public final class HarvesterCurator {
 
-	private static DeliveryChannel deliveryChannel() {
-		return
-			ProtocolFactory.
-				newDeliveryChannel().
-					withRoutingKey("curator.testing").
-					build();
-	}
+	private static final Logger LOGGER = LoggerFactory.getLogger(HarvesterCurator.class);
 
-	public static void main(final String... args) throws Exception {
-		configureLogger();
-		final Logger LOGGER=LoggerFactory.getLogger(HarvesterCurator.class);
-		final TestingCurator curator=
-			TestingCurator.
-				builder().
-					withResponseProvider(new TestingResponseProvider(LOGGER)).
-					withConnectorConfiguration(deliveryChannel()).
-					withConversionContext(ConversionContext.
-						newInstance().
-							withNamespacePrefix(UseCase.CI_NAMESPACE,"ci").
-							withNamespacePrefix(UseCase.SCM_NAMESPACE,"scm").
-								withNamespacePrefix(UseCase.DOAP_NAMESPACE,"doap")).
-					withNotifier(new Notifier()).
-					build();
-		final Agent agent = ProtocolFactory.newAgent().withAgentId(UUID.randomUUID()).build();
-		LOGGER.info("Starting testing curator [{}]...",agent.agentId());
-		curator.connect(agent);
-		LOGGER.info("Awaiting for enrichment requests...");
-		try {
-			TimeUnit.SECONDS.sleep(600);
-		} catch (final InterruptedException e) {
-			LOGGER.warn("Testing curator interrupted");
+	private static final class Worker implements Runnable {
+
+		private static final class ResponseMemoizer extends Notifier {
+
+			private final List<UUID> answeredRequests;
+			private final TestingResponseProvider provider;
+
+			private ResponseMemoizer(final TestingResponseProvider provider) {
+				this.provider=provider;
+				this.answeredRequests=Lists.newArrayList();
+			}
+
+			@Override
+			public synchronized void onEnrichmentResponse(final EnrichmentResponseMessage response) {
+				this.answeredRequests.add(response.responseTo());
+			}
+
+			private synchronized List<Action> submittedActions() {
+				final List<Action> acknowledged=Lists.newArrayList();
+				for(final Action action:this.provider.actions()) {
+					if(this.answeredRequests.contains(action.requestId())) {
+						acknowledged.add(action);
+					}
+				}
+				return acknowledged;
+			}
+
 		}
-		LOGGER.info("Terminating testing curator...");
-		curator.disconnect();
 
+		private final TestingCurator curator;
+		private final Agent agent;
+		private final TestingResponseProvider provider;
+		private final Object lock;
+		private boolean terminate;
+		private final ResponseMemoizer memoizer;
+
+		private Worker() {
+			this.provider = new TestingResponseProvider(LOGGER);
+			this.memoizer = new ResponseMemoizer(this.provider);
+			this.curator =
+				TestingCurator.
+					builder().
+						withResponseProvider(this.provider).
+						withNotifier(this.memoizer).
+						withConnectorConfiguration(
+							ProtocolFactory.
+								newDeliveryChannel().
+									withRoutingKey("curator.testing").
+									build()).
+						withConversionContext(
+							ConversionContext.
+								newInstance().
+									withNamespacePrefix(UseCase.CI_NAMESPACE,"ci").
+									withNamespacePrefix(UseCase.SCM_NAMESPACE,"scm").
+										withNamespacePrefix(UseCase.DOAP_NAMESPACE,"doap")).
+						build();
+			this.agent=ProtocolFactory.newAgent().withAgentId(UUID.randomUUID()).build();
+			this.terminate=false;
+			this.lock=new Object();
+		}
+
+		@Override
+		public void run() {
+			LOGGER.info("Starting testing curator [{}]...",this.agent.agentId());
+			this.curator.connect(this.agent);
+			LOGGER.info("Awaiting for enrichment requests...");
+			awaitTermination();
+			LOGGER.info("Terminating testing curator...");
+			this.curator.disconnect();
+		}
+
+		private void awaitTermination() {
+			synchronized(this.lock) {
+				while(!this.terminate) {
+					try {
+						this.lock.wait();
+					} catch (final InterruptedException e) {
+						// IGNORE
+					}
+				}
+			}
+		}
+
+		private void terminate() {
+			synchronized(this.lock) {
+				this.terminate=true;
+				this.lock.notify();
+			}
+		}
 	}
 
-	private static void configureLogger() {
-		System.setProperty("log4j.configuration",Thread.currentThread().getContextClassLoader().getResource("curator.log4j.properties").toString());
+	private final ExecutorService executor;
+	private final Worker worker;
+
+	public HarvesterCurator() {
+		this.executor =
+			Executors.
+				newSingleThreadExecutor(
+					new ThreadFactoryBuilder().
+						setNameFormat("testing-curator").
+						setPriority(Thread.MAX_PRIORITY).
+						setUncaughtExceptionHandler(
+							new UncaughtExceptionHandler() {
+								@Override
+								public void uncaughtException(final Thread t, final Throwable e) {
+									LOGGER.error("Testing harvester unexpected termination",e);
+								}
+							}).
+						build());
+		this.worker=new Worker();
+	}
+
+	public void start() {
+		this.executor.execute(this.worker);
+	}
+
+	public List<Action> actionsUndertaken() {
+		return this.worker.memoizer.submittedActions();
+	}
+
+	public void stop() {
+		this.worker.terminate();
+		this.executor.shutdown();
+		int tries=0;
+		while(!this.executor.isTerminated() && tries<5) {
+			try {
+				this.executor.awaitTermination(1, TimeUnit.SECONDS);
+				tries++;
+			} catch (final InterruptedException e) {
+				// IGNORE
+			}
+		}
+		if(!this.executor.isTerminated()) {
+			this.executor.shutdownNow();
+		}
 	}
 
 }
