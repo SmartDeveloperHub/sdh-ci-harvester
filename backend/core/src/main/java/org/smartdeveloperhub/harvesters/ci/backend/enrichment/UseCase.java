@@ -52,11 +52,15 @@ final class UseCase {
 	static final String SCM_NAMESPACE  = "http://www.smartdeveloperhub.org/vocabulary/scm#";
 	static final String CI_NAMESPACE   = "http://www.smartdeveloperhub.org/vocabulary/ci#";
 
+	static {
+		LOGGER.warn("Execution enrichment request customization is still missing");
+		LOGGER.warn("Execution enrichment result customized processing is still missing");
+	}
+
 	private UseCase() {
 	}
 
 	static EnrichmentRequest createRequest(final URI targetResource, final EnrichmentContext context) {
-		LOGGER.warn("{} enrichment request customization is still missing",context);
 		return
 			EnrichmentRequest.
 				newInstance().
@@ -92,7 +96,6 @@ final class UseCase {
 	}
 
 	static ExecutionEnrichment processResult(final EnrichmentContext context, final EnrichmentResult result) {
-		LOGGER.warn("{} enrichment result customized processing is still missing",context);
 		final Bindings additions = result.additions();
 		return
 			new ImmutableExecutionEnrichment().

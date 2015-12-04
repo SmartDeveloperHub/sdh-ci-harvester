@@ -156,7 +156,7 @@ final class EnrichmentRequestor {
 			while(true) {
 				try {
 					this.queue.put(job);
-					LOGGER.trace("Queued job ",job.description());
+					LOGGER.trace("Queued job {}",job.description());
 					break;
 				} catch (final InterruptedException e) {
 					LOGGER.info("Enrichment Requestor interrupted while awaiting for enqueueing job {}",job.description(),e);

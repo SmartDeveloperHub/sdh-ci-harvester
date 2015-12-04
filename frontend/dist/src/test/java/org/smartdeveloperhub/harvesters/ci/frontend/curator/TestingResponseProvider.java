@@ -153,12 +153,21 @@ final class TestingResponseProvider implements ResponseProvider {
 	public EnrichmentResult getResult(final UUID messageId, final EnrichmentRequest request) {
 		final URI targetResource = request.targetResource();
 		final Map<URI, Value> values = getFilters(request);
+
+		if(values.size()!=3) {
+			this.logger.warn("Rejected partial enrichment request:");
+			this.logger.info("  - Message Id: {} ",messageId);
+			this.logger.info("  - Target resource: {}",targetResource);
+			this.logger.info("  - Filters: ",request.filters());
+			return null;
+		}
+
 		final URI repository=createRepository(values.get(FOR_REPOSITORY));
 		final URI branch=createBranch(repository,values.get(FOR_BRANCH));
 		final URI commit=createCommit(branch,values.get(FOR_COMMIT));
 		this.actions.add(Action.newInstance(messageId,targetResource,repository,branch,commit));
 
-		this.logger.info("Received enrichment request:");
+		this.logger.info("Processed complete enrichment request:");
 		this.logger.info("  - Message Id: {} ",messageId);
 		this.logger.info("  - Target resource: {}",targetResource);
 		this.logger.info("  - Filters: ");
