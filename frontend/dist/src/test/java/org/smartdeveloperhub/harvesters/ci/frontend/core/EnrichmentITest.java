@@ -96,17 +96,17 @@ public class EnrichmentITest extends SmokeTest {
 	public void testService(@ArquillianResource final URL contextURL) throws Exception {
 		assumeThat(EnrichmentITest.available,equalTo(true));
 		LOGGER.info("Warming up...");
-		TimeUnit.SECONDS.sleep(30);
+		TimeUnit.SECONDS.sleep(60);
 		curator.stop();
 		final List<Action> actionsUndertaken = curator.actionsUndertaken();
-		LOGGER.info("Processed {} enrichment requests",actionsUndertaken.size());
+		LOGGER.info("Warm up completed. {} enrichment requests processed.",actionsUndertaken.size());
 		LOGGER.info("Awaiting for the processing of the enrichment responses...");
 		TimeUnit.SECONDS.sleep(30);
 		LOGGER.info("Starting verification...");
 		for(final Action action:actionsUndertaken) {
 			assertThat(hasBeenApplied(contextURL, action),equalTo(true));
 		}
-		LOGGER.info("Verified {} enrichment response updates",actionsUndertaken.size());
+		LOGGER.info("Verified {} enrichment response updates.",actionsUndertaken.size());
 	}
 
 }
