@@ -46,15 +46,12 @@ import org.smartdeveloperhub.harvesters.util.concurrent.MemoizingScheduledExecut
 import org.smartdeveloperhub.harvesters.util.concurrent.MoreExecutors;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 final class EnrichmentRequestor {
 
 	final class RequestJob implements Runnable {
-
-		private static final int DEFAULT_RETRY_DELAY = 5000;
 
 		private final long id;
 		private final EnrichmentContext context;
@@ -84,14 +81,10 @@ final class EnrichmentRequestor {
 			this.cancelled=true;
 		}
 
-		long retry() {
+		long retry(final long duration, final TimeUnit unit) {
 			if(!this.cancelled) {
 				this.retries++;
-				EnrichmentRequestor.this.executor.schedule(
-					this,
-					DEFAULT_RETRY_DELAY,
-					TimeUnit.MILLISECONDS
-				);
+				EnrichmentRequestor.this.executor.schedule(this,duration,unit);
 			}
 			return this.retries;
 		}
@@ -102,7 +95,7 @@ final class EnrichmentRequestor {
 
 		@Override
 		public void run() {
-			if(!RequestJob.this.cancelled) {
+			if(!this.cancelled) {
 				EnrichmentRequestor.this.worker.queueJob(RequestJob.this);
 			}
 		}
@@ -202,7 +195,7 @@ final class EnrichmentRequestor {
 		}
 
 		private void retryJob(final RequestJob job) {
-			final long retries = job.retry();
+			final long retries = job.retry(5,TimeUnit.SECONDS);
 			LOGGER.
 				trace(
 					"Retrying job #{} ({}): could not resolve resource for execution {} ",
@@ -319,7 +312,7 @@ final class EnrichmentRequestor {
 		if(context.requiresCommit()) {
 			final RequestJob job = new RequestJob(context);
 			LOGGER.trace("Created job {}",job.description());
-			this.worker.queueJob(job);
+			job.retry(1,TimeUnit.SECONDS);
 		}
 	}
 
@@ -344,7 +337,7 @@ final class EnrichmentRequestor {
 		LOGGER.info("Stopping Enrichment Requestor...");
 		if(this.started) {
 			this.worker.triggerTermination();
-			shutdownPoolGracefully(5,TimeUnit.SECONDS);
+			shutdownPoolGracefully();
 			try {
 				this.worker.connector.disconnect();
 			} catch (final ConnectorException e) {
@@ -355,17 +348,7 @@ final class EnrichmentRequestor {
 		LOGGER.info("Enrichment Requestor stopped.");
 	}
 
-	private void shutdownPoolGracefully(final int period, final TimeUnit unit) {
-		this.executor.shutdown();
-		final Stopwatch watch=Stopwatch.createStarted();
-		while(!this.executor.isTerminated() && watch.elapsed(unit)<period) {
-			try {
-				this.executor.awaitTermination(500, TimeUnit.MILLISECONDS);
-			} catch (final InterruptedException e) {
-				LOGGER.trace("Enrichment Requestor interrupted while awaiting for termination",e);
-				Thread.currentThread().interrupt();
-			}
-		}
+	private void shutdownPoolGracefully() {
 		if(!this.executor.isTerminated()) {
 			final List<Runnable> unfinished = this.executor.shutdownNow();
 			logAbortedRequestJobs(unfinished);
@@ -383,6 +366,8 @@ final class EnrichmentRequestor {
 			}
 			if(!aborted.isEmpty()) {
 				LOGGER.trace("Aborted {} pending execution enrichment requests ({})",aborted.size(),aborted);
+			} else {
+				LOGGER.trace("All scheduled pending execution enrichment requests were queued.");
 			}
 		}
 	}
