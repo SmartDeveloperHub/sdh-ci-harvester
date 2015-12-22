@@ -20,13 +20,14 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend;
 
 import java.io.IOException;
+import java.net.URI;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -35,6 +36,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPAComponentRegistry;
 
@@ -51,13 +58,13 @@ public class BackendCoreITest extends SmokeTest {
 				new Database(){
 					@Override
 					public void close() throws IOException {
-						if(factory!=null) {
-							factory.close();
+						if(BackendCoreITest.this.factory!=null) {
+							BackendCoreITest.this.factory.close();
 						}
 					}
 					@Override
 					public EntityManagerFactory getEntityManagerFactory() {
-						return factory;
+						return BackendCoreITest.this.factory;
 					}
 				}
 			);
@@ -72,16 +79,40 @@ public class BackendCoreITest extends SmokeTest {
 
 	@Test
 	public void smokeTest() throws Exception {
-		ContinuousIntegrationService cis =
+		final EnrichmentService ers =
+			new EnrichmentService(
+				new SourceCodeManagementService(
+					this.persistencyFacade.getRepositoryRepository(),
+					this.persistencyFacade.getBranchRepository(),
+					this.persistencyFacade.getCommitRepository()),
+				this.persistencyFacade.getExecutionRepository(),
+				this.persistencyFacade.getPendingEnrichmentRepository(),
+				this.persistencyFacade.getCompletedEnrichmentRepository(),
+				this.persistencyFacade.getTransactionManager(),
+				Deployment.builder().build());
+		final ContinuousIntegrationService cis =
 			new ContinuousIntegrationService(
 				this.persistencyFacade.getServiceRepository(),
 				this.persistencyFacade.getBuildRepository(),
 				this.persistencyFacade.getExecutionRepository());
-		JenkinsIntegrationService jis=
+		final JenkinsIntegrationService jis=
 			new JenkinsIntegrationService(
 				cis,
-				persistencyFacade.getTransactionManager());
-		smokeTest(cis,jis);
+				ers,
+				this.persistencyFacade.getTransactionManager());
+		jis.setResolverService(
+			new ResolverService() {
+				@Override
+				public URI resolveExecution(final Execution execution) {
+					return null;
+				}
+				@Override
+				public boolean isReady() {
+					return true;
+				}
+			}
+		);
+		smokeTest(cis,jis,ers);
 	}
 
 

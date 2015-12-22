@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.jpa;
@@ -33,8 +33,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ServiceRepository;
 
 public class JPAServiceRepository implements ServiceRepository {
 

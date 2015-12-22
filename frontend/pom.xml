@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-aggregator:0.1.0
-      Bundle      : ci-frontend-aggregator-0.1.0.pom
+      Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-aggregator:0.2.0
+      Bundle      : ci-frontend-aggregator-0.2.0.pom
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -39,7 +39,7 @@
 	<parent>
 		<groupId>org.smartdeveloperhub.harvesters.ci</groupId>
 		<artifactId>ci-harvester-aggregator</artifactId>
-		<version>0.1.0</version>
+		<version>0.2.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -58,6 +58,29 @@
 	<!-- =================================================================== -->
 	<!--   BUILD SETTINGS                                                    -->
 	<!-- =================================================================== -->
+
+	<properties>
+		<ldp4j.version>0.2.0</ldp4j.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.ldp4j.framework</groupId>
+				<artifactId>ldp4j-application-bom</artifactId>
+				<version>${ldp4j.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.ldp4j.framework</groupId>
+				<artifactId>ldp4j-server-bom</artifactId>
+				<version>${ldp4j.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<modules>
 		<module>bom</module>

@@ -20,71 +20,71 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-cli:0.1.0
- *   Bundle      : ci-jenkins-cli-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-cli:0.2.0
+ *   Bundle      : ci-jenkins-cli-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.cli;
 
+import org.smartdeveloperhub.jenkins.crawler.event.InstanceFoundEvent;
+import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
 import org.smartdeveloperhub.jenkins.crawler.event.JobCreatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JobDeletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JobUpdatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.RunCreatedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.RunDeletedEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.RunUpdatedEvent;
-import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
-import org.smartdeveloperhub.jenkins.crawler.event.InstanceFoundEvent;
 import org.smartdeveloperhub.util.console.Consoles;
 
 final class ConsoleLoggingJenkinsEventListener implements JenkinsEventListener {
 
 	@Override
-	public void onInstanceFound(InstanceFoundEvent event) {
+	public void onInstanceFound(final InstanceFoundEvent event) {
 		Consoles.
 			defaultConsole().
 				printf("[%s] Found instance %s%n",event.date(),event.instanceId());
 	}
 
 	@Override
-	public void onRunUpdate(RunUpdatedEvent event) {
+	public void onRunUpdate(final RunUpdatedEvent event) {
 		Consoles.
 			defaultConsole().
 				printf("[%s] Updated run %s%n",event.date(),event.runId());
 	}
 
 	@Override
-	public void onRunDeletion(RunDeletedEvent event) {
+	public void onRunDeletion(final RunDeletedEvent event) {
 		Consoles.
 			defaultConsole().
 				printf("[%s] Deleted run %s%n",event.date(),event.runId());
 	}
 
 	@Override
-	public void onRunCreation(RunCreatedEvent event) {
+	public void onRunCreation(final RunCreatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Created run %s%n",event.date(),event.runId());
+				printf("[%s] Created run %s {%s -> %s :: %s }%n",event.date(),event.runId(),event.codebase(),event.branchName(),event.commitId());
 	}
 
 	@Override
-	public void onJobDeletion(JobDeletedEvent event) {
+	public void onJobDeletion(final JobDeletedEvent event) {
 		Consoles.
 			defaultConsole().
 				printf("[%s] Deleted job %s%n",event.date(),event.jobId());
 	}
 
 	@Override
-	public void onJobCreation(JobCreatedEvent event) {
+	public void onJobCreation(final JobCreatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Created job %s%n",event.date(),event.jobId());
+				printf("[%s] Created job %s {%s -> %s}%n",event.date(),event.jobId(),event.codebase(),event.branchName());
 	}
 
 	@Override
-	public void onJobUpdate(JobUpdatedEvent event) {
+	public void onJobUpdate(final JobUpdatedEvent event) {
 		Consoles.
 			defaultConsole().
-				printf("[%s] Updated job %s {%s}%n",event.date(),event.jobId(),event.codebase());
+				printf("[%s] Updated job %s {%s -> %s}%n",event.date(),event.jobId(),event.codebase(),event.branchName());
 	}
 
 }

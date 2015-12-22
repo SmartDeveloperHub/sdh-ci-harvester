@@ -20,32 +20,46 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-client:0.1.0
- *   Bundle      : ci-jenkins-client-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-client:0.2.0
+ *   Bundle      : ci-jenkins-client-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.client;
 
 import java.util.Date;
+import java.util.List;
 
 import org.smartdeveloperhub.jenkins.JenkinsResource.Metadata;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 
 final class InMemoryMetadata implements Metadata {
 
 	private final Date retrievedOn;
 	private final InMemoryResponseExcerpt response;
+	private List<Filter> filters;
 	private String serverVersion;
 
-	InMemoryMetadata(Date retrievedOn) {
+	InMemoryMetadata(final Date retrievedOn) {
+		this.filters = ImmutableList.of();
 		this.response = new InMemoryResponseExcerpt();
 		this.retrievedOn = retrievedOn;
 	}
 
-	InMemoryMetadata withServerVersion(String serverVersion) {
+	InMemoryMetadata withFilters(final List<Filter> filters) {
+		this.filters=ImmutableList.copyOf(filters);
+		return this;
+	}
+
+	InMemoryMetadata withServerVersion(final String serverVersion) {
 		this.serverVersion = serverVersion;
 		return this;
+	}
+
+	@Override
+	public List<Filter> filters() {
+		return this.filters;
 	}
 
 	@Override
@@ -69,6 +83,7 @@ final class InMemoryMetadata implements Metadata {
 			MoreObjects.
 				toStringHelper(getClass()).
 					omitNullValues().
+					add("filters",this.filters).
 					add("retrievedOn",this.retrievedOn).
 					add("serverVersion",this.serverVersion).
 					add("response",this.response).

@@ -20,24 +20,27 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.jpa;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ExecutionRepository;
 
 public class JPAExecutionRepository implements ExecutionRepository {
 
-	private EntityManagerProvider provider;
+	private final EntityManagerProvider provider;
 
-	public JPAExecutionRepository(EntityManagerProvider provider) {
+	public JPAExecutionRepository(final EntityManagerProvider provider) {
 		this.provider = provider;
 	}
 
@@ -46,18 +49,31 @@ public class JPAExecutionRepository implements ExecutionRepository {
 	}
 
 	@Override
-	public void add(Execution execution) {
+	public void add(final Execution execution) {
 		entityManager().persist(execution);
 	}
 
 	@Override
-	public void remove(Execution execution) {
+	public void remove(final Execution execution) {
 		entityManager().remove(execution);
 	}
 
 	@Override
-	public Execution executionOfId(URI executionId) {
+	public Execution executionOfId(final URI executionId) {
 		return entityManager().find(Execution.class, executionId);
+	}
+
+	@Override
+	public List<URI> executionIds() {
+		final CriteriaQuery<URI> query =
+				entityManager().
+					getCriteriaBuilder().
+						createQuery(URI.class);
+		final Root<Execution> execution = query.from(Execution.class);
+		query.
+			select(execution.<URI>get("executionId")).
+			distinct(true);
+		return entityManager().createQuery(query).getResultList();
 	}
 
 }

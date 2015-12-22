@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
- *   Bundle      : ci-frontend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.2.0
+ *   Bundle      : ci-frontend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.build;
@@ -34,9 +34,9 @@ import org.ldp4j.application.data.DataSetUtils;
 import org.ldp4j.application.data.DataSets;
 import org.ldp4j.application.data.IndividualPropertyHelper;
 import org.ldp4j.application.data.Name;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.CompositeBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 
 final class BuildMapper extends BuildVocabulary {
@@ -65,8 +65,10 @@ final class BuildMapper extends BuildVocabulary {
 						withLiteral(build.title()).
 					property(DC_TERMS_DESCRIPTION).
 						withLiteral(build.description()).
-					property(CI_CODEBASE).
-						withLiteral(build.codebase()).
+					property(SCM_LOCATION).
+						withLiteral(build.codebase().location()).
+					property(CI_BRANCH_SPECIFIER).
+						withLiteral(build.codebase().branchName()).
 					property(CI_LOCATION).
 						withLiteral(build.location());
 

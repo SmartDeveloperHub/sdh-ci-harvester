@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend;
@@ -29,8 +29,10 @@ package org.smartdeveloperhub.harvesters.ci.backend;
 import java.io.Closeable;
 import java.io.IOException;
 
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.harvesters.ci.backend.spi.ComponentRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.spi.RuntimeDelegate;
@@ -38,13 +40,28 @@ import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManage
 
 public final class BackendFacade implements Closeable {
 
-	private ContinuousIntegrationService applicationService;
-	private JenkinsIntegrationService integrationService;
+	private final ContinuousIntegrationService applicationService;
+	private final JenkinsIntegrationService integrationService;
 
 	private final ComponentRegistry componentRegistry;
+	private final EnrichmentService enrichmentService;
+	private final SourceCodeManagementService scmService;
 
-	private BackendFacade(ComponentRegistry componentRegistry) {
+	private BackendFacade(final ComponentRegistry componentRegistry, final Deployment configuration) {
 		this.componentRegistry=componentRegistry;
+		this.scmService =
+			new SourceCodeManagementService(
+				this.componentRegistry.getRepositoryRepository(),
+				this.componentRegistry.getBranchRepository(),
+				this.componentRegistry.getCommitRepository());
+		this.enrichmentService=
+			new EnrichmentService(
+				this.scmService,
+				this.componentRegistry.getExecutionRepository(),
+				this.componentRegistry.getPendingEnrichmentRepository(),
+				this.componentRegistry.getCompletedEnrichmentRepository(),
+				this.componentRegistry.getTransactionManager(),
+				configuration);
 		this.applicationService=
 			new ContinuousIntegrationService(
 				this.componentRegistry.getServiceRepository(),
@@ -53,11 +70,15 @@ public final class BackendFacade implements Closeable {
 		this.integrationService=
 			new JenkinsIntegrationService(
 				this.applicationService,
+				this.enrichmentService,
 				this.componentRegistry.getTransactionManager());
 	}
 
-	public static BackendFacade create(DatabaseConfig config) {
-		return new BackendFacade(RuntimeDelegate.getInstance().getComponentRegistry(config));
+	public static BackendFacade create(final BackendConfig config) {
+		return
+			new BackendFacade(
+				RuntimeDelegate.getInstance().getComponentRegistry(config.getDatabase()),
+				Deployment.fromConfiguration(config.getEnrichment()));
 	}
 
 	public TransactionManager transactionManager() {
@@ -70,6 +91,14 @@ public final class BackendFacade implements Closeable {
 
 	public JenkinsIntegrationService integrationService() {
 		return this.integrationService;
+	}
+
+	public EnrichmentService enrichmentService() {
+		return this.enrichmentService;
+	}
+
+	public SourceCodeManagementService sourceCodeManagementService() {
+		return this.scmService;
 	}
 
 	@Override

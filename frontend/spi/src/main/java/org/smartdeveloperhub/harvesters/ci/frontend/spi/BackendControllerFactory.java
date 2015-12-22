@@ -20,15 +20,17 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-spi:0.1.0
- *   Bundle      : ci-frontend-spi-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-spi:0.2.0
+ *   Bundle      : ci-frontend-spi-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
+import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
+
 
 public interface BackendControllerFactory {
 
-	BackendController create(String providerId);
+	BackendController create(String providerId, BackendConfig config);
 
 }

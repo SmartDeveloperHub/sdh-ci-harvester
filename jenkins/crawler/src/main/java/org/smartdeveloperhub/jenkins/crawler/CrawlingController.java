@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler;
@@ -37,13 +37,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.smartdeveloperhub.harvesters.util.concurrent.Delay;
+import org.smartdeveloperhub.harvesters.util.concurrent.Sleeper;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlerEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.event.CrawlingEvent;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
-import org.smartdeveloperhub.jenkins.crawler.util.Delay;
-import org.smartdeveloperhub.jenkins.crawler.util.Sleeper;
 import org.smartdeveloperhub.jenkins.crawler.util.Timer;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Instance;
 

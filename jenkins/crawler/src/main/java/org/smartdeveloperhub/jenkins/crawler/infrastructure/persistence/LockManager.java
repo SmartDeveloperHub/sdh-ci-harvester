@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence;
@@ -57,8 +57,8 @@ final class LockManager {
 		this.locks=Maps.newConcurrentMap();
 	}
 
-	private ReadWriteLock register(URI uri) {
-		ReadWriteLock newLock = new ReentrantReadWriteLock();
+	private ReadWriteLock register(final URI uri) {
+		final ReadWriteLock newLock = new ReentrantReadWriteLock();
 		ReadWriteLock result=this.locks.put(uri, newLock);
 		if(result==null) {
 			result=newLock;
@@ -66,8 +66,8 @@ final class LockManager {
 		return result;
 	}
 
-	<E extends Throwable> void read(URI uri, RunnableOperation<E> operation) throws E{
-		ReadWriteLock lock = register(uri);
+	<E extends Throwable> void read(final URI uri, final RunnableOperation<E> operation) throws E{
+		final ReadWriteLock lock = register(uri);
 		lock.readLock().lock();
 		try {
 			operation.execute();
@@ -76,8 +76,8 @@ final class LockManager {
 		}
 	}
 
-	<T, E extends Throwable> T read(URI uri, CallableOperation<T,E> operation) throws E {
-		ReadWriteLock lock = register(uri);
+	<T, E extends Throwable> T read(final URI uri, final CallableOperation<T,E> operation) throws E {
+		final ReadWriteLock lock = register(uri);
 		lock.readLock().lock();
 		try {
 			return operation.execute();
@@ -86,8 +86,8 @@ final class LockManager {
 		}
 	}
 
-	<E extends Throwable> void write(URI uri, RunnableOperation<E> operation) throws E{
-		ReadWriteLock lock = register(uri);
+	<E extends Throwable> void write(final URI uri, final RunnableOperation<E> operation) throws E{
+		final ReadWriteLock lock = register(uri);
 		lock.writeLock().lock();
 		try {
 			operation.execute();
@@ -96,9 +96,9 @@ final class LockManager {
 		}
 	}
 
-	<T, E extends Throwable> T write(URI uri, CallableOperation<T,E> operation) throws E {
-		ReadWriteLock lock = register(uri);
-		lock.readLock().lock();
+	<T, E extends Throwable> T write(final URI uri, final CallableOperation<T,E> operation) throws E {
+		final ReadWriteLock lock = register(uri);
+		lock.writeLock().lock();
 		try {
 			return operation.execute();
 		} finally {

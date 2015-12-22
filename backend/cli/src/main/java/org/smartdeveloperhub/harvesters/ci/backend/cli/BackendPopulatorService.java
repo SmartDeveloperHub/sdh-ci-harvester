@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:0.1.0
- *   Bundle      : ci-backend-cli-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-cli:0.2.0
+ *   Bundle      : ci-backend-cli-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.cli;
@@ -44,10 +44,9 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
 final class BackendPopulatorService extends AbstractExecutionThreadService {
 
-	private final class EventDumper implements
-			EntityLifecycleEventListener {
+	private final class EventDumper implements EntityLifecycleEventListener {
 		@Override
-		public void onEvent(EntityLifecycleEvent event) {
+		public void onEvent(final EntityLifecycleEvent event) {
 			Consoles.
 				defaultConsole().
 					printf(
@@ -65,7 +64,7 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 	private final BackendFacade facade;
 	private JenkinsIntegrationService jis;
 
-	BackendPopulatorService(BackendConfig config, BackendFacade facade) {
+	BackendPopulatorService(final BackendConfig config, final BackendFacade facade) {
 		this.config = config;
 		this.facade = facade;
 	}
@@ -85,7 +84,7 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 	private void execute() throws IOException {
 		LOGGER.info("Starting population...");
 		this.jis.registerListener(new EventDumper());
-		this.jis.connect(URI.create("http://ci.jenkins-ci.org/"));
+		this.jis.connect(URI.create("https://ci.jenkins-ci.org/"));
 		this.jis.awaitCrawlingCompletion();
 	}
 
@@ -94,14 +93,14 @@ final class BackendPopulatorService extends AbstractExecutionThreadService {
 			LOGGER.info("Terminating population...");
 			this.jis.disconnect();
 			LOGGER.info("Population completed.");
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("Could not disconnect integration service. Full stacktrace follows",e);
 		}
 	}
 
 	private void setUp() {
 		LOGGER.info("Preparing backend...");
-		File tmpDirectory=new File(this.config.getWorkingDirectory());
+		final File tmpDirectory=new File(this.config.getWorkingDirectory());
 		this.jis=this.facade.integrationService();
 		this.jis.
 			setWorkingDirectory(tmpDirectory).

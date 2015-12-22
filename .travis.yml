@@ -3,11 +3,17 @@ cache:
   directories:
   - $HOME/.m2/repository
   - $HOME/.sonar
+notifications:
+  slack: sdhub:ti8lMh7ERZIqLzWF4dHkcgwt
 language: java
 jdk:
 - oraclejdk7
+services:
+- rabbitmq
 before_install:
 - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+install:
+- mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -U
 before_script:
 - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in target/config/ci/secring.gpg.enc
   -out local.secring.gpg -d
@@ -23,15 +29,15 @@ script:
   else
     echo mvn clean install -B -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;
   fi
-- if [ "${TRAVIS_PULL_REQUEST}" = "false" ];
-  then
-    case "${TRAVIS_BRANCH}" in
-      master)   mvn sonar:sonar -B -Dsonar.branch=$TRAVIS_BRANCH -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;;
-      develop)  mvn sonar:sonar -B -Dsonar.branch=$TRAVIS_BRANCH -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;;
-      feature*) mvn sonar:sonar -B -Dsonar.branch=$TRAVIS_BRANCH -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;;
-      *)        echo "Skip SonarQube analysis (${TRAVIS_BRANCH})";;
-    esac
-  fi
+#- if [ "${TRAVIS_PULL_REQUEST}" = "false" ];
+#  then
+#    case "${TRAVIS_BRANCH}" in
+#      master)   mvn sonar:sonar -B -Dsonar.branch=$TRAVIS_BRANCH -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;;
+#      develop)  mvn sonar:sonar -B -Dsonar.branch=$TRAVIS_BRANCH -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;;
+#      feature*) mvn sonar:sonar -B -Dsonar.branch=$TRAVIS_BRANCH -Dcoverage.reports.dir=`pwd`/target/all --settings target/config/ci/settings.xml;;
+#      *)        echo "Skip SonarQube analysis (${TRAVIS_BRANCH})";;
+#    esac
+#  fi
 - mkdir /tmp/cache-trick
 - mv $HOME/.m2/repository/org/smartdeveloperhub /tmp/cache-trick/
 env:

@@ -20,14 +20,15 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-api:0.1.0
- *   Bundle      : ci-jenkins-api-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-api:0.2.0
+ *   Bundle      : ci-jenkins-api-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 
 import org.w3c.dom.Document;
 
@@ -36,6 +37,14 @@ import com.google.common.base.Optional;
 public interface JenkinsResource {
 
 	interface Metadata {
+
+		interface Filter {
+
+			String expression();
+
+		}
+
+		List<Filter> filters();
 
 		Date retrievedOn();
 

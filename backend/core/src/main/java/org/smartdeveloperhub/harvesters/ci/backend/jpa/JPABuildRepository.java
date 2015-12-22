@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.jpa;
@@ -30,8 +30,8 @@ import java.net.URI;
 
 import javax.persistence.EntityManager;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.BuildRepository;
 
 public class JPABuildRepository implements BuildRepository {
 

@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
-      Bundle      : ci-jenkins-crawler-0.1.0.jar
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+      Bundle      : ci-jenkins-crawler-0.2.0.jar
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -34,6 +34,13 @@
 	<xsd:complexType name="ResourceType">
 		<xsd:sequence>
 			<xsd:element name="url" type="xsd:anyURI"/>
+			<xsd:element name="filters">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="filter" type="rest:FilterType" minOccurs="0" maxOccurs="unbounded"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
 			<xsd:element name="entity" type="rest:EntityType" minOccurs="0"/>
 			<xsd:element name="artifact" type="rest:ArtifactType" minOccurs="0"/>
 			<xsd:element name="representation" type="rest:RepresentationType" minOccurs="0"/>
@@ -111,5 +118,10 @@
 				<xsd:attribute name="algorithm" type="xsd:string" use="required"/>
 			</xsd:extension>
 		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="FilterType">
+		<xsd:sequence>
+			<xsd:element name="expression" type="xsd:string"/>
+		</xsd:sequence>
 	</xsd:complexType>
 </xsd:schema>

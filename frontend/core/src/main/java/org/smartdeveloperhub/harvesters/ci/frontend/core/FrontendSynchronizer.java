@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
- *   Bundle      : ci-frontend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.2.0
+ *   Bundle      : ci-frontend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
@@ -31,16 +31,19 @@ import java.net.URI;
 import org.ldp4j.application.ApplicationContext;
 import org.ldp4j.application.ApplicationContextException;
 import org.ldp4j.application.data.Name;
+import org.ldp4j.application.ext.ResourceHandler;
 import org.ldp4j.application.session.ResourceSnapshot;
+import org.ldp4j.application.session.SessionTerminationException;
 import org.ldp4j.application.session.WriteSession;
 import org.ldp4j.application.session.WriteSessionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEvent;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
+import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
@@ -51,22 +54,21 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 	private final EntityIndex index;
 	private final BackendModelPublisher publisher;
 
-	FrontendSynchronizer(EntityIndex index, BackendModelPublisher publisher) {
+	FrontendSynchronizer(final EntityIndex index, final BackendModelPublisher publisher) {
 		this.index = index;
 		this.publisher = publisher;
 	}
 
 	@Override
-	public void onEvent(EntityLifecycleEvent event) {
-		try {
-			WriteSession session = ApplicationContext.getInstance().createSession();
+	public void onEvent(final EntityLifecycleEvent event) {
+		try(WriteSession session = ApplicationContext.getInstance().createSession()) {
 			actOnSession(event, session);
-		} catch (ApplicationContextException e) {
-			LOGGER.warn("Could not create session for processing event {}",event,e);
+		} catch (ApplicationContextException | SessionTerminationException e) {
+			LOGGER.warn("Session failure while processing event {}",event,e);
 		}
 	}
 
-	private void actOnSession(EntityLifecycleEvent event, WriteSession session) {
+	private void actOnSession(final EntityLifecycleEvent event, final WriteSession session) {
 		try {
 			if(processEvent(event, session)) {
 				session.saveChanges();
@@ -75,18 +77,19 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 				session.discardChanges();
 				LOGGER.debug("Nothing to do ({} {} {})",event.state(),event.entityType(),event.entityId());
 			}
-		} catch (WriteSessionException e) {
+		} catch (final WriteSessionException e) {
 			LOGGER.warn("Could not process event {}",event,e);
 		}
 	}
 
-	private boolean processEvent(EntityLifecycleEvent event, WriteSession session) {
+	private boolean processEvent(final EntityLifecycleEvent event, final WriteSession session) {
 		boolean result=false;
 		switch(event.state()) {
 			case CREATED:
 				result=update(event, session);
 				break;
 			case MODIFIED:
+			case ENRICHED:
 				result=modify(event, session);
 				break;
 			case DELETED:
@@ -98,7 +101,7 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 		return result;
 	}
 
-	private boolean update(EntityLifecycleEvent event, WriteSession session) {
+	private boolean update(final EntityLifecycleEvent event, final WriteSession session) {
 		boolean result=false;
 		switch(event.entityType()) {
 			case BUILD:
@@ -113,51 +116,54 @@ final class FrontendSynchronizer implements EntityLifecycleEventListener {
 		return result;
 	}
 
-	private boolean updateExecution(EntityLifecycleEvent event, WriteSession session) {
-		Execution execution=this.index.findExecution(event.entityId());
+	private boolean updateExecution(final EntityLifecycleEvent event, final WriteSession session) {
+		final Execution execution=this.index.findExecution(event.entityId());
 		if(execution!=null) {
 			this.publisher.publish(session, execution);
 		}
 		return execution!=null;
 	}
 
-	private boolean updateBuild(EntityLifecycleEvent event, WriteSession session) {
-		Build build=this.index.findBuild(event.entityId());
+	private boolean updateBuild(final EntityLifecycleEvent event, final WriteSession session) {
+		final Build build=this.index.findBuild(event.entityId());
 		if(build!=null) {
 			this.publisher.publish(session, build);
 		}
 		return build!=null;
 	}
 
-	private boolean modify(EntityLifecycleEvent event, WriteSession session) {
-		ResourceSnapshot resource = findResource(event, session);
+	private boolean modify(final EntityLifecycleEvent event, final WriteSession session) {
+		final ResourceSnapshot resource = findResource(event, session);
 		if(resource!=null) {
 			session.modify(resource);
 		}
 		return resource!=null;
 	}
 
-	private boolean delete(EntityLifecycleEvent event, WriteSession session) {
-		ResourceSnapshot resource = findResource(event, session);
+	private boolean delete(final EntityLifecycleEvent event, final WriteSession session) {
+		final ResourceSnapshot resource = findResource(event, session);
 		if(resource!=null) {
 			session.delete(resource);
 		}
 		return resource!=null;
 	}
 
-	private ResourceSnapshot findResource(EntityLifecycleEvent event, WriteSession session) {
+	private ResourceSnapshot findResource(final EntityLifecycleEvent event, final WriteSession session) {
 		Name<URI> name=null;
+		Class<? extends ResourceHandler> handlerClass=null;
 		switch(event.entityType()) {
 			case BUILD:
 				name=IdentityUtil.buildName(event.entityId());
+				handlerClass=BuildHandler.class;
 				break;
 			case EXECUTION:
 				name=IdentityUtil.executionName(event.entityId());
+				handlerClass=ExecutionHandler.class;
 				break;
 			default:
 				break;
 		}
-		return session.find(ResourceSnapshot.class,name,BuildHandler.class);
+		return session.find(ResourceSnapshot.class,name,handlerClass);
 	}
 
 }

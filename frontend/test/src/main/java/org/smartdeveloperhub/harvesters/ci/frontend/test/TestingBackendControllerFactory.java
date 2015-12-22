@@ -20,12 +20,14 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:0.1.0
- *   Bundle      : ci-frontend-test-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:0.2.0
+ *   Bundle      : ci-frontend-test-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.test;
 
+import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
 
@@ -35,8 +37,8 @@ public final class TestingBackendControllerFactory implements BackendControllerF
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BackendController create(String providerId) {
-		return new TestingBackendController();
+	public BackendController create(final String providerId, final BackendConfig config) {
+		return new TestingBackendController(Deployment.fromConfiguration(config.getEnrichment()));
 	}
 
 }

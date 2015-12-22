@@ -20,26 +20,29 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.integration;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.command.Command;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CommandVisitor;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CreateBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CreateExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.FinishExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.UpdateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.Command;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CommandVisitor;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.FinishExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.UpdateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionException;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
@@ -55,60 +58,73 @@ final class CommandProcessor {
 		}
 
 		@Override
-		public void visitRegisterServiceCommand(RegisterServiceCommand command) {
-			service.registerService(command);
+		public void visitRegisterServiceCommand(final RegisterServiceCommand command) {
+			CommandProcessor.this.ciService.registerService(command);
 			this.retry=false;
 		}
 
 		@Override
-		public void visitCreateBuildCommand(CreateBuildCommand command) {
-			URI parentId = command.subBuildOf();
-			if(parentId!=null && service.getBuild(parentId)!=null) {
-				service.createBuild(command);
+		public void visitCreateBuildCommand(final CreateBuildCommand command) {
+			final URI parentId = command.subBuildOf();
+			if(parentId!=null && CommandProcessor.this.ciService.getBuild(parentId)!=null) {
+				CommandProcessor.this.ciService.createBuild(command);
 				this.retry=false;
-			} else if(service.getService(command.serviceId())!=null) {
-				service.createBuild(command);
-				this.retry=false;
-			}
-		}
-
-		@Override
-		public void visitUpdateBuildCommand(UpdateBuildCommand command) {
-			if(service.getBuild(command.buildId())!=null) {
-				service.updateBuild(command);
+			} else if(CommandProcessor.this.ciService.getService(command.serviceId())!=null) {
+				CommandProcessor.this.ciService.createBuild(command);
 				this.retry=false;
 			}
 		}
 
 		@Override
-		public void visitDeleteBuildCommand(DeleteBuildCommand command) {
-			if(service.getBuild(command.buildId())!=null) {
-				service.deleteBuild(command);
+		public void visitUpdateBuildCommand(final UpdateBuildCommand command) {
+			if(CommandProcessor.this.ciService.getBuild(command.buildId())!=null) {
+				CommandProcessor.this.ciService.updateBuild(command);
 				this.retry=false;
 			}
 		}
 
 		@Override
-		public void visitCreateExecutionCommand(CreateExecutionCommand command) {
-			if(service.getBuild(command.buildId())!=null) {
-				service.createExecution(command);
+		public void visitDeleteBuildCommand(final DeleteBuildCommand command) {
+			if(CommandProcessor.this.ciService.getBuild(command.buildId())!=null) {
+				CommandProcessor.this.ciService.deleteBuild(command);
 				this.retry=false;
 			}
 		}
 
 		@Override
-		public void visitFinishExecutionCommand(FinishExecutionCommand command) {
-			if(service.getExecution(command.executionId())!=null) {
-				service.finishExecution(command);
+		public void visitCreateExecutionCommand(final CreateExecutionCommand command) {
+			if(CommandProcessor.this.ciService.getBuild(command.buildId())!=null) {
+				CommandProcessor.this.ciService.createExecution(command);
+				final URI executionId = command.executionId();
+				enrich(executionId);
 				this.retry=false;
 			}
 		}
 
 		@Override
-		public void visitDeleteExecutionCommand(DeleteExecutionCommand command) {
-			if(service.getExecution(command.executionId())!=null) {
-				service.deleteExecution(command);
+		public void visitFinishExecutionCommand(final FinishExecutionCommand command) {
+			final URI executionId = command.executionId();
+			if(CommandProcessor.this.ciService.getExecution(executionId)!=null) {
+				CommandProcessor.this.ciService.finishExecution(command);
+				enrich(executionId);
 				this.retry=false;
+			}
+		}
+
+		@Override
+		public void visitDeleteExecutionCommand(final DeleteExecutionCommand command) {
+			if(CommandProcessor.this.ciService.getExecution(command.executionId())!=null) {
+				CommandProcessor.this.ciService.deleteExecution(command);
+				this.retry=false;
+			}
+		}
+
+		private void enrich(final URI executionId) {
+			final Execution execution = CommandProcessor.this.ciService.getExecution(executionId);
+			try {
+				CommandProcessor.this.erService.enrich(execution);
+			} catch (final IOException e) {
+				LOGGER.error("Could not enrich execution {}",execution,e);
 			}
 		}
 
@@ -121,21 +137,23 @@ final class CommandProcessor {
 	private static final Logger LOGGER=LoggerFactory.getLogger(CommandProcessor.class);
 
 	private final TransactionManager manager;
-	private final ContinuousIntegrationService service;
+	private final ContinuousIntegrationService ciService;
+	private final EnrichmentService erService;
 
-	private CommandProcessor(TransactionManager manager, ContinuousIntegrationService service) {
+	private CommandProcessor(final TransactionManager manager, final ContinuousIntegrationService ciService, final EnrichmentService erService) {
 		this.manager = manager;
-		this.service = service;
+		this.ciService = ciService;
+		this.erService = erService;
 	}
 
-	boolean processCommand(Command command) throws CommandProcessingException {
-		Transaction tx = this.manager.currentTransaction();
+	boolean processCommand(final Command command) throws CommandProcessingException {
+		final Transaction tx = this.manager.currentTransaction();
 		try {
 			tx.begin();
-			boolean result = processTransactionally(command);
+			final boolean result = processTransactionally(command);
 			tx.commit();
 			return result;
-		} catch(Exception e) {
+		} catch(final Exception e) {
 			LOGGER.error("Could not process command {} ({})",command,e.getMessage());
 			throw new CommandProcessingException("Could not process command", e);
 		} finally {
@@ -143,19 +161,19 @@ final class CommandProcessor {
 		}
 	}
 
-	private void rollbackQuietly(Transaction tx) {
+	private void rollbackQuietly(final Transaction tx) {
 		if(tx!=null && tx.isActive()) {
 			try {
 				tx.rollback();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error("Could not rollback transaction for command",e);
 			}
 		}
 	}
 
-	private boolean processTransactionally(Command command) throws TransactionException {
+	private boolean processTransactionally(final Command command) throws TransactionException {
 		LOGGER.trace("Processing command {}",command);
-		Dispatcher dispatcher = new Dispatcher();
+		final Dispatcher dispatcher = new Dispatcher();
 		command.accept(dispatcher);
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace(
@@ -168,8 +186,8 @@ final class CommandProcessor {
 		return !dispatcher.mustRetry();
 	}
 
-	static CommandProcessor newInstance(TransactionManager manager, ContinuousIntegrationService service) {
-		return new CommandProcessor(manager, service);
+	static CommandProcessor newInstance(final TransactionManager manager, final ContinuousIntegrationService service, final EnrichmentService erService) {
+		return new CommandProcessor(manager, service, erService);
 	}
 
 }

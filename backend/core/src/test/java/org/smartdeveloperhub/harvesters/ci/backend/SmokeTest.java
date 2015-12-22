@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend;
@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
@@ -43,26 +44,32 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.CompositeBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.SimpleBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.PendingEnrichment;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence.FileBasedStorage;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 
+import com.google.common.collect.Sets;
+
 public class SmokeTest {
+
+	private static final String DEFAULT_TARGET = "https://ci.jenkins-ci.org/";
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(SmokeTest.class);
 
 	@BeforeClass
 	public static void setUpBefore() {
-		File logFile = new File("target"+File.separator+"derby.log");
+		final File logFile = new File("target"+File.separator+"derby.log");
 		System.setProperty("derby.stream.error.file", logFile.getAbsolutePath());
 	}
 
@@ -75,51 +82,64 @@ public class SmokeTest {
 	private FileBasedStorage storage;
 	private File tmpDirectory;
 
-	protected void smokeTest(ContinuousIntegrationService cis, JenkinsIntegrationService jis) throws Exception {
+	protected void smokeTest(final ContinuousIntegrationService cis, final JenkinsIntegrationService jis, final EnrichmentService es) throws Exception {
 		LOGGER.info("Starting smoke test...");
 		this.tmpDirectory = new File("target","jenkins"+new Date().getTime());
-		jis.setWorkingDirectory(tmpDirectory);
+		jis.setWorkingDirectory(this.tmpDirectory);
 		LOGGER.info("Warming up...");
-		jis.connect(URI.create("http://ci.jenkins-ci.org/"));
+		// Local: http://vps164.cesvima.upm.es:8000/
+		jis.connect(URI.create(DEFAULT_TARGET));
 		try {
 			TimeUnit.SECONDS.sleep(60);
-		} catch(InterruptedException e) {
-
+		} catch(final InterruptedException e) {
 		}
 		jis.disconnect();
 		LOGGER.info("Warm up completed.");
 		doVerify(cis);
+		checkPendingEnrichments(cis,es);
 		LOGGER.info("Smoke test completed.");
 	}
 
 
-	private FileBasedStorage storage() throws IOException {
-		if(this.storage==null) {
-			File configFile = new File(this.tmpDirectory,"repository.xml");
-			this.storage=
-				FileBasedStorage.
-					builder().
-						withConfigFile(configFile).
-						build();
+	private void checkPendingEnrichments(final ContinuousIntegrationService cis, final EnrichmentService es) {
+		LOGGER.info("Checking pending enrichments...");
+		final Set<URI> executions=Sets.newLinkedHashSet();
+		for(final PendingEnrichment pending:es.pendingEnrichments()) {
+			LOGGER.debug("- [{}] <{},{},{}> {{}}",pending.id(),pending.repositoryLocation(),pending.branchName(),pending.commitId(),pending.executions().size());
+			for(final URI id:pending.executions()) {
+				final Execution execution = cis.getExecution(id);
+				LOGGER.debug("  + Awaiting execution: {}",execution);
+				if(execution.codebase().location()!=null) {
+	 				assertThat("Repository location does not match "+pending+" vs. "+execution,pending.repositoryLocation(),equalTo(execution.codebase().location()));
+				}
+				if(execution.codebase().branchName()!=null) {
+					assertThat("Branch name does not match "+pending+" vs. "+execution,pending.branchName(),equalTo(execution.codebase().branchName()));
+				}
+				if(execution.commitId()!=null) {
+					assertThat("Commit id does not match "+pending+" vs. "+execution,pending.commitId(),equalTo(execution.commitId()));
+				}
+				assertThat(executions.add(id),equalTo(true));
+			}
 		}
-		return this.storage;
+		LOGGER.info("Pending enrichment check completed.");
 	}
 
-	private void doVerify(ContinuousIntegrationService cis) throws Exception {
+
+	private void doVerify(final ContinuousIntegrationService cis) throws Exception {
 		LOGGER.info("Starting verification...");
-		for(URI serviceId:cis.getRegisteredServices()) {
-			Service service=cis.getService(serviceId);
+		for(final URI serviceId:cis.getRegisteredServices()) {
+			final Service service=cis.getService(serviceId);
 			LOGGER.debug("- Service {} : {}",serviceId,service);
 			assertThat(service,notNullValue());
-			for(URI buildId:service.builds()) {
-				Build build=cis.getBuild(buildId);
+			for(final URI buildId:service.builds()) {
+				final Build build=cis.getBuild(buildId);
 				LOGGER.debug("  + Build {} : {}",buildId,build);
-				Job job=storage().entityOfId(buildId,JenkinsEntityType.JOB,Job.class);
+				final Job job=storage().entityOfId(buildId,JenkinsEntityType.JOB,Job.class);
 				verifyBuildMatchesJob(buildId,build,job);
-				for(URI executionId:build.executions()) {
-					Execution execution=cis.getExecution(executionId);
-					LOGGER.trace("    * Execution {} : {}",executionId,execution);
-					Run run=storage().entityOfId(executionId,JenkinsEntityType.RUN,Run.class);
+				for(final URI executionId:build.executions()) {
+					final Execution execution=cis.getExecution(executionId);
+					LOGGER.debug("    * Execution {} : {}",executionId,execution);
+					final Run run=storage().entityOfId(executionId,JenkinsEntityType.RUN,Run.class);
 					verifyExecutionMatchesRun(executionId,execution,run);
 				}
 			}
@@ -127,13 +147,13 @@ public class SmokeTest {
 		LOGGER.info("Verification completed.");
 	}
 
-	private void verifyExecutionMatchesRun(URI executionId, Execution execution, Run run) {
+	private void verifyExecutionMatchesRun(final URI executionId, final Execution execution, final Run run) {
 		assertThat(String.format("Execution %s should exist",executionId),execution,notNullValue());
 		assertThat(String.format("Run %s should exist",executionId),run,notNullValue());
 		assertThat(String.format("{%s} Execution and run owner should match",executionId),run.getJob(),equalTo(execution.buildId()));
 	}
 
-	private void verifyBuildMatchesJob(URI buildId, Build build, Job job) {
+	private void verifyBuildMatchesJob(final URI buildId, final Build build, final Job job) {
 		assertThat(String.format("Build %s should exist",buildId),build,notNullValue());
 		assertThat(String.format("Job %s should exist",buildId),job,notNullValue());
 		assertThat(String.format("{%s} Build and job owner should match",buildId),build.serviceId(),equalTo(job.getInstance()));
@@ -156,6 +176,19 @@ public class SmokeTest {
 				break;
 		}
 		assertThat(String.format("{%s} Build does not match job type",buildId),build,instanceOf(clazz));
+	}
+
+
+	private FileBasedStorage storage() throws IOException {
+		if(this.storage==null) {
+			final File configFile = new File(this.tmpDirectory,"repository.xml");
+			this.storage=
+				FileBasedStorage.
+					builder().
+						withConfigFile(configFile).
+						build();
+		}
+		return this.storage;
 	}
 
 }

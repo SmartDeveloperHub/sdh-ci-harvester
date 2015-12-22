@@ -21,16 +21,12 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
-      Bundle      : ci-jenkins-crawler-0.1.0.jar
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+      Bundle      : ci-jenkins-crawler-0.2.0.jar
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
-<xsd:schema
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:ci="http://www.smartdeveloperhub.org/harvester/ci/model/v1"
-	xmlns:rest="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1"
-	targetNamespace="http://www.smartdeveloperhub.org/harvester/ci/model/v1">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ci="http://www.smartdeveloperhub.org/harvester/ci/model/v1" xmlns:rest="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1" targetNamespace="http://www.smartdeveloperhub.org/harvester/ci/model/v1">
 	<xsd:import namespace="http://www.smartdeveloperhub.org/harvester/ci/jenkins/v1" schemaLocation="rest.xsd"/>
 	<xsd:element name="entity" type="ci:Entity"/>
 	<xsd:element name="instance" type="ci:Instance"/>
@@ -61,12 +57,18 @@
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
+	<xsd:complexType name="Codebase">
+		<xsd:sequence>
+			<xsd:element name="location" type="xsd:anyURI"/>
+			<xsd:element name="branch" type="xsd:string"/>
+		</xsd:sequence>
+	</xsd:complexType>
 	<xsd:complexType name="Job" abstract="true">
 		<xsd:complexContent>
 			<xsd:extension base="ci:Entity">
 				<xsd:sequence>
 					<xsd:element name="type" type="ci:JobType"/>
-					<xsd:element name="codebase" type="xsd:anyURI" minOccurs="0"/>
+					<xsd:element name="codebase" type="ci:Codebase" minOccurs="0"/>
 					<xsd:element name="runnable" type="xsd:boolean"/>
 					<xsd:element name="runs">
 						<xsd:complexType>
@@ -110,6 +112,12 @@
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
+	<xsd:complexType name="Result">
+		<xsd:sequence>
+			<xsd:element name="status" type="ci:RunResult"/>
+			<xsd:element name="duration" type="xsd:long"/>
+		</xsd:sequence>
+	</xsd:complexType>
 	<xsd:complexType name="Run">
 		<xsd:complexContent>
 			<xsd:extension base="ci:Entity">
@@ -117,13 +125,21 @@
 					<xsd:element name="type" type="ci:RunType"/>
 					<xsd:element name="timestamp" type="xsd:long"/>
 					<xsd:element name="status" type="ci:RunStatus"/>
-					<xsd:sequence minOccurs="0">
+					<xsd:element name="result" type="ci:Result" minOccurs="0">
 						<xsd:annotation>
 							<xsd:documentation>Further information is only available if the run has finished</xsd:documentation>
 						</xsd:annotation>
-						<xsd:element name="result" type="ci:RunResult"/>
-						<xsd:element name="duration" type="xsd:long"/>
-					</xsd:sequence>
+					</xsd:element>
+					<xsd:element name="codebase" type="ci:Codebase" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>May not be found if the repository is not GIT-based</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="commit" type="xsd:string" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>May not be found if the repository is not GIT-based</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
 				</xsd:sequence>
 				<xsd:attribute name="job" type="xsd:anyURI" use="required"/>
 			</xsd:extension>

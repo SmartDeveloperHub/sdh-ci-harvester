@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.jpa;
@@ -34,10 +34,15 @@ import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.BranchRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CommitRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.CompletedEnrichmentRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.PendingEnrichmentRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.persistence.RepositoryRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.LifecycleDescriptorRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.spi.ComponentRegistry;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
@@ -70,7 +75,7 @@ public final class JPAComponentRegistry implements ComponentRegistry {
 	private final String id;
 
 
-	public JPAComponentRegistry(Database database) {
+	public JPAComponentRegistry(final Database database) {
 		this.database = database;
 		this.emf = database.getEntityManagerFactory();
 		this.manager=new ThreadLocal<EntityManager>();
@@ -78,7 +83,7 @@ public final class JPAComponentRegistry implements ComponentRegistry {
 		this.id = String.format("%08X",hashCode());
 	}
 
-	private void trace(String message, Object... args) {
+	private void trace(final String message, final Object... args) {
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace("{} - {} - {}",
 				this.id,
@@ -89,7 +94,7 @@ public final class JPAComponentRegistry implements ComponentRegistry {
 
 	private boolean isTransactionActive() {
 		boolean result = false;
-		EntityManager entityManager = this.manager.get();
+		final EntityManager entityManager = this.manager.get();
 		if(entityManager!=null) {
 			result=entityManager.getTransaction().isActive();
 		}
@@ -109,7 +114,7 @@ public final class JPAComponentRegistry implements ComponentRegistry {
 	}
 
 	private void disposeManager() {
-		EntityManager entityManager = this.manager.get();
+		final EntityManager entityManager = this.manager.get();
 		if(entityManager!=null) {
 			entityManager.close();
 			this.manager.remove();
@@ -142,6 +147,46 @@ public final class JPAComponentRegistry implements ComponentRegistry {
 	@Override
 	public ServiceRepository getServiceRepository() {
 		return new JPAServiceRepository(this.provider);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public RepositoryRepository getRepositoryRepository() {
+		return new JPARepositoryRepository(this.provider);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public BranchRepository getBranchRepository() {
+		return new JPABranchRepository(this.provider);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public CommitRepository getCommitRepository() {
+		return new JPACommitRepository(this.provider);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PendingEnrichmentRepository getPendingEnrichmentRepository() {
+		return new JPAPendingEnrichmentRepository(this.provider);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public CompletedEnrichmentRepository getCompletedEnrichmentRepository() {
+		return new JPACompletedEnrichmentRepository(this.provider);
 	}
 
 	/**

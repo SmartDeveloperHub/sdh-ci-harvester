@@ -20,11 +20,14 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-client:0.1.0
- *   Bundle      : ci-jenkins-client-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-client:0.2.0
+ *   Bundle      : ci-jenkins-client-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.client;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -38,40 +41,62 @@ public class JenkinsResourceProxyTest {
 
 	@Test
 	public void testGet() throws Exception {
-		String location="https://ci.jenkins-ci.org/";
-		JenkinsResourceProxy sut =
+		final String location="https://ci.jenkins-ci.org/";
+		final JenkinsResourceProxy sut =
 			JenkinsResourceProxy.
 				create(URI.create(location)).
-					withUseHttps(true).
 					withEntity(JenkinsEntityType.INSTANCE);
 		try {
-			JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
-			System.out.println("Resource from '"+location+"':");
-			System.out.println(representation);
-		} catch (IOException e) {
-			System.err.println("Could not retrieve service: "+e.getMessage());
-			e.printStackTrace(System.err);
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			assertThat(representation,notNullValue());
+		} catch (final IOException e) {
+		}
+	}
+
+	@Test
+	public void testGet$withDepth() throws Exception {
+		final String location="https://ci.jenkins-ci.org/job/jenkins_main_trunk/";
+		final JenkinsResourceProxy sut =
+			JenkinsResourceProxy.
+				create(URI.create(location)).
+					withDepth(1).
+					withEntity(JenkinsEntityType.FREE_STYLE_BUILD);
+		try {
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			assertThat(representation,notNullValue());
+		} catch (final IOException e) {
+		}
+	}
+
+	@Test
+	public void testGet$withTree() throws Exception {
+		final String location="https://ci.jenkins-ci.org/job/jenkins_main_trunk/";
+		final JenkinsResourceProxy sut =
+			JenkinsResourceProxy.
+				create(URI.create(location)).
+					withTree("allBuilds[url,number,building,duration,result,timestamp]").
+					withEntity(JenkinsEntityType.FREE_STYLE_BUILD);
+		try {
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			assertThat(representation,notNullValue());
+		} catch (final IOException e) {
 		}
 	}
 
 	@Test
 	public void testBadEncoding() throws Exception {
-		String location="http://ci.jenkins-ci.org/job/infra_changelog_refresh/27821/";
-		JenkinsResourceProxy sut =
+		final String location="https://ci.jenkins-ci.org/job/infra_changelog_refresh/27821/";
+		final JenkinsResourceProxy sut =
 			JenkinsResourceProxy.
 				create(URI.create(location)).
-					withUseHttps(true).
 					withEntity(JenkinsEntityType.RUN);
 		try {
-			JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
-			System.out.println("Resource from '"+location+"':");
-			System.out.println(representation);
+			final JenkinsResource representation=sut.get(JenkinsArtifactType.RESOURCE);
+			assertThat(representation,notNullValue());
 			if(representation.failure().isPresent()) {
-				representation.failure().get().printStackTrace();
+				assertThat(representation.failure().get(),notNullValue());
 			}
-		} catch (IOException e) {
-			System.err.println("Could not retrieve service: "+e.getMessage());
-			e.printStackTrace(System.err);
+		} catch (final IOException e) {
 		}
 	}
 

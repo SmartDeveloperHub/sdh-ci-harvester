@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
- *   Bundle      : ci-frontend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.2.0
+ *   Bundle      : ci-frontend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.build;
@@ -42,7 +42,8 @@ abstract class BuildVocabulary {
 	static final String CI_COMPOSITE_BUILD_TYPE = "http://www.smartdeveloperhub.org/vocabulary/ci#CompositeBuild";
 	static final String CI_SUB_BUILD_TYPE       = "http://www.smartdeveloperhub.org/vocabulary/ci#SubBuild";
 	static final String CI_LOCATION             = "http://www.smartdeveloperhub.org/vocabulary/ci#location";
-	static final String CI_CODEBASE             = "http://www.smartdeveloperhub.org/vocabulary/ci#codebase";
+	static final String SCM_LOCATION            = "http://www.smartdeveloperhub.org/vocabulary/scm#location";
+	static final String CI_BRANCH_SPECIFIER     = "http://www.smartdeveloperhub.org/vocabulary/ci#branchSpecifier";
 	static final String CI_HAS_EXECUTION        = "http://www.smartdeveloperhub.org/vocabulary/ci#hasResource";
 	static final String CI_INCLUDES_BUILD       = "http://www.smartdeveloperhub.org/vocabulary/ci#includesBuild";
 	static final String CI_IS_PART_OF           = "http://www.smartdeveloperhub.org/vocabulary/ci#isPartOf";

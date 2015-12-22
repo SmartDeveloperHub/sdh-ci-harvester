@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
- *   Bundle      : ci-frontend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.2.0
+ *   Bundle      : ci-frontend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.service;
@@ -34,7 +34,7 @@ import org.ldp4j.application.data.DataSetHelper;
 import org.ldp4j.application.data.DataSetUtils;
 import org.ldp4j.application.data.IndividualPropertyHelper;
 import org.ldp4j.application.data.Name;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.build.BuildHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 

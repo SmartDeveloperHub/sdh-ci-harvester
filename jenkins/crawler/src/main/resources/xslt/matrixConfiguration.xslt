@@ -22,8 +22,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
-      Bundle      : ci-jenkins-crawler-0.1.0.jar
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+      Bundle      : ci-jenkins-crawler-0.2.0.jar
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -55,9 +55,16 @@
 				<description><xsl:value-of select="description"/></description>
 			</xsl:if>
 			<type><xsl:value-of select="fn:local-name()"/></type>
+			<xsl:if test="exists(scm)">
+				<codebase>
+					<location><xsl:value-of select="scm/userRemoteConfig/url"/></location>
+					<branch><xsl:value-of select="scm/branche/name"/></branch>
+				</codebase>
+			</xsl:if>
 			<runnable><xsl:value-of select="buildable"/></runnable>
 			<runs>
 				<xsl:for-each select="build">
+					<xsl:sort select="number" data-type="number" order="ascending"/>
 					<xsl:variable name="number" select="number"/>
 					<run id="{$number}"><xsl:value-of select="url"/></run>
 				</xsl:for-each>

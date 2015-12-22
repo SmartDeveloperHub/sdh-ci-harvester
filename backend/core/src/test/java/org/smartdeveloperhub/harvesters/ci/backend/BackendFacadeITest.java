@@ -20,18 +20,23 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.smartdeveloperhub.harvesters.ci.backend.database.DatabaseConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.BrokerConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 
 public class BackendFacadeITest extends SmokeTest {
 
@@ -39,8 +44,13 @@ public class BackendFacadeITest extends SmokeTest {
 
 	@Before
 	public void startUp() throws IOException {
-		DatabaseConfig config = new DatabaseConfig();
-		config.setProvider(DerbyProvider.class.getCanonicalName());
+		final DatabaseConfig databaseConfig = new DatabaseConfig();
+		databaseConfig.setProvider(DerbyProvider.class.getCanonicalName());
+		final BackendConfig config=new BackendConfig();
+		config.setDatabase(databaseConfig);
+		final EnrichmentConfig enrichment = new EnrichmentConfig();
+		config.setEnrichment(enrichment);
+		enrichment.setBroker(new BrokerConfig());
 		this.facade = BackendFacade.create(config);
 	}
 
@@ -51,9 +61,22 @@ public class BackendFacadeITest extends SmokeTest {
 
 	@Test
 	public void smokeTest() throws Exception {
+		this.facade.integrationService().setResolverService(
+			new ResolverService(){
+				@Override
+				public boolean isReady() {
+					return true;
+				}
+				@Override
+				public URI resolveExecution(final Execution execution) {
+					return null;
+				}
+			}
+		);
 		smokeTest(
 			this.facade.applicationService(),
-			this.facade.integrationService());
+			this.facade.integrationService(),
+			this.facade.enrichmentService());
 	}
 
 }

@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
@@ -29,9 +29,11 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.SubJob;
 
+import com.google.common.base.Optional;
 import com.google.common.base.MoreObjects.ToStringHelper;
 
 public final class JobCreatedEvent extends JenkinsEvent {
@@ -44,6 +46,7 @@ public final class JobCreatedEvent extends JenkinsEvent {
 
 	private Job job;
 	private Type type;
+	private Codebase codebase;
 
 	private JobCreatedEvent(URI instanceId, Date date) {
 		super(instanceId,date);
@@ -51,6 +54,7 @@ public final class JobCreatedEvent extends JenkinsEvent {
 
 	JobCreatedEvent withJob(Job job) {
 		this.job = job;
+		this.codebase=Optional.fromNullable(this.job.getCodebase()).or(new Codebase());
 		return this;
 	}
 
@@ -74,11 +78,15 @@ public final class JobCreatedEvent extends JenkinsEvent {
 	}
 
 	public String description() {
-		return job.getDescription();
+		return this.job.getDescription();
 	}
 
 	public URI codebase() {
-		return job.getCodebase();
+		return this.codebase.getLocation();
+	}
+
+	public String branchName() {
+		return this.codebase.getBranch();
 	}
 
 	public Type type() {
@@ -121,6 +129,7 @@ public final class JobCreatedEvent extends JenkinsEvent {
 			add("title",title()).
 			add("description",description()).
 			add("codebase", codebase()).
+			add("branchName", branchName()).
 			add("type",type()).
 			add("parent",parent());
 	}

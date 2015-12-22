@@ -20,13 +20,14 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
@@ -39,7 +40,7 @@ final class RefreshRunTask extends AbstractEntityCrawlingTask<Run> {
 
 	private final Run run;
 
-	RefreshRunTask(Run run) {
+	RefreshRunTask(final Run run) {
 		super(run.getUrl(),Run.class,JenkinsEntityType.RUN,JenkinsArtifactType.RESOURCE);
 		this.run = run;
 	}
@@ -50,18 +51,31 @@ final class RefreshRunTask extends AbstractEntityCrawlingTask<Run> {
 	}
 
 	@Override
-	protected void processEntity(Run currentRun,JenkinsResource resource) throws IOException {
-		if(!this.run.getStatus().equals(currentRun.getStatus())) {
-			if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && currentRun.getResult().equals(RunResult.SUCCESS)) {
-				scheduleTask(new LoadRunArtifactsTask(super.location(),currentRun));
-			}
-
+	protected void processEntity(final Run currentRun,final JenkinsResource resource) throws IOException {
+		if(hasFinished(currentRun)) {
 			super.fireEvent(
 				JenkinsEventFactory.
 					newRunUpdatedEvent(
 						super.jenkinsInstance(),
 						currentRun));
 		}
+		if(hasFinished(currentRun)) {
+			if(JenkinsEntityType.MAVEN_RUN.isCompatible(resource.entity()) && currentRun.getResult().equals(RunResult.SUCCESS)) {
+				scheduleTask(new LoadRunArtifactsTask(super.location(),currentRun));
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private boolean hasChanged(final Run currentRun) { // NOSONAR
+		return
+			!Objects.equals(currentRun.getTitle(),this.run.getTitle()) ||
+			!Objects.equals(currentRun.getDescription(),this.run.getDescription()) ||
+			hasFinished(currentRun);
+	}
+
+	private boolean hasFinished(final Run currentRun) {
+		return !Objects.equals(currentRun.getStatus(),this.run.getStatus());
 	}
 
 }

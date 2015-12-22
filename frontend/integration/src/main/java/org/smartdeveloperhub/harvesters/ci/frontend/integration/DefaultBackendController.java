@@ -20,24 +20,27 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-integration:0.1.0
- *   Bundle      : ci-frontend-integration-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-integration:0.2.0
+ *   Bundle      : ci-frontend-integration-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.integration;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartdeveloperhub.harvesters.ci.backend.BackendFacade;
-import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.JenkinsIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
+import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionException;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
 
@@ -49,14 +52,17 @@ final class DefaultBackendController implements BackendController {
 
 	private URI jenkinsInstance;
 
-	private DefaultEntityIndex index;
+	private final DefaultEntityIndex index;
 
-	DefaultBackendController(BackendFacade backendFacade) {
+	private ResolverService resolver;
+
+	DefaultBackendController(final BackendFacade backendFacade) {
 		this.backendFacade = backendFacade;
 		this.index=
 			new DefaultEntityIndex(
 				this.backendFacade.transactionManager(),
-				this.backendFacade.applicationService());
+				this.backendFacade.applicationService(),
+				this.backendFacade.enrichmentService());
 
 	}
 
@@ -64,27 +70,83 @@ final class DefaultBackendController implements BackendController {
 		return this.backendFacade.integrationService();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public EntityIndex entityIndex() {
-		return index;
+	private void rollbackQuietly(final Transaction tx) {
+		if(tx.isActive()) {
+			try {
+				tx.rollback();
+			} catch (final TransactionException e) {
+				LOGGER.warn("Could not discard transaction",e);
+			}
+		}
+	}
+
+	private boolean hasTargetService(final URI instance) {
+		return
+			this.backendFacade.
+				applicationService().
+					getRegisteredServices().
+						contains(instance);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void connect(URI instance, EntityLifecycleEventListener listener) throws IOException {
-		checkState(this.jenkinsInstance==null,"Already connected");
-		this.jenkinsInstance=instance;
+	public EntityIndex entityIndex() {
+		return this.index;
+	}
+
+
+	/**
+	 * {@inheritDoc}
+	 * @return
+	 */
+	@Override
+	public boolean setTargetService(final URI instance) {
+		checkNotNull(instance,"Target service cannot be null");
+		checkState(this.jenkinsInstance==null,"Target service already defined (%s)",this.jenkinsInstance);
+		LOGGER.info("Setting up target service to {}...",instance);
+		final Transaction tx = this.backendFacade.transactionManager().currentTransaction();
+		boolean result=false;
+		try {
+			tx.begin();
+			try {
+				if(!hasTargetService(instance)) {
+					this.backendFacade.applicationService().
+						registerService(
+							RegisterServiceCommand.create(instance));
+					tx.commit();
+				}
+				result=true;
+				this.jenkinsInstance=instance;
+			} finally {
+				rollbackQuietly(tx);
+			}
+		} catch (final TransactionException e) {
+			LOGGER.error("Could not create target service {}",instance,e);
+		}
+		return result;
+	}
+
+	@Override
+	public void setExecutionResolver(final ResolverService resolver) {
+		checkNotNull(resolver,"Execution resolver cannot be null");
+		this.resolver=resolver;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void connect(final EntityLifecycleEventListener listener) throws IOException {
+		checkState(this.jenkinsInstance!=null,"No target service defined");
+		checkState(this.resolver!=null,"No execution resolver defined");
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
-		checkState(hasInstance(instance,this.backendFacade),"Could not connect to %s",instance);
 		try {
 			integrationService().registerListener(listener);
-			integrationService().connect(instance);
-		} catch (IOException e) {
+			integrationService().setResolverService(this.resolver);
+			integrationService().connect(this.jenkinsInstance);
+		} catch (final IOException e) {
 			LOGGER.info("Could not connect to {}. Full stacktrace follows",this.jenkinsInstance,e);
 			this.jenkinsInstance=null;
 			throw e;
@@ -104,32 +166,9 @@ final class DefaultBackendController implements BackendController {
 				LOGGER.info("Disconnected from {}.",this.jenkinsInstance);
 			}
 			this.backendFacade.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error("Could not close backend properly",e);
 		}
-	}
-
-	private static boolean hasInstance(URI instance, BackendFacade backend) {
-		return hasInstance(instance, backend, true);
-	}
-
-	private static boolean hasInstance(URI jenkinsInstance, BackendFacade backend, boolean create) {
-		List<URI> availableServices=
-			backend.
-				applicationService().
-					getRegisteredServices();
-		boolean contains = availableServices.contains(jenkinsInstance);
-		if(!contains) {
-			if(create) {
-				backend.
-					applicationService().
-						registerService(RegisterServiceCommand.create(jenkinsInstance));
-				contains=hasInstance(jenkinsInstance,backend,false);
-			} else {
-				LOGGER.warn("Could not find instance {} ({})",jenkinsInstance,availableServices);
-			}
-		}
-		return contains;
 	}
 
 }

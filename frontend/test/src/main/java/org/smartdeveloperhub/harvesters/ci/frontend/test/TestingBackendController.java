@@ -20,11 +20,14 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:0.1.0
- *   Bundle      : ci-frontend-test-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-test:0.2.0
+ *   Bundle      : ci-frontend-test-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.test;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.net.URI;
 import java.util.Date;
@@ -32,30 +35,44 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Result;
-import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Codebase;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.CompositeBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Result;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.SimpleBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Result.Status;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.Deployment;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.EnrichmentService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.SourceCodeManagementService;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateBranchCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateCommitCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.command.CreateRepositoryCommand;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBranchRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryCommitRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryCompletedEnrichmentRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecutionRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryPendingEnrichmentRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryRepositoryRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryTransactionManager;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
-
-import static com.google.common.base.Preconditions.*;
 
 final class TestingBackendController implements BackendController {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(TestingBackendController.class);
+
+	private static int count;
 
 	private URI jenkinsInstance;
 
@@ -67,9 +84,13 @@ final class TestingBackendController implements BackendController {
 
 	private final ContinuousIntegrationService service;
 
-	private TestingEntityIndex index;
+	private final TestingEntityIndex index;
 
-	TestingBackendController() {
+	private final SourceCodeManagementService scmService;
+
+	private final EnrichmentService es;
+
+	TestingBackendController(final Deployment deployment) {
 		this.serviceRepository = new InMemoryServiceRepository();
 		this.buildRepository = new InMemoryBuildRepository();
 		this.executionRepository = new InMemoryExecutionRepository();
@@ -78,33 +99,45 @@ final class TestingBackendController implements BackendController {
 				this.serviceRepository,
 				this.buildRepository,
 				this.executionRepository);
-		this.index = new TestingEntityIndex(this.service);
-		populateBackend(URI.create("http://ci.jenkins-ci.org/"));
+		this.scmService =
+			new SourceCodeManagementService(
+				new InMemoryRepositoryRepository(),
+				new InMemoryBranchRepository(),
+				new InMemoryCommitRepository());
+		this.es =
+			new EnrichmentService(
+				this.scmService,
+				this.executionRepository,
+				new InMemoryPendingEnrichmentRepository(),
+				new InMemoryCompletedEnrichmentRepository(),
+				new InMemoryTransactionManager(),
+				deployment);
+		this.index=new TestingEntityIndex(this.service,this.es);
 	}
 
-	void setInstance(URI jenkinsInstance) {
+	void setInstance(final URI jenkinsInstance) {
 		checkState(this.jenkinsInstance==null,"Already connected (%s)",this.jenkinsInstance);
 		this.jenkinsInstance = jenkinsInstance;
 	}
 
-	private static Date after(Date date) {
-		Random random=new Random(System.nanoTime());
+	private static Date after(final Date date) {
+		final Random random=new Random(System.nanoTime());
 		return new Date(date.getTime()+(random.nextLong() % 3600000));
 	}
 
-	private static URI buildId(Service service, String id) {
+	private static URI buildId(final Service service, final String id) {
 		return service.serviceId().resolve("jobs/"+id+"/");
 	}
 
-	private static URI buildId(CompositeBuild build, String id) {
+	private static URI buildId(final CompositeBuild build, final String id) {
 		return build.buildId().resolve(id+"/");
 	}
 
-	private static URI executionId(Build build, int executionIdi) {
+	private static URI executionId(final Build build, final int executionIdi) {
 		return build.buildId().resolve(executionIdi+"/");
 	}
 
-	private static Execution createExecution(ExecutionRepository repository, Build build, Execution execution, int executionIdi, Status status) {
+	private static Execution createExecution(final ExecutionRepository repository, final SourceCodeManagementService scmService, final Build build, final Execution execution, final int executionIdi, final Status status) {
 		Date date=build.createdOn();
 		if(execution!=null) {
 			if(execution.isFinished()) {
@@ -113,47 +146,90 @@ final class TestingBackendController implements BackendController {
 				date=execution.createdOn();
 			}
 		}
-		Execution newExecution=build.addExecution(executionId(build, executionIdi), after(date));
+		final Execution newExecution=build.addExecution(executionId(build, executionIdi), after(date), build.codebase(), randomSHA1(build,executionIdi));
 		if(status!=null) {
 			newExecution.finish(new Result(status,after(newExecution.createdOn())));
 		}
 		repository.add(newExecution);
+		final CreateCommitCommand command =
+			CreateCommitCommand.
+				builder().
+					withRepositoryLocation(newExecution.codebase().location()).
+					withBranchName(newExecution.codebase().branchName()).
+					withCommitId(newExecution.commitId()).
+					withResource(build.buildId().resolve("scm/repo/master/"+newExecution.commitId()+"/")).
+					build();
+		scmService.createCommit(command);
 		return newExecution;
 	}
 
-	private static void createExecutions(ExecutionRepository repository, Build build) {
-		Execution failedExecution  = createExecution(repository,build,null,            1,Status.FAILED);
-		Execution warningExecution = createExecution(repository,build,failedExecution, 2,Status.WARNING);
-		Execution errorExecution   = createExecution(repository,build,warningExecution,3,Status.NOT_BUILT);
-		Execution passedExecution  = createExecution(repository,build,errorExecution,  4,Status.PASSED);
-		Execution abortedExecution = createExecution(repository,build,passedExecution, 5,Status.ABORTED);
-									 createExecution(repository,build,abortedExecution,6,null);
+	private static String randomSHA1(final Build build, final int executionId) {
+		final Random r=new Random(System.currentTimeMillis());
+		count++;
+		final int[] n= {
+			build.buildId().hashCode(),
+			executionId,
+			r.nextInt(),
+			r.nextInt(),
+			count,
+		};
+		final StringBuilder builder=new StringBuilder();
+		for(int i=0;i<n.length;i++) {
+			final String hexString = Integer.toHexString(n[i]);
+			for(int j=0;j<4-hexString.length();j++) {
+				builder.append("0");
+			}
+			builder.append(hexString);
+		}
+		return builder.toString();
 	}
 
-	private static void createBuild(BuildRepository repository, Build build, Date createdOn, String description) {
+	private static void createExecutions(final ExecutionRepository repository, final Build build, final SourceCodeManagementService scmService) {
+		final Execution failedExecution  = createExecution(repository,scmService,build,null,            1,Status.FAILED);
+		final Execution warningExecution = createExecution(repository,scmService,build,failedExecution, 2,Status.WARNING);
+		final Execution errorExecution   = createExecution(repository,scmService,build,warningExecution,3,Status.NOT_BUILT);
+		final Execution passedExecution  = createExecution(repository,scmService,build,errorExecution,  4,Status.PASSED);
+		final Execution abortedExecution = createExecution(repository,scmService,build,passedExecution, 5,Status.ABORTED);
+		createExecution(repository,scmService,build,abortedExecution,6,null);
+	}
+
+	private static void createBuild(final BuildRepository repository, final Build build, final Date createdOn, final String description, final SourceCodeManagementService scmService) {
 		build.setCreatedOn(after(createdOn));
 		build.setDescription(description);
-		build.setCodebase(build.buildId().resolve("repository.git"));
+		build.setCodebase(new Codebase(build.buildId().resolve("repository.git"),"master"));
+		scmService.createRepository(
+			CreateRepositoryCommand.
+				builder().
+					withRepositoryLocation(build.codebase().location()).
+					withResource(build.buildId().resolve("scm/repo/")).
+					build());
+		scmService.createBranch(
+			CreateBranchCommand.
+				builder().
+					withRepositoryLocation(build.codebase().location()).
+					withBranchName(build.codebase().branchName()).
+					withResource(build.buildId().resolve("scm/repo/master/")).
+					build());
 		repository.add(build);
 	}
 
-	private void populateBackend(URI jenkinsInstance) {
-		Date initTime = new Date();
+	private void populateBackend(final URI jenkinsInstance) {
+		final Date initTime = new Date();
 
-		Service defaultService = Service.newInstance(jenkinsInstance);
+		final Service defaultService = Service.newInstance(jenkinsInstance);
 		this.serviceRepository.add(defaultService);
 
-		SimpleBuild simpleBuild=defaultService.addSimpleBuild(buildId(defaultService, "simple-job"),"Example simple build");
-		createBuild(this.buildRepository, simpleBuild, initTime, "An example simple build for testing");
-		createExecutions(this.executionRepository,simpleBuild);
+		final SimpleBuild simpleBuild=defaultService.addSimpleBuild(buildId(defaultService, "simple-job"),"Example simple build");
+		createBuild(this.buildRepository, simpleBuild, initTime, "An example simple build for testing",this.scmService);
+		createExecutions(this.executionRepository,simpleBuild,this.scmService);
 
-		CompositeBuild compositeBuild=defaultService.addCompositeBuild(buildId(defaultService, "composite-job"),"Example composite build");
-		createBuild(this.buildRepository, compositeBuild, initTime, "An example composite build for testing");
-		createExecutions(this.executionRepository, compositeBuild);
+		final CompositeBuild compositeBuild=defaultService.addCompositeBuild(buildId(defaultService, "composite-job"),"Example composite build");
+		createBuild(this.buildRepository, compositeBuild, initTime, "An example composite build for testing",this.scmService);
+		createExecutions(this.executionRepository, compositeBuild,this.scmService);
 
-		SubBuild subBuild=compositeBuild.addSubBuild(buildId(compositeBuild, "sub-job"),"Example sub build");
-		createBuild(this.buildRepository, subBuild, initTime, "An example sub build for testing");
-		createExecutions(this.executionRepository, subBuild);
+		final SubBuild subBuild=compositeBuild.addSubBuild(buildId(compositeBuild, "sub-job"),"Example sub build");
+		createBuild(this.buildRepository, subBuild, initTime, "An example sub build for testing",this.scmService);
+		createExecutions(this.executionRepository, subBuild,this.scmService);
 	}
 
 	/**
@@ -161,12 +237,38 @@ final class TestingBackendController implements BackendController {
 	 */
 	@Override
 	public EntityIndex entityIndex() {
-		return index;
+		return this.index;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public void connect(URI instance, EntityLifecycleEventListener listener) {
-		setInstance(instance);
+	public boolean setTargetService(final URI instance) {
+		try {
+			setInstance(instance);
+			populateBackend(this.jenkinsInstance);
+			return true;
+		} catch (final Exception e) {
+			LOGGER.error("Could not populate testing backend controller",e);
+			return false;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setExecutionResolver(final ResolverService resolver) {
+		checkNotNull(resolver,"Execution resolver cannot be null");
+		this.es.withResolverService(resolver);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void connect(final EntityLifecycleEventListener listener) {
 		LOGGER.info("Connecting to {}...",this.jenkinsInstance);
 		LOGGER.info("Connected to {}.",this.jenkinsInstance);
 	}

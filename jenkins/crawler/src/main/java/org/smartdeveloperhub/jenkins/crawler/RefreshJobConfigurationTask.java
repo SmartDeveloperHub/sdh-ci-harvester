@@ -20,31 +20,33 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
 import java.net.URI;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
-import org.smartdeveloperhub.util.xml.XmlUtils;
 
-final class RefreshJobConfigurationTask extends AbstractArtifactCrawlingTask<Job> {
+import com.google.common.collect.Lists;
+
+final class RefreshJobConfigurationTask extends AbstractJobConfigurationTask {
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(RefreshJobConfigurationTask.class);
 
 	private final Job previousJob;
 
-	RefreshJobConfigurationTask(URI location, Job previousJob, Job job, JenkinsEntityType type) {
-		super(location,type,JenkinsArtifactType.CONFIGURATION,job);
+	RefreshJobConfigurationTask(final URI location, final Job previousJob, final Job job, final JenkinsEntityType type) {
+		super(location,job,type);
 		this.previousJob= previousJob;
 	}
 
@@ -54,20 +56,23 @@ final class RefreshJobConfigurationTask extends AbstractArtifactCrawlingTask<Job
 	}
 
 	@Override
-	protected void processSubresource(Job parent, JenkinsResource resource) {
+	protected void processSubresource(final Job parent, final JenkinsResource resource) {
+		final Codebase currentCodebase = loadCodebase(parent, resource);
+		final Codebase oldCodebase = this.previousJob.getCodebase();
+		LOGGER.trace("Retrieved SCM information for {}: {}",parent.getUrl(),currentCodebase);
+		final List<Codebase> codebases=Lists.newArrayList();
+		codebases.add(currentCodebase);
+		codebases.add(oldCodebase);
+		final Codebase newCodebase=SCMUtil.mergeCodebases(codebases);
 		try {
-			String rawURI=
-				XmlUtils.
-					evaluateXPath(
-						"//scm[@class='hudson.plugins.git.GitSCM']/userRemoteConfigs//url",
-						resource.content().get());
-			parent.withCodebase(URI.create(rawURI));
-			persistEntity(parent, entityType());
-			if(!parent.getCodebase().equals(this.previousJob.getCodebase())) {
+			if(SCMUtil.isDefined(newCodebase) && !newCodebase.equals(oldCodebase)) {
+				LOGGER.debug("Updating SCM information for {} from {} to {}",parent.getUrl(),oldCodebase,newCodebase);
+				parent.setCodebase(newCodebase);
+				super.persistEntity(parent, entityType());
 				super.fireEvent(JenkinsEventFactory.newJobUpdatedEvent(super.jenkinsInstance(),parent));
 			}
-		} catch (Exception e) {
-			LOGGER.error("Could not recover SCM information",e);
+		} catch (final Exception e) {
+			LOGGER.error("Could not refresh SCM information {} for {}",newCodebase,parent,e);
 		}
 	}
 

@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler;
@@ -33,13 +33,15 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeJob;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Reference;
+
+import com.google.common.base.Optional;
 
 final class LoadJobTask extends AbstractEntityCrawlingTask<Job> {
 
-	LoadJobTask(URI location) {
+	LoadJobTask(final URI location) {
 		super(location,Job.class,JenkinsEntityType.JOB,JenkinsArtifactType.RESOURCE);
 	}
 
@@ -49,22 +51,24 @@ final class LoadJobTask extends AbstractEntityCrawlingTask<Job> {
 	}
 
 	@Override
-	protected void processEntity(Job job, JenkinsResource resource) throws IOException {
+	protected Optional<String> getTree() {
+		return Optional.of("name,url,description,displayName,buildable,builds[url,number],scm[*[*]]");
+	}
+
+	@Override
+	protected void processEntity(final Job job, final JenkinsResource resource) throws IOException {
 		super.fireEvent(
 			JenkinsEventFactory.
 				newJobCreatedEvent(super.jenkinsInstance(),job));
 
-		scheduleTask(new LoadJobConfigurationTask(super.location(),job,resource.entity()));
-		scheduleTask(new LoadJobSCMTask(super.location(),job));
-
 		if(job instanceof CompositeJob) {
-			CompositeJob compositeJob=(CompositeJob)job;
-			for(Reference ref:compositeJob.getSubJobs().getJobs()) {
+			final CompositeJob compositeJob=(CompositeJob)job;
+			for(final Reference ref:compositeJob.getSubJobs().getJobs()) {
 				scheduleTask(new LoadJobTask(ref.getValue()));
 			}
 		}
 
-		for(Reference ref:job.getRuns().getRuns()) {
+		for(final Reference ref:job.getRuns().getRuns()) {
 			scheduleTask(new LoadRunTask(ref.getValue()));
 		}
 

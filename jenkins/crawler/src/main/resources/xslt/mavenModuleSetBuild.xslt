@@ -22,8 +22,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
-      Bundle      : ci-jenkins-crawler-0.1.0.jar
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+      Bundle      : ci-jenkins-crawler-0.2.0.jar
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -54,8 +54,17 @@
 			</xsl:if>
 			<xsl:if test="exists(result)">
 				<status>FINISHED</status>
-				<result><xsl:value-of select="result"/></result>
-				<duration><xsl:value-of select="duration"/></duration>
+				<result>
+					<status><xsl:value-of select="result"/></status>
+					<duration><xsl:value-of select="duration"/></duration>
+				</result>
+			</xsl:if>
+			<xsl:if test="exists(//action/lastBuiltRevision)">
+				<codebase>
+					<location><xsl:value-of select="//action/lastBuiltRevision/../remoteUrl"/></location>
+					<branch><xsl:value-of select="//action/lastBuiltRevision/branch/name"/></branch>
+				</codebase>
+				<commit><xsl:value-of select="//action/lastBuiltRevision/SHA1"/></commit>
 			</xsl:if>
 		</ci:run>
 	</xsl:template>

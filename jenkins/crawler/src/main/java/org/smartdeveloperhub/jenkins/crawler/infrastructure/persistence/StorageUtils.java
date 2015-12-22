@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler.infrastructure.persistence;
@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
@@ -44,13 +45,17 @@ import org.smartdeveloperhub.jenkins.JenkinsArtifactType;
 import org.smartdeveloperhub.jenkins.JenkinsEntityType;
 import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.JenkinsResource.Metadata;
+import org.smartdeveloperhub.jenkins.JenkinsResource.Metadata.Filter;
 import org.smartdeveloperhub.jenkins.ResponseBody;
 import org.smartdeveloperhub.jenkins.ResponseBodyBuilder;
 import org.smartdeveloperhub.jenkins.ResponseExcerpt;
 import org.smartdeveloperhub.jenkins.Status;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.BodyType;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.DigestType;
+import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.FilterType;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.RepresentationDescriptor;
+import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResourceDescriptor;
+import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResourceDescriptor.Filters;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResourceDescriptorDocument;
 import org.smartdeveloperhub.jenkins.crawler.xml.jenkins.ResponseDescriptor;
 import org.smartdeveloperhub.util.xml.XmlUtils;
@@ -58,31 +63,53 @@ import org.w3c.dom.Document;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 final class StorageUtils {
 
 	private static final class PersistentJenkinsResource implements JenkinsResource {
 
+		private static final class ImmutableFilter implements Filter {
+
+			private final String expression;
+
+			private ImmutableFilter(final String expression) {
+				this.expression = expression;
+			}
+
+			@Override
+			public String expression() {
+				return this.expression;
+			}
+
+			@Override
+			public String toString() {
+				return this.expression;
+			}
+
+		}
+
 		private final class ImmutableResponseExcerpt implements ResponseExcerpt {
 
 			@Override
 			public String etag() {
-				return response.getEtag();
+				return PersistentJenkinsResource.this.response.getEtag();
 			}
 
 			@Override
 			public Date lastModified() {
-				return lastModified;
+				return PersistentJenkinsResource.this.lastModified;
 			}
 
 			@Override
 			public Optional<ResponseBody> body() {
-				return Optional.fromNullable(body);
+				return Optional.fromNullable(PersistentJenkinsResource.this.body);
 			}
 
 			@Override
 			public int statusCode() {
-				return response.getStatusCode();
+				return PersistentJenkinsResource.this.response.getStatusCode();
 			}
 
 			@Override
@@ -93,8 +120,8 @@ final class StorageUtils {
 							omitNullValues().
 							add("statusCode",statusCode()).
 							add("etag",etag()).
-							add("lastModified",lastModified).
-							add("body",body).
+							add("lastModified",PersistentJenkinsResource.this.lastModified).
+							add("body",PersistentJenkinsResource.this.body).
 							toString();
 			}
 		}
@@ -102,24 +129,39 @@ final class StorageUtils {
 		private final class ImmutableMetadata implements Metadata {
 
 			private final ResponseExcerpt responseExcerpt;
+			private final List<Filter> filters;
 
 			private ImmutableMetadata() {
 				this.responseExcerpt = new ImmutableResponseExcerpt();
+				this.filters=createFilters(PersistentJenkinsResource.this.resource.getFilters().getFilters());
+			}
+
+			private List<Filter> createFilters(final List<FilterType> filterDefinitions) {
+				final Builder<Filter> result=ImmutableList.builder();
+				for(final FilterType filterDefinition:filterDefinitions) {
+					result.add(new ImmutableFilter(filterDefinition.getExpression()));
+				}
+				return result.build();
+			}
+
+			@Override
+			public List<Filter> filters() {
+				return this.filters;
 			}
 
 			@Override
 			public Date retrievedOn() {
-				return representation.getRetrievedOn().toDate();
+				return PersistentJenkinsResource.this.representation.getRetrievedOn().toDate();
 			}
 
 			@Override
 			public String serverVersion() {
-				return response.getServerVersion();
+				return PersistentJenkinsResource.this.response.getServerVersion();
 			}
 
 			@Override
 			public ResponseExcerpt response() {
-				return responseExcerpt;
+				return this.responseExcerpt;
 			}
 
 			@Override
@@ -128,6 +170,7 @@ final class StorageUtils {
 					MoreObjects.
 						toStringHelper(getClass()).
 							omitNullValues().
+							add("filters",this.filters).
 							add("retrievedOn",retrievedOn()).
 							add("serverVersion",serverVersion()).
 							add("response",response()).
@@ -144,59 +187,59 @@ final class StorageUtils {
 		private Document content;
 		private Throwable failure;
 
-		private Date lastModified;
+		private final Date lastModified;
 
-		private PersistentJenkinsResource(ResourceDescriptorDocument resource) {
+		private PersistentJenkinsResource(final ResourceDescriptorDocument resource) {
 			this.resource = resource;
 			this.representation = this.resource.getRepresentation();
 			this.response = this.representation.getResponse();
-			this.lastModified=date(response.getLastModified());
+			this.lastModified=date(this.response.getLastModified());
 			this.metadata = new ImmutableMetadata();
 		}
 
-		private PersistentJenkinsResource withBody(ResponseBody body) {
+		private PersistentJenkinsResource withBody(final ResponseBody body) {
 			this.body=body;
 			return this;
 		}
 
-		private PersistentJenkinsResource withFailure(Throwable failure) {
+		private PersistentJenkinsResource withFailure(final Throwable failure) {
 			this.failure = failure;
 			return this;
 		}
 
-		private PersistentJenkinsResource withContent(Document content) {
+		private PersistentJenkinsResource withContent(final Document content) {
 			this.content = content;
 			return this;
 		}
 
 		@Override
 		public URI location() {
-			return resource.getUrl();
+			return this.resource.getUrl();
 		}
 
 		@Override
 		public JenkinsEntityType entity() {
-			return resource.getEntity();
+			return this.resource.getEntity();
 		}
 
 		@Override
 		public JenkinsArtifactType artifact() {
-			return resource.getArtifact();
+			return this.resource.getArtifact();
 		}
 
 		@Override
 		public Status status() {
-			return representation.getStatus();
+			return this.representation.getStatus();
 		}
 
 		@Override
 		public Optional<Throwable> failure() {
-			return Optional.fromNullable(failure);
+			return Optional.fromNullable(this.failure);
 		}
 
 		@Override
 		public Optional<Document> content() {
-			return Optional.fromNullable(content);
+			return Optional.fromNullable(this.content);
 		}
 
 		@Override
@@ -227,7 +270,7 @@ final class StorageUtils {
 	private StorageUtils() {
 	}
 
-	private static DateTime dateTime(Date date) {
+	private static DateTime dateTime(final Date date) {
 		DateTime result=null;
 		if(date!=null) {
 			result=new DateTime(date.getTime());
@@ -235,7 +278,7 @@ final class StorageUtils {
 		return result;
 	}
 
-	private static Date date(DateTime dateTime) {
+	private static Date date(final DateTime dateTime) {
 		Date result=null;
 		if(dateTime!=null) {
 			result=dateTime.toDate();
@@ -243,20 +286,20 @@ final class StorageUtils {
 		return result;
 	}
 
-	private static void populateFailure(PersistentJenkinsResource result, URI entity, byte[] rawFailure) {
+	private static void populateFailure(final PersistentJenkinsResource result, final URI entity, final byte[] rawFailure) {
 		if(rawFailure==null) {
 			return;
 		}
 		try {
 			result.withFailure(SerializationUtils.deserialize(rawFailure,Throwable.class));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalStateException("Could not load failure for resource '"+entity+"'",e);
 		}
 	}
 
-	private static void populateBodyAndContent(PersistentJenkinsResource result, URI entity, BodyType body) {
+	private static void populateBodyAndContent(final PersistentJenkinsResource result, final URI entity, final BodyType body) {
 		try {
-			String rawBody=IOUtils.toString(body.getExternal());
+			final String rawBody=IOUtils.toString(body.getExternal());
 			result.withBody(
 				new ResponseBodyBuilder().
 					withContent(rawBody).
@@ -268,12 +311,12 @@ final class StorageUtils {
 			if("application/xml".equals(body.getContentType())) {
 				result.withContent(XmlUtils.toDocument(rawBody));
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalStateException("Could not load body of '"+entity+"' from '"+body.getExternal()+"'",e);
 		}
 	}
 
-	private static Digest toDigest(DigestType digestDescriptor) {
+	private static Digest toDigest(final DigestType digestDescriptor) {
 		if(digestDescriptor==null) {
 			return null;
 		}
@@ -284,13 +327,13 @@ final class StorageUtils {
 					digestDescriptor.getAlgorithm());
 	}
 
-	static ResourceDescriptorDocument toResourceDescriptorDocument(JenkinsResource resource, File external) {
+	static ResourceDescriptorDocument toResourceDescriptorDocument(final JenkinsResource resource, final File external) {
 		checkNotNull(resource,"Representation cannot be null");
 
-		Metadata metadata = resource.metadata();
-		ResponseExcerpt response = metadata.response();
+		final Metadata metadata = resource.metadata();
+		final ResponseExcerpt response = metadata.response();
 
-		ResponseDescriptor responseDescriptor =
+		final ResponseDescriptor responseDescriptor =
 			new ResponseDescriptor().
 				withStatusCode(response.statusCode()).
 				withEtag(response.etag()).
@@ -298,13 +341,13 @@ final class StorageUtils {
 				withServerVersion(metadata.serverVersion());
 
 		if(response.body().isPresent()) {
-			ResponseBody rBody = response.body().get();
-			DigestType digest=
+			final ResponseBody rBody = response.body().get();
+			final DigestType digest=
 				new DigestType().
 					withAlgorithm(rBody.digest().algorithm()).
 					withValue(rBody.digest().value());
 
-			BodyType body=
+			final BodyType body=
 				new BodyType().
 					withDigest(digest).
 					withContentType(rBody.contentType()).
@@ -314,7 +357,7 @@ final class StorageUtils {
 			responseDescriptor.setBody(body);
 		}
 
-		RepresentationDescriptor representationDescriptor=
+		final RepresentationDescriptor representationDescriptor=
 			new RepresentationDescriptor().
 				withRetrievedOn(dateTime(metadata.retrievedOn())).
 				withStatus(resource.status()).
@@ -324,29 +367,37 @@ final class StorageUtils {
 			try {
 				representationDescriptor.
 					withFailure(SerializationUtils.serialize(resource.failure().get()));
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				logAndDiscard(resource, e);
 			}
+		}
+
+		final Filters filters=new ResourceDescriptor.Filters();
+		for(final Filter filter:resource.metadata().filters()) {
+			filters.
+				getFilters().
+					add(new FilterType().withExpression(filter.expression()));
 		}
 
 		return
 			new ResourceDescriptorDocument().
 				withUrl(resource.location()).
+				withFilters(filters).
 				withEntity(resource.entity()).
 				withArtifact(resource.artifact()).
 				withRepresentation(representationDescriptor);
 	}
 
-	private static void logAndDiscard(JenkinsResource resource, Throwable e) {
+	private static void logAndDiscard(final JenkinsResource resource, final Throwable e) {
 		LOGGER.error("Could not serialize failure ({}):",e.getMessage(),resource.failure().get());
 	}
 
-	static JenkinsResource toJenkinsResource(ResourceDescriptorDocument descriptor) {
-		PersistentJenkinsResource result = new PersistentJenkinsResource(descriptor);
-		URI entity = descriptor.getUrl();
-		RepresentationDescriptor representation = descriptor.getRepresentation();
+	static JenkinsResource toJenkinsResource(final ResourceDescriptorDocument descriptor) {
+		final PersistentJenkinsResource result = new PersistentJenkinsResource(descriptor);
+		final URI entity = descriptor.getUrl();
+		final RepresentationDescriptor representation = descriptor.getRepresentation();
 		if(representation!=null) {
-			BodyType body = representation.getResponse().getBody();
+			final BodyType body = representation.getResponse().getBody();
 			if(body!=null) {
 				populateBodyAndContent(result,entity,body);
 			}
@@ -355,7 +406,7 @@ final class StorageUtils {
 		return result;
 	}
 
-	static void prepareWorkingDirectory(File workingDirectory) {
+	static void prepareWorkingDirectory(final File workingDirectory) {
 		if(!workingDirectory.exists()) {
 			workingDirectory.mkdirs();
 		}
@@ -363,10 +414,10 @@ final class StorageUtils {
 		checkArgument(workingDirectory.canWrite(),"Working directory %s cannot be written",workingDirectory.getAbsolutePath());
 	}
 
-	static StorageAllocationStrategy instantiateStrategy(String className) throws IOException {
+	static StorageAllocationStrategy instantiateStrategy(final String className) throws IOException {
 		try {
 			return StorageAllocationStrategy.class.cast(Class.forName(className).newInstance());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IOException("Could not instantiate strategy '"+className+"'",e);
 		}
 	}

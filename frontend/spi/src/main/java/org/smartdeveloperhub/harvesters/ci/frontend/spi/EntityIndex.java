@@ -20,17 +20,17 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-spi:0.1.0
- *   Bundle      : ci-frontend-spi-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-spi:0.2.0
+ *   Bundle      : ci-frontend-spi-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.spi;
 
 import java.net.URI;
 
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
 
 public interface EntityIndex {
 
@@ -39,4 +39,7 @@ public interface EntityIndex {
 	Build findBuild(URI buildId);
 
 	Execution findExecution(URI executionId);
+
+	EnrichedExecution findEnrichedExecution(URI executionId);
+
 }

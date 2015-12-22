@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:0.1.0
- *   Bundle      : ci-util-xml-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:0.2.0
+ *   Bundle      : ci-util-xml-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.util.xml;
@@ -74,14 +74,14 @@ public final class XmlUtils {
 
 	static {
 		FACTORY=XPathFactory.newInstance();
-		List<Class<?>> xmlRegistries = getXmlRegistries();
+		final List<Class<?>> xmlRegistries = getXmlRegistries();
 		try {
 			CONTEXT=
 				JAXBContext.
 					newInstance(xmlRegistries.toArray(new Class<?>[0]));
-			LOGGER.debug("Created JAXB context using {}",getContextPath(xmlRegistries));
-		} catch (JAXBException e) {
-			String errorMessage=String.format("Could not initialize JAXB context using %s",getContextPath(xmlRegistries));
+			LOGGER.debug("Created JAXB context using context path [{}]",getContextPath(xmlRegistries));
+		} catch (final JAXBException e) {
+			final String errorMessage=String.format("Could not initialize JAXB context using %s",getContextPath(xmlRegistries));
 			LOGGER.warn(errorMessage.concat(". Full stacktrace follows"),e);
 			throw new IllegalStateException(errorMessage,e);
 		}
@@ -91,11 +91,11 @@ public final class XmlUtils {
 	}
 
 	private static List<Class<?>> getXmlRegistries() {
-		ServiceLoader<XmlRegistryProvider> providers=ServiceLoader.load(XmlRegistryProvider.class);
-		List<Class<?>> result=Lists.newArrayList();
-		for(XmlRegistryProvider provider:providers) {
+		final ServiceLoader<XmlRegistryProvider> providers=ServiceLoader.load(XmlRegistryProvider.class);
+		final List<Class<?>> result=Lists.newArrayList();
+		for(final XmlRegistryProvider provider:providers) {
 			LOGGER.trace("Loading XmlRegistry classes from {}",provider.getClass().getCanonicalName());
-			for(Class<?> xmlRegistry:provider.getXmlRegistries()) {
+			for(final Class<?> xmlRegistry:provider.getXmlRegistries()) {
 				if(xmlRegistry.getAnnotation(XmlRegistry.class)!=null) {
 					result.add(xmlRegistry);
 					LOGGER.trace(" - Added XmlRegistry {}",xmlRegistry.getCanonicalName());
@@ -107,10 +107,10 @@ public final class XmlUtils {
 		return result;
 	}
 
-	private static String getContextPath(List<Class<?>> classes) {
-		StringBuilder builder=new StringBuilder();
+	private static String getContextPath(final List<Class<?>> classes) {
+		final StringBuilder builder=new StringBuilder();
 		String next="";
-		for(Class<?> xmlRegistry:classes) {
+		for(final Class<?> xmlRegistry:classes) {
 			builder.append(next).append(xmlRegistry.getCanonicalName());
 			next=", ";
 		}
@@ -118,8 +118,8 @@ public final class XmlUtils {
 	}
 
 	private static Transformer getTransformer() throws TransformerConfigurationException {
-		TransformerFactory transformerFactory=TransformerFactory.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
+		final TransformerFactory transformerFactory=TransformerFactory.newInstance();
+		final Transformer transformer = transformerFactory.newTransformer();
 		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,"false");
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 		transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
@@ -129,22 +129,22 @@ public final class XmlUtils {
 		return transformer;
 	}
 
-	private static void closeQuietly(File source, FileInputStream is) {
+	private static void closeQuietly(final File source, final FileInputStream is) {
 		if(is!=null) {
 			try {
 				is.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOGGER.warn("Could not close output file '"+source.getAbsolutePath()+"'",e);
 			}
 		}
 	}
 
-	private static void tryClose(Unmarshaller unmarshaller) {
+	private static void tryClose(final Unmarshaller unmarshaller) {
 		if(unmarshaller instanceof Closeable) {
-			Closeable closeable=(Closeable)unmarshaller;
+			final Closeable closeable=(Closeable)unmarshaller;
 			try {
 				closeable.close();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warn("Could not close unmarshaller file "+unmarshaller,e);
 			}
 		}
@@ -154,62 +154,62 @@ public final class XmlUtils {
 		return XmlUtils.CONTEXT;
 	}
 
-	public static String evaluateXPath(String xpath, String source) throws XmlProcessingException {
-		XPath newXPath = FACTORY.newXPath();
+	public static String evaluateXPath(final String xpath, final String source) throws XmlProcessingException {
+		final XPath newXPath = FACTORY.newXPath();
 		try {
-			XPathExpression compile = newXPath.compile(xpath);
+			final XPathExpression compile = newXPath.compile(xpath);
 			return compile.evaluate(new InputSource(new StringReader(source)));
-		} catch (XPathExpressionException e) {
+		} catch (final XPathExpressionException e) {
 			throw new XmlProcessingException(String.format(INVALID_XPATH_EXPRESSION,xpath),e);
 		}
 	}
 
-	public static String evaluateXPath(String xpath, Document content) throws XmlProcessingException {
-		XPath newXPath = FACTORY.newXPath();
+	public static String evaluateXPath(final String xpath, final Document content) throws XmlProcessingException {
+		final XPath newXPath = FACTORY.newXPath();
 		try {
-			XPathExpression compile = newXPath.compile(xpath);
+			final XPathExpression compile = newXPath.compile(xpath);
 			return compile.evaluate(content);
-		} catch (XPathExpressionException e) {
+		} catch (final XPathExpressionException e) {
 			throw new XmlProcessingException(String.format(INVALID_XPATH_EXPRESSION,xpath),e);
 		}
 	}
 
-	public static String toString(Document document) throws XmlProcessingException {
+	public static String toString(final Document document) throws XmlProcessingException {
 		try {
-			StringWriter writer = new StringWriter();
-			StreamResult result = new StreamResult(writer);
-			DOMSource source=new DOMSource(document);
+			final StringWriter writer = new StringWriter();
+			final StreamResult result = new StreamResult(writer);
+			final DOMSource source=new DOMSource(document);
 			getTransformer().
 				transform(source, result);
 			return writer.toString();
-		} catch(Exception e) {
+		} catch(final Exception e) {
 			throw new XmlProcessingException("Could not marshall document",e);
 		}
 	}
 
-	public static Document toDocument(String body) throws XmlProcessingException {
+	public static Document toDocument(final String body) throws XmlProcessingException {
 		try {
-			DocumentBuilder builder =
+			final DocumentBuilder builder =
 				DocumentBuilderFactory.
 					newInstance().
 						newDocumentBuilder();
 			return
 				builder.
 					parse(new InputSource(new StringReader(body)));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new XmlProcessingException("Could not unmarshall document",e);
 		}
 	}
 
-	public static <T, E extends Throwable> T unmarshall(File source, Class<? extends T> clazz, E throwable) throws E {
+	public static <T, E extends Throwable> T unmarshall(final File source, final Class<? extends T> clazz, final E throwable) throws E {
 		FileInputStream is=null;
 		Unmarshaller unmarshaller=null;
 		try {
 			unmarshaller=CONTEXT.createUnmarshaller();
 			is=new FileInputStream(source);
-			Object unmarshal = unmarshaller.unmarshal(is);
+			final Object unmarshal = unmarshaller.unmarshal(is);
 			return clazz.cast(unmarshal);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throwable.initCause(e);
 			throw throwable;
 		} finally {
@@ -218,25 +218,25 @@ public final class XmlUtils {
 		}
 	}
 
-	public static <E extends Throwable> void marshall(Object entity, File target, E throwable) throws E {
+	public static <E extends Throwable> void marshall(final Object entity, final File target, final E throwable) throws E {
 		try {
-			Marshaller marshaller=CONTEXT.createMarshaller();
+			final Marshaller marshaller=CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,true);
 			marshaller.setProperty(Marshaller.JAXB_ENCODING,"UTF-8");
 			marshaller.marshal(entity,target);
-		} catch (JAXBException e) {
+		} catch (final Exception e) {
 			throwable.initCause(e);
 			throw throwable;
 		}
 	}
 
-	public static <T, E extends Throwable> T unmarshall(String content, Class<? extends T> clazz, E throwable) throws E {
+	public static <T, E extends Throwable> T unmarshall(final String content, final Class<? extends T> clazz, final E throwable) throws E {
 		Unmarshaller unmarshaller=null;
 		try {
 			unmarshaller=CONTEXT.createUnmarshaller();
-			Object unmarshal=unmarshaller.unmarshal(new StringReader(content));
+			final Object unmarshal=unmarshaller.unmarshal(new StringReader(content));
 			return clazz.cast(unmarshal);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throwable.initCause(e);
 			throw throwable;
 		} finally {
@@ -244,25 +244,25 @@ public final class XmlUtils {
 		}
 	}
 
-	public static <E extends Throwable> String marshall(Object entity, E throwable) throws E {
+	public static <E extends Throwable> String marshall(final Object entity, final E throwable) throws E {
 		try {
-			Marshaller marshaller=CONTEXT.createMarshaller();
+			final Marshaller marshaller=CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,true);
 			marshaller.setProperty(Marshaller.JAXB_ENCODING,"UTF-8");
-			StringWriter writer = new StringWriter();
+			final StringWriter writer = new StringWriter();
 			marshaller.marshal(entity,writer);
 			return writer.toString();
-		} catch (JAXBException e) {
+		} catch (final JAXBException e) {
 			throwable.initCause(e);
 			throw throwable;
 		}
 	}
 
-	public static void marshall(File file, Source source) throws XmlProcessingException {
+	public static void marshall(final File file, final Source source) throws XmlProcessingException {
 		try {
 			getTransformer().
 				transform(source, new StreamResult(file));
-		} catch(Exception e) {
+		} catch(final Exception e) {
 			throw new XmlProcessingException(RESOURCE_STORAGE_FAILURE,e);
 		}
 	}

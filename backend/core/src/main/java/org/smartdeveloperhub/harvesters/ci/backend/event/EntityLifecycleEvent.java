@@ -20,18 +20,18 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.event;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.URI;
 import java.util.Date;
 
 import com.google.common.base.MoreObjects;
-
-import static com.google.common.base.Preconditions.*;
 
 public final class EntityLifecycleEvent {
 
@@ -44,6 +44,7 @@ public final class EntityLifecycleEvent {
 		CREATED,
 		MODIFIED,
 		DELETED,
+		ENRICHED,
 	}
 
 	private final Date ocurredOn;
@@ -51,7 +52,7 @@ public final class EntityLifecycleEvent {
 	private final EntityType entityType;
 	private final URI entityId;
 
-	public EntityLifecycleEvent(EntityType entityType, State state, URI entityId) {
+	public EntityLifecycleEvent(final EntityType entityType, final State state, final URI entityId) {
 		this.entityType = entityType;
 		this.state = state;
 		this.entityId = entityId;
@@ -85,7 +86,7 @@ public final class EntityLifecycleEvent {
 					add("entityId",this.entityId).toString();
 	}
 
-	public static EntityLifecycleEvent newInstance(EntityType entityType, State state, URI entityId) {
+	public static EntityLifecycleEvent newInstance(final EntityType entityType, final State state, final URI entityId) {
 		return
 			new EntityLifecycleEvent(
 				checkNotNull(entityType,"Entity type cannot be null"),

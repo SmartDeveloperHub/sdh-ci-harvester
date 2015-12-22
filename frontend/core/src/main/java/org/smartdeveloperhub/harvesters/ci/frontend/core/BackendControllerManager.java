@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
- *   Bundle      : ci-frontend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.2.0
+ *   Bundle      : ci-frontend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
@@ -32,17 +32,22 @@ import java.util.ServiceLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
-import org.smartdeveloperhub.harvesters.ci.backend.ContinuousIntegrationService;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.BackendConfig;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.ContinuousIntegrationService;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.enrichment.ResolverService;
 import org.smartdeveloperhub.harvesters.ci.backend.event.EntityLifecycleEventListener;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryBuildRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.persistence.mem.InMemoryServiceRepository;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendController;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.BackendControllerFactory;
+import org.smartdeveloperhub.harvesters.ci.frontend.spi.EnrichedExecution;
 import org.smartdeveloperhub.harvesters.ci.frontend.spi.EntityIndex;
+
+import com.google.common.base.Optional;
 
 final class BackendControllerManager {
 
@@ -53,7 +58,17 @@ final class BackendControllerManager {
 		}
 
 		@Override
-		public void connect(URI instance, EntityLifecycleEventListener listener) {
+		public boolean setTargetService(final URI instance) {
+			throw getFailure();
+		}
+
+		@Override
+		public void setExecutionResolver(final ResolverService resolver) {
+			throw getFailure();
+		}
+
+		@Override
+		public void connect(final EntityLifecycleEventListener listener) {
 			throw getFailure();
 		}
 
@@ -72,35 +87,74 @@ final class BackendControllerManager {
 	private static final class NullBackendController implements BackendController {
 
 		private final class NullEntityIndex implements EntityIndex {
-			@Override
-			public Service findService(URI serviceId) {
-				return service.getService(serviceId);
+			private final class NullEnrichedExecution implements
+					EnrichedExecution {
+				private final Execution target;
+
+				private NullEnrichedExecution(final Execution target) {
+					this.target = target;
+				}
+
+				@Override
+				public Execution target() {
+					return this.target;
+				}
+
+				@Override
+				public Optional<URI> repositoryResource() {
+					return Optional.absent();
+				}
+
+				@Override
+				public Optional<URI> branchResource() {
+					return Optional.absent();
+				}
+
+				@Override
+				public Optional<URI> commitResource() {
+					return Optional.absent();
+				}
 			}
 
 			@Override
-			public Execution findExecution(URI executionId) {
-				return service.getExecution(executionId);
+			public Service findService(final URI serviceId) {
+				return NullBackendController.this.service.getService(serviceId);
 			}
 
 			@Override
-			public Build findBuild(URI buildId) {
-				return service.getBuild(buildId);
+			public Execution findExecution(final URI executionId) {
+				return NullBackendController.this.service.getExecution(executionId);
+			}
+
+			@Override
+			public Build findBuild(final URI buildId) {
+				return NullBackendController.this.service.getBuild(buildId);
+			}
+
+			@Override
+			public EnrichedExecution findEnrichedExecution(final URI executionId) {
+				return new NullEnrichedExecution(findExecution(executionId));
 			}
 		}
 
-		private ContinuousIntegrationService service;
+		private final ContinuousIntegrationService service;
 
 		private NullBackendController() {
 			this.service = new ContinuousIntegrationService(new InMemoryServiceRepository(), new InMemoryBuildRepository(), new InMemoryExecutionRepository());
 		}
 
 		@Override
-		public void disconnect() {
+		public boolean setTargetService(final URI instance) {
+			return false;
+		}
+
+		@Override
+		public void setExecutionResolver(final ResolverService resolver) {
 			// NOTHING TO DO
 		}
 
 		@Override
-		public void connect(URI instance, EntityLifecycleEventListener listener) throws IOException {
+		public void connect(final EntityLifecycleEventListener listener) throws IOException {
 			// NOTHING TO DO
 		}
 
@@ -108,6 +162,12 @@ final class BackendControllerManager {
 		public EntityIndex entityIndex() {
 			return new NullEntityIndex();
 		}
+
+		@Override
+		public void disconnect() {
+			// NOTHING TO DO
+		}
+
 	}
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(BackendControllerManager.class);
@@ -115,21 +175,26 @@ final class BackendControllerManager {
 	private BackendControllerManager() {
 	}
 
-	public static BackendController create(String providerId) {
-		if(providerId==null) {
-			return new NullBackendController();
+	public static BackendController create(final String providerId, final BackendConfig config) {
+		BackendController result = new NullBackendController();
+		if(providerId!=null && config!=null) {
+			result=loadBackend(providerId,config);
 		}
-		ServiceLoader<BackendControllerFactory> providers=ServiceLoader.load(BackendControllerFactory.class);
-		for(BackendControllerFactory provider:providers) {
+		return result;
+	}
+
+	private static BackendController loadBackend(final String providerId, final BackendConfig cfg) {
+		final ServiceLoader<BackendControllerFactory> providers=ServiceLoader.load(BackendControllerFactory.class);
+		for(final BackendControllerFactory provider:providers) {
 			LOGGER.debug("Trying to create backend controller {} using provider {}...",providerId,provider.getClass().getCanonicalName());
 			try {
-				BackendController controller = provider.create(providerId);
+				final BackendController controller = provider.create(providerId,cfg);
 				if(controller!=null) {
 					LOGGER.debug("Created backend controller {} via {}",providerId,provider.getClass().getCanonicalName());
 					return controller;
 				}
 				LOGGER.debug("Could not create backend controller {} using provider {}",providerId,provider.getClass().getCanonicalName());
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.warn("Provider {} failed while creating a backend controller {}. Full stacktrace follows",provider.getClass().getCanonicalName(),providerId,e);
 			}
 		}

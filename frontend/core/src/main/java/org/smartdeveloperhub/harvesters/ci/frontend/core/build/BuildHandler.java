@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
- *   Bundle      : ci-frontend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.2.0
+ *   Bundle      : ci-frontend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.build;
@@ -34,7 +34,7 @@ import org.ldp4j.application.ext.UnknownResourceException;
 import org.ldp4j.application.ext.annotations.Attachment;
 import org.ldp4j.application.ext.annotations.Resource;
 import org.ldp4j.application.session.ResourceSnapshot;
-import org.smartdeveloperhub.harvesters.ci.backend.Build;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Build;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.execution.ExecutionContainerHandler;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.IdentityUtil;
 import org.smartdeveloperhub.harvesters.ci.frontend.core.util.Serviceable;

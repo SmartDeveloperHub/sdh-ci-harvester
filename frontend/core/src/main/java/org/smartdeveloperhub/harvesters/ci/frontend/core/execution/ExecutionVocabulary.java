@@ -20,11 +20,12 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
- *   Bundle      : ci-frontend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.2.0
+ *   Bundle      : ci-frontend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.execution;
+
 
 
 abstract class ExecutionVocabulary {
@@ -61,6 +62,12 @@ abstract class ExecutionVocabulary {
 	static final String CI_LOCATION                     = "http://www.smartdeveloperhub.org/vocabulary/ci#location";
 	static final String CI_FINISHED                     = "http://www.smartdeveloperhub.org/vocabulary/ci#finished";
 	static final String CI_HAS_RESULT                   = "http://www.smartdeveloperhub.org/vocabulary/ci#hasResult";
+	static final String CI_BRANCH_ID                    = "http://www.smartdeveloperhub.org/vocabulary/ci#branchId";
+	static final String CI_COMMIT_ID                    = "http://www.smartdeveloperhub.org/vocabulary/ci#commitId";
+	static final String CI_FOR_BRANCH                   = "http://www.smartdeveloperhub.org/vocabulary/ci#forBranch";
+	static final String CI_FOR_COMMIT                   = "http://www.smartdeveloperhub.org/vocabulary/ci#forCommit";
+
+	static final String SCM_LOCATION                    = "http://www.smartdeveloperhub.org/vocabulary/scm#location";
 
 	ExecutionVocabulary() {
 	}

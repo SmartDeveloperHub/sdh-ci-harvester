@@ -20,14 +20,15 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +38,12 @@ import org.smartdeveloperhub.jenkins.JenkinsResource;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventFactory;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils;
 import org.smartdeveloperhub.jenkins.crawler.util.TaskUtils.ReferenceDifference;
-import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.CompositeJob;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Job;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
+
+import com.google.common.base.Optional;
 
 final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 
@@ -48,7 +51,7 @@ final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 
 	private final Job job;
 
-	RefreshJobTask(Job job) {
+	RefreshJobTask(final Job job) {
 		super(job.getUrl(),Job.class,JenkinsEntityType.JOB,JenkinsArtifactType.RESOURCE);
 		this.job = job;
 	}
@@ -58,38 +61,48 @@ final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 	}
 
 	@Override
-	protected void processEntity(Job currentJob, JenkinsResource resource) throws IOException {
-		ReferenceDifference difference=
+	protected Optional<String> getTree() {
+		return Optional.of("name,url,description,displayName,buildable,builds[url,number],scm[*[*]]");
+	}
+
+	@Override
+	protected void processEntity(final Job currentJob, final JenkinsResource resource) throws IOException {
+		final ReferenceDifference difference=
 			TaskUtils.
 				calculate(
 					this.job.getRuns().getRuns(),
 					currentJob.getRuns().getRuns());
 
-		scheduleTask(new RefreshJobConfigurationTask(super.location(),this.job,currentJob,resource.entity()));
-		scheduleTask(new LoadJobSCMTask(super.location(),currentJob));
+		if(hasChanged(currentJob)) {
+			super.fireEvent(
+				JenkinsEventFactory.
+					newJobUpdatedEvent(
+						super.jenkinsInstance(),
+						currentJob));
+		}
 
 		if(currentJob instanceof CompositeJob) {
 			refreshSubJobs((CompositeJob)currentJob);
 		}
 
-		for(URI createdRuns:difference.created()) {
+		for(final URI createdRuns:difference.created()) {
 			scheduleTask(new LoadRunTask(createdRuns));
 		}
 
-		for(URI maintainedRun:difference.maintained()) {
+		for(final URI maintainedRun:difference.maintained()) {
 			try {
-				Run run = super.entityOfId(maintainedRun,JenkinsEntityType.RUN,Run.class);
+				final Run run = super.entityOfId(maintainedRun,JenkinsEntityType.RUN,Run.class);
 				if(run==null) {
 					scheduleTask(new LoadRunTask(maintainedRun));
 				} else if(RunStatus.RUNNING.equals(run.getStatus())) {
 					scheduleTask(new RefreshRunTask(run));
 				} // Otherwise the run is finished and we have nothing to do
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOGGER.warn("Could not load persisted run '"+maintainedRun+"'",e);
 			}
 		}
 
-		for(URI deletedRuns:difference.deleted()) {
+		for(final URI deletedRuns:difference.deleted()) {
 			super.fireEvent(
 				JenkinsEventFactory.
 					newRunDeletedEvent(
@@ -98,31 +111,39 @@ final class RefreshJobTask extends AbstractEntityCrawlingTask<Job> {
 		}
 
 	}
-	private void refreshSubJobs(CompositeJob currentCompositeJob) {
-		ReferenceDifference difference=
+
+	private boolean hasChanged(final Job currentJob) {
+		return
+			!Objects.equals(currentJob.getTitle(),this.job.getTitle()) ||
+			!Objects.equals(currentJob.getDescription(),this.job.getDescription()) ||
+			!Objects.equals(currentJob.getCodebase(),this.job.getCodebase());
+	}
+
+	private void refreshSubJobs(final CompositeJob currentCompositeJob) {
+		final ReferenceDifference difference=
 			TaskUtils.
 				calculate(
 					((CompositeJob)this.job).getSubJobs().getJobs(),
 					currentCompositeJob.getSubJobs().getJobs());
 
-		for(URI createdJob:difference.created()) {
+		for(final URI createdJob:difference.created()) {
 			scheduleTask(new LoadJobTask(createdJob));
 		}
 
-		for(URI maintainedJob:difference.maintained()) {
+		for(final URI maintainedJob:difference.maintained()) {
 			try {
-				Job persistedJob = super.entityOfId(maintainedJob,JenkinsEntityType.JOB,Job.class);
+				final Job persistedJob = super.entityOfId(maintainedJob,JenkinsEntityType.JOB,Job.class);
 				if(persistedJob==null) {
 					scheduleTask(new LoadJobTask(maintainedJob));
 				} else {
 					scheduleTask(new RefreshJobTask(persistedJob));
 				}
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOGGER.warn("Could not recover persisted job '"+maintainedJob+"'",e);
 			}
 		}
 
-		for(URI deletedBuild:difference.deleted()) {
+		for(final URI deletedBuild:difference.deleted()) {
 			super.fireEvent(
 				JenkinsEventFactory.
 					newJobDeletedEvent(

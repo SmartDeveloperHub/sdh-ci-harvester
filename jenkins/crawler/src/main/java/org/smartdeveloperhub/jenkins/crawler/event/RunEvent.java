@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.1.0
- *   Bundle      : ci-jenkins-crawler-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-crawler:0.2.0
+ *   Bundle      : ci-jenkins-crawler-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.jenkins.crawler.event;
@@ -29,15 +29,21 @@ package org.smartdeveloperhub.jenkins.crawler.event;
 import java.net.URI;
 import java.util.Date;
 
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Codebase;
+import org.smartdeveloperhub.jenkins.crawler.xml.ci.Result;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.Run;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunResult;
 import org.smartdeveloperhub.jenkins.crawler.xml.ci.RunStatus;
+
+import com.google.common.base.Optional;
 
 abstract class RunEvent<T extends RunEvent<T>> extends JenkinsEvent {
 
 	private final Class<? extends T> clazz;
 
 	private Run run;
+	private Codebase codebase;
+	private Result result;
 
 	RunEvent(URI instanceId, Date date, Class<? extends T> clazz) {
 		super(instanceId,date);
@@ -46,6 +52,8 @@ abstract class RunEvent<T extends RunEvent<T>> extends JenkinsEvent {
 
 	final T withRun(Run run) {
 		this.run = run;
+		this.codebase=Optional.fromNullable(this.run.getCodebase()).or(new Codebase());
+		this.result=Optional.fromNullable(this.run.getResult()).or(new Result());
 		return this.clazz.cast(this);
 	}
 
@@ -62,15 +70,27 @@ abstract class RunEvent<T extends RunEvent<T>> extends JenkinsEvent {
 	}
 
 	public final Date finishedOn() {
-		Date result=null;
+		Date finishedOn=null;
 		if(isFinished()) {
-			result=new Date(this.run.getTimestamp()+this.run.getDuration());
+			finishedOn=new Date(this.run.getTimestamp()+this.run.getResult().getDuration());
 		}
-		return result;
+		return finishedOn;
 	}
 
 	public final RunResult result() {
-		return this.run.getResult();
+		return this.result.getStatus();
+	}
+
+	public final URI codebase() {
+		return this.codebase.getLocation();
+	}
+
+	public final String branchName() {
+		return this.codebase.getBranch();
+	}
+
+	public final String commitId() {
+		return this.run.getCommit();
 	}
 
 }

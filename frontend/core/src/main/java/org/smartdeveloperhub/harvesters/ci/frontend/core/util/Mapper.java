@@ -20,19 +20,14 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.1.0
- *   Bundle      : ci-frontend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-core:0.2.0
+ *   Bundle      : ci-frontend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core.util;
 
 import java.net.URI;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Set;
-
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.ldp4j.application.data.DataSetUtils;
 import org.ldp4j.application.data.ExternalIndividual;
@@ -45,11 +40,11 @@ public final class Mapper {
 
 	private final IndividualHelper helper;
 
-	private Mapper(IndividualHelper helper) {
+	private Mapper(final IndividualHelper helper) {
 		this.helper = helper;
 	}
 
-	private Mapper(Individual<?,?> individual) {
+	private Mapper(final Individual<?,?> individual) {
 		this(DataSetUtils.newHelper(individual));
 	}
 
@@ -57,14 +52,14 @@ public final class Mapper {
 		return this.helper.types();
 	}
 
-	public <T> T literal(String propertyURI, Class<? extends T> aClazz) {
+	public <T> T literal(final String propertyURI, final Class<? extends T> aClazz) {
 		return
 			this.helper.
 				property(propertyURI).
 					firstValue(aClazz);
 	}
 
-	public Optional<URI> individual(String propertyURI) {
+	public Optional<URI> individual(final String propertyURI) {
 		return
 			Optional.
 				fromNullable(
@@ -73,29 +68,15 @@ public final class Mapper {
 							firstIndividual(ExternalIndividual.class));
 	}
 
-	public Mapper individualMapper(String propertyURI) {
+	public Mapper individualMapper(final String propertyURI) {
 		return new Mapper(this.helper.property(propertyURI).firstIndividual());
 	}
 
-	@Deprecated
-	public static XMLGregorianCalendar toLiteral(Date date) {
-		if(date==null) {
-			return null;
-		}
-		try {
-			GregorianCalendar gc=new GregorianCalendar();
-			gc.setTime(date);
-			return DatatypeFactory.newInstance().newXMLGregorianCalendar(gc);
-		} catch (Exception e) {
-			throw new AssertionError("Could not create literal for date "+date,e);
-		}
-	}
-
-	public static String toStringOrNull(Optional<URI> individual) {
+	public static String toStringOrNull(final Optional<URI> individual) {
 		return individual.isPresent()?individual.get().toString():null;
 	}
 
-	public static Mapper create(Individual<?,?> individual) {
+	public static Mapper create(final Individual<?,?> individual) {
 		return new Mapper(individual);
 	}
 

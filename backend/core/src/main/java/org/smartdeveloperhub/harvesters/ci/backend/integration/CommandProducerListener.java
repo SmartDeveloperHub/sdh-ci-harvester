@@ -20,22 +20,23 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.integration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CreateBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.CreateExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteBuildCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.DeleteExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.FinishExecutionCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.RegisterServiceCommand;
-import org.smartdeveloperhub.harvesters.ci.backend.command.UpdateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Result.Status;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.CreateExecutionCommand.Builder;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteBuildCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.DeleteExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.FinishExecutionCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.RegisterServiceCommand;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.command.UpdateBuildCommand;
 import org.smartdeveloperhub.jenkins.crawler.event.InstanceFoundEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEvent;
 import org.smartdeveloperhub.jenkins.crawler.event.JenkinsEventListener;
@@ -53,11 +54,14 @@ final class CommandProducerListener implements JenkinsEventListener {
 
 	private final CommandProcessingMonitor monitor;
 
-	CommandProducerListener(CommandProcessingMonitor monitor) {
+	private final boolean acceptDeletions;
+
+	CommandProducerListener(final CommandProcessingMonitor monitor, final boolean acceptDeletions) {
 		this.monitor = monitor;
+		this.acceptDeletions = acceptDeletions;
 	}
 
-	private Status toStatus(RunResult result) {
+	private Status toStatus(final RunResult result) {
 		Status status=null;
 		switch(result) {
 			case ABORTED:
@@ -82,14 +86,14 @@ final class CommandProducerListener implements JenkinsEventListener {
 		return status;
 	}
 
-	private void logEvent(JenkinsEvent event) {
+	private void logEvent(final JenkinsEvent event) {
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace("Received event {}",event);
 		}
 	}
 
 	@Override
-	public void onInstanceFound(InstanceFoundEvent event) {
+	public void onInstanceFound(final InstanceFoundEvent event) {
 		logEvent(event);
 		this.monitor.offer(
 			RegisterServiceCommand.create(event.instanceId())
@@ -97,16 +101,17 @@ final class CommandProducerListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onJobCreation(JobCreatedEvent event) {
+	public void onJobCreation(final JobCreatedEvent event) {
 		logEvent(event);
-		CreateBuildCommand.Builder builder=
+		final CreateBuildCommand.Builder builder=
 			CreateBuildCommand.
 				builder().
 				withServiceId(event.instanceId()).
 				withBuildId(event.jobId()).
 				withTitle(event.title()).
 				withDescription(event.description()).
-				withCodebase(event.codebase());
+				withCodebase(event.codebase()).
+				withBranchName(event.branchName());
 		switch(event.type()) {
 			case SIMPLE:
 				builder.simple();
@@ -124,7 +129,7 @@ final class CommandProducerListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onJobUpdate(JobUpdatedEvent event) {
+	public void onJobUpdate(final JobUpdatedEvent event) {
 		logEvent(event);
 		this.monitor.offer(
 			UpdateBuildCommand.
@@ -133,43 +138,43 @@ final class CommandProducerListener implements JenkinsEventListener {
 					withTitle(event.title()).
 					withDescription(event.description()).
 					withCodebase(event.codebase()).
+					withBranchName(event.branchName()).
 					build()
 		);
 	}
 
 	@Override
-	public void onJobDeletion(JobDeletedEvent event) {
+	public void onJobDeletion(final JobDeletedEvent event) {
 		logEvent(event);
-		this.monitor.offer(
-			DeleteBuildCommand.create(event.jobId())
-		);
-	}
-
-	@Override
-	public void onRunCreation(RunCreatedEvent event) {
-		logEvent(event);
-		this.monitor.offer(
-			CreateExecutionCommand.
-				builder().
-					withBuildId(event.jobId()).
-					withExecutionId(event.runId()).
-					withCreatedOn(event.createdOn()).
-					build()
-		);
-		if(event.isFinished()) {
+		if(this.acceptDeletions) {
 			this.monitor.offer(
-				FinishExecutionCommand.
-					builder().
-						withExecutionId(event.runId()).
-						withStatus(toStatus(event.result())).
-						withFinishedOn(event.finishedOn()).
-						build()
+				DeleteBuildCommand.create(event.jobId())
 			);
 		}
 	}
 
 	@Override
-	public void onRunUpdate(RunUpdatedEvent event) {
+	public void onRunCreation(final RunCreatedEvent event) {
+		logEvent(event);
+		final Builder builder =
+			CreateExecutionCommand.
+				builder().
+					withBuildId(event.jobId()).
+					withExecutionId(event.runId()).
+					withCreatedOn(event.createdOn()).
+					withCodebase(event.codebase()).
+					withBranchName(event.branchName()).
+					withCommitId(event.commitId());
+		if(event.isFinished()) {
+			builder.
+				withStatus(toStatus(event.result())).
+				withFinishedOn(event.finishedOn());
+		}
+		this.monitor.offer(builder.build());
+	}
+
+	@Override
+	public void onRunUpdate(final RunUpdatedEvent event) {
 		logEvent(event);
 		this.monitor.offer(
 			FinishExecutionCommand.
@@ -182,11 +187,13 @@ final class CommandProducerListener implements JenkinsEventListener {
 	}
 
 	@Override
-	public void onRunDeletion(RunDeletedEvent event) {
+	public void onRunDeletion(final RunDeletedEvent event) {
 		logEvent(event);
-		this.monitor.offer(
-			DeleteExecutionCommand.create(event.runId())
-		);
+		if(this.acceptDeletions) {
+			this.monitor.offer(
+				DeleteExecutionCommand.create(event.runId())
+			);
+		}
 	}
 
 }

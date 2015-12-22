@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.1.0
- *   Bundle      : ci-backend-core-0.1.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.backend:ci-backend-core:0.2.0
+ *   Bundle      : ci-backend-core-0.2.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.backend.jpa;
@@ -47,25 +47,28 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartdeveloperhub.harvesters.ci.backend.CompositeBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.Execution;
-import org.smartdeveloperhub.harvesters.ci.backend.Result;
-import org.smartdeveloperhub.harvesters.ci.backend.Result.Status;
-import org.smartdeveloperhub.harvesters.ci.backend.Service;
-import org.smartdeveloperhub.harvesters.ci.backend.SimpleBuild;
-import org.smartdeveloperhub.harvesters.ci.backend.SubBuild;
 import org.smartdeveloperhub.harvesters.ci.backend.database.Database;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Codebase;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.CompositeBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Execution;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Result;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Service;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.SimpleBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.SubBuild;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.Result.Status;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.BuildRepository;
+import org.smartdeveloperhub.harvesters.ci.backend.domain.persistence.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.EntityId;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.LifecycleDescriptor;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.LifecycleDescriptorRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.integration.lifecycle.EntityId.Type;
 import org.smartdeveloperhub.harvesters.ci.backend.jpa.JPAComponentRegistry;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.BuildRepository;
-import org.smartdeveloperhub.harvesters.ci.backend.persistence.ExecutionRepository;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.Transaction;
 import org.smartdeveloperhub.harvesters.ci.backend.transaction.TransactionManager;
 
 public class JPAComponentRegistryTest {
+
+	private static final Codebase CODEBASE = new Codebase(URI.create("git://github.com/SmartDeveloperHub/sdh-ci-harvester.git"),"develop");
 
 	private static final Logger LOGGER=LoggerFactory.getLogger(JPAComponentRegistryTest.class);
 
@@ -126,7 +129,8 @@ public class JPAComponentRegistryTest {
 		try {
 			Service service=Service.newInstance(serviceId);
 			inBuild = service.addSimpleBuild(buildId,BUILD_TITLE);
-			inExecution = inBuild.addExecution(executionId, createdOn);
+			inBuild.setCodebase(CODEBASE);
+			inExecution = inBuild.addExecution(executionId, createdOn,CODEBASE,"123");
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
 			tx1.commit();
@@ -207,7 +211,8 @@ public class JPAComponentRegistryTest {
 		try {
 			Service service=Service.newInstance(serviceId);
 			inBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
-			inExecution = inBuild.addExecution(executionId, createdOn);
+			inBuild.setCodebase(CODEBASE);
+			inExecution = inBuild.addExecution(executionId,createdOn,CODEBASE,"123");
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
 			tx1.commit();
@@ -292,7 +297,8 @@ public class JPAComponentRegistryTest {
 			Service service=Service.newInstance(serviceId);
 			CompositeBuild compositeBuild = service.addCompositeBuild(buildId,BUILD_TITLE);
 			inBuild=compositeBuild.addSubBuild(subBuildId,SUB_BUILD_TITLE);
-			inExecution = inBuild.addExecution(executionId, createdOn);
+			inBuild.setCodebase(CODEBASE);
+			inExecution = inBuild.addExecution(executionId,createdOn,CODEBASE,"123");
 			buildRepository.add(compositeBuild);
 			buildRepository.add(inBuild);
 			executionRepository.add(inExecution);
