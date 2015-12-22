@@ -62,7 +62,7 @@
 		<jena.version>2.13.0</jena.version>
 		<frontend.http.port>80</frontend.http.port>
 		<failsafe.arg.line>-Xmx1024m -XX:MaxPermSize=256m</failsafe.arg.line>
-		<curator.connector.version>0.1.0-SNAPSHOT</curator.connector.version>
+		<curator.connector.version>0.1.0</curator.connector.version>
 	</properties>
 
 	<dependencyManagement>
