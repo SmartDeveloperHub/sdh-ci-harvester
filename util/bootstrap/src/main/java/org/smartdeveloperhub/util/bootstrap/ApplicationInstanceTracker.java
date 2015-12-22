@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-bootstrap:0.2.0
- *   Bundle      : ci-util-bootstrap-0.2.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-bootstrap:0.3.0-SNAPSHOT
+ *   Bundle      : ci-util-bootstrap-0.3.0-SNAPSHOT.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.util.bootstrap;
