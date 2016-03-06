@@ -60,7 +60,7 @@
 	<!-- =================================================================== -->
 
 	<properties>
-		<ldp4j.version>0.2.0</ldp4j.version>
+		<ldp4j.version>0.3.0-SNAPSHOT</ldp4j.version>
 	</properties>
 
 	<dependencyManagement>
