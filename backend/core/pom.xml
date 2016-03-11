@@ -60,6 +60,7 @@
 	<properties>
 		<ldp4j.version>0.2.0</ldp4j.version>
 		<curator.connector.version>0.1.0</curator.connector.version>
+		<failsafe.arg.line>-Xmx1024m -XX:MaxPermSize=256m</failsafe.arg.line>
 	</properties>
 
 	<dependencyManagement>
