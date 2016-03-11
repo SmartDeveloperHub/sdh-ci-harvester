@@ -150,6 +150,48 @@ public final class XmlUtils {
 		}
 	}
 
+	private static boolean isValidXmlCharacter(final int current) {
+		return
+			isAllowedControlCharacter(current)              ||
+			((current >= 0x20) && (current <= 0xD7FF))      ||
+			((current >= 0xE000) && (current <= 0xFFFD))    ||
+			((current >= 0x10000) && (current <= 0x10FFFF));
+	}
+
+	private static boolean isAllowedControlCharacter(final int current) {
+		return (current == 0x9) || (current == 0xA) || (current == 0xD);
+	}
+
+	/**
+	 * This method ensures that the output String has only valid XML unicode
+	 * characters as specified by the XML 1.0 standard. For reference, please
+	 * see <a href="http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char">the
+	 * standard</a>. This method will return an empty String if the input is
+	 * null or empty.
+	 *
+	 * @param in
+	 *            The String whose non-valid characters we want to remove.
+	 * @return The in String, stripped of non-valid characters.
+	 */
+	public static String stripNonValidXMLCharacters(final String in) {
+		if(in == null || ("".equals(in))) {
+			return ""; // vacancy test.
+		}
+		final StringBuffer out = new StringBuffer();
+		final int length = in.length();
+		int i=0;
+		while(i<length) {
+			final int current=Character.codePointAt(in,i);
+			if(isValidXmlCharacter(current)) {
+				for(final char character:Character.toChars(current)) {
+					out.append(character);
+				}
+			}
+			i+=Character.charCount(current);
+		}
+		return out.toString();
+	}
+
 	public static JAXBContext context() {
 		return XmlUtils.CONTEXT;
 	}
@@ -188,6 +230,10 @@ public final class XmlUtils {
 	}
 
 	public static Document toDocument(final String body) throws XmlProcessingException {
+		final String curatedBody = stripNonValidXMLCharacters(body);
+		if(curatedBody.length()!=body.length()) {
+			throw new XmlProcessingException("Input data has invalid XML characters");
+		}
 		try {
 			final DocumentBuilder builder =
 				DocumentBuilderFactory.
@@ -195,7 +241,7 @@ public final class XmlUtils {
 						newDocumentBuilder();
 			return
 				builder.
-					parse(new InputSource(new StringReader(body)));
+					parse(new InputSource(new StringReader(curatedBody)));
 		} catch (final Exception e) {
 			throw new XmlProcessingException("Could not unmarshall document",e);
 		}
