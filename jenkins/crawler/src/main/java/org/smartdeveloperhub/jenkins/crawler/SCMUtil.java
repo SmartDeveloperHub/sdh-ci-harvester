@@ -109,7 +109,7 @@ final class SCMUtil {
 		try {
 			return XmlUtils.toString(document);
 		} catch (final XmlProcessingException e) {
-			LOGGER.error("Could process {}",document,e);
+			LOGGER.error("Could not process {}",document,e);
 			return "<not available>";
 		}
 	}

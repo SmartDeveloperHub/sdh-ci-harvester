@@ -60,6 +60,7 @@ import org.smartdeveloperhub.util.xml.spi.XmlRegistryProvider;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 public final class XmlUtils {
@@ -150,16 +151,32 @@ public final class XmlUtils {
 		}
 	}
 
-	private static boolean isValidXmlCharacter(final int current) {
+	private static boolean isValidXmlCharacter(final int codePoint) {
 		return
-			isAllowedControlCharacter(current)              ||
-			((current >= 0x20) && (current <= 0xD7FF))      ||
-			((current >= 0xE000) && (current <= 0xFFFD))    ||
-			((current >= 0x10000) && (current <= 0x10FFFF));
+			isValidBasicMultilingualCodepoint(codePoint) ||
+			Character.isSupplementaryCodePoint(codePoint);
 	}
 
-	private static boolean isAllowedControlCharacter(final int current) {
-		return (current == 0x9) || (current == 0xA) || (current == 0xD);
+	private static boolean isValidBasicMultilingualCodepoint(final int codePoint) {
+		return
+			isValidControlCharacter(codePoint) ||
+			isValidNonControlCharacter(codePoint);
+	}
+
+	private static boolean isValidControlCharacter(final int codePoint) {
+		return (codePoint == 0x9) || (codePoint == 0xA) || (codePoint == 0xD);
+	}
+
+	private static boolean isValidNonControlCharacter(final int codePoint) {
+		return isNonControlCodepoint(codePoint) && !isSurrogateCodepoint(codePoint);
+	}
+
+	private static boolean isNonControlCodepoint(final int codePoint) {
+		return (codePoint >= 0x20) && (codePoint <= 0xFFFD);
+	}
+
+	private static boolean isSurrogateCodepoint(final int codePoint) {
+		return (codePoint >= 0xD800) && (codePoint <= 0xDFFF);
 	}
 
 	/**
@@ -174,20 +191,18 @@ public final class XmlUtils {
 	 * @return The in String, stripped of non-valid characters.
 	 */
 	public static String stripNonValidXMLCharacters(final String in) {
-		if(in == null || ("".equals(in))) {
-			return ""; // vacancy test.
+		if(Strings.isNullOrEmpty(in)) {
+			return "";
 		}
-		final StringBuffer out = new StringBuffer();
+		final StringBuilder out = new StringBuilder();
 		final int length = in.length();
 		int i=0;
 		while(i<length) {
-			final int current=Character.codePointAt(in,i);
-			if(isValidXmlCharacter(current)) {
-				for(final char character:Character.toChars(current)) {
-					out.append(character);
-				}
+			final int codePoint=Character.codePointAt(in,i);
+			if(isValidXmlCharacter(codePoint)) {
+				out.appendCodePoint(codePoint);
 			}
-			i+=Character.charCount(current);
+			i+=Character.charCount(codePoint);
 		}
 		return out.toString();
 	}
