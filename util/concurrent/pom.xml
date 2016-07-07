@@ -58,7 +58,7 @@
 	<!-- =================================================================== -->
 
 	<properties>
-		<ldp4j.version>0.2.0</ldp4j.version>
+		<ldp4j.version>0.2.1</ldp4j.version>
 	</properties>
 
 	<dependencies>
