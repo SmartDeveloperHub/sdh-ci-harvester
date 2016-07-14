@@ -6,7 +6,7 @@
  *   Center for Open Middleware
  *     http://www.centeropenmiddleware.com/
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Copyright (C) 2015 Center for Open Middleware.
+ *   Copyright (C) 2015-2016 Center for Open Middleware.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:0.2.0
- *   Bundle      : ci-util-xml-0.2.0.jar
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.util:ci-util-xml:0.3.0
+ *   Bundle      : ci-util-xml-0.3.0.jar
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.util.xml;
@@ -60,6 +60,7 @@ import org.smartdeveloperhub.util.xml.spi.XmlRegistryProvider;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 public final class XmlUtils {
@@ -150,6 +151,62 @@ public final class XmlUtils {
 		}
 	}
 
+	private static boolean isValidXmlCharacter(final int codePoint) {
+		return
+			isValidBasicMultilingualCodepoint(codePoint) ||
+			Character.isSupplementaryCodePoint(codePoint);
+	}
+
+	private static boolean isValidBasicMultilingualCodepoint(final int codePoint) {
+		return
+			isValidControlCharacter(codePoint) ||
+			isValidNonControlCharacter(codePoint);
+	}
+
+	private static boolean isValidControlCharacter(final int codePoint) {
+		return (codePoint == 0x9) || (codePoint == 0xA) || (codePoint == 0xD);
+	}
+
+	private static boolean isValidNonControlCharacter(final int codePoint) {
+		return isNonControlCodepoint(codePoint) && !isSurrogateCodepoint(codePoint);
+	}
+
+	private static boolean isNonControlCodepoint(final int codePoint) {
+		return (codePoint >= 0x20) && (codePoint <= 0xFFFD);
+	}
+
+	private static boolean isSurrogateCodepoint(final int codePoint) {
+		return (codePoint >= 0xD800) && (codePoint <= 0xDFFF);
+	}
+
+	/**
+	 * This method ensures that the output String has only valid XML unicode
+	 * characters as specified by the XML 1.0 standard. For reference, please
+	 * see <a href="http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char">the
+	 * standard</a>. This method will return an empty String if the input is
+	 * null or empty.
+	 *
+	 * @param in
+	 *            The String whose non-valid characters we want to remove.
+	 * @return The in String, stripped of non-valid characters.
+	 */
+	public static String stripNonValidXMLCharacters(final String in) {
+		if(Strings.isNullOrEmpty(in)) {
+			return "";
+		}
+		final StringBuilder out = new StringBuilder();
+		final int length = in.length();
+		int i=0;
+		while(i<length) {
+			final int codePoint=Character.codePointAt(in,i);
+			if(isValidXmlCharacter(codePoint)) {
+				out.appendCodePoint(codePoint);
+			}
+			i+=Character.charCount(codePoint);
+		}
+		return out.toString();
+	}
+
 	public static JAXBContext context() {
 		return XmlUtils.CONTEXT;
 	}
@@ -188,6 +245,10 @@ public final class XmlUtils {
 	}
 
 	public static Document toDocument(final String body) throws XmlProcessingException {
+		final String curatedBody = stripNonValidXMLCharacters(body);
+		if(curatedBody.length()!=body.length()) {
+			throw new XmlProcessingException("Input data has invalid XML characters");
+		}
 		try {
 			final DocumentBuilder builder =
 				DocumentBuilderFactory.
@@ -195,7 +256,7 @@ public final class XmlUtils {
 						newDocumentBuilder();
 			return
 				builder.
-					parse(new InputSource(new StringReader(body)));
+					parse(new InputSource(new StringReader(curatedBody)));
 		} catch (final Exception e) {
 			throw new XmlProcessingException("Could not unmarshall document",e);
 		}

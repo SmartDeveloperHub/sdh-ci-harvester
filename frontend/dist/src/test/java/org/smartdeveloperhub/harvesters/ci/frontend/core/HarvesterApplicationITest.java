@@ -6,7 +6,7 @@
  *   Center for Open Middleware
  *     http://www.centeropenmiddleware.com/
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Copyright (C) 2015 Center for Open Middleware.
+ *   Copyright (C) 2015-2016 Center for Open Middleware.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
- *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-dist:0.2.0
- *   Bundle      : ci-frontend-dist-0.2.0.war
+ *   Artifact    : org.smartdeveloperhub.harvesters.ci.frontend:ci-frontend-dist:0.3.0
+ *   Bundle      : ci-frontend-dist-0.3.0.war
  * #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
  */
 package org.smartdeveloperhub.harvesters.ci.frontend.core;
@@ -75,8 +75,8 @@ public class HarvesterApplicationITest extends SmokeTest {
 	@TargetsContainer("tomcat")
 	public static WebArchive createDeployment() throws Exception {
 		String target = "https://ci.jenkins-ci.org/";
-		HarvesterApplicationITest.available = checkAvailability(target);
-		HarvesterApplicationITest.expectedResources = 5;
+//		HarvesterApplicationITest.available = checkAvailability(target);
+//		HarvesterApplicationITest.expectedResources = 5;
 		if(!HarvesterApplicationITest.available) {
 			target = "http://vps164.cesvima.upm.es:8000/";
 			HarvesterApplicationITest.available=checkAvailability(target);
