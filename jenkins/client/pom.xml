@@ -21,8 +21,8 @@
       See the License for the specific language governing permissions and
       limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
-      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-client:0.3.0-SNAPSHOT
-      Bundle      : ci-jenkins-client-0.3.0-SNAPSHOT.jar
+      Artifact    : org.smartdeveloperhub.harvesters.ci.jenkins:ci-jenkins-client:0.4.0-SNAPSHOT
+      Bundle      : ci-jenkins-client-0.4.0-SNAPSHOT.jar
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 -->
@@ -39,7 +39,7 @@
 	<parent>
 		<groupId>org.smartdeveloperhub.harvesters.ci.jenkins</groupId>
 		<artifactId>ci-jenkins-aggregator</artifactId>
-		<version>0.3.0-SNAPSHOT</version>
+		<version>0.4.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
