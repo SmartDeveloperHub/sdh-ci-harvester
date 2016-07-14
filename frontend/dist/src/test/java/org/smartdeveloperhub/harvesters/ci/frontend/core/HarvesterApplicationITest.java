@@ -75,8 +75,8 @@ public class HarvesterApplicationITest extends SmokeTest {
 	@TargetsContainer("tomcat")
 	public static WebArchive createDeployment() throws Exception {
 		String target = "https://ci.jenkins-ci.org/";
-		HarvesterApplicationITest.available = checkAvailability(target);
-		HarvesterApplicationITest.expectedResources = 5;
+//		HarvesterApplicationITest.available = checkAvailability(target);
+//		HarvesterApplicationITest.expectedResources = 5;
 		if(!HarvesterApplicationITest.available) {
 			target = "http://vps164.cesvima.upm.es:8000/";
 			HarvesterApplicationITest.available=checkAvailability(target);

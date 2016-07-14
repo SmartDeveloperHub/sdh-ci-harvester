@@ -78,7 +78,7 @@ public class EnrichmentITest extends SmokeTest {
 	@TargetsContainer("tomcat")
 	public static WebArchive createDeployment() throws Exception {
 		String target = "https://ci.jenkins-ci.org/";
-		EnrichmentITest.available = checkAvailability(target);
+//		EnrichmentITest.available = checkAvailability(target);
 		if(!EnrichmentITest.available) {
 			target = "http://vps164.cesvima.upm.es:8000/";
 			EnrichmentITest.available=checkAvailability(target);
